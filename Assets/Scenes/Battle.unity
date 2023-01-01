@@ -418,13 +418,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10e27e57552347049817b18b2e53f705, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  heroPrefab: {fileID: 7931305902562262809, guid: 840dcac51aa5380409a15180df4cc2ad,
+    type: 3}
   cameraRig: {fileID: 2142880691}
   board: {fileID: 1544800057}
-  levelData: {fileID: 11400000, guid: c9e4d6e9370aebd4db42268db3228936, type: 2}
+  levelData: {fileID: 11400000, guid: a28b3867a0547db43a5a350f0a6aa290, type: 2}
   tileSelectionIndicator: {fileID: 2073229240}
   pos:
     x: 0
     y: 0
+  currentUnit: {fileID: 0}
 --- !u!4 &421261628
 Transform:
   m_ObjectHideFlags: 0

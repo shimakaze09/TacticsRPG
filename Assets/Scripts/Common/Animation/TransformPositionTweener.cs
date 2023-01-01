@@ -1,11 +1,10 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System;
 
-public class TransformPositionTweener : Vector3Tweener 
+public class TransformPositionTweener : Vector3Tweener
 {
-	protected override void OnUpdate (object sender, System.EventArgs e)
-	{
-		base.OnUpdate (sender, e);
-		transform.position = currentValue;
-	}
+    protected override void OnUpdate(object sender, EventArgs e)
+    {
+        base.OnUpdate(sender, e);
+        transform.position = currentValue;
+    }
 }
