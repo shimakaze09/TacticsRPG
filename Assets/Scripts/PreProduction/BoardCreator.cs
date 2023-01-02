@@ -1,8 +1,7 @@
-using UnityEngine;
-using UnityEditor;
-using System.IO;
-using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
+using UnityEngine;
 
 public class BoardCreator : MonoBehaviour
 {
@@ -10,12 +9,12 @@ public class BoardCreator : MonoBehaviour
 
     [SerializeField] private GameObject tileViewPrefab;
     [SerializeField] private GameObject tileSelectionIndicatorPrefab;
-    [SerializeField] private int width = 10;
-    [SerializeField] private int depth = 10;
-    [SerializeField] private int height = 8;
+    [SerializeField] private readonly int width = 10;
+    [SerializeField] private readonly int depth = 10;
+    [SerializeField] private readonly int height = 8;
     [SerializeField] private Point pos;
     [SerializeField] private LevelData levelData;
-    private Dictionary<Point, Tile> tiles = new();
+    private readonly Dictionary<Point, Tile> tiles = new();
 
     private Transform marker
     {
@@ -23,7 +22,7 @@ public class BoardCreator : MonoBehaviour
         {
             if (_marker == null)
             {
-                var instance = Instantiate(tileSelectionIndicatorPrefab) as GameObject;
+                var instance = Instantiate(tileSelectionIndicatorPrefab);
                 _marker = instance.transform;
             }
 
@@ -125,10 +124,10 @@ public class BoardCreator : MonoBehaviour
 
     private Rect RandomRect()
     {
-        var x = Random.Range(0, width - 2);
-        var y = Random.Range(0, height - 2);
-        var w = Random.Range(1, width - x);
-        var h = Random.Range(1, depth - y);
+        var x = Random.Range(0, width);
+        var y = Random.Range(0, depth);
+        var w = Random.Range(1, width - x + 1);
+        var h = Random.Range(1, depth - y + 1);
         return new Rect(x, y, w, h);
     }
 
@@ -154,7 +153,7 @@ public class BoardCreator : MonoBehaviour
 
     private Tile Create()
     {
-        var instance = Instantiate(tileViewPrefab) as GameObject;
+        var instance = Instantiate(tileViewPrefab);
         instance.transform.parent = transform;
         return instance.GetComponent<Tile>();
     }
