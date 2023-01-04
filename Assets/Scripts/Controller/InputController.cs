@@ -8,7 +8,7 @@ public class InputController : MonoBehaviour
 
     private Repeater _hor = new("Horizontal");
     private Repeater _ver = new("Vertical");
-    private string[] _buttons = new string[] { "Fire1", "Fire2", "Fire3" };
+    private string[] _buttons = new[] { "Fire1", "Fire2", "Fire3" };
 
     private void Update()
     {

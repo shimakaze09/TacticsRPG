@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class BattleController : StateMachine
 {
@@ -9,8 +10,10 @@ public class BattleController : StateMachine
     public LevelData levelData;
     public Transform tileSelectionIndicator;
     public Point pos;
-    public Unit currentUnit;
     public Tile currentTile => board.GetTile(pos);
+    public AbilityMenuPanelController abilityMenuPanelController;
+    public Turn turn = new();
+    public List<Unit> units = new();
 
     private void Start()
     {

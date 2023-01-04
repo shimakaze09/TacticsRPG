@@ -1,10 +1,17 @@
 using UnityEngine;
+using System.Collections;
 
 [RequireComponent(typeof(RectTransform))]
 public class LayoutAnchor : MonoBehaviour
 {
+    #region Fields / Properties
+
     private RectTransform myRT;
     private RectTransform parentRT;
+
+    #endregion
+
+    #region MonoBehaviour
 
     private void Awake()
     {
@@ -13,6 +20,38 @@ public class LayoutAnchor : MonoBehaviour
         if (parentRT == null)
             Debug.LogError("This component requires a RectTransform parent to work.", gameObject);
     }
+
+    #endregion
+
+    #region Public
+
+    public void SnapToAnchorPosition(TextAnchor myAnchor, TextAnchor parentAnchor, Vector2 offset)
+    {
+        myRT.anchoredPosition = AnchorPosition(myAnchor, parentAnchor, offset);
+    }
+
+    public Tweener MoveToAnchorPosition(TextAnchor myAnchor, TextAnchor parentAnchor, Vector2 offset)
+    {
+        return myRT.AnchorTo(AnchorPosition(myAnchor, parentAnchor, offset));
+    }
+
+    public Vector2 AnchorPosition(TextAnchor myAnchor, TextAnchor parentAnchor, Vector2 offset)
+    {
+        var myOffset = GetPosition(myRT, myAnchor);
+        var parentOffset = GetPosition(parentRT, parentAnchor);
+        var anchorCenter = new Vector2(Mathf.Lerp(myRT.anchorMin.x, myRT.anchorMax.x, myRT.pivot.x),
+            Mathf.Lerp(myRT.anchorMin.y, myRT.anchorMax.y, myRT.pivot.y));
+        var myAnchorOffset = new Vector2(parentRT.rect.width * anchorCenter.x, parentRT.rect.height * anchorCenter.y);
+        var myPivotOffset = new Vector2(myRT.rect.width * myRT.pivot.x, myRT.rect.height * myRT.pivot.y);
+        var pos = parentOffset - myAnchorOffset - myOffset + myPivotOffset + offset;
+        pos.x = Mathf.RoundToInt(pos.x);
+        pos.y = Mathf.RoundToInt(pos.y);
+        return pos;
+    }
+
+    #endregion
+
+    #region Private
 
     private Vector2 GetPosition(RectTransform rt, TextAnchor anchor)
     {
@@ -49,27 +88,5 @@ public class LayoutAnchor : MonoBehaviour
         return retValue;
     }
 
-    public Vector2 AnchorPosition(TextAnchor myAnchor, TextAnchor parentAnchor, Vector2 offset)
-    {
-        var myOffset = GetPosition(myRT, myAnchor);
-        var parentOffset = GetPosition(parentRT, parentAnchor);
-        var anchorCenter = new Vector2(Mathf.Lerp(myRT.anchorMin.x, myRT.anchorMax.x, myRT.pivot.x),
-            Mathf.Lerp(myRT.anchorMin.y, myRT.anchorMax.y, myRT.pivot.y));
-        var myAnchorOffset = new Vector2(parentRT.rect.width * anchorCenter.x, parentRT.rect.height * anchorCenter.y);
-        var myPivotOffset = new Vector2(myRT.rect.width * myRT.pivot.x, myRT.rect.height * myRT.pivot.y);
-        var pos = parentOffset - myAnchorOffset - myOffset + myPivotOffset + offset;
-        pos.x = Mathf.RoundToInt(pos.x);
-        pos.y = Mathf.RoundToInt(pos.y);
-        return pos;
-    }
-
-    public void SnapToAnchorPosition(TextAnchor myAnchor, TextAnchor parentAnchor, Vector2 offset)
-    {
-        myRT.anchoredPosition = AnchorPosition(myAnchor, parentAnchor, offset);
-    }
-
-    public Tweener MoveToAnchorPosition(TextAnchor myAnchor, TextAnchor parentAnchor, Vector2 offset)
-    {
-        return myRT.AnchorTo(AnchorPosition(myAnchor, parentAnchor, offset));
-    }
+    #endregion
 }

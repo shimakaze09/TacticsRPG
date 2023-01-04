@@ -396,20 +396,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   positionList:
   - name: Hide Bottom
-    myAnchor: 6
-    parentAnchor: 8
+    myAnchor: 8
+    parentAnchor: 6
     offset: {x: 0, y: 20}
   - name: Hide Top
-    myAnchor: 0
-    parentAnchor: 2
+    myAnchor: 2
+    parentAnchor: 0
     offset: {x: 0, y: -20}
   - name: Show Bottom
-    myAnchor: 8
-    parentAnchor: 8
+    myAnchor: 6
+    parentAnchor: 6
     offset: {x: 0, y: 20}
   - name: Show Top
-    myAnchor: 2
-    parentAnchor: 2
+    myAnchor: 0
+    parentAnchor: 0
     offset: {x: 0, y: -20}
 --- !u!1 &7210026944549950959
 GameObject:

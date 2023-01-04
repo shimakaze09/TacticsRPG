@@ -1,6 +1,7 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(LayoutAnchor))]
 public class Panel : MonoBehaviour
@@ -99,9 +100,11 @@ public class Panel : MonoBehaviour
             Transition = anchor.MoveToAnchorPosition(p.myAnchor, p.parentAnchor, p.offset);
             return Transition;
         }
-
-        anchor.SnapToAnchorPosition(p.myAnchor, p.parentAnchor, p.offset);
-        return null;
+        else
+        {
+            anchor.SnapToAnchorPosition(p.myAnchor, p.parentAnchor, p.offset);
+            return null;
+        }
     }
 
     #endregion
