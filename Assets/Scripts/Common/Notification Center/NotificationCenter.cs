@@ -125,17 +125,15 @@ public class NotificationCenter
         var notKeys = new string[_table.Keys.Count];
         _table.Keys.CopyTo(notKeys, 0);
 
-        for (var i = notKeys.Length - 1; i >= 0; --i)
+        foreach (var notificationName in notKeys)
         {
-            var notificationName = notKeys[i];
             var senderTable = _table[notificationName];
 
             var senKeys = new object[senderTable.Keys.Count];
             senderTable.Keys.CopyTo(senKeys, 0);
 
-            for (var j = senKeys.Length - 1; j >= 0; --j)
+            foreach (var sender in senKeys)
             {
-                var sender = senKeys[j];
                 var handlers = senderTable[sender];
                 if (handlers.Count == 0)
                     senderTable.Remove(sender);

@@ -79,14 +79,14 @@ public class Board : MonoBehaviour
 
     public void SelectTiles(List<Tile> tiles)
     {
-        for (var i = tiles.Count - 1; i >= 0; --i)
-            tiles[i].GetComponent<Renderer>().material.SetColor("_BaseColor", selectedTileColor);
+        foreach (var tile in tiles)
+            tile.GetComponent<Renderer>().material.SetColor("_BaseColor", selectedTileColor);
     }
 
     public void DeSelectTiles(List<Tile> tiles)
     {
-        for (var i = tiles.Count - 1; i >= 0; --i)
-            tiles[i].GetComponent<Renderer>().material.SetColor("_BaseColor", defaultTileColor);
+        foreach (var tile in tiles)
+            tile.GetComponent<Renderer>().material.SetColor("_BaseColor", defaultTileColor);
     }
 
     #endregion

@@ -66,7 +66,7 @@ public class BoardCreator : MonoBehaviour
 
     public void Clear()
     {
-        for (var i = transform.childCount - 1; i >= 0; --i)
+        for (var i = 0; i < transform.childCount; i++)
             DestroyImmediate(transform.GetChild(i).gameObject);
         tiles.Clear();
     }

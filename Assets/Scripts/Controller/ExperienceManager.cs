@@ -19,16 +19,16 @@ public static class ExperienceManager
         // Step 1: determine the range in actor level stats
         var min = int.MaxValue;
         var max = int.MinValue;
-        for (var i = ranks.Count - 1; i >= 0; i--)
+        foreach (var rank in ranks)
         {
-            min = Mathf.Min(ranks[i].LVL, min);
-            max = Mathf.Max(ranks[i].LVL, max);
+            min = Mathf.Min(rank.LVL, min);
+            max = Mathf.Max(rank.LVL, max);
         }
 
         // Step 2: weight the amount to award per actor based on their level
         var weights = new float[party.Count];
         float summedWeights = 0;
-        for (var i = ranks.Count - 1; i >= 0; i--)
+        for (var i = 0; i < ranks.Count; i++)
         {
             var percent = (float)(ranks[i].LVL - min) / (float)(max - min);
             weights[i] = Mathf.Lerp(minLevelBonus, maxLevelBonus, percent);
@@ -36,7 +36,7 @@ public static class ExperienceManager
         }
 
         // Step 3: hand out the weighted award
-        for (var i = ranks.Count - 1; i >= 0; i--)
+        for (var i = 0; i < ranks.Count; i++)
         {
             var subAmount = Mathf.FloorToInt(weights[i] / summedWeights * amount);
             ranks[i].EXP += subAmount;

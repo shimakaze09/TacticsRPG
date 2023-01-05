@@ -56,8 +56,8 @@ public class Panel : MonoBehaviour
     {
         anchor = GetComponent<LayoutAnchor>();
         positionMap = new Dictionary<string, Position>(positionList.Count);
-        for (var i = positionList.Count - 1; i >= 0; --i)
-            AddPosition(positionList[i]);
+        foreach (var position in positionList)
+            AddPosition(position);
     }
 
     private void Start()
