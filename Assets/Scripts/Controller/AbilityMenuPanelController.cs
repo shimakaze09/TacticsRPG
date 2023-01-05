@@ -48,10 +48,10 @@ public class AbilityMenuPanelController : MonoBehaviour
         canvas.SetActive(true);
         Clear();
         titleLabel.text = title;
-        for (var i = 0; i < options.Count; ++i)
+        foreach (var option in options)
         {
             var entry = Dequeue();
-            entry.Title = options[i];
+            entry.Title = option;
             menuEntries.Add(entry);
         }
 
