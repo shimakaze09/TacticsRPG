@@ -9,7 +9,9 @@ public abstract class BattleState : State
     public Board board => owner.board;
     public LevelData levelData => owner.levelData;
     public Transform tileSelectionIndicator => owner.tileSelectionIndicator;
+    public Tile currentTile => owner.currentTile;
     public AbilityMenuPanelController abilityMenuPanelController => owner.abilityMenuPanelController;
+    public StatPanelController statPanelController => owner.statPanelController;
     public Turn turn => owner.turn;
     public List<Unit> units => owner.units;
 
@@ -51,5 +53,30 @@ public abstract class BattleState : State
 
         pos = p;
         tileSelectionIndicator.localPosition = board.tiles[p].center;
+    }
+
+    protected virtual Unit GetUnit(Point p)
+    {
+        var t = board.GetTile(p);
+        var content = t != null ? t.content : null;
+        return content != null ? content.GetComponent<Unit>() : null;
+    }
+
+    protected virtual void RefreshPrimaryStatPanel(Point p)
+    {
+        var target = GetUnit(p);
+        if (target != null)
+            statPanelController.ShowPrimary(target.gameObject);
+        else
+            statPanelController.HidePrimary();
+    }
+
+    protected virtual void RefreshSecondaryStatPanel(Point p)
+    {
+        var target = GetUnit(p);
+        if (target != null)
+            statPanelController.ShowSecondary(target.gameObject);
+        else
+            statPanelController.HideSecondary();
     }
 }
