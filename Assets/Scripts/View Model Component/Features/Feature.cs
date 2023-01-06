@@ -12,7 +12,7 @@ public abstract class Feature : MonoBehaviour
 
     #region Public
 
-    public void Active(GameObject target)
+    public void Activate(GameObject target)
     {
         if (_target == null)
         {

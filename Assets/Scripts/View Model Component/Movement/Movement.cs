@@ -6,10 +6,11 @@ public abstract class Movement : MonoBehaviour
 {
     #region Properties
 
-    public int range;
-    public int jumpHeight;
+    public int range => stats[StatTypes.MOV];
+    public int jumpHeight => stats[StatTypes.JMP];
     protected Unit unit;
     protected Transform jumper;
+    protected Stats stats;
 
     #endregion
 
@@ -19,6 +20,11 @@ public abstract class Movement : MonoBehaviour
     {
         unit = GetComponent<Unit>();
         jumper = transform.Find("Jumper");
+    }
+
+    protected virtual void Start()
+    {
+        stats = GetComponent<Stats>();
     }
 
     #endregion

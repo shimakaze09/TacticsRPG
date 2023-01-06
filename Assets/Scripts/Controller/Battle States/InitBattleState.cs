@@ -21,19 +21,26 @@ public class InitBattleState : BattleState
 
     private void SpawnTestUnits()
     {
-        var components = new[] { typeof(WalkMovement), typeof(FlyMovement), typeof(TeleportMovement) };
-        for (var i = 0; i < 3; ++i)
+        var jobs = new string[] { "Rogue", "Warrior", "Wizard" };
+        for (var i = 0; i < jobs.Length; ++i)
         {
             var instance = Instantiate(owner.heroPrefab) as GameObject;
+            var s = instance.AddComponent<Stats>();
+            s[StatTypes.LVL] = 1;
+            var jobPrefab = Resources.Load<GameObject>("Jobs/" + jobs[i]);
+            var jobInstance = Instantiate(jobPrefab) as GameObject;
+            jobInstance.transform.SetParent(instance.transform);
+            var job = jobInstance.GetComponent<Job>();
+            job.Employ();
+            job.LoadDefaultStats();
             var p = new Point((int)levelData.tiles[i].x, (int)levelData.tiles[i].z);
             var unit = instance.GetComponent<Unit>();
             unit.Place(board.GetTile(p));
             unit.Match();
-            var m = instance.AddComponent(components[i]) as Movement;
-            m.range = 5;
-            m.jumpHeight = 1;
-
+            instance.AddComponent<WalkMovement>();
             units.Add(unit);
+            //    Rank rank = instance.AddComponent<Rank>();
+            //    rank.Init (10);
         }
     }
 }

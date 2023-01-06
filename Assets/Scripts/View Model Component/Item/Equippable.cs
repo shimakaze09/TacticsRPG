@@ -24,7 +24,7 @@ public class Equippable : MonoBehaviour
 
         var features = GetComponentsInChildren<Feature>();
         foreach (var feature in features)
-            feature.Active(gameObject);
+            feature.Activate(gameObject);
     }
 
     public void OnUnEquip()
