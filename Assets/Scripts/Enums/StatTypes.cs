@@ -19,5 +19,6 @@ public enum StatTypes
     SPD, // Speed
     MOV, // Move Range
     JMP, // Jump Height
+    CTR, // Counter - for turn order
     Count
 }

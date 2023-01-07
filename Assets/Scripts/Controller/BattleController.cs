@@ -15,6 +15,7 @@ public class BattleController : StateMachine
     public StatPanelController statPanelController;
     public Turn turn = new();
     public List<Unit> units = new();
+    public IEnumerator round;
 
     private void Start()
     {
