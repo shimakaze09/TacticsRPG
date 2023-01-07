@@ -9,6 +9,10 @@ public class Board : MonoBehaviour
 
     [SerializeField] private GameObject tilePrefab;
     public Dictionary<Point, Tile> tiles = new();
+    public Point min => _min;
+    public Point max => _max;
+    private Point _min;
+    private Point _max;
 
     private Point[] dirs = new Point[4]
     {
@@ -27,12 +31,19 @@ public class Board : MonoBehaviour
 
     public void Load(LevelData data)
     {
+        _min = new Point(int.MaxValue, int.MaxValue);
+        _max = new Point(int.MinValue, int.MinValue);
         foreach (var tile in data.tiles)
         {
             var instance = Instantiate(tilePrefab);
             var t = instance.GetComponent<Tile>();
             t.Load(tile);
             tiles.Add(t.pos, t);
+
+            _min.x = Mathf.Min(_min.x, t.pos.x);
+            _min.y = Mathf.Min(_min.y, t.pos.y);
+            _max.x = Mathf.Max(_max.x, t.pos.x);
+            _max.y = Mathf.Max(_max.y, t.pos.y);
         }
     }
 
