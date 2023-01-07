@@ -9,6 +9,7 @@ public class Turn
     public bool hasUnitActed;
     public bool lockMove;
     public GameObject ability;
+    public List<Tile> targets;
     private Tile startTile;
     private Directions startDir;
 

@@ -117,8 +117,7 @@ public class EasingControl : MonoBehaviour
         currentOffset = newValue - currentValue;
         currentValue = newValue;
 
-        if (updateEvent != null)
-            updateEvent(this, EventArgs.Empty);
+        updateEvent?.Invoke(this, EventArgs.Empty);
     }
 
     public void SeekToBeginning()
@@ -143,8 +142,7 @@ public class EasingControl : MonoBehaviour
         previousPlayState = playState;
         playState = target;
 
-        if (stateChangeEvent != null)
-            stateChangeEvent(this, EventArgs.Empty);
+        stateChangeEvent?.Invoke(this, EventArgs.Empty);
 
         StopCoroutine("Ticker");
         if (IsPlaying)
@@ -189,8 +187,7 @@ public class EasingControl : MonoBehaviour
         currentOffset = frameValue - currentValue;
         currentValue = frameValue;
 
-        if (updateEvent != null)
-            updateEvent(this, EventArgs.Empty);
+        updateEvent?.Invoke(this, EventArgs.Empty);
 
         if (finished)
         {
@@ -202,13 +199,11 @@ public class EasingControl : MonoBehaviour
                 else // PingPong
                     SetPlayState(playState == PlayState.Playing ? PlayState.Reversing : PlayState.Playing);
 
-                if (loopedEvent != null)
-                    loopedEvent(this, EventArgs.Empty);
+                loopedEvent?.Invoke(this, EventArgs.Empty);
             }
             else
             {
-                if (completedEvent != null)
-                    completedEvent(this, EventArgs.Empty);
+                completedEvent?.Invoke(this, EventArgs.Empty);
 
                 Stop();
             }

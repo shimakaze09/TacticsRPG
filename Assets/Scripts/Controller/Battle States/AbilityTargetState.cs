@@ -42,10 +42,8 @@ public class AbilityTargetState : BattleState
     {
         if (e.info == 0)
         {
-            turn.hasUnitActed = true;
-            if (turn.hasUnitMoved)
-                turn.lockMove = true;
-            owner.ChangeState<CommandSelectionState>();
+            if (ar.directionOriented || tiles.Contains(board.GetTile(pos)))
+                owner.ChangeState<ConfirmAbilityTargetState>();
         }
         else
         {

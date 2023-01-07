@@ -303,6 +303,8 @@ GameObject:
   m_Component:
   - component: {fileID: 8154865406308007246}
   - component: {fileID: 6502602620397929537}
+  - component: {fileID: 9058020228704905047}
+  - component: {fileID: 1334687383681687727}
   m_Layer: 0
   m_Name: Attack
   m_TagString: Untagged
@@ -339,6 +341,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   horizontal: 1
   vertical: 1
+--- !u!114 &9058020228704905047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6363901238100605398}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 747699440c40f1149ba190d117d70e48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1334687383681687727
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6363901238100605398}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbe8ea566fb17674bb85957d75f6e36c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7195229028095503288
 GameObject:
   m_ObjectHideFlags: 0
