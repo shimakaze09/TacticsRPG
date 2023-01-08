@@ -27,4 +27,15 @@ public static class DirectionsExtensions
             return Directions.South;
         return Directions.West;
     }
+
+    public static Point GetNormal(this Directions dir)
+    {
+        return dir switch
+        {
+            Directions.North => new Point(0, 1),
+            Directions.East => new Point(1, 0),
+            Directions.South => new Point(0, -1),
+            _ => new Point(-1, 0) // Directions.West
+        };
+    }
 }

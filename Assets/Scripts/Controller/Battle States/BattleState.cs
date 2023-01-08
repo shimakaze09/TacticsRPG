@@ -12,6 +12,7 @@ public abstract class BattleState : State
     public Tile currentTile => owner.currentTile;
     public AbilityMenuPanelController abilityMenuPanelController => owner.abilityMenuPanelController;
     public StatPanelController statPanelController => owner.statPanelController;
+    public HitSuccessIndicator hitSuccessIndicator => owner.hitSuccessIndicator;
     public Turn turn => owner.turn;
     public List<Unit> units => owner.units;
 

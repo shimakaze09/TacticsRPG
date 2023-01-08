@@ -43,6 +43,11 @@ public struct Point
         return !(a == b);
     }
 
+    public static implicit operator Vector2(Point p)
+    {
+        return new Vector2(p.x, p.y);
+    }
+
     #endregion
 
     #region Object Overloads
