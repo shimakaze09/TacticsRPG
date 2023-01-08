@@ -8,5 +8,5 @@ public abstract class ValueModifier : Modifier
     {
     }
 
-    public abstract float Modify(float value);
+    public abstract float Modify(float fromValue, float toValue);
 }

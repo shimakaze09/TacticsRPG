@@ -33,12 +33,13 @@ public class ValueChangeException : BaseException
 
     public float GetModifiedValue()
     {
-        var value = toValue;
-        if (modifiers == null) return value;
+        if (modifiers == null)
+            return toValue;
 
+        var value = toValue;
         modifiers.Sort(Compare);
 
-        return modifiers.Aggregate(value, (current, modifier) => modifier.Modify(current));
+        return modifiers.Aggregate(value, (current, t) => t.Modify(fromValue, current));
     }
 
     #endregion

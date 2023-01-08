@@ -11,8 +11,8 @@ public class AddValueModifier : ValueModifier
         this.toAdd = toAdd;
     }
 
-    public override float Modify(float value)
+    public override float Modify(float fromValue, float toValue)
     {
-        return value + toAdd;
+        return toValue + toAdd;
     }
 }
