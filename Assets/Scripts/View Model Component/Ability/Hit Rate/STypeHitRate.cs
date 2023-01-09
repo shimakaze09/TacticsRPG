@@ -1,19 +1,20 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
 
 public class STypeHitRate : HitRate
 {
-    public override int Calculate(Unit attacker, Unit target)
+    public override int Calculate(Tile target)
     {
-        if (AutomaticMiss(attacker, target))
+        var defender = target.content.GetComponent<Unit>();
+        if (AutomaticMiss(defender))
             return Final(100);
-        if (AutomaticHit(attacker, target))
+
+        if (AutomaticHit(defender))
             return Final(0);
 
-        var res = GetResistance(target);
-        res = AdjustForStatusEffects(attacker, target, res);
-        res = AdjustForRelativeFacing(attacker, target, res);
+        var res = GetResistance(defender);
+        res = AdjustForStatusEffects(defender, res);
+        res = AdjustForRelativeFacing(defender, res);
         res = Mathf.Clamp(res, 0, 100);
         return Final(res);
     }
@@ -24,7 +25,7 @@ public class STypeHitRate : HitRate
         return s[StatTypes.RES];
     }
 
-    private int AdjustForRelativeFacing(Unit attacker, Unit target, int rate)
+    private int AdjustForRelativeFacing(Unit target, int rate)
     {
         return attacker.GetFacing(target) switch
         {

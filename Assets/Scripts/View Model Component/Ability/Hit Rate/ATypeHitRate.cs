@@ -3,15 +3,18 @@ using System.Collections;
 
 public class ATypeHitRate : HitRate
 {
-    public override int Calculate(Unit attacker, Unit target)
+    public override int Calculate(Tile target)
     {
-        if (AutomaticHit(attacker, target))
+        var defender = target.content.GetComponent<Unit>();
+        if (AutomaticHit(defender))
             return Final(0);
-        if (AutomaticMiss(attacker, target))
+
+        if (AutomaticMiss(defender))
             return Final(100);
-        var evade = GetEvade(target);
-        evade = AdjustForRelativeFacing(attacker, target, evade);
-        evade = AdjustForStatusEffects(attacker, target, evade);
+
+        var evade = GetEvade(defender);
+        evade = AdjustForRelativeFacing(defender, evade);
+        evade = AdjustForStatusEffects(defender, evade);
         evade = Mathf.Clamp(evade, 5, 95);
         return Final(evade);
     }
@@ -22,7 +25,7 @@ public class ATypeHitRate : HitRate
         return Mathf.Clamp(s[StatTypes.EVD], 0, 100);
     }
 
-    private int AdjustForRelativeFacing(Unit attacker, Unit target, int rate)
+    private int AdjustForRelativeFacing(Unit target, int rate)
     {
         return attacker.GetFacing(target) switch
         {

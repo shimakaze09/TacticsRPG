@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class Equipment : MonoBehaviour
 {
@@ -50,6 +51,11 @@ public class Equipment : MonoBehaviour
             if ((item.slots & slots) != EquipSlots.None)
                 UnEquip(item);
         }
+    }
+
+    public Equippable GetItem(EquipSlots slots)
+    {
+        return _items.FirstOrDefault(item => (item.slots & slots) != EquipSlots.None);
     }
 
     #endregion

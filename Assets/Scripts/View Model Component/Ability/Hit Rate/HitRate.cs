@@ -24,35 +24,50 @@ public abstract class HitRate : MonoBehaviour
 
     #endregion
 
+    #region Fields
+
+    protected Unit attacker;
+
+    #endregion
+
+    #region MonoBehaviour
+
+    protected virtual void Start()
+    {
+        attacker = GetComponentInParent<Unit>();
+    }
+
+    #endregion
+
     #region Public
 
     /// <summary>
     /// Returns a value in the range of 0 t0 100 as a percent chance of
     /// an ability succeeding to hit
     /// </summary>
-    public abstract int Calculate(Unit attacker, Unit target);
+    public abstract int Calculate(Tile target);
 
     #endregion
 
     #region Protected
 
-    protected virtual bool AutomaticHit(Unit attacker, Unit target)
+    protected virtual bool AutomaticHit(Unit target)
     {
         var exc = new MatchException(attacker, target);
         this.PostNotification(AutomaticHitCheckNotification, exc);
         return exc.toggle;
     }
 
-    protected virtual bool AutomaticMiss(Unit attacker, Unit target)
+    protected virtual bool AutomaticMiss(Unit target)
     {
         var exc = new MatchException(attacker, target);
         this.PostNotification(AutomaticMissCheckNotification, exc);
         return exc.toggle;
     }
 
-    protected virtual int AdjustForStatusEffects(Unit attacker, Unit target, int rate)
+    protected virtual int AdjustForStatusEffects(Unit target, int rate)
     {
-        Info<Unit, Unit, int> args = new Info<Unit, Unit, int>(attacker, target, rate);
+        var args = new Info<Unit, Unit, int>(attacker, target, rate);
         this.PostNotification(StatusCheckNotification, args);
         return args.arg2;
     }

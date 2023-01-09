@@ -17,7 +17,7 @@ public class PerformAbilityState : BattleState
         // TODO play animations, etc
         yield return null;
         // TODO apply ability effect, etc
-        TemporaryAttackExample();
+        ApplyAbility();
 
         if (turn.hasUnitMoved)
             owner.ChangeState<EndFacingState>();
@@ -25,17 +25,21 @@ public class PerformAbilityState : BattleState
             owner.ChangeState<CommandSelectionState>();
     }
 
-    private void TemporaryAttackExample()
+    private void ApplyAbility()
     {
+        var effects = turn.ability.GetComponentsInChildren<BaseAbilityEffect>();
         foreach (var target in turn.targets)
+        foreach (var effect in effects)
         {
-            var obj = target.content;
-            var stats = obj != null ? obj.GetComponentInChildren<Stats>() : null;
-            if (stats != null)
+            var targeter = effect.GetComponent<AbilityEffectTarget>();
+            if (targeter.IsTarget(target))
             {
-                stats[StatTypes.HP] -= 50;
-                if (stats[StatTypes.HP] <= 0)
-                    Debug.Log("KO'd Uni!", obj);
+                var rate = effect.GetComponent<HitRate>();
+                var chance = rate.Calculate(target);
+                if (Random.Range(0, 101) > chance)
+                    // A Miss!
+                    continue;
+                effect.Apply(target);
             }
         }
     }

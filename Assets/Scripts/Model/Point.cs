@@ -1,8 +1,9 @@
+using System;
 using UnityEngine;
 using System.Collections;
 
-[System.Serializable]
-public struct Point
+[Serializable]
+public struct Point : IEquatable<Point>
 {
     #region Fields
 

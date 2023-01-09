@@ -5,6 +5,7 @@ using System.Linq;
 
 public class ConfirmAbilityTargetState : BattleState
 {
+    private AbilityEffectTarget[] targeters;
     private List<Tile> tiles;
     private AbilityArea aa;
     private int index = 0;
@@ -83,20 +84,21 @@ public class ConfirmAbilityTargetState : BattleState
 
     private void UpdateHitSuccessIndicator()
     {
-        var chance = CalculateHitRate();
-        var amount = EstimateDamage();
+        var chance = 0;
+        var amount = 0;
+        var target = turn.targets[index];
+
+        foreach (var targeter in targeters)
+            if (targeter.IsTarget(target))
+            {
+                var hitRate = targeter.GetComponent<HitRate>();
+                chance = hitRate.Calculate(target);
+
+                var effect = targeter.GetComponent<BaseAbilityEffect>();
+                amount = effect.Predict(target);
+                break;
+            }
+
         hitSuccessIndicator.SetStats(chance, amount);
-    }
-
-    private int CalculateHitRate()
-    {
-        var target = turn.targets[index].content.GetComponent<Unit>();
-        var hr = turn.ability.GetComponentInChildren<HitRate>();
-        return hr.Calculate(turn.actor, target);
-    }
-
-    private int EstimateDamage()
-    {
-        return 50;
     }
 }
