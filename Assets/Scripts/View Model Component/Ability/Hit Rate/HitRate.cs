@@ -47,6 +47,13 @@ public abstract class HitRate : MonoBehaviour
     /// </summary>
     public abstract int Calculate(Tile target);
 
+    public virtual bool RollForHit(Tile target)
+    {
+        var roll = Random.Range(0, 101);
+        var chance = Calculate(target);
+        return roll <= chance;
+    }
+
     #endregion
 
     #region Protected

@@ -9,8 +9,8 @@ public class TeleportMovement : Movement
         unit.Place(tile);
 
         var spin = jumper.RotateToLocal(new Vector3(0, 360, 0), 0.5f, EasingEquations.EaseInOutQuad);
-        spin.easingControl.loopCount = 1;
-        spin.easingControl.loopType = EasingControl.LoopType.PingPong;
+        spin.loopCount = 1;
+        spin.loopType = EasingControl.LoopType.PingPong;
 
         var shrink = transform.ScaleTo(Vector3.zero, 0.5f, EasingEquations.EaseInBack);
 

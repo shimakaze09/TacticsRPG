@@ -11,7 +11,7 @@ public class IndicatorAnimator : MonoBehaviour
         var scale = gameObject.transform.localScale;
         var t = gameObject.transform.ScaleTo(new Vector3(scale.x - 0.05f, scale.y, scale.z - 0.05f), 0.5f,
             EasingEquations.EaseInQuad);
-        t.easingControl.loopType = EasingControl.LoopType.PingPong;
-        t.easingControl.loopCount = -1;
+        t.loopType = EasingControl.LoopType.PingPong;
+        t.loopCount = -1;
     }
 }

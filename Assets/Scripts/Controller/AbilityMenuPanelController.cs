@@ -62,7 +62,7 @@ public class AbilityMenuPanelController : MonoBehaviour
     public void Hide()
     {
         var t = TogglePos(HideKey);
-        t.easingControl.completedEvent += delegate(object sender, System.EventArgs e)
+        t.completedEvent += delegate
         {
             if (panel.CurrentPosition == panel[HideKey])
             {
@@ -152,8 +152,8 @@ public class AbilityMenuPanelController : MonoBehaviour
     private Tweener TogglePos(string pos)
     {
         var t = panel.SetPosition(pos, true);
-        t.easingControl.duration = 0.5f;
-        t.easingControl.equation = EasingEquations.EaseOutQuad;
+        t.duration = 0.5f;
+        t.equation = EasingEquations.EaseOutQuad;
         return t;
     }
 

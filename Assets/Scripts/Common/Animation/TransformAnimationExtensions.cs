@@ -1,5 +1,6 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
+using System;
+using System.Collections;
 
 public static class TransformAnimationExtensions
 {
@@ -17,11 +18,11 @@ public static class TransformAnimationExtensions
         Func<float, float, float, float> equation)
     {
         var tweener = t.gameObject.AddComponent<TransformPositionTweener>();
-        tweener.startValue = t.position;
-        tweener.endValue = position;
-        tweener.easingControl.duration = duration;
-        tweener.easingControl.equation = equation;
-        tweener.easingControl.Play();
+        tweener.startTweenValue = t.position;
+        tweener.endTweenValue = position;
+        tweener.duration = duration;
+        tweener.equation = equation;
+        tweener.Play();
         return tweener;
     }
 
@@ -39,11 +40,11 @@ public static class TransformAnimationExtensions
         Func<float, float, float, float> equation)
     {
         var tweener = t.gameObject.AddComponent<TransformLocalPositionTweener>();
-        tweener.startValue = t.localPosition;
-        tweener.endValue = position;
-        tweener.easingControl.duration = duration;
-        tweener.easingControl.equation = equation;
-        tweener.easingControl.Play();
+        tweener.startTweenValue = t.localPosition;
+        tweener.endTweenValue = position;
+        tweener.duration = duration;
+        tweener.equation = equation;
+        tweener.Play();
         return tweener;
     }
 
@@ -51,11 +52,11 @@ public static class TransformAnimationExtensions
         Func<float, float, float, float> equation)
     {
         var tweener = t.gameObject.AddComponent<TransformLocalEulerTweener>();
-        tweener.startValue = t.localEulerAngles;
-        tweener.endValue = euler;
-        tweener.easingControl.duration = duration;
-        tweener.easingControl.equation = equation;
-        tweener.easingControl.Play();
+        tweener.startTweenValue = t.localEulerAngles;
+        tweener.endTweenValue = euler;
+        tweener.duration = duration;
+        tweener.equation = equation;
+        tweener.Play();
         return tweener;
     }
 
@@ -73,11 +74,11 @@ public static class TransformAnimationExtensions
         Func<float, float, float, float> equation)
     {
         var tweener = t.gameObject.AddComponent<TransformScaleTweener>();
-        tweener.startValue = t.localScale;
-        tweener.endValue = scale;
-        tweener.easingControl.duration = duration;
-        tweener.easingControl.equation = equation;
-        tweener.easingControl.Play();
+        tweener.startTweenValue = t.localScale;
+        tweener.endTweenValue = scale;
+        tweener.duration = duration;
+        tweener.equation = equation;
+        tweener.Play();
         return tweener;
     }
 }

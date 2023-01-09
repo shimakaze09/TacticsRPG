@@ -26,22 +26,35 @@ public class InitBattleState : BattleState
         for (var i = 0; i < jobs.Length; ++i)
         {
             var instance = Instantiate(owner.heroPrefab) as GameObject;
+
             var s = instance.AddComponent<Stats>();
             s[StatTypes.LVL] = 1;
+
             var jobPrefab = Resources.Load<GameObject>("Jobs/" + jobs[i]);
             var jobInstance = Instantiate(jobPrefab) as GameObject;
             jobInstance.transform.SetParent(instance.transform);
+
             var job = jobInstance.GetComponent<Job>();
             job.Employ();
             job.LoadDefaultStats();
+
             var p = new Point((int)levelData.tiles[i].x, (int)levelData.tiles[i].z);
+
             var unit = instance.GetComponent<Unit>();
             unit.Place(board.GetTile(p));
             unit.Match();
+
             instance.AddComponent<WalkMovement>();
+
             units.Add(unit);
-            //    Rank rank = instance.AddComponent<Rank>();
-            //    rank.Init (10);
+
+            var rank = instance.AddComponent<Rank>();
+            rank.Init(10);
+
+            instance.AddComponent<Health>();
+            instance.AddComponent<Mana>();
+
+            instance.name = jobs[i];
         }
     }
 }

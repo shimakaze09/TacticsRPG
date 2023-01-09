@@ -95,10 +95,7 @@ public class ConversationController : MonoBehaviour
             while (presenter.MoveNext()) yield return null;
 
             MovePanel(currentPanel, hide);
-            transition.easingControl.completedEvent += delegate
-            {
-                conversation.MoveNext();
-            };
+            transition.completedEvent += delegate { conversation.MoveNext(); };
 
             yield return null;
         }
@@ -110,8 +107,8 @@ public class ConversationController : MonoBehaviour
     private void MovePanel(ConversationPanel obj, string pos)
     {
         transition = obj.panel.SetPosition(pos, true);
-        transition.easingControl.duration = 0.5f;
-        transition.easingControl.equation = EasingEquations.EaseOutQuad;
+        transition.duration = 0.5f;
+        transition.equation = EasingEquations.EaseOutQuad;
     }
 
     #endregion

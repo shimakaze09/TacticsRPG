@@ -1,22 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class DamageAbilityEffect : BaseAbilityEffect
 {
-    #region Consts & Notifications
-
-    public const string GetAttackNotification = "DamageAbilityEffect.GetAttackNotification";
-    public const string GetDefenseNotification = "DamageAbilityEffect.GetDefenseNotification";
-    public const string GetPowerNotification = "DamageAbilityEffect.GetPowerNotification";
-    public const string TweakDamageNotification = "DamageAbilityEffect.TweakDamageNotification";
-
-    private const int minDamage = -999;
-    private const int maxDamage = 999;
-
-    #endregion
-
     #region Public
 
     public override int Predict(Tile target)
@@ -45,14 +32,14 @@ public class DamageAbilityEffect : BaseAbilityEffect
 
         // Tweak the damage based on a variety of other checks like
         // Elemental damage, Critical Hits, Damage multipliers, etc.
-        damage = GetStat(attacker, defender, TweakDamageNotification, 0);
+        damage = GetStat(attacker, defender, TweakDamageNotification, damage);
 
         // Clamp the damage to a range
         damage = Mathf.Clamp(damage, minDamage, maxDamage);
-        return damage;
+        return -damage;
     }
 
-    public override void Apply(Tile target)
+    protected override int OnApply(Tile target)
     {
         var defender = target.content.GetComponent<Unit>();
 
@@ -60,32 +47,15 @@ public class DamageAbilityEffect : BaseAbilityEffect
         var value = Predict(target);
 
         // Add some random variance
-        value *= Mathf.FloorToInt(Random.Range(0.9f, 1.1f));
+        value = Mathf.FloorToInt(value * Random.Range(0.9f, 1.1f));
 
         // Clamp the damage to a range
         value = Mathf.Clamp(value, minDamage, maxDamage);
 
         // Apply the damage to the target
         var s = defender.GetComponent<Stats>();
-        s[StatTypes.HP] -= value;
-    }
-
-    #endregion
-
-    #region Private
-
-    private int GetStat(Unit attacker, Unit target, string notification, int startValue)
-    {
-        var mods = new List<ValueModifier>();
-        var info = new Info<Unit, Unit, List<ValueModifier>>(attacker, target, mods);
-        this.PostNotification(notification, info);
-        mods.Sort();
-
-        var value = mods.Aggregate<ValueModifier, float>(startValue, (current, t) => t.Modify(startValue, current));
-
-        var retValue = Mathf.FloorToInt(value);
-        retValue = Mathf.Clamp(retValue, minDamage, maxDamage);
-        return retValue;
+        s[StatTypes.HP] += value;
+        return value;
     }
 
     #endregion

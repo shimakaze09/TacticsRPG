@@ -1,10 +1,11 @@
-﻿using System;
+﻿using UnityEngine;
+using System.Collections;
 
 public class TransformLocalEulerTweener : Vector3Tweener
 {
-    protected override void OnUpdate(object sender, EventArgs e)
+    protected override void OnUpdate()
     {
-        base.OnUpdate(sender, e);
-        transform.localEulerAngles = currentValue;
+        base.OnUpdate();
+        transform.localEulerAngles = currentTweenValue;
     }
 }

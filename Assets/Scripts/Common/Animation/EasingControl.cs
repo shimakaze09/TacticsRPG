@@ -1,6 +1,6 @@
-﻿using System;
+﻿using UnityEngine;
+using System;
 using System.Collections;
-using UnityEngine;
 
 public class EasingControl : MonoBehaviour
 {
@@ -20,7 +20,7 @@ public class EasingControl : MonoBehaviour
         Normal,
         Real,
         Fixed
-    }
+    };
 
     public enum PlayState
     {
@@ -28,19 +28,19 @@ public class EasingControl : MonoBehaviour
         Paused,
         Playing,
         Reversing
-    }
+    };
 
     public enum EndBehaviour
     {
         Constant,
         Reset
-    }
+    };
 
     public enum LoopType
     {
         Repeat,
         PingPong
-    }
+    };
 
     #endregion
 
@@ -94,17 +94,20 @@ public class EasingControl : MonoBehaviour
 
     public void Pause()
     {
-        SetPlayState(PlayState.Paused);
+        if (IsPlaying)
+            SetPlayState(PlayState.Paused);
     }
 
     public void Resume()
     {
-        SetPlayState(previousPlayState);
+        if (playState == PlayState.Paused)
+            SetPlayState(previousPlayState);
     }
 
     public void Stop()
     {
         SetPlayState(PlayState.Stopped);
+        previousPlayState = PlayState.Stopped;
         loops = 0;
         if (endBehaviour == EndBehaviour.Reset)
             SeekToBeginning();
@@ -116,8 +119,7 @@ public class EasingControl : MonoBehaviour
         var newValue = (endValue - startValue) * currentTime + startValue;
         currentOffset = newValue - currentValue;
         currentValue = newValue;
-
-        updateEvent?.Invoke(this, EventArgs.Empty);
+        OnUpdate();
     }
 
     public void SeekToBeginning()
@@ -132,21 +134,51 @@ public class EasingControl : MonoBehaviour
 
     #endregion
 
+    #region Protected
+
+    protected virtual void OnUpdate()
+    {
+        updateEvent?.Invoke(this, EventArgs.Empty);
+    }
+
+    protected virtual void OnLoop()
+    {
+        loopedEvent?.Invoke(this, EventArgs.Empty);
+    }
+
+    protected virtual void OnComplete()
+    {
+        completedEvent?.Invoke(this, EventArgs.Empty);
+    }
+
+    protected virtual void OnStateChange()
+    {
+        stateChangeEvent?.Invoke(this, EventArgs.Empty);
+    }
+
+    #endregion
+
     #region Private
 
     private void SetPlayState(PlayState target)
     {
-        if (playState == target)
-            return;
+        if (isActiveAndEnabled)
+        {
+            if (playState == target)
+                return;
 
-        previousPlayState = playState;
-        playState = target;
-
-        stateChangeEvent?.Invoke(this, EventArgs.Empty);
-
-        StopCoroutine("Ticker");
-        if (IsPlaying)
-            StartCoroutine("Ticker");
+            previousPlayState = playState;
+            playState = target;
+            OnStateChange();
+            StopCoroutine("Ticker");
+            if (IsPlaying)
+                StartCoroutine("Ticker");
+        }
+        else
+        {
+            previousPlayState = target;
+            playState = PlayState.Paused;
+        }
     }
 
     private IEnumerator Ticker()
@@ -186,8 +218,7 @@ public class EasingControl : MonoBehaviour
         var frameValue = (endValue - startValue) * equation(0.0f, 1.0f, currentTime) + startValue;
         currentOffset = frameValue - currentValue;
         currentValue = frameValue;
-
-        updateEvent?.Invoke(this, EventArgs.Empty);
+        OnUpdate();
 
         if (finished)
         {
@@ -199,12 +230,11 @@ public class EasingControl : MonoBehaviour
                 else // PingPong
                     SetPlayState(playState == PlayState.Playing ? PlayState.Reversing : PlayState.Playing);
 
-                loopedEvent?.Invoke(this, EventArgs.Empty);
+                OnLoop();
             }
             else
             {
-                completedEvent?.Invoke(this, EventArgs.Empty);
-
+                OnComplete();
                 Stop();
             }
         }

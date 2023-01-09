@@ -5,8 +5,7 @@ using System.Collections.Generic;
 public class ActionSelectionState : BaseAbilityMenuState
 {
     public static int category;
-    private string[] whiteMagicOptions = { "Cure", "Raise", "Holy" };
-    private string[] blackMagicOptions = { "Fire", "Ice", "Lightning" };
+    private AbilityCatalog catalog;
 
     public override void Enter()
     {
@@ -22,39 +21,38 @@ public class ActionSelectionState : BaseAbilityMenuState
 
     protected override void LoadMenu()
     {
-        menuOptions ??= new List<string>(3);
+        catalog = turn.actor.GetComponentInChildren<AbilityCatalog>();
+        var container = catalog.GetCategory(category);
+        menuTitle = container.name;
 
-        if (category == 0)
-        {
-            menuTitle = "White Magic";
-            SetOptions(whiteMagicOptions);
-        }
+        var count = catalog.AbilityCount(container);
+        if (menuOptions == null)
+            menuOptions = new List<string>(count);
         else
+            menuOptions.Clear();
+
+        var locks = new bool[count];
+        for (var i = 0; i < count; ++i)
         {
-            menuTitle = "Black Magic";
-            SetOptions(blackMagicOptions);
+            var ability = catalog.GetAbility(category, i);
+            var cost = ability.GetComponent<AbilityMagicCost>();
+            menuOptions.Add(cost ? $"{ability.name}: {cost.amount}" : ability.name);
+            locks[i] = !ability.CanPerform();
         }
 
         abilityMenuPanelController.Show(menuTitle, menuOptions);
+        for (var i = 0; i < count; ++i)
+            abilityMenuPanelController.SetLocked(i, locks[i]);
     }
 
     protected override void Confirm()
     {
-        turn.hasUnitActed = true;
-        if (turn.hasUnitMoved)
-            turn.lockMove = true;
-        owner.ChangeState<CommandSelectionState>();
+        turn.ability = catalog.GetAbility(category, abilityMenuPanelController.selection);
+        owner.ChangeState<AbilityTargetState>();
     }
 
     protected override void Cancel()
     {
         owner.ChangeState<CategorySelectionState>();
-    }
-
-    private void SetOptions(string[] options)
-    {
-        menuOptions.Clear();
-        foreach (var option in options)
-            menuOptions.Add(option);
     }
 }
