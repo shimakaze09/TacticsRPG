@@ -25,7 +25,7 @@ public class TestLevelGrowth : MonoBehaviour
 
     private void VerifyLevelToExperienceCalculations()
     {
-        for (var i = 1; i < 100; ++i)
+        for (var i = 1; i < 100; i++)
         {
             var expLvl = Rank.ExperienceForLevel(i);
             var lvlExp = Rank.LevelForExperience(expLvl);

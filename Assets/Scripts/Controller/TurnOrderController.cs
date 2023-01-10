@@ -37,7 +37,7 @@ public class TurnOrderController : MonoBehaviour
             foreach (var s in units.Select(unit => unit.GetComponent<Stats>())) s[StatTypes.CTR] += s[StatTypes.SPD];
 
             units.Sort((a, b) => GetCounter(a).CompareTo(GetCounter(b)));
-            for (var i = units.Count - 1; i >= 0; --i)
+            for (var i = units.Count - 1; i >= 0; i--)
                 if (CanTakeTurn(units[i]))
                 {
                     bc.turn.Change(units[i]);

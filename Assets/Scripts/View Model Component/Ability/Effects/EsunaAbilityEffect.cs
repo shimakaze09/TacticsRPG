@@ -23,11 +23,11 @@ public class EsunaAbilityEffect : BaseAbilityEffect
         var status = defender.GetComponentInChildren<Status>();
 
         var candidates = status.GetComponentsInChildren<DurationStatusCondition>();
-        foreach (var candidate in candidates)
+        for (var i = candidates.Length - 1; i >= 0; i--)
         {
-            var effect = candidate.GetComponentInParent<StatusEffect>();
+            var effect = candidates[i].GetComponentInParent<StatusEffect>();
             if (CurableTypes.Contains(effect.GetType()))
-                candidate.Remove();
+                candidates[i].Remove();
         }
 
         return 0;

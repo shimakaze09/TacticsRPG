@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -27,6 +26,19 @@ public class Ability : MonoBehaviour
             Perform(target);
 
         this.PostNotification(DidPerformNotification);
+    }
+
+    public bool IsTarget(Tile tile)
+    {
+        var obj = transform;
+        for (var i = 0; i < obj.childCount; i++)
+        {
+            var targeter = obj.GetChild(i).GetComponent<AbilityEffectTarget>();
+            if (targeter.IsTarget(tile))
+                return true;
+        }
+
+        return false;
     }
 
     private void Perform(Tile target)

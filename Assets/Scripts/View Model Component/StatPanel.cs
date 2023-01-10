@@ -18,8 +18,8 @@ public class StatPanel : MonoBehaviour
 
     public void Display(GameObject obj)
     {
-        // Temp until I add a component to determine unit alliances
-        background.sprite = Random.value > 0.5f ? enemyBackground : allyBackground;
+        var alliance = obj.GetComponent<Alliance>();
+        background.sprite = alliance.type == Alliances.Enemy ? enemyBackground : allyBackground;
         // avatar.sprite = null; Need a component which provides this data
         nameLabel.text = obj.name;
         var stats = obj.GetComponent<Stats>();

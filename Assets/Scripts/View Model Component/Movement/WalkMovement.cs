@@ -31,7 +31,7 @@ public class WalkMovement : Movement
         }
 
         // Move to each way point in succession
-        for (var i = 1; i < targets.Count; ++i)
+        for (var i = 1; i < targets.Count; i++)
         {
             var from = targets[i - 1];
             var to = targets[i];

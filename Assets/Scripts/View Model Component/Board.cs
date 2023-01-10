@@ -66,7 +66,7 @@ public class Board : MonoBehaviour
         while (checkNow.Count > 0)
         {
             var t = checkNow.Dequeue();
-            for (var i = 0; i < 4; ++i)
+            for (var i = 0; i < 4; i++)
             {
                 var next = GetTile(t.pos + dirs[i]);
                 if (next == null || next.distance <= t.distance + 1)

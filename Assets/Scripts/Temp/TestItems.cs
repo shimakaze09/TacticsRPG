@@ -199,7 +199,7 @@ public class TestItems : MonoBehaviour
 
     private bool VictoryCheck()
     {
-        for (var i = 0; i < 2; ++i)
+        for (var i = 0; i < 2; i++)
         {
             var s = combatants[i].GetComponent<Stats>();
             if (s[StatTypes.HP] <= 0)
@@ -212,7 +212,7 @@ public class TestItems : MonoBehaviour
     private void LogCombatants()
     {
         Debug.Log("============");
-        for (var i = 0; i < 2; ++i)
+        for (var i = 0; i < 2; i++)
             LogToConsole(combatants[i]);
         Debug.Log("============");
     }

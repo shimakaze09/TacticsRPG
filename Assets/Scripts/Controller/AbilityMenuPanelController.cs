@@ -84,7 +84,7 @@ public class AbilityMenuPanelController : MonoBehaviour
 
     public void Next()
     {
-        for (var i = selection + 1; i < selection + menuEntries.Count; ++i)
+        for (var i = selection + 1; i < selection + menuEntries.Count; i++)
         {
             var index = i % menuEntries.Count;
             if (SetSelection(index))

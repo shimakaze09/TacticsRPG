@@ -275,8 +275,7 @@ public static class EasingEquations
     public static float Punch(float amplitude, float value)
     {
         float s = 9;
-        if (value == 0) return 0;
-        if (value == 1) return 0;
+        if (value is 0 or 1) return 0;
         var period = 1 * 0.3f;
         s = period / (2 * Mathf.PI) * Mathf.Asin(0);
         return amplitude * Mathf.Pow(2, -10 * value) * Mathf.Sin((value * 1 - s) * (2 * Mathf.PI) / period);

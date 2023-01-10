@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,11 +13,11 @@ public class ConeAbilityRange : AbilityRange
         var lateral = 1;
 
         if (unit.dir is Directions.North or Directions.South)
-            for (var y = 1; y <= horizontal; ++y)
+            for (var y = 1; y <= horizontal; y++)
             {
                 var min = -(lateral / 2);
                 var max = lateral / 2;
-                for (var x = min; x <= max; ++x)
+                for (var x = min; x <= max; x++)
                 {
                     var next = new Point(pos.x + x, pos.y + y * dir);
                     var tile = board.GetTile(next);
@@ -33,7 +32,7 @@ public class ConeAbilityRange : AbilityRange
             {
                 var min = -(lateral / 2);
                 var max = lateral / 2;
-                for (var y = min; y <= max; ++y)
+                for (var y = min; y <= max; y++)
                 {
                     var next = new Point(pos.x + x * dir, pos.y + y);
                     var tile = board.GetTile(next);

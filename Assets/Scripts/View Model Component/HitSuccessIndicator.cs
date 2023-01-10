@@ -24,7 +24,7 @@ public class HitSuccessIndicator : MonoBehaviour
     public void SetStats(int chance, int amount)
     {
         arrow.fillAmount = chance / 100f;
-        label.text = $"{chance}% {amount}pt(s)";
+        label.text = $"{chance}% {Mathf.Abs(amount)}pt(s)";
     }
 
     public void Show()
@@ -36,10 +36,7 @@ public class HitSuccessIndicator : MonoBehaviour
     public void Hide()
     {
         SetPanelPos(HideKey);
-        transition.completedEvent += delegate(object sender, System.EventArgs e)
-        {
-            canvas.gameObject.SetActive(false);
-        };
+        transition.completedEvent += delegate { canvas.gameObject.SetActive(false); };
     }
 
     private void SetPanelPos(string pos)

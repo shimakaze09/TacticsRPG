@@ -57,7 +57,7 @@ public class GameObjectPoolController : MonoBehaviour
         };
         pools.Add(key, data);
 
-        for (var i = 0; i < prepopulate; ++i)
+        for (var i = 0; i < prepopulate; i++)
             Enqueue(CreateInstance(key, prefab));
 
         return true;

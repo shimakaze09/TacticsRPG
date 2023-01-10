@@ -5,10 +5,9 @@ using System.Linq;
 
 public class ConfirmAbilityTargetState : BattleState
 {
-    private AbilityEffectTarget[] targeters;
     private List<Tile> tiles;
     private AbilityArea aa;
-    private int index = 0;
+    private int index;
 
     public override void Enter()
     {
@@ -58,14 +57,21 @@ public class ConfirmAbilityTargetState : BattleState
     private void FindTargets()
     {
         turn.targets = new List<Tile>();
-        var targeters = turn.ability.GetComponentsInChildren<AbilityEffectTarget>();
-        foreach (var tile in tiles.Where(tile => IsTarget(tile, targeters)))
+        foreach (var tile in tiles.Where(IsTarget))
             turn.targets.Add(tile);
     }
 
-    private bool IsTarget(Tile tile, AbilityEffectTarget[] list)
+    private bool IsTarget(Tile tile)
     {
-        return list.Any(t => t.IsTarget(tile));
+        var obj = turn.ability.transform;
+        for (var i = 0; i < obj.childCount; i++)
+        {
+            var targeter = obj.GetChild(i).GetComponent<AbilityEffectTarget>();
+            if (targeter.IsTarget(tile))
+                return true;
+        }
+
+        return false;
     }
 
     private void SetTarget(int target)
@@ -75,6 +81,7 @@ public class ConfirmAbilityTargetState : BattleState
             index = turn.targets.Count - 1;
         if (index >= turn.targets.Count)
             index = 0;
+
         if (turn.targets.Count > 0)
         {
             RefreshSecondaryStatPanel(turn.targets[index].pos);
@@ -88,7 +95,10 @@ public class ConfirmAbilityTargetState : BattleState
         var amount = 0;
         var target = turn.targets[index];
 
-        foreach (var targeter in targeters)
+        var obj = turn.ability.transform;
+        for (var i = 0; i < obj.childCount; i++)
+        {
+            var targeter = obj.GetChild(i).GetComponent<AbilityEffectTarget>();
             if (targeter.IsTarget(target))
             {
                 var hitRate = targeter.GetComponent<HitRate>();
@@ -98,6 +108,7 @@ public class ConfirmAbilityTargetState : BattleState
                 amount = effect.Predict(target);
                 break;
             }
+        }
 
         hitSuccessIndicator.SetStats(chance, amount);
     }

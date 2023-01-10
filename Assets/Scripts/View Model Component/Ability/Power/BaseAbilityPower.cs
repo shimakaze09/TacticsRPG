@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,45 +9,48 @@ public abstract class BaseAbilityPower : MonoBehaviour
 
     private void OnEnable()
     {
-        this.AddObserver(OnGetBaseAttack, DamageAbilityEffect.GetAttackNotification);
-        this.AddObserver(OnGetBaseDefense, DamageAbilityEffect.GetDefenseNotification);
-        this.AddObserver(OnGetPower, DamageAbilityEffect.GetPowerNotification);
+        this.AddObserver(OnGetBaseAttack, BaseAbilityEffect.GetAttackNotification);
+        this.AddObserver(OnGetBaseDefense, BaseAbilityEffect.GetDefenseNotification);
+        this.AddObserver(OnGetPower, BaseAbilityEffect.GetPowerNotification);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnGetBaseAttack, DamageAbilityEffect.GetAttackNotification);
-        this.RemoveObserver(OnGetBaseDefense, DamageAbilityEffect.GetDefenseNotification);
-        this.RemoveObserver(OnGetPower, DamageAbilityEffect.GetPowerNotification);
+        this.RemoveObserver(OnGetBaseAttack, BaseAbilityEffect.GetAttackNotification);
+        this.RemoveObserver(OnGetBaseDefense, BaseAbilityEffect.GetDefenseNotification);
+        this.RemoveObserver(OnGetPower, BaseAbilityEffect.GetPowerNotification);
     }
 
     private void OnGetBaseAttack(object sender, object args)
     {
-        var info = args as Info<Unit, Unit, List<ValueModifier>>;
-        if (info.arg0 != GetComponentInParent<Unit>())
-            return;
-
-        var mod = new AddValueModifier(0, GetBaseAttack());
-        info.arg2.Add(mod);
+        if (IsMyEffect(sender))
+        {
+            var info = args as Info<Unit, Unit, List<ValueModifier>>;
+            info.arg2.Add(new AddValueModifier(0, GetBaseAttack()));
+        }
     }
 
     private void OnGetBaseDefense(object sender, object args)
     {
-        var info = args as Info<Unit, Unit, List<ValueModifier>>;
-        if (info.arg0 != GetComponentInParent<Unit>())
-            return;
-
-        var mod = new AddValueModifier(0, GetBaseDefense(info.arg1));
-        info.arg2.Add(mod);
+        if (IsMyEffect(sender))
+        {
+            var info = args as Info<Unit, Unit, List<ValueModifier>>;
+            info.arg2.Add(new AddValueModifier(0, GetBaseDefense(info.arg1)));
+        }
     }
 
     private void OnGetPower(object sender, object args)
     {
-        var info = args as Info<Unit, Unit, List<ValueModifier>>;
-        if (info.arg0 != GetComponentInParent<Unit>())
-            return;
+        if (IsMyEffect(sender))
+        {
+            var info = args as Info<Unit, Unit, List<ValueModifier>>;
+            info.arg2.Add(new AddValueModifier(0, GetPower()));
+        }
+    }
 
-        var mod = new AddValueModifier(0, GetPower());
-        info.arg2.Add(mod);
+    private bool IsMyEffect(object sender)
+    {
+        var obj = sender as MonoBehaviour;
+        return obj != null && obj.transform.parent == transform;
     }
 }

@@ -27,7 +27,7 @@ public static class JobParser
     {
         var readPath = $"{Application.dataPath}/Settings/data/JobStartingStats.csv";
         var readText = File.ReadAllLines(readPath);
-        for (var i = 1; i < readText.Length; ++i)
+        for (var i = 1; i < readText.Length; i++)
             PartsStartingStats(readText[i]);
     }
 
@@ -36,7 +36,7 @@ public static class JobParser
         var elements = line.Split(',');
         var obj = GetOrCreate(elements[0]);
         var job = obj.GetComponent<Job>();
-        for (var i = 1; i < Job.statOrder.Length + 1; ++i)
+        for (var i = 1; i < Job.statOrder.Length + 1; i++)
             job.baseStats[i - 1] = Convert.ToInt32(elements[i]);
 
         var evade = GetFeature(obj, StatTypes.EVD);
@@ -56,7 +56,7 @@ public static class JobParser
     {
         var readPath = $"{Application.dataPath}/Settings/data/JobGrowthStats.csv";
         var readText = File.ReadAllLines(readPath);
-        for (var i = 1; i < readText.Length; ++i)
+        for (var i = 1; i < readText.Length; i++)
             ParseGrowthStats(readText[i]);
     }
 
@@ -65,7 +65,7 @@ public static class JobParser
         var elements = line.Split(',');
         var obj = GetOrCreate(elements[0]);
         var job = obj.GetComponent<Job>();
-        for (var i = 1; i < elements.Length; ++i)
+        for (var i = 1; i < elements.Length; i++)
             job.growStats[i - 1] = Convert.ToSingle(elements[i]);
     }
 

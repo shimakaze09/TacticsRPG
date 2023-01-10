@@ -172,7 +172,7 @@ public class NotificationCenter
         {
             var handlers = subTable[sender];
             _invoking.Add(handlers);
-            for (var i = 0; i < handlers.Count; ++i)
+            for (var i = 0; i < handlers.Count; i++)
                 handlers[i](sender, e);
             _invoking.Remove(handlers);
         }

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,9 +15,10 @@ public class LineAbilityRange : AbilityRange
             Directions.North => new Point(startPos.x, board.max.y),
             Directions.East => new Point(board.max.x, startPos.y),
             Directions.South => new Point(startPos.x, board.min.y),
-            _ => new Point(board.min.x, startPos.y) // West
+            _ => new Point(board.min.x, startPos.y)
         };
 
+        var dist = 0;
         while (startPos != endPos)
         {
             if (startPos.x < endPos.x) startPos.x++;
@@ -28,7 +28,12 @@ public class LineAbilityRange : AbilityRange
             else if (startPos.y > endPos.y) startPos.y--;
 
             var t = board.GetTile(startPos);
-            if (t != null && Mathf.Abs(t.height - unit.tile.height) <= vertical) retValue.Add(t);
+            if (t != null && Mathf.Abs(t.height - unit.tile.height) <= vertical)
+                retValue.Add(t);
+
+            dist++;
+            if (dist >= horizontal)
+                break;
         }
 
         return retValue;

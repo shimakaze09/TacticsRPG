@@ -51,7 +51,7 @@ public class EasingControl : MonoBehaviour
     public PlayState previousPlayState { get; private set; }
     public EndBehaviour endBehaviour = EndBehaviour.Constant;
     public LoopType loopType = LoopType.Repeat;
-    public bool IsPlaying => playState == PlayState.Playing || playState == PlayState.Reversing;
+    public bool IsPlaying => playState is PlayState.Playing or PlayState.Reversing;
 
     public float startValue = 0.0f;
     public float endValue = 1.0f;

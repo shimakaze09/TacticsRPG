@@ -133,8 +133,8 @@ public class BoardCreator : MonoBehaviour
 
     private void GrowRect(Rect rect)
     {
-        for (var y = (int)rect.yMin; y < (int)rect.yMax; ++y)
-        for (var x = (int)rect.xMin; x < (int)rect.xMax; ++x)
+        for (var y = (int)rect.yMin; y < (int)rect.yMax; y++)
+        for (var x = (int)rect.xMin; x < (int)rect.xMax; x++)
         {
             var p = new Point(x, y);
             GrowSingle(p);
@@ -143,8 +143,8 @@ public class BoardCreator : MonoBehaviour
 
     private void ShrinkRect(Rect rect)
     {
-        for (var y = (int)rect.yMin; y < (int)rect.yMax; ++y)
-        for (var x = (int)rect.xMin; x < (int)rect.xMax; ++x)
+        for (var y = (int)rect.yMin; y < (int)rect.yMax; y++)
+        for (var x = (int)rect.xMin; x < (int)rect.xMax; x++)
         {
             var p = new Point(x, y);
             ShrinkSingle(p);

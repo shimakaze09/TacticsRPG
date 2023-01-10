@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 public class BattleController : StateMachine
 {
-    public GameObject heroPrefab;
     public CameraRig cameraRig;
     public Board board;
     public LevelData levelData;

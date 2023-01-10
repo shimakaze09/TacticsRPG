@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class HealAbilityEffect : BaseAbilityEffect
@@ -7,13 +5,13 @@ public class HealAbilityEffect : BaseAbilityEffect
     public override int Predict(Tile target)
     {
         var attacker = GetComponentInParent<Unit>();
-        var defender = target.GetComponent<Unit>();
+        var defender = target.content.GetComponent<Unit>();
         return GetStat(attacker, defender, GetPowerNotification, 0);
     }
 
     protected override int OnApply(Tile target)
     {
-        var defender = target.GetComponent<Unit>();
+        var defender = target.content.GetComponent<Unit>();
 
         // Start with the predicted value
         var value = Predict(target);

@@ -1,9 +1,21 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 public class AbsorbDamageAbilityEffect : BaseAbilityEffect
 {
+    #region Private
+
+    private BaseAbilityEffect GetTrackedEffect()
+    {
+        var owner = GetComponentInParent<Ability>().transform;
+        if (trackedSiblingIndex >= 0 && trackedSiblingIndex < owner.childCount)
+        {
+            var sibling = owner.GetChild(trackedSiblingIndex);
+            return sibling.GetComponent<BaseAbilityEffect>();
+        }
+
+        return null;
+    }
+
+    #endregion
+
     #region Fields
 
     public int trackedSiblingIndex;
@@ -53,28 +65,12 @@ public class AbsorbDamageAbilityEffect : BaseAbilityEffect
 
     private void OnEffectHit(object sender, object args)
     {
-        amount = (int)args;
+        amount = (int)args * -1;
     }
 
     private void OnEffectMiss(object sender, object args)
     {
         amount = 0;
-    }
-
-    #endregion
-
-    #region Private
-
-    private BaseAbilityEffect GetTrackedEffect()
-    {
-        var owner = GetComponentInParent<Ability>().transform;
-        if (trackedSiblingIndex >= 0 && trackedSiblingIndex < owner.childCount)
-        {
-            var sibling = owner.GetChild(trackedSiblingIndex);
-            return sibling.GetComponent<BaseAbilityEffect>();
-        }
-
-        return null;
     }
 
     #endregion

@@ -73,7 +73,7 @@ public class Job : MonoBehaviour
     {
         var oldValue = (int)args;
         var newValue = stats[StatTypes.LVL];
-        for (var i = oldValue; i < newValue; ++i)
+        for (var i = oldValue; i < newValue; i++)
             LevelUp();
     }
 
@@ -83,7 +83,7 @@ public class Job : MonoBehaviour
 
     private void LevelUp()
     {
-        for (var i = 0; i < statOrder.Length; ++i)
+        for (var i = 0; i < statOrder.Length; i++)
         {
             var type = statOrder[i];
             var whole = Mathf.FloorToInt(growStats[i]);

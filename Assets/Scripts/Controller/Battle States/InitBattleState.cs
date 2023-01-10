@@ -1,5 +1,6 @@
-using System.Collections;
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
 public class InitBattleState : BattleState
 {
@@ -22,39 +23,34 @@ public class InitBattleState : BattleState
 
     private void SpawnTestUnits()
     {
-        var jobs = new string[] { "Rogue", "Warrior", "Wizard" };
-        for (var i = 0; i < jobs.Length; ++i)
+        var recipes = new[]
         {
-            var instance = Instantiate(owner.heroPrefab) as GameObject;
+            "Alaois",
+            "Hania",
+            "Kamau",
+            "Enemy Rogue",
+            "Enemy Warrior",
+            "Enemy Wizard"
+        };
 
-            var s = instance.AddComponent<Stats>();
-            s[StatTypes.LVL] = 1;
+        var locations = new List<Tile>(board.tiles.Values);
+        foreach (var recipe in recipes)
+        {
+            var level = Random.Range(9, 12);
+            var instance = UnitFactory.Create(recipe, level);
 
-            var jobPrefab = Resources.Load<GameObject>("Jobs/" + jobs[i]);
-            var jobInstance = Instantiate(jobPrefab) as GameObject;
-            jobInstance.transform.SetParent(instance.transform);
-
-            var job = jobInstance.GetComponent<Job>();
-            job.Employ();
-            job.LoadDefaultStats();
-
-            var p = new Point((int)levelData.tiles[i].x, (int)levelData.tiles[i].z);
+            var random = Random.Range(0, locations.Count);
+            var randomTile = locations[random];
+            locations.RemoveAt(random);
 
             var unit = instance.GetComponent<Unit>();
-            unit.Place(board.GetTile(p));
+            unit.Place(randomTile);
+            unit.dir = (Directions)Random.Range(0, 4);
             unit.Match();
 
-            instance.AddComponent<WalkMovement>();
-
             units.Add(unit);
-
-            var rank = instance.AddComponent<Rank>();
-            rank.Init(10);
-
-            instance.AddComponent<Health>();
-            instance.AddComponent<Mana>();
-
-            instance.name = jobs[i];
         }
+
+        SelectTile(units[0].tile.pos);
     }
 }

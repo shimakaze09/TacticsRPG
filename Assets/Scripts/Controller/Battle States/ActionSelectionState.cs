@@ -32,7 +32,7 @@ public class ActionSelectionState : BaseAbilityMenuState
             menuOptions.Clear();
 
         var locks = new bool[count];
-        for (var i = 0; i < count; ++i)
+        for (var i = 0; i < count; i++)
         {
             var ability = catalog.GetAbility(category, i);
             var cost = ability.GetComponent<AbilityMagicCost>();
@@ -41,7 +41,7 @@ public class ActionSelectionState : BaseAbilityMenuState
         }
 
         abilityMenuPanelController.Show(menuTitle, menuOptions);
-        for (var i = 0; i < count; ++i)
+        for (var i = 0; i < count; i++)
             abilityMenuPanelController.SetLocked(i, locks[i]);
     }
 
