@@ -9,7 +9,8 @@ public abstract class BaseAbilityMenuState : BattleState
     {
         base.Enter();
         SelectTile(turn.actor.tile.pos);
-        LoadMenu();
+        if (driver.Current == Drivers.Human)
+            LoadMenu();
     }
 
     public override void Exit()

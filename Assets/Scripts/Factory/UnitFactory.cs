@@ -30,6 +30,7 @@ public static class UnitFactory
         AddAttack(obj, recipe.attack);
         AddAbilityCatalog(obj, recipe.abilityCatalog);
         AddAlliance(obj, recipe.alliance);
+        AddAttackPattern(obj, recipe.strategy);
         return obj;
     }
 
@@ -43,6 +44,7 @@ public static class UnitFactory
         }
 
         var instance = Object.Instantiate(prefab);
+        instance.name = instance.name.Replace("(Clone)", "");
         return instance;
     }
 
@@ -117,9 +119,23 @@ public static class UnitFactory
             {
                 var abilityName = $"Abilities/{categoryName.name}/{entry}";
                 var ability = InstantiatePrefab(abilityName);
-                ability.name = entry;
                 ability.transform.SetParent(category.transform);
             }
+        }
+    }
+
+    private static void AddAttackPattern(GameObject obj, string name)
+    {
+        var driver = obj.AddComponent<Driver>();
+        if (string.IsNullOrEmpty(name))
+        {
+            driver.normal = Drivers.Human;
+        }
+        else
+        {
+            driver.normal = Drivers.Computer;
+            var instance = InstantiatePrefab("Attack Pattern/" + name);
+            instance.transform.SetParent(obj.transform);
         }
     }
 }

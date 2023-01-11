@@ -13,10 +13,12 @@ public class BattleController : StateMachine
     public AbilityMenuPanelController abilityMenuPanelController;
     public StatPanelController statPanelController;
     public HitSuccessIndicator hitSuccessIndicator;
+    public BattleMessageController battleMessageController;
     public FacingIndicator facingIndicator;
     public Turn turn = new();
     public List<Unit> units = new();
     public IEnumerator round;
+    public ComputerPlayer cpu;
 
     private void Start()
     {

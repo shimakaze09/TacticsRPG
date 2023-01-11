@@ -35,6 +35,7 @@ public class Board : MonoBehaviour
         foreach (var tile in data.tiles)
         {
             var instance = Instantiate(tilePrefab);
+            instance.transform.SetParent(transform);
             var t = instance.GetComponent<Tile>();
             t.Load(tile);
             tiles.Add(t.pos, t);

@@ -1,5 +1,7 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 public class ConfirmAbilityTargetState : BattleState
 {
@@ -18,9 +20,13 @@ public class ConfirmAbilityTargetState : BattleState
 
         if (turn.targets.Count > 0)
         {
-            hitSuccessIndicator.Show();
+            if (driver.Current == Drivers.Human)
+                hitSuccessIndicator.Show();
             SetTarget(0);
         }
+
+        if (driver.Current == Drivers.Computer)
+            StartCoroutine(ComputerDisplayAbilitySelection());
     }
 
     public override void Exit()
@@ -55,21 +61,8 @@ public class ConfirmAbilityTargetState : BattleState
     private void FindTargets()
     {
         turn.targets = new List<Tile>();
-        foreach (var tile in tiles.Where(IsTarget))
+        foreach (var tile in tiles.Where(tile => turn.ability.IsTarget(tile)))
             turn.targets.Add(tile);
-    }
-
-    private bool IsTarget(Tile tile)
-    {
-        var obj = turn.ability.transform;
-        for (var i = 0; i < obj.childCount; i++)
-        {
-            var targeter = obj.GetChild(i).GetComponent<AbilityEffectTarget>();
-            if (targeter.IsTarget(tile))
-                return true;
-        }
-
-        return false;
     }
 
     private void SetTarget(int target)
@@ -109,5 +102,12 @@ public class ConfirmAbilityTargetState : BattleState
         }
 
         hitSuccessIndicator.SetStats(chance, amount);
+    }
+
+    private IEnumerator ComputerDisplayAbilitySelection()
+    {
+        owner.battleMessageController.Display(turn.ability.name);
+        yield return new WaitForSeconds(2f);
+        owner.ChangeState<PerformAbilityState>();
     }
 }
