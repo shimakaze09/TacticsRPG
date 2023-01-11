@@ -16,10 +16,13 @@ public class PerformAbilityState : BattleState
     {
         // TODO play animations, etc
         yield return null;
-        // TODO apply ability effect, etc
         ApplyAbility();
 
-        if (turn.hasUnitMoved)
+        if (IsBattleOver())
+            owner.ChangeState<CutSceneState>();
+        else if (!UnitHasControl())
+            owner.ChangeState<SelectUnitState>();
+        else if (turn.hasUnitMoved)
             owner.ChangeState<EndFacingState>();
         else
             owner.ChangeState<CommandSelectionState>();
@@ -38,9 +41,16 @@ public class PerformAbilityState : BattleState
                 var chance = rate.Calculate(target);
                 if (Random.Range(0, 101) > chance)
                     // A Miss!
+                    // TODO: Add animations, etc.
                     continue;
                 effect.Apply(target);
             }
         }
+    }
+
+    private bool UnitHasControl()
+    {
+        // TODO: Add confuse status effect, etc.
+        return turn.actor.GetComponentInChildren<KnockOutStatusEffect>() == null;
     }
 }

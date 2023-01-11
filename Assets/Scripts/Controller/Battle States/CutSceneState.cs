@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CutSceneState : BattleState
@@ -11,19 +9,24 @@ public class CutSceneState : BattleState
     {
         base.Awake();
         conversationController = GetComponentInChildren<ConversationController>();
-        data = Resources.Load<ConversationData>("Conversations/IntroScene");
-    }
-
-    protected override void OnDestroy()
-    {
-        base.OnDestroy();
-        if (data) Resources.UnloadAsset(data);
     }
 
     public override void Enter()
     {
         base.Enter();
+        data = IsBattleOver()
+            ? Resources.Load<ConversationData>(DidPlayerWin()
+                ? "Conversations/OutroSceneWin"
+                : "Conversations/OutroSceneLose")
+            : Resources.Load<ConversationData>("Conversations/IntroScene");
+
         conversationController.Show(data);
+    }
+
+    public override void Exit()
+    {
+        base.Exit();
+        if (data) Resources.UnloadAsset(data);
     }
 
     protected override void AddListeners()
@@ -46,6 +49,9 @@ public class CutSceneState : BattleState
 
     private void OnCompleteConversation(object sender, System.EventArgs e)
     {
-        owner.ChangeState<SelectUnitState>();
+        if (IsBattleOver())
+            owner.ChangeState<EndBattleState>();
+        else
+            owner.ChangeState<SelectUnitState>();
     }
 }

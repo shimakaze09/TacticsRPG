@@ -16,6 +16,7 @@ public class InitBattleState : BattleState
         var p = new Point((int)levelData.tiles[0].x, (int)levelData.tiles[0].z);
         SelectTile(p);
         SpawnTestUnits();
+        AddVictoryCondition();
         owner.round = owner.gameObject.AddComponent<TurnOrderController>().Round();
         yield return null;
         owner.ChangeState<CutSceneState>();
@@ -32,6 +33,9 @@ public class InitBattleState : BattleState
             "Enemy Warrior",
             "Enemy Wizard"
         };
+
+        var unitContainer = new GameObject("Units");
+        unitContainer.transform.SetParent(owner.transform);
 
         var locations = new List<Tile>(board.tiles.Values);
         foreach (var recipe in recipes)
@@ -52,5 +56,14 @@ public class InitBattleState : BattleState
         }
 
         SelectTile(units[0].tile.pos);
+    }
+
+    private void AddVictoryCondition()
+    {
+        var vc = owner.gameObject.AddComponent<DefeatTargetVictoryCondition>();
+        var enemy = units[^1];
+        vc.target = enemy;
+        var health = enemy.GetComponent<Health>();
+        health.MinHP = 10;
     }
 }

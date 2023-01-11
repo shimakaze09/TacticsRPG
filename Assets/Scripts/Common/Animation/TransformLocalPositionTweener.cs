@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class TransformLocalPositionTweener : Vector3Tweener
+﻿public class TransformLocalPositionTweener : Vector3Tweener
 {
     protected override void OnUpdate()
     {

@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 
 public abstract class BattleState : State
@@ -79,5 +78,15 @@ public abstract class BattleState : State
             statPanelController.ShowSecondary(target.gameObject);
         else
             statPanelController.HideSecondary();
+    }
+
+    protected virtual bool DidPlayerWin()
+    {
+        return owner.GetComponent<BaseVictoryCondition>().Victor == Alliances.Hero;
+    }
+
+    protected virtual bool IsBattleOver()
+    {
+        return owner.GetComponent<BaseVictoryCondition>().Victor != Alliances.None;
     }
 }

@@ -467,6 +467,7 @@ GameObject:
   - component: {fileID: 421261628}
   - component: {fileID: 421261627}
   - component: {fileID: 421261629}
+  - component: {fileID: 421261630}
   m_Layer: 0
   m_Name: Battle Controller
   m_TagString: Untagged
@@ -496,6 +497,7 @@ MonoBehaviour:
   abilityMenuPanelController: {fileID: 1030889062}
   statPanelController: {fileID: 1837319753}
   hitSuccessIndicator: {fileID: 1421179873}
+  facingIndicator: {fileID: 1293718354}
   units: []
 --- !u!4 &421261628
 Transform:
@@ -529,6 +531,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b5b49f1da440dba4fbf729940076f111, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &421261630
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 421261626}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feb1bfedc990bbe458a8b80f2cb2c70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &602758552 stripped
@@ -705,6 +719,18 @@ Transform:
   m_Father: {fileID: 234713295}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 35.264, y: 0, z: 0}
+--- !u!114 &1293718354 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1343899028604088606, guid: eed4dadbe5681ee4cb01f44606383c86,
+    type: 3}
+  m_PrefabInstance: {fileID: 1183338604}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c03080820ba13784b9b49609e9bfa6c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1421179873 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3257186292122004953, guid: 65ab72122cef300499deaaf86d9577bc,
@@ -1173,6 +1199,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5686721829499207250, guid: 65ab72122cef300499deaaf86d9577bc,
+        type: 3}
+      propertyPath: m_fontStyle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5686721829499207250, guid: 65ab72122cef300499deaaf86d9577bc,
+        type: 3}
+      propertyPath: m_fontColor.r
+      value: 0.74509805
       objectReference: {fileID: 0}
     - target: {fileID: 6167612194448496365, guid: 65ab72122cef300499deaaf86d9577bc,
         type: 3}

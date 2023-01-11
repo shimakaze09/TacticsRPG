@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEditor;
 using System;
 using System.IO;
-using System.Collections;
 using Object = UnityEngine.Object;
 
 public static class JobParser

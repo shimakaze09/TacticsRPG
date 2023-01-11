@@ -1,6 +1,3 @@
-using UnityEngine;
-using System.Collections;
-
 public class MultValueModifier : ValueModifier
 {
     public readonly float toMultiply;

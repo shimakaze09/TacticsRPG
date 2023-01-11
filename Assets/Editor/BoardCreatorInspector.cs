@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEditor;
-using System.Collections;
 
 [CustomEditor(typeof(BoardCreator))]
 public class BoardCreatorInspector : Editor
