@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -24,7 +24,7 @@ public class InitBattleState : BattleState
 
     private void SpawnTestUnits()
     {
-        var recipes = new[]
+        var recipes = new string[]
         {
             "Alaois",
             "Hania",
@@ -38,10 +38,11 @@ public class InitBattleState : BattleState
         unitContainer.transform.SetParent(owner.transform);
 
         var locations = new List<Tile>(board.tiles.Values);
-        foreach (var recipe in recipes)
+        for (var i = 0; i < recipes.Length; ++i)
         {
             var level = Random.Range(9, 12);
-            var instance = UnitFactory.Create(recipe, level);
+            var instance = UnitFactory.Create(recipes[i], level);
+            instance.transform.SetParent(unitContainer.transform);
 
             var random = Random.Range(0, locations.Count);
             var randomTile = locations[random];
@@ -61,7 +62,7 @@ public class InitBattleState : BattleState
     private void AddVictoryCondition()
     {
         var vc = owner.gameObject.AddComponent<DefeatTargetVictoryCondition>();
-        var enemy = units[^1];
+        var enemy = units[units.Count - 1];
         vc.target = enemy;
         var health = enemy.GetComponent<Health>();
         health.MinHP = 10;

@@ -1,3 +1,5 @@
+﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public class ActionSelectionState : BaseAbilityMenuState
@@ -30,16 +32,19 @@ public class ActionSelectionState : BaseAbilityMenuState
             menuOptions.Clear();
 
         var locks = new bool[count];
-        for (var i = 0; i < count; i++)
+        for (var i = 0; i < count; ++i)
         {
             var ability = catalog.GetAbility(category, i);
             var cost = ability.GetComponent<AbilityMagicCost>();
-            menuOptions.Add(cost ? $"{ability.name}: {cost.amount}" : ability.name);
+            if (cost)
+                menuOptions.Add($"{ability.name}: {cost.amount}");
+            else
+                menuOptions.Add(ability.name);
             locks[i] = !ability.CanPerform();
         }
 
         abilityMenuPanelController.Show(menuTitle, menuOptions);
-        for (var i = 0; i < count; i++)
+        for (var i = 0; i < count; ++i)
             abilityMenuPanelController.SetLocked(i, locks[i]);
     }
 

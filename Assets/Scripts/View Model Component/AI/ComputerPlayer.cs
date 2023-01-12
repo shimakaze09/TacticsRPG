@@ -1,35 +1,54 @@
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class ComputerPlayer : MonoBehaviour
 {
+    #region Fields
+
     private BattleController bc;
     private Unit actor => bc.turn.actor;
+    private Alliance alliance => actor.GetComponent<Alliance>();
+    private Unit nearestFoe;
+
+    #endregion
+
+    #region MonoBehaviour
 
     private void Awake()
     {
         bc = GetComponent<BattleController>();
     }
 
+    #endregion
+
+    #region Public
+
     public PlanOfAttack Evaluate()
     {
-        // Create and fill out a plan of attack
         var poa = new PlanOfAttack();
-
-        // Step 1: Decide what ability to use
         var pattern = actor.GetComponentInChildren<AttackPattern>();
         if (pattern)
             pattern.Pick(poa);
         else
             DefaultAttackPattern(poa);
 
-        // Step 2: Determine where to move and aim to best use the ability
-        PlaceholderCode(poa);
+        if (IsPositionIndependent(poa))
+            PlanPositionIndependent(poa);
+        else if (IsDirectionIndependent(poa))
+            PlanDirectionIndependent(poa);
+        else
+            PlanDirectionDependent(poa);
 
-        // Return the completed plan
+        if (poa.ability == null)
+            MoveTowardOpponent(poa);
+
         return poa;
     }
+
+    #endregion
+
+    #region Private
 
     private void DefaultAttackPattern(PlanOfAttack poa)
     {
@@ -38,34 +57,251 @@ public class ComputerPlayer : MonoBehaviour
         poa.target = Targets.Foe;
     }
 
-    private void PlaceholderCode(PlanOfAttack poa)
+    private bool IsPositionIndependent(PlanOfAttack poa)
     {
-        // Move to a random location within the unit's move range
-        var tiles = actor.GetComponent<Movement>().GetTilesInRange(bc.board);
-        var randomTile = tiles.Count > 0 ? tiles[Random.Range(0, tiles.Count)] : null;
-        poa.moveLocation = randomTile != null ? randomTile.pos : actor.tile.pos;
-        // Pick a random attack direction (for direction based abilities)
-        poa.attackDirection = (Directions)Random.Range(0, 4);
-        // Pick a random fire location based on having moved to the random tile
-        var start = actor.tile;
-        actor.Place(randomTile);
-        tiles = poa.ability.GetComponent<AbilityRange>().GetTilesInRange(bc.board);
-        if (tiles.Count == 0)
+        var range = poa.ability.GetComponent<AbilityRange>();
+        return range.positionOriented == false;
+    }
+
+    private bool IsDirectionIndependent(PlanOfAttack poa)
+    {
+        var range = poa.ability.GetComponent<AbilityRange>();
+        return !range.directionOriented;
+    }
+
+    private void PlanPositionIndependent(PlanOfAttack poa)
+    {
+        var moveOptions = GetMoveOptions();
+        var tile = moveOptions[Random.Range(0, moveOptions.Count)];
+        poa.moveLocation = poa.fireLocation = tile.pos;
+    }
+
+    private void PlanDirectionIndependent(PlanOfAttack poa)
+    {
+        var startTile = actor.tile;
+        var map = new Dictionary<Tile, AttackOption>();
+        var ar = poa.ability.GetComponent<AbilityRange>();
+        var moveOptions = GetMoveOptions();
+
+        for (var i = 0; i < moveOptions.Count; ++i)
         {
-            poa.ability = null;
-            poa.fireLocation = poa.moveLocation;
-        }
-        else
-        {
-            randomTile = tiles[Random.Range(0, tiles.Count)];
-            poa.fireLocation = randomTile.pos;
+            var moveTile = moveOptions[i];
+            actor.Place(moveTile);
+            var fireOptions = ar.GetTilesInRange(bc.board);
+
+            for (var j = 0; j < fireOptions.Count; ++j)
+            {
+                var fireTile = fireOptions[j];
+                AttackOption ao = null;
+                if (map.ContainsKey(fireTile))
+                {
+                    ao = map[fireTile];
+                }
+                else
+                {
+                    ao = new AttackOption();
+                    map[fireTile] = ao;
+                    ao.target = fireTile;
+                    ao.direction = actor.dir;
+                    RateFireLocation(poa, ao);
+                }
+
+                ao.AddMoveTarget(moveTile);
+            }
         }
 
-        actor.Place(start);
+        actor.Place(startTile);
+        var list = new List<AttackOption>(map.Values);
+        PickBestOption(poa, list);
+    }
+
+    private void PlanDirectionDependent(PlanOfAttack poa)
+    {
+        var startTile = actor.tile;
+        var startDirection = actor.dir;
+        var list = new List<AttackOption>();
+        var moveOptions = GetMoveOptions();
+
+        for (var i = 0; i < moveOptions.Count; ++i)
+        {
+            var moveTile = moveOptions[i];
+            actor.Place(moveTile);
+
+            for (var j = 0; j < 4; ++j)
+            {
+                actor.dir = (Directions)j;
+                var ao = new AttackOption();
+                ao.target = moveTile;
+                ao.direction = actor.dir;
+                RateFireLocation(poa, ao);
+                ao.AddMoveTarget(moveTile);
+                list.Add(ao);
+            }
+        }
+
+        actor.Place(startTile);
+        actor.dir = startDirection;
+        PickBestOption(poa, list);
+    }
+
+    private bool IsAbilityTargetMatch(PlanOfAttack poa, Tile tile)
+    {
+        var isMatch = false;
+        if (poa.target == Targets.Tile)
+        {
+            isMatch = true;
+        }
+        else if (poa.target != Targets.None)
+        {
+            var other = tile.content.GetComponentInChildren<Alliance>();
+            if (other != null && alliance.IsMatch(other, poa.target))
+                isMatch = true;
+        }
+
+        return isMatch;
+    }
+
+    private List<Tile> GetMoveOptions()
+    {
+        return actor.GetComponent<Movement>().GetTilesInRange(bc.board);
+    }
+
+    private void RateFireLocation(PlanOfAttack poa, AttackOption option)
+    {
+        var area = poa.ability.GetComponent<AbilityArea>();
+        var tiles = area.GetTilesInArea(bc.board, option.target.pos);
+        option.areaTargets = tiles;
+        option.isCasterMatch = IsAbilityTargetMatch(poa, actor.tile);
+
+        for (var i = 0; i < tiles.Count; ++i)
+        {
+            var tile = tiles[i];
+            if (actor.tile == tiles[i] || !poa.ability.IsTarget(tile))
+                continue;
+
+            var isMatch = IsAbilityTargetMatch(poa, tile);
+            option.AddMark(tile, isMatch);
+        }
+    }
+
+    private void PickBestOption(PlanOfAttack poa, List<AttackOption> list)
+    {
+        var bestScore = 1;
+        var bestOptions = new List<AttackOption>();
+        for (var i = 0; i < list.Count; ++i)
+        {
+            var option = list[i];
+            var score = option.GetScore(actor, poa.ability);
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestOptions.Clear();
+                bestOptions.Add(option);
+            }
+            else if (score == bestScore)
+            {
+                bestOptions.Add(option);
+            }
+        }
+
+        if (bestOptions.Count == 0)
+        {
+            poa.ability = null; // Clear ability as a sign not to perform it
+            return;
+        }
+
+        var finalPicks = new List<AttackOption>();
+        bestScore = 0;
+        for (var i = 0; i < bestOptions.Count; ++i)
+        {
+            var option = bestOptions[i];
+            var score = option.bestAngleBasedScore;
+            if (score > bestScore)
+            {
+                bestScore = score;
+                finalPicks.Clear();
+                finalPicks.Add(option);
+            }
+            else if (score == bestScore)
+            {
+                finalPicks.Add(option);
+            }
+        }
+
+        var choice = finalPicks[Random.Range(0, finalPicks.Count)];
+        poa.fireLocation = choice.target.pos;
+        poa.attackDirection = choice.direction;
+        poa.moveLocation = choice.bestMoveTile.pos;
+    }
+
+    private void FindNearestFoe()
+    {
+        nearestFoe = null;
+        bc.board.Search(actor.tile, delegate(Tile arg1, Tile arg2)
+        {
+            if (nearestFoe == null && arg2.content != null)
+            {
+                var other = arg2.content.GetComponentInChildren<Alliance>();
+                if (other != null && alliance.IsMatch(other, Targets.Foe))
+                {
+                    var unit = other.GetComponent<Unit>();
+                    var stats = unit.GetComponent<Stats>();
+                    if (stats[StatTypes.HP] > 0)
+                    {
+                        nearestFoe = unit;
+                        return true;
+                    }
+                }
+            }
+
+            return nearestFoe == null;
+        });
+    }
+
+    private void MoveTowardOpponent(PlanOfAttack poa)
+    {
+        var moveOptions = GetMoveOptions();
+        FindNearestFoe();
+        if (nearestFoe != null)
+        {
+            var toCheck = nearestFoe.tile;
+            while (toCheck != null)
+            {
+                if (moveOptions.Contains(toCheck))
+                {
+                    poa.moveLocation = toCheck.pos;
+                    return;
+                }
+
+                toCheck = toCheck.prev;
+            }
+        }
+
+        poa.moveLocation = actor.tile.pos;
     }
 
     public Directions DetermineEndFacingDirection()
     {
-        return (Directions)Random.Range(0, 4);
+        var dir = (Directions)Random.Range(0, 4);
+        FindNearestFoe();
+        if (nearestFoe != null)
+        {
+            var start = actor.dir;
+            for (var i = 0; i < 4; ++i)
+            {
+                actor.dir = (Directions)i;
+                if (nearestFoe.GetFacing(actor) == Facings.Front)
+                {
+                    dir = actor.dir;
+                    break;
+                }
+            }
+
+            actor.dir = start;
+        }
+
+        return dir;
     }
+
+    #endregion
 }

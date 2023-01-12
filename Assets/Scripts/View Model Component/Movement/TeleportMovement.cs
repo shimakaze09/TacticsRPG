@@ -1,5 +1,5 @@
+﻿using UnityEngine;
 using System.Collections;
-using UnityEngine;
 
 public class TeleportMovement : Movement
 {
@@ -13,11 +13,13 @@ public class TeleportMovement : Movement
 
         var shrink = transform.ScaleTo(Vector3.zero, 0.5f, EasingEquations.EaseInBack);
 
-        while (shrink != null) yield return null;
+        while (shrink != null)
+            yield return null;
 
         transform.position = tile.center;
 
         var grow = transform.ScaleTo(Vector3.one, 0.5f, EasingEquations.EaseOutBack);
-        while (grow != null) yield return null;
+        while (grow != null)
+            yield return null;
     }
 }

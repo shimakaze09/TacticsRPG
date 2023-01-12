@@ -1,5 +1,6 @@
+﻿using UnityEngine;
 using System;
-using UnityEngine;
+using System.Collections;
 
 [Serializable]
 public struct Point : IEquatable<Point>
@@ -54,7 +55,12 @@ public struct Point : IEquatable<Point>
 
     public override bool Equals(object obj)
     {
-        if (obj is Point point) return x == point.x && y == point.y;
+        if (obj is Point)
+        {
+            var p = (Point)obj;
+            return x == p.x && y == p.y;
+        }
+
         return false;
     }
 

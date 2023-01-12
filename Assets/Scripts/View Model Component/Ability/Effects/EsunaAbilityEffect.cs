@@ -1,16 +1,26 @@
+﻿using UnityEngine;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 public class EsunaAbilityEffect : BaseAbilityEffect
 {
-    private static HashSet<Type> _curableTypes;
-
-    private static HashSet<Type> CurableTypes =>
-        _curableTypes ??= new HashSet<Type>
+    private static HashSet<Type> CurableTypes
+    {
+        get
         {
-            typeof(PoisonStatusEffect),
-            typeof(BlindStatusEffect)
-        };
+            if (_curableTypes == null)
+            {
+                _curableTypes = new HashSet<Type>();
+                _curableTypes.Add(typeof(PoisonStatusEffect));
+                _curableTypes.Add(typeof(BlindStatusEffect));
+            }
+
+            return _curableTypes;
+        }
+    }
+
+    private static HashSet<Type> _curableTypes;
 
     public override int Predict(Tile target)
     {
@@ -23,7 +33,7 @@ public class EsunaAbilityEffect : BaseAbilityEffect
         var status = defender.GetComponentInChildren<Status>();
 
         var candidates = status.GetComponentsInChildren<DurationStatusCondition>();
-        for (var i = candidates.Length - 1; i >= 0; i--)
+        for (var i = candidates.Length - 1; i >= 0; --i)
         {
             var effect = candidates[i].GetComponentInParent<StatusEffect>();
             if (CurableTypes.Contains(effect.GetType()))

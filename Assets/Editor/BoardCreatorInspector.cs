@@ -40,16 +40,16 @@ public class BoardCreatorInspector : Editor
                 switch (Event.current.keyCode)
                 {
                     case KeyCode.LeftArrow:
-                        current.SetPos(current.GetPos() + new Point(-1, 0));
+                        current.pos += new Point(-1, 0);
                         break;
                     case KeyCode.RightArrow:
-                        current.SetPos(current.GetPos() + new Point(1, 0));
+                        current.pos += new Point(1, 0);
                         break;
                     case KeyCode.UpArrow:
-                        current.SetPos(current.GetPos() + new Point(0, 1));
+                        current.pos += new Point(0, 1);
                         break;
                     case KeyCode.DownArrow:
-                        current.SetPos(current.GetPos() + new Point(0, -1));
+                        current.pos += new Point(0, -1);
                         break;
 
                     case KeyCode.J:

@@ -1,7 +1,11 @@
-using UnityEngine;
+﻿using UnityEngine;
+using System.IO;
+using System.Collections;
 
 public static class UnitFactory
 {
+    #region Public
+
     public static GameObject Create(string name, int level)
     {
         var recipe = Resources.Load<UnitRecipe>("Unit Recipes/" + name);
@@ -33,6 +37,10 @@ public static class UnitFactory
         AddAttackPattern(obj, recipe.strategy);
         return obj;
     }
+
+    #endregion
+
+    #region Private
 
     private static GameObject InstantiatePrefab(string name)
     {
@@ -110,14 +118,14 @@ public static class UnitFactory
             return;
         }
 
-        foreach (var categoryName in recipe.categories)
+        for (var i = 0; i < recipe.categories.Length; ++i)
         {
-            var category = new GameObject(categoryName.name);
+            var category = new GameObject(recipe.categories[i].name);
             category.transform.SetParent(main.transform);
 
-            foreach (var entry in categoryName.entries)
+            for (var j = 0; j < recipe.categories[i].entries.Length; ++j)
             {
-                var abilityName = $"Abilities/{categoryName.name}/{entry}";
+                var abilityName = $"Abilities/{recipe.categories[i].name}/{recipe.categories[i].entries[j]}";
                 var ability = InstantiatePrefab(abilityName);
                 ability.transform.SetParent(category.transform);
             }
@@ -138,4 +146,6 @@ public static class UnitFactory
             instance.transform.SetParent(obj.transform);
         }
     }
+
+    #endregion
 }

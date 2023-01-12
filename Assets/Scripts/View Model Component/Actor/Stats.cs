@@ -1,5 +1,6 @@
+﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class Stats : MonoBehaviour
 {
@@ -8,14 +9,14 @@ public class Stats : MonoBehaviour
     public static string WillChangeNotification(StatTypes type)
     {
         if (!_willChangeNotifications.ContainsKey(type))
-            _willChangeNotifications.Add(type, $"Stats.{type}WillChange");
+            _willChangeNotifications.Add(type, $"Stats.{type.ToString()}WillChange");
         return _willChangeNotifications[type];
     }
 
     public static string DidChangeNotification(StatTypes type)
     {
         if (!_didChangeNotifications.ContainsKey(type))
-            _didChangeNotifications.Add(type, $"Stats.{type}DidChange");
+            _didChangeNotifications.Add(type, $"Stats.{type.ToString()}DidChange");
         return _didChangeNotifications[type];
     }
 
@@ -56,7 +57,8 @@ public class Stats : MonoBehaviour
             value = Mathf.FloorToInt(exc.GetModifiedValue());
 
             // Did something nullify the change?
-            if (exc.toggle == false || value == oldValue) return;
+            if (exc.toggle == false || value == oldValue)
+                return;
         }
 
         _data[(int)type] = value;

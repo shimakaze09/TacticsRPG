@@ -16,5 +16,6 @@ MonoBehaviour:
   job: Warrior
   attack: Common/Attack
   abilityCatalog: Enemy Warrior
+  strategy: Warrior Attack Pattern
   locomotion: 0
   alliance: 4

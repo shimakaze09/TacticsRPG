@@ -1,3 +1,6 @@
+﻿using UnityEngine;
+using System.Collections;
+
 public class UndeadAbilityEffectTarget : AbilityEffectTarget
 {
     /// <summary>
@@ -8,7 +11,8 @@ public class UndeadAbilityEffectTarget : AbilityEffectTarget
 
     public override bool IsTarget(Tile tile)
     {
-        if (tile == null || tile.content == null) return false;
+        if (tile == null || tile.content == null)
+            return false;
 
         var hasComponent = tile.content.GetComponent<Undead>() != null;
         if (hasComponent != toggle)

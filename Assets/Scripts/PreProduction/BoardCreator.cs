@@ -1,7 +1,8 @@
-using System.Collections.Generic;
-using System.IO;
+﻿using UnityEngine;
 using UnityEditor;
-using UnityEngine;
+using System.IO;
+using System.Collections;
+using System.Collections.Generic;
 
 public class BoardCreator : MonoBehaviour
 {
@@ -9,12 +10,17 @@ public class BoardCreator : MonoBehaviour
 
     [SerializeField] private GameObject tileViewPrefab;
     [SerializeField] private GameObject tileSelectionIndicatorPrefab;
-    [SerializeField] private readonly int width = 10;
-    [SerializeField] private readonly int depth = 10;
-    [SerializeField] private readonly int height = 8;
-    [SerializeField] private Point pos;
+    [SerializeField] private int width = 10;
+    [SerializeField] private int depth = 10;
+    [SerializeField] private int height = 8;
     [SerializeField] private LevelData levelData;
-    private readonly Dictionary<Point, Tile> tiles = new();
+    private Dictionary<Point, Tile> tiles = new();
+
+    public Point pos
+    {
+        get => pos;
+        set => pos = value;
+    }
 
     private Transform marker
     {
@@ -22,7 +28,7 @@ public class BoardCreator : MonoBehaviour
         {
             if (_marker == null)
             {
-                var instance = Instantiate(tileSelectionIndicatorPrefab);
+                var instance = Instantiate(tileSelectionIndicatorPrefab) as GameObject;
                 _marker = instance.transform;
             }
 
@@ -66,7 +72,7 @@ public class BoardCreator : MonoBehaviour
 
     public void Clear()
     {
-        for (var i = 0; i < transform.childCount; i++)
+        for (var i = transform.childCount - 1; i >= 0; --i)
             DestroyImmediate(transform.GetChild(i).gameObject);
         tiles.Clear();
     }
@@ -82,7 +88,7 @@ public class BoardCreator : MonoBehaviour
         foreach (var t in tiles.Values)
             board.tiles.Add(new Vector3(t.pos.x, t.height, t.pos.y));
 
-        var fileName = $"Assets/Resources/Levels/{name}.asset";
+        var fileName = string.Format("Assets/Resources/Levels/{1}.asset", filePath, name);
         AssetDatabase.CreateAsset(board, fileName);
     }
 
@@ -103,19 +109,10 @@ public class BoardCreator : MonoBehaviour
     public void CreateBase()
     {
         Clear();
-        for (var i = 0; i < height; i++)
-        for (var j = 0; j < width; j++)
-            GrowSingle(new Point(j, i));
-    }
 
-    public Point GetPos()
-    {
-        return pos;
-    }
-
-    public void SetPos(Point pos)
-    {
-        this.pos = pos;
+        for (var i = 0; i < width; i++)
+        for (var j = 0; j < depth; j++)
+            GrowSingle(new Point(i, j));
     }
 
     #endregion
@@ -133,8 +130,8 @@ public class BoardCreator : MonoBehaviour
 
     private void GrowRect(Rect rect)
     {
-        for (var y = (int)rect.yMin; y < (int)rect.yMax; y++)
-        for (var x = (int)rect.xMin; x < (int)rect.xMax; x++)
+        for (var y = (int)rect.yMin; y < (int)rect.yMax; ++y)
+        for (var x = (int)rect.xMin; x < (int)rect.xMax; ++x)
         {
             var p = new Point(x, y);
             GrowSingle(p);
@@ -143,8 +140,8 @@ public class BoardCreator : MonoBehaviour
 
     private void ShrinkRect(Rect rect)
     {
-        for (var y = (int)rect.yMin; y < (int)rect.yMax; y++)
-        for (var x = (int)rect.xMin; x < (int)rect.xMax; x++)
+        for (var y = (int)rect.yMin; y < (int)rect.yMax; ++y)
+        for (var x = (int)rect.xMin; x < (int)rect.xMax; ++x)
         {
             var p = new Point(x, y);
             ShrinkSingle(p);
@@ -153,7 +150,7 @@ public class BoardCreator : MonoBehaviour
 
     private Tile Create()
     {
-        var instance = Instantiate(tileViewPrefab);
+        var instance = Instantiate(tileViewPrefab) as GameObject;
         instance.transform.parent = transform;
         return instance.GetComponent<Tile>();
     }

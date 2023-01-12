@@ -1,20 +1,20 @@
+﻿using UnityEngine;
 using System.Collections;
-using UnityEngine;
 
 public class FlyMovement : Movement
 {
     public override IEnumerator Traverse(Tile tile)
     {
         // Store the distance between the start tile and target tile
-        var dist =
-            Mathf.Sqrt(Mathf.Pow(tile.pos.x - unit.tile.pos.x, 2) + Mathf.Pow(tile.pos.y - unit.tile.pos.y, 2));
+        var dist = Mathf.Sqrt(Mathf.Pow(tile.pos.x - unit.tile.pos.x, 2) + Mathf.Pow(tile.pos.y - unit.tile.pos.y, 2));
         unit.Place(tile);
 
         // Fly high enough not to clip through any ground tiles
         var y = Tile.stepHeight * 10;
         var duration = (y - jumper.position.y) * 0.5f;
         var tweener = jumper.MoveToLocal(new Vector3(0, y, 0), duration, EasingEquations.EaseInOutQuad);
-        while (tweener != null) yield return null;
+        while (tweener != null)
+            yield return null;
 
         // Turn to face the general direction
         Directions dir;
@@ -28,11 +28,13 @@ public class FlyMovement : Movement
         // Move to the correct position
         duration = dist * 0.5f;
         tweener = transform.MoveTo(tile.center, duration, EasingEquations.EaseInOutQuad);
-        while (tweener != null) yield return null;
+        while (tweener != null)
+            yield return null;
 
         // Land
         duration = (y - tile.center.y) * 0.5f;
         tweener = jumper.MoveToLocal(Vector3.zero, 0.5f, EasingEquations.EaseInOutQuad);
-        while (tweener != null) yield return null;
+        while (tweener != null)
+            yield return null;
     }
 }

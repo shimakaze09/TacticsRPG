@@ -1,4 +1,5 @@
-using System.Linq;
+using UnityEngine;
+using System.Collections;
 
 public class WeaponAbilityPower : BaseAbilityPower
 {
@@ -20,20 +21,24 @@ public class WeaponAbilityPower : BaseAbilityPower
 
     private int PowerFromEquippedWeapon()
     {
+        var power = 0;
         var eq = GetComponentInParent<Equipment>();
         var item = eq.GetItem(EquipSlots.Primary);
         var features = item.GetComponentsInChildren<StatModifierFeature>();
 
-        return features.Where(t => t.type == StatTypes.ATK).Sum(t => t.amount);
+        for (var i = 0; i < features.Length; ++i)
+            if (features[i].type == StatTypes.ATK)
+                power += features[i].amount;
+
+        return power;
     }
 
     private int UnarmedPower()
     {
         var job = GetComponentInParent<Job>();
-        for (var i = 0; i < Job.statOrder.Length; i++)
+        for (var i = 0; i < Job.statOrder.Length; ++i)
             if (Job.statOrder[i] == StatTypes.ATK)
                 return job.baseStats[i];
-
         return 0;
     }
 }

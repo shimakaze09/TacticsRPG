@@ -1,4 +1,5 @@
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections;
 
 public class FacingIndicator : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class FacingIndicator : MonoBehaviour
     public void SetDirection(Directions dir)
     {
         var index = (int)dir;
-        for (var i = 0; i < 4; i++) directions[i].material = i == index ? selected : normal;
+        for (var i = 0; i < 4; ++i)
+            directions[i].material = i == index ? selected : normal;
     }
 }

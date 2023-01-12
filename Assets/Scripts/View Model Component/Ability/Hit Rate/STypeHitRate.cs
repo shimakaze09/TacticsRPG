@@ -1,4 +1,5 @@
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections;
 
 public class STypeHitRate : HitRate
 {
@@ -26,11 +27,14 @@ public class STypeHitRate : HitRate
 
     private int AdjustForRelativeFacing(Unit target, int rate)
     {
-        return attacker.GetFacing(target) switch
+        switch (attacker.GetFacing(target))
         {
-            Facings.Front => rate,
-            Facings.Side => rate - 10,
-            _ => rate - 20
-        };
+            case Facings.Front:
+                return rate;
+            case Facings.Side:
+                return rate - 10;
+            default:
+                return rate - 20;
+        }
     }
 }

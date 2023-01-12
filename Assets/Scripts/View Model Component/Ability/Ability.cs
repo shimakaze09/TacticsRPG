@@ -1,5 +1,6 @@
+﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class Ability : MonoBehaviour
 {
@@ -22,8 +23,8 @@ public class Ability : MonoBehaviour
             return;
         }
 
-        foreach (var target in targets)
-            Perform(target);
+        for (var i = 0; i < targets.Count; ++i)
+            Perform(targets[i]);
 
         this.PostNotification(DidPerformNotification);
     }
@@ -31,7 +32,7 @@ public class Ability : MonoBehaviour
     public bool IsTarget(Tile tile)
     {
         var obj = transform;
-        for (var i = 0; i < obj.childCount; i++)
+        for (var i = 0; i < obj.childCount; ++i)
         {
             var targeter = obj.GetChild(i).GetComponent<AbilityEffectTarget>();
             if (targeter.IsTarget(tile))
@@ -43,7 +44,7 @@ public class Ability : MonoBehaviour
 
     private void Perform(Tile target)
     {
-        for (var i = 0; i < transform.childCount; i++)
+        for (var i = 0; i < transform.childCount; ++i)
         {
             var child = transform.GetChild(i);
             var effect = child.GetComponent<BaseAbilityEffect>();

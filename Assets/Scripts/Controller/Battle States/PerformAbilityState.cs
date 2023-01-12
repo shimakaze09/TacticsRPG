@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 
 public class PerformAbilityState : BattleState
@@ -30,27 +30,11 @@ public class PerformAbilityState : BattleState
 
     private void ApplyAbility()
     {
-        var effects = turn.ability.GetComponentsInChildren<BaseAbilityEffect>();
-        foreach (var target in turn.targets)
-        foreach (var effect in effects)
-        {
-            var targeter = effect.GetComponent<AbilityEffectTarget>();
-            if (targeter.IsTarget(target))
-            {
-                var rate = effect.GetComponent<HitRate>();
-                var chance = rate.Calculate(target);
-                if (Random.Range(0, 101) > chance)
-                    // A Miss!
-                    // TODO: Add animations, etc.
-                    continue;
-                effect.Apply(target);
-            }
-        }
+        turn.ability.Perform(turn.targets);
     }
 
     private bool UnitHasControl()
     {
-        // TODO: Add confuse status effect, etc.
         return turn.actor.GetComponentInChildren<KnockOutStatusEffect>() == null;
     }
 }

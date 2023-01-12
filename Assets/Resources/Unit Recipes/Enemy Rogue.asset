@@ -16,5 +16,6 @@ MonoBehaviour:
   job: Rogue
   attack: Common/Attack
   abilityCatalog: Enemy Rogue
+  strategy: Rogue Attack Pattern
   locomotion: 1
   alliance: 4

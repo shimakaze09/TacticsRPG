@@ -1,4 +1,5 @@
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections;
 
 public class Mana : MonoBehaviour
 {
@@ -50,7 +51,7 @@ public class Mana : MonoBehaviour
     private void OnMPWillChange(object sender, object args)
     {
         var vce = args as ValueChangeException;
-        vce.AddModifier(new ClampValueModifier(int.MaxValue, 0, stats[StatTypes.MMP]));
+        vce.AddModifier(new ClampValueModifier(int.MaxValue, 0, stats[StatTypes.MHP]));
     }
 
     private void OnMMPDidChange(object sender, object args)

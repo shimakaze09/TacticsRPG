@@ -1,6 +1,6 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 
 public class Equipment : MonoBehaviour
 {
@@ -44,7 +44,7 @@ public class Equipment : MonoBehaviour
 
     public void UnEquip(EquipSlots slots)
     {
-        for (var i = 0; i < _items.Count; i++)
+        for (var i = _items.Count - 1; i >= 0; --i)
         {
             var item = _items[i];
             if ((item.slots & slots) != EquipSlots.None)
@@ -54,7 +54,14 @@ public class Equipment : MonoBehaviour
 
     public Equippable GetItem(EquipSlots slots)
     {
-        return _items.FirstOrDefault(item => (item.slots & slots) != EquipSlots.None);
+        for (var i = _items.Count - 1; i >= 0; --i)
+        {
+            var item = _items[i];
+            if ((item.slots & slots) != EquipSlots.None)
+                return item;
+        }
+
+        return null;
     }
 
     #endregion

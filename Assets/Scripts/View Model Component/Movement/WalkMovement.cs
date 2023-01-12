@@ -1,9 +1,11 @@
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class WalkMovement : Movement
 {
+    #region Protected
+
     protected override bool ExpandSearch(Tile from, Tile to)
     {
         // Skip if the distance in height between the two tiles is more than the unit can jump
@@ -31,7 +33,7 @@ public class WalkMovement : Movement
         }
 
         // Move to each way point in succession
-        for (var i = 1; i < targets.Count; i++)
+        for (var i = 1; i < targets.Count; ++i)
         {
             var from = targets[i - 1];
             var to = targets[i];
@@ -49,10 +51,15 @@ public class WalkMovement : Movement
         yield return null;
     }
 
+    #endregion
+
+    #region Private
+
     private IEnumerator Walk(Tile target)
     {
         var tweener = transform.MoveTo(target.center, 0.5f, EasingEquations.Linear);
-        while (tweener != null) yield return null;
+        while (tweener != null)
+            yield return null;
     }
 
     private IEnumerator Jump(Tile to)
@@ -64,6 +71,9 @@ public class WalkMovement : Movement
         t2.loopCount = 1;
         t2.loopType = EasingControl.LoopType.PingPong;
 
-        while (tweener != null) yield return null;
+        while (tweener != null)
+            yield return null;
     }
+
+    #endregion
 }

@@ -1,5 +1,5 @@
-using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections;
 
 public abstract class BaseVictoryCondition : MonoBehaviour
 {
@@ -19,7 +19,7 @@ public abstract class BaseVictoryCondition : MonoBehaviour
 
     #region MonoBehaviour
 
-    private void Awake()
+    protected virtual void Awake()
     {
         bc = GetComponent<BattleController>();
     }
@@ -47,6 +47,27 @@ public abstract class BaseVictoryCondition : MonoBehaviour
 
     #region Protected
 
+    protected virtual void CheckForGameOver()
+    {
+        if (PartyDefeated(Alliances.Hero))
+            Victor = Alliances.Enemy;
+    }
+
+    protected virtual bool PartyDefeated(Alliances type)
+    {
+        for (var i = 0; i < bc.units.Count; ++i)
+        {
+            var a = bc.units[i].GetComponent<Alliance>();
+            if (a == null)
+                continue;
+
+            if (a.type == type && !IsDefeated(bc.units[i]))
+                return false;
+        }
+
+        return true;
+    }
+
     protected virtual bool IsDefeated(Unit unit)
     {
         var health = unit.GetComponent<Health>();
@@ -55,21 +76,6 @@ public abstract class BaseVictoryCondition : MonoBehaviour
 
         var stats = unit.GetComponent<Stats>();
         return stats[StatTypes.HP] == 0;
-    }
-
-    protected virtual bool PartyDefeated(Alliances type)
-    {
-        return !(from unit in bc.units
-            let a = unit.GetComponent<Alliance>()
-            where a != null
-            where a.type == type && !IsDefeated(unit)
-            select unit).Any();
-    }
-
-    protected virtual void CheckForGameOver()
-    {
-        if (PartyDefeated(Alliances.Hero))
-            Victor = Alliances.Enemy;
     }
 
     #endregion

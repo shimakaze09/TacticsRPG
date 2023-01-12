@@ -1,7 +1,6 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 public class TurnOrderController : MonoBehaviour
 {
@@ -16,11 +15,11 @@ public class TurnOrderController : MonoBehaviour
 
     #region Notifications
 
-    public const string RoundBeganNotification = "TurnOrderController.RoundBegan";
-    public const string TurnCheckNotification = "TurnOrderController.TurnCheck";
+    public const string RoundBeganNotification = "TurnOrderController.roundBegan";
+    public const string TurnCheckNotification = "TurnOrderController.turnCheck";
     public const string TurnBeganNotification = "TurnOrderController.TurnBeganNotification";
-    public const string TurnCompletedNotification = "TurnOrderController.TurnCompleted";
-    public const string RoundEndedNotification = "TurnOrderController.RoundEnded";
+    public const string TurnCompletedNotification = "TurnOrderController.turnCompleted";
+    public const string RoundEndedNotification = "TurnOrderController.roundEnded";
 
     #endregion
 
@@ -33,24 +32,33 @@ public class TurnOrderController : MonoBehaviour
         while (true)
         {
             this.PostNotification(RoundBeganNotification);
+
             var units = new List<Unit>(bc.units);
-            foreach (var s in units.Select(unit => unit.GetComponent<Stats>())) s[StatTypes.CTR] += s[StatTypes.SPD];
+            for (var i = 0; i < units.Count; ++i)
+            {
+                var s = units[i].GetComponent<Stats>();
+                s[StatTypes.CTR] += s[StatTypes.SPD];
+            }
 
             units.Sort((a, b) => GetCounter(a).CompareTo(GetCounter(b)));
-            for (var i = units.Count - 1; i >= 0; i--)
+
+            for (var i = units.Count - 1; i >= 0; --i)
                 if (CanTakeTurn(units[i]))
                 {
                     bc.turn.Change(units[i]);
                     units[i].PostNotification(TurnBeganNotification);
 
                     yield return units[i];
+
                     var cost = turnCost;
                     if (bc.turn.hasUnitMoved)
                         cost += moveCost;
                     if (bc.turn.hasUnitActed)
                         cost += actionCost;
+
                     var s = units[i].GetComponent<Stats>();
                     s.SetValue(StatTypes.CTR, s[StatTypes.CTR] - cost, false);
+
                     units[i].PostNotification(TurnCompletedNotification);
                 }
 

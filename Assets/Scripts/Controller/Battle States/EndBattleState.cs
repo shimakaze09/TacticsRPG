@@ -1,3 +1,5 @@
+﻿using UnityEngine;
+using System.Collections;
 using UnityEngine.SceneManagement;
 
 public class EndBattleState : BattleState
@@ -6,6 +8,5 @@ public class EndBattleState : BattleState
     {
         base.Enter();
         SceneManager.LoadScene(0);
-        // TODO: Need Refactor
     }
 }

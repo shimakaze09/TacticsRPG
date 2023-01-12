@@ -1,3 +1,6 @@
+using UnityEngine;
+using System.Collections;
+
 public class MagicalAbilityPower : BaseAbilityPower
 {
     public int level;

@@ -1,3 +1,5 @@
+﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public class SelfAbilityRange : AbilityRange
@@ -6,7 +8,8 @@ public class SelfAbilityRange : AbilityRange
 
     public override List<Tile> GetTilesInRange(Board board)
     {
-        var retValue = new List<Tile>(1) { unit.tile };
+        var retValue = new List<Tile>(1);
+        retValue.Add(unit.tile);
         return retValue;
     }
 }

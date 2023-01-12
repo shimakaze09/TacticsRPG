@@ -1,3 +1,6 @@
+using UnityEngine;
+using System.Collections;
+
 public class PhysicalAbilityPower : BaseAbilityPower
 {
     public int level;

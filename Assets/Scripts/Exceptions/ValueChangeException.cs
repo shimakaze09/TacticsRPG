@@ -1,11 +1,13 @@
+﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 public class ValueChangeException : BaseException
 {
-    #region Fields / Properties
+    #region Fields / Properteis
 
-    public readonly float fromValue, toValue;
+    public readonly float fromValue;
+    public readonly float toValue;
     public float delta => toValue - fromValue;
     private List<ValueModifier> modifiers;
 
@@ -25,7 +27,8 @@ public class ValueChangeException : BaseException
 
     public void AddModifier(ValueModifier m)
     {
-        modifiers ??= new List<ValueModifier>();
+        if (modifiers == null)
+            modifiers = new List<ValueModifier>();
         modifiers.Add(m);
     }
 
@@ -36,8 +39,10 @@ public class ValueChangeException : BaseException
 
         var value = toValue;
         modifiers.Sort(Compare);
+        for (var i = 0; i < modifiers.Count; ++i)
+            value = modifiers[i].Modify(fromValue, value);
 
-        return modifiers.Aggregate(value, (current, t) => t.Modify(fromValue, current));
+        return value;
     }
 
     #endregion

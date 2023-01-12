@@ -1,12 +1,11 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using System;
 using System.Collections;
-using TMPro;
 
 public class BattleMessageController : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI label;
+    [SerializeField] private Text label;
     [SerializeField] private GameObject canvas;
     [SerializeField] private CanvasGroup group;
     private EasingControl ec;
@@ -37,13 +36,15 @@ public class BattleMessageController : MonoBehaviour
     {
         ec.Play();
 
-        while (ec.IsPlaying) yield return null;
+        while (ec.IsPlaying)
+            yield return null;
 
         yield return new WaitForSeconds(1);
 
         ec.Reverse();
 
-        while (ec.IsPlaying) yield return null;
+        while (ec.IsPlaying)
+            yield return null;
 
         canvas.SetActive(false);
     }

@@ -1,4 +1,6 @@
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
 public class Status : MonoBehaviour
 {
@@ -21,8 +23,10 @@ public class Status : MonoBehaviour
     public void Remove(StatusCondition target)
     {
         var effect = target.GetComponentInParent<StatusEffect>();
+
         target.transform.SetParent(null);
         Destroy(target.gameObject);
+
         var condition = effect.GetComponentInChildren<StatusCondition>();
         if (condition == null)
         {

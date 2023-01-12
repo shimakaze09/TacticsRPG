@@ -1,3 +1,4 @@
+﻿using UnityEngine;
 using System.Collections;
 
 public class MoveSequenceState : BattleState
@@ -5,7 +6,7 @@ public class MoveSequenceState : BattleState
     public override void Enter()
     {
         base.Enter();
-        StartCoroutine(Sequence());
+        StartCoroutine("Sequence");
     }
 
     private IEnumerator Sequence()

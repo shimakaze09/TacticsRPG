@@ -1,4 +1,6 @@
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 
@@ -46,10 +48,10 @@ public class AbilityMenuPanelController : MonoBehaviour
         canvas.SetActive(true);
         Clear();
         titleLabel.text = title;
-        foreach (var option in options)
+        for (var i = 0; i < options.Count; ++i)
         {
             var entry = Dequeue();
-            entry.Title = option;
+            entry.Title = options[i];
             menuEntries.Add(entry);
         }
 
@@ -60,7 +62,7 @@ public class AbilityMenuPanelController : MonoBehaviour
     public void Hide()
     {
         var t = TogglePos(HideKey);
-        t.completedEvent += delegate
+        t.completedEvent += delegate(object sender, System.EventArgs e)
         {
             if (panel.CurrentPosition == panel[HideKey])
             {
@@ -82,7 +84,7 @@ public class AbilityMenuPanelController : MonoBehaviour
 
     public void Next()
     {
-        for (var i = selection + 1; i < selection + menuEntries.Count; i++)
+        for (var i = selection + 1; i < selection + menuEntries.Count; ++i)
         {
             var index = i % menuEntries.Count;
             if (SetSelection(index))
@@ -92,7 +94,7 @@ public class AbilityMenuPanelController : MonoBehaviour
 
     public void Previous()
     {
-        for (var i = selection - 1 + menuEntries.Count; i > selection; i--)
+        for (var i = selection - 1 + menuEntries.Count; i > selection; --i)
         {
             var index = i % menuEntries.Count;
             if (SetSelection(index))
@@ -123,9 +125,8 @@ public class AbilityMenuPanelController : MonoBehaviour
 
     private void Clear()
     {
-        foreach (var entry in menuEntries)
-            Enqueue(entry);
-
+        for (var i = menuEntries.Count - 1; i >= 0; --i)
+            Enqueue(menuEntries[i]);
         menuEntries.Clear();
     }
 

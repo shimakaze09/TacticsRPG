@@ -1,4 +1,5 @@
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections;
 
 public class KnockOutStatusEffect : StatusEffect
 {
@@ -27,14 +28,15 @@ public class KnockOutStatusEffect : StatusEffect
 
     private void OnTurnCheck(object sender, object args)
     {
-        // Don't allow a KO'd unit to take turns
+        // Dont allow a KO'd unit to take turns
         var exc = args as BaseException;
-        if (exc.defaultToggle) exc.FlipToggle();
+        if (exc.defaultToggle == true)
+            exc.FlipToggle();
     }
 
     private void OnStatCounterWillChange(object sender, object args)
     {
-        // Don't allow a KO'd unit to increment the turn order counter
+        // Dont allow a KO'd unit to increment the turn order counter
         var exc = args as ValueChangeException;
         if (exc.toValue > exc.fromValue)
             exc.FlipToggle();

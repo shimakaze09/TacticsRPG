@@ -1,4 +1,5 @@
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections;
 
 public static class FacingsExtensions
 {
@@ -7,11 +8,10 @@ public static class FacingsExtensions
         Vector2 targetDirection = target.dir.GetNormal();
         var approachDirection = ((Vector2)(target.tile.pos - attacker.tile.pos)).normalized;
         var dot = Vector2.Dot(approachDirection, targetDirection);
-        return dot switch
-        {
-            >= 0.45f => Facings.Back,
-            <= -0.45f => Facings.Front,
-            _ => Facings.Side
-        };
+        if (dot >= 0.45f)
+            return Facings.Back;
+        if (dot <= -0.45f)
+            return Facings.Front;
+        return Facings.Side;
     }
 }

@@ -1,4 +1,6 @@
-using UnityEngine;
+﻿using UnityEngine;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 /// <summary>
 /// This delegate is similar to an EventHandler:
@@ -65,7 +67,7 @@ public class NotificationCenter
 
         var subTable = _table[notificationName];
 
-        var key = sender ?? this;
+        var key = sender != null ? sender : this;
 
         if (!subTable.ContainsKey(key))
             subTable.Add(key, new List<Handler>());
@@ -104,7 +106,7 @@ public class NotificationCenter
             return;
 
         var subTable = _table[notificationName];
-        var key = sender ?? this;
+        var key = sender != null ? sender : this;
 
         if (!subTable.ContainsKey(key))
             return;
@@ -124,15 +126,17 @@ public class NotificationCenter
         var notKeys = new string[_table.Keys.Count];
         _table.Keys.CopyTo(notKeys, 0);
 
-        foreach (var notificationName in notKeys)
+        for (var i = notKeys.Length - 1; i >= 0; --i)
         {
+            var notificationName = notKeys[i];
             var senderTable = _table[notificationName];
 
             var senKeys = new object[senderTable.Keys.Count];
             senderTable.Keys.CopyTo(senKeys, 0);
 
-            foreach (var sender in senKeys)
+            for (var j = senKeys.Length - 1; j >= 0; --j)
             {
+                var sender = senKeys[j];
                 var handlers = senderTable[sender];
                 if (handlers.Count == 0)
                     senderTable.Remove(sender);
@@ -171,7 +175,7 @@ public class NotificationCenter
         {
             var handlers = subTable[sender];
             _invoking.Add(handlers);
-            for (var i = 0; i < handlers.Count; i++)
+            for (var i = 0; i < handlers.Count; ++i)
                 handlers[i](sender, e);
             _invoking.Remove(handlers);
         }
@@ -181,9 +185,8 @@ public class NotificationCenter
         {
             var handlers = subTable[this];
             _invoking.Add(handlers);
-            foreach (var handler in handlers)
-                handler(sender, e);
-
+            for (var i = 0; i < handlers.Count; ++i)
+                handlers[i](sender, e);
             _invoking.Remove(handlers);
         }
     }

@@ -41,7 +41,7 @@ public class TestItems : MonoBehaviour
         var eq = sender as Equipment;
         var item = args as Equippable;
         inventory.Remove(item.gameObject);
-        var message = string.Format("{0} equipped {1}", eq.name, item.name);
+        var message = $"{eq.name} equipped {item.name}";
         Debug.Log(message);
     }
 
@@ -50,7 +50,7 @@ public class TestItems : MonoBehaviour
         var eq = sender as Equipment;
         var item = args as Equippable;
         inventory.Add(item.gameObject);
-        var message = string.Format("{0} un-equipped {1}", eq.name, item.name);
+        var message = $"{eq.name} un-equipped {item.name}";
         Debug.Log(message);
     }
 

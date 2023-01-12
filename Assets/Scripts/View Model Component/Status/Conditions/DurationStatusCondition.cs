@@ -1,3 +1,6 @@
+﻿using UnityEngine;
+using System.Collections;
+
 public class DurationStatusCondition : StatusCondition
 {
     public int duration = 10;
@@ -15,6 +18,7 @@ public class DurationStatusCondition : StatusCondition
     private void OnNewTurn(object sender, object args)
     {
         duration--;
-        if (duration <= 0) Remove();
+        if (duration <= 0)
+            Remove();
     }
 }

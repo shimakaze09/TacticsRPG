@@ -1,7 +1,7 @@
+﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using TMPro;
-using UnityEngine;
-using UnityEngine.UI;
 
 public class ConversationPanel : MonoBehaviour
 {
@@ -24,7 +24,7 @@ public class ConversationPanel : MonoBehaviour
         speaker.sprite = sd.speaker;
         speaker.SetNativeSize();
 
-        for (var i = 0; i < sd.messages.Count; i++)
+        for (var i = 0; i < sd.messages.Count; ++i)
         {
             message.text = sd.messages[i];
             arrow.SetActive(i + 1 < sd.messages.Count);

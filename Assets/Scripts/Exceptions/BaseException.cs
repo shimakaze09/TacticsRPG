@@ -1,3 +1,6 @@
+﻿using UnityEngine;
+using System.Collections;
+
 public class BaseException
 {
     public bool toggle { get; private set; }

@@ -1,13 +1,12 @@
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 
 public class ConfirmAbilityTargetState : BattleState
 {
     private List<Tile> tiles;
     private AbilityArea aa;
-    private int index;
+    private int index = 0;
 
     public override void Enter()
     {
@@ -17,7 +16,6 @@ public class ConfirmAbilityTargetState : BattleState
         board.SelectTiles(tiles);
         FindTargets();
         RefreshPrimaryStatPanel(turn.actor.tile.pos);
-
         if (turn.targets.Count > 0)
         {
             if (driver.Current == Drivers.Human)
@@ -61,8 +59,9 @@ public class ConfirmAbilityTargetState : BattleState
     private void FindTargets()
     {
         turn.targets = new List<Tile>();
-        foreach (var tile in tiles.Where(tile => turn.ability.IsTarget(tile)))
-            turn.targets.Add(tile);
+        for (var i = 0; i < tiles.Count; ++i)
+            if (turn.ability.IsTarget(tiles[i]))
+                turn.targets.Add(tiles[i]);
     }
 
     private void SetTarget(int target)
@@ -87,7 +86,7 @@ public class ConfirmAbilityTargetState : BattleState
         var target = turn.targets[index];
 
         var obj = turn.ability.transform;
-        for (var i = 0; i < obj.childCount; i++)
+        for (var i = 0; i < obj.childCount; ++i)
         {
             var targeter = obj.GetChild(i).GetComponent<AbilityEffectTarget>();
             if (targeter.IsTarget(target))

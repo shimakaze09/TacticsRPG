@@ -1,32 +1,24 @@
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections;
 
 public abstract class HitRate : MonoBehaviour
 {
-    #region MonoBehaviour
-
-    protected virtual void Start()
-    {
-        attacker = GetComponentInParent<Unit>();
-    }
-
-    #endregion
-
     #region Notifications
 
     /// <summary>
-    ///     Includes a toggleable MatchException argument which defaults to false.
+    /// Includes a toggleable MatchException argument which defaults to false.
     /// </summary>
     public const string AutomaticHitCheckNotification = "HitRate.AutomaticHitCheckNotification";
 
     /// <summary>
-    ///     Includes a toggleable MatchException argument which defaults to false.
+    /// Includes a toggleable MatchException argument which defaults to false.
     /// </summary>
     public const string AutomaticMissCheckNotification = "HitRate.AutomaticMissCheckNotification";
 
     /// <summary>
-    ///     Includes an Info argument with three parameters: Attacker (Unit), Defender (Unit),
-    ///     and Defender's calculated Evade / Resistance (int).  Status effects which modify Hit Rate
-    ///     should modify the arg2 parameter.
+    /// Includes an Info argument with three parameters: Attacker (Unit), Defender (Unit), 
+    /// and Defender's calculated Evade / Resistance (int).  Status effects which modify Hit Rate
+    /// should modify the arg2 parameter.
     /// </summary>
     public const string StatusCheckNotification = "HitRate.StatusCheckNotification";
 
@@ -39,11 +31,20 @@ public abstract class HitRate : MonoBehaviour
 
     #endregion
 
+    #region MonoBehaviour
+
+    protected virtual void Start()
+    {
+        attacker = GetComponentInParent<Unit>();
+    }
+
+    #endregion
+
     #region Public
 
     /// <summary>
-    ///     Returns a value in the range of 0 t0 100 as a percent chance of
-    ///     an ability succeeding to hit
+    /// Returns a value in the range of 0 t0 100 as a percent chance of
+    /// an ability succeeding to hit
     /// </summary>
     public abstract int Calculate(Tile target);
 

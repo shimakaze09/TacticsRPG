@@ -1,5 +1,6 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(LayoutAnchor))]
@@ -45,7 +46,15 @@ public class Panel : MonoBehaviour
     public Tweener Transition { get; private set; }
     public bool InTransition => Transition != null;
 
-    public Position this[string name] => positionMap.ContainsKey(name) ? positionMap[name] : null;
+    public Position this[string name]
+    {
+        get
+        {
+            if (positionMap.ContainsKey(name))
+                return positionMap[name];
+            return null;
+        }
+    }
 
     #endregion
 
@@ -55,8 +64,8 @@ public class Panel : MonoBehaviour
     {
         anchor = GetComponent<LayoutAnchor>();
         positionMap = new Dictionary<string, Position>(positionList.Count);
-        foreach (var position in positionList)
-            AddPosition(position);
+        for (var i = positionList.Count - 1; i >= 0; --i)
+            AddPosition(positionList[i]);
     }
 
     private void Start()

@@ -1,4 +1,5 @@
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections;
 
 public class StatPanelController : MonoBehaviour
 {
@@ -64,7 +65,7 @@ public class StatPanelController : MonoBehaviour
         var target = obj.panel[pos];
         if (obj.panel.CurrentPosition != target)
         {
-            if (t != null && t != null)
+            if (t != null)
                 t.Stop();
             t = obj.panel.SetPosition(pos, true);
             t.duration = 0.5f;

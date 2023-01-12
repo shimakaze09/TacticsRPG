@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class Rank : MonoBehaviour
 {
@@ -73,7 +74,7 @@ public class Rank : MonoBehaviour
     public static int LevelForExperience(int exp)
     {
         var lvl = maxLevel;
-        for (; lvl >= minLevel; lvl--)
+        for (; lvl >= minLevel; --lvl)
             if (exp >= ExperienceForLevel(lvl))
                 break;
         return lvl;

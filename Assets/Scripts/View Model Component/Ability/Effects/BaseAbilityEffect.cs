@@ -1,6 +1,6 @@
+﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 
 public abstract class BaseAbilityEffect : MonoBehaviour
 {
@@ -47,7 +47,9 @@ public abstract class BaseAbilityEffect : MonoBehaviour
         this.PostNotification(notification, info);
         mods.Sort(Compare);
 
-        var value = mods.Aggregate<ValueModifier, float>(startValue, (current, t) => t.Modify(startValue, current));
+        float value = startValue;
+        for (var i = 0; i < mods.Count; ++i)
+            value = mods[i].Modify(startValue, value);
 
         var retValue = Mathf.FloorToInt(value);
         retValue = Mathf.Clamp(retValue, minDamage, maxDamage);

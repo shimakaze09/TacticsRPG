@@ -1,6 +1,7 @@
-using TMPro;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
+using TMPro;
 
 public class HitSuccessIndicator : MonoBehaviour
 {
@@ -23,6 +24,7 @@ public class HitSuccessIndicator : MonoBehaviour
     {
         arrow.fillAmount = chance / 100f;
         label.text = $"{chance}% {Mathf.Abs(amount)}pt(s)";
+        label.color = amount > 0 ? Color.green : Color.red;
     }
 
     public void Show()
@@ -34,13 +36,17 @@ public class HitSuccessIndicator : MonoBehaviour
     public void Hide()
     {
         SetPanelPos(HideKey);
-        transition.completedEvent += delegate { canvas.gameObject.SetActive(false); };
+        transition.completedEvent += delegate(object sender, System.EventArgs e)
+        {
+            canvas.gameObject.SetActive(false);
+        };
     }
 
     private void SetPanelPos(string pos)
     {
         if (transition != null && transition.IsPlaying)
             transition.Stop();
+
         transition = panel.SetPosition(pos, true);
         transition.duration = 0.5f;
         transition.equation = EasingEquations.EaseInOutQuad;

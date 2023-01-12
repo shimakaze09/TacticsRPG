@@ -1,3 +1,6 @@
+﻿using UnityEngine;
+using System.Collections;
+
 public abstract class AddStatusFeature<T> : Feature where T : StatusEffect
 {
     #region Fields

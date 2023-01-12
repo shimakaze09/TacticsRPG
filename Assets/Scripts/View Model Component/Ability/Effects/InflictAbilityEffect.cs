@@ -1,5 +1,7 @@
+﻿using UnityEngine;
+using System.Collections;
 using System;
-using UnityEngine;
+using System.Reflection;
 
 public class InflictAbilityEffect : BaseAbilityEffect
 {
@@ -21,7 +23,7 @@ public class InflictAbilityEffect : BaseAbilityEffect
         }
 
         var mi = typeof(Status).GetMethod("Add");
-        Type[] types = { statusType, typeof(DurationStatusCondition) };
+        var types = new Type[] { statusType, typeof(DurationStatusCondition) };
         var constructed = mi.MakeGenericMethod(types);
 
         var status = target.content.GetComponent<Status>();

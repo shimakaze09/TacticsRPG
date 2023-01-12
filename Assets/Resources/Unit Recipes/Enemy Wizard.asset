@@ -16,5 +16,6 @@ MonoBehaviour:
   job: Wizard
   attack: Common/Attack
   abilityCatalog: Enemy Wizard
+  strategy: Mage Attack Pattern
   locomotion: 2
   alliance: 4

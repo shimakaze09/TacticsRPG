@@ -1,26 +1,6 @@
+﻿using UnityEngine;
 using System;
-using UnityEngine;
-
-public class InputController : MonoBehaviour
-{
-    public static event EventHandler<InfoEventArgs<Point>> moveEvent;
-    public static event EventHandler<InfoEventArgs<int>> fireEvent;
-
-    private Repeater _hor = new("Horizontal");
-    private Repeater _ver = new("Vertical");
-    private string[] _buttons = new[] { "Fire1", "Fire2", "Fire3" };
-
-    private void Update()
-    {
-        var x = _hor.Update();
-        var y = _ver.Update();
-        if (x != 0 || y != 0) moveEvent?.Invoke(this, new InfoEventArgs<Point>(new Point(x, y)));
-
-        for (var i = 0; i < _buttons.Length; i++)
-            if (Input.GetButtonUp(_buttons[i]))
-                fireEvent?.Invoke(this, new InfoEventArgs<int>(i));
-    }
-}
+using System.Collections;
 
 internal class Repeater
 {
@@ -39,6 +19,7 @@ internal class Repeater
     {
         var retValue = 0;
         var value = Mathf.RoundToInt(Input.GetAxisRaw(_axis));
+
         if (value != 0)
         {
             if (Time.time > _next)
@@ -55,5 +36,29 @@ internal class Repeater
         }
 
         return retValue;
+    }
+}
+
+public class InputController : MonoBehaviour
+{
+    public static event EventHandler<InfoEventArgs<Point>> moveEvent;
+    public static event EventHandler<InfoEventArgs<int>> fireEvent;
+
+    private Repeater _hor = new("Horizontal");
+    private Repeater _ver = new("Vertical");
+    private string[] _buttons = new string[] { "Fire1", "Fire2", "Fire3" };
+
+    private void Update()
+    {
+        var x = _hor.Update();
+        var y = _ver.Update();
+        if (x != 0 || y != 0)
+            if (moveEvent != null)
+                moveEvent(this, new InfoEventArgs<Point>(new Point(x, y)));
+
+        for (var i = 0; i < 3; ++i)
+            if (Input.GetButtonUp(_buttons[i]))
+                if (fireEvent != null)
+                    fireEvent(this, new InfoEventArgs<int>(i));
     }
 }

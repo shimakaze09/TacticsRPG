@@ -1,5 +1,6 @@
+﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class LineAbilityRange : AbilityRange
 {
@@ -8,15 +9,24 @@ public class LineAbilityRange : AbilityRange
     public override List<Tile> GetTilesInRange(Board board)
     {
         var startPos = unit.tile.pos;
+        Point endPos;
         var retValue = new List<Tile>();
 
-        var endPos = unit.dir switch
+        switch (unit.dir)
         {
-            Directions.North => new Point(startPos.x, board.max.y),
-            Directions.East => new Point(board.max.x, startPos.y),
-            Directions.South => new Point(startPos.x, board.min.y),
-            _ => new Point(board.min.x, startPos.y)
-        };
+            case Directions.North:
+                endPos = new Point(startPos.x, board.max.y);
+                break;
+            case Directions.East:
+                endPos = new Point(board.max.x, startPos.y);
+                break;
+            case Directions.South:
+                endPos = new Point(startPos.x, board.min.y);
+                break;
+            default: // West
+                endPos = new Point(board.min.x, startPos.y);
+                break;
+        }
 
         var dist = 0;
         while (startPos != endPos)

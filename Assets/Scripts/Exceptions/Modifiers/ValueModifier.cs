@@ -1,3 +1,6 @@
+﻿using UnityEngine;
+using System.Collections;
+
 public abstract class ValueModifier : Modifier
 {
     public ValueModifier(int sortOrder) : base(sortOrder)

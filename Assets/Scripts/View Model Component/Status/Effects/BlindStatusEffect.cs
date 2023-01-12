@@ -1,3 +1,6 @@
+﻿using UnityEngine;
+using System.Collections;
+
 public class BlindStatusEffect : StatusEffect
 {
     private void OnEnable()

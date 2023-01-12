@@ -1,4 +1,5 @@
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public abstract class BattleState : State
@@ -9,18 +10,19 @@ public abstract class BattleState : State
     public Board board => owner.board;
     public LevelData levelData => owner.levelData;
     public Transform tileSelectionIndicator => owner.tileSelectionIndicator;
-    public Tile currentTile => owner.currentTile;
-    public AbilityMenuPanelController abilityMenuPanelController => owner.abilityMenuPanelController;
-    public StatPanelController statPanelController => owner.statPanelController;
-    public HitSuccessIndicator hitSuccessIndicator => owner.hitSuccessIndicator;
-    public Turn turn => owner.turn;
-    public List<Unit> units => owner.units;
 
     public Point pos
     {
         get => owner.pos;
         set => owner.pos = value;
     }
+
+    public Tile currentTile => owner.currentTile;
+    public AbilityMenuPanelController abilityMenuPanelController => owner.abilityMenuPanelController;
+    public StatPanelController statPanelController => owner.statPanelController;
+    public HitSuccessIndicator hitSuccessIndicator => owner.hitSuccessIndicator;
+    public Turn turn => owner.turn;
+    public List<Unit> units => owner.units;
 
     protected virtual void Awake()
     {

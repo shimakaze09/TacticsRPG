@@ -1,3 +1,5 @@
+﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public class CategorySelectionState : BaseAbilityMenuState
@@ -25,7 +27,7 @@ public class CategorySelectionState : BaseAbilityMenuState
         menuOptions.Add("Attack");
 
         var catalog = turn.actor.GetComponentInChildren<AbilityCatalog>();
-        for (var i = 0; i < catalog.CategoryCount(); i++)
+        for (var i = 0; i < catalog.CategoryCount(); ++i)
             menuOptions.Add(catalog.GetCategory(i).name);
 
         abilityMenuPanelController.Show(menuTitle, menuOptions);

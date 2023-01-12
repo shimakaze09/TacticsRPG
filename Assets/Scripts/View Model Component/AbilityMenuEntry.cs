@@ -1,5 +1,6 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 using TMPro;
 
 public class AbilityMenuEntry : MonoBehaviour
@@ -87,6 +88,7 @@ public class AbilityMenuEntry : MonoBehaviour
     [SerializeField] private TextMeshProUGUI label;
 
     #endregion
+
 
     #region Public
 

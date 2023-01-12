@@ -1,4 +1,7 @@
-﻿public class TransformLocalEulerTweener : Vector3Tweener
+﻿using UnityEngine;
+using System.Collections;
+
+public class TransformLocalEulerTweener : Vector3Tweener
 {
     protected override void OnUpdate()
     {

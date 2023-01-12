@@ -1,6 +1,6 @@
+﻿using UnityEngine;
 using System;
 using System.Collections;
-using UnityEngine;
 
 public class ConversationController : MonoBehaviour
 {
@@ -55,7 +55,8 @@ public class ConversationController : MonoBehaviour
 
     public void Next()
     {
-        if (conversation == null || transition != null) return;
+        if (conversation == null || transition != null)
+            return;
 
         conversation.MoveNext();
     }
@@ -66,17 +67,21 @@ public class ConversationController : MonoBehaviour
 
     private IEnumerator Sequence(ConversationData data)
     {
-        foreach (var sd in data.list)
+        for (var i = 0; i < data.list.Count; ++i)
         {
+            var sd = data.list[i];
+
             var currentPanel =
-                sd.anchor is TextAnchor.UpperLeft or TextAnchor.MiddleLeft or TextAnchor.LowerLeft
+                sd.anchor == TextAnchor.UpperLeft || sd.anchor == TextAnchor.MiddleLeft ||
+                sd.anchor == TextAnchor.LowerLeft
                     ? leftPanel
                     : rightPanel;
             var presenter = currentPanel.Display(sd);
             presenter.MoveNext();
 
             string show, hide;
-            if (sd.anchor is TextAnchor.UpperLeft or TextAnchor.UpperCenter or TextAnchor.UpperRight)
+            if (sd.anchor == TextAnchor.UpperLeft || sd.anchor == TextAnchor.UpperCenter ||
+                sd.anchor == TextAnchor.UpperRight)
             {
                 show = ShowTop;
                 hide = HideTop;
@@ -91,16 +96,18 @@ public class ConversationController : MonoBehaviour
             MovePanel(currentPanel, show);
 
             yield return null;
-            while (presenter.MoveNext()) yield return null;
+            while (presenter.MoveNext())
+                yield return null;
 
             MovePanel(currentPanel, hide);
-            transition.completedEvent += delegate { conversation.MoveNext(); };
+            transition.completedEvent += delegate(object sender, EventArgs e) { conversation.MoveNext(); };
 
             yield return null;
         }
 
         canvas.gameObject.SetActive(false);
-        completeEvent?.Invoke(this, EventArgs.Empty);
+        if (completeEvent != null)
+            completeEvent(this, EventArgs.Empty);
     }
 
     private void MovePanel(ConversationPanel obj, string pos)

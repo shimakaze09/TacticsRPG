@@ -32,6 +32,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 using UnityEngine;
+using System;
 
 public static class EasingEquations
 {
@@ -213,22 +214,25 @@ public static class EasingEquations
     {
         value /= 1f;
         end -= start;
-        if (value < 1 / 2.75f) return end * (7.5625f * value * value) + start;
-
-        if (value < 2 / 2.75f)
+        if (value < 1 / 2.75f)
+        {
+            return end * (7.5625f * value * value) + start;
+        }
+        else if (value < 2 / 2.75f)
         {
             value -= 1.5f / 2.75f;
             return end * (7.5625f * value * value + .75f) + start;
         }
-
-        if (value < 2.5 / 2.75)
+        else if (value < 2.5 / 2.75)
         {
             value -= 2.25f / 2.75f;
             return end * (7.5625f * value * value + .9375f) + start;
         }
-
-        value -= 2.625f / 2.75f;
-        return end * (7.5625f * value * value + .984375f) + start;
+        else
+        {
+            value -= 2.625f / 2.75f;
+            return end * (7.5625f * value * value + .984375f) + start;
+        }
     }
 
     public static float EaseInOutBounce(float start, float end, float value)
@@ -237,7 +241,8 @@ public static class EasingEquations
         var d = 1f;
         if (value < d / 2)
             return EaseInBounce(0, end, value * 2) * 0.5f + start;
-        return EaseOutBounce(0, end, value * 2 - d) * 0.5f + end * 0.5f + start;
+        else
+            return EaseOutBounce(0, end, value * 2 - d) * 0.5f + end * 0.5f + start;
     }
 
     public static float EaseInBack(float start, float end, float value)
@@ -275,7 +280,8 @@ public static class EasingEquations
     public static float Punch(float amplitude, float value)
     {
         float s = 9;
-        if (value is 0 or 1) return 0;
+        if (value == 0) return 0;
+        if (value == 1) return 0;
         var period = 1 * 0.3f;
         s = period / (2 * Mathf.PI) * Mathf.Asin(0);
         return amplitude * Mathf.Pow(2, -10 * value) * Mathf.Sin((value * 1 - s) * (2 * Mathf.PI) / period);

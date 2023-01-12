@@ -1,3 +1,6 @@
+using UnityEngine;
+using System.Collections;
+
 public class ExploreState : BattleState
 {
     public override void Enter()

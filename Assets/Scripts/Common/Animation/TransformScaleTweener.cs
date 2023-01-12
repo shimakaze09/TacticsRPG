@@ -1,4 +1,7 @@
-﻿public class TransformScaleTweener : Vector3Tweener
+﻿using UnityEngine;
+using System.Collections;
+
+public class TransformScaleTweener : Vector3Tweener
 {
     protected override void OnUpdate()
     {

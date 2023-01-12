@@ -1,5 +1,6 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 public class Board : MonoBehaviour
@@ -32,12 +33,13 @@ public class Board : MonoBehaviour
     {
         _min = new Point(int.MaxValue, int.MaxValue);
         _max = new Point(int.MinValue, int.MinValue);
-        foreach (var tile in data.tiles)
+
+        for (var i = 0; i < data.tiles.Count; ++i)
         {
-            var instance = Instantiate(tilePrefab);
+            var instance = Instantiate(tilePrefab) as GameObject;
             instance.transform.SetParent(transform);
             var t = instance.GetComponent<Tile>();
-            t.Load(tile);
+            t.Load(data.tiles[i]);
             tiles.Add(t.pos, t);
 
             _min.x = Mathf.Min(_min.x, t.pos.x);
@@ -54,7 +56,8 @@ public class Board : MonoBehaviour
 
     public List<Tile> Search(Tile start, Func<Tile, Tile, bool> addTile)
     {
-        var retValue = new List<Tile> { start };
+        var retValue = new List<Tile>();
+        retValue.Add(start);
 
         ClearSearch();
         var checkNext = new Queue<Tile>();
@@ -66,7 +69,7 @@ public class Board : MonoBehaviour
         while (checkNow.Count > 0)
         {
             var t = checkNow.Dequeue();
-            for (var i = 0; i < 4; i++)
+            for (var i = 0; i < 4; ++i)
             {
                 var next = GetTile(t.pos + dirs[i]);
                 if (next == null || next.distance <= t.distance + 1)
@@ -90,14 +93,14 @@ public class Board : MonoBehaviour
 
     public void SelectTiles(List<Tile> tiles)
     {
-        foreach (var tile in tiles)
-            tile.GetComponent<Renderer>().material.SetColor("_BaseColor", selectedTileColor);
+        for (var i = tiles.Count - 1; i >= 0; --i)
+            tiles[i].GetComponent<Renderer>().material.SetColor("_BaseColor", selectedTileColor);
     }
 
     public void DeSelectTiles(List<Tile> tiles)
     {
-        foreach (var tile in tiles)
-            tile.GetComponent<Renderer>().material.SetColor("_BaseColor", defaultTileColor);
+        for (var i = tiles.Count - 1; i >= 0; --i)
+            tiles[i].GetComponent<Renderer>().material.SetColor("_BaseColor", defaultTileColor);
     }
 
     #endregion
