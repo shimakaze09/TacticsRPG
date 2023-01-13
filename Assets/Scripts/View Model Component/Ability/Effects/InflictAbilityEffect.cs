@@ -23,7 +23,7 @@ public class InflictAbilityEffect : BaseAbilityEffect
         }
 
         var mi = typeof(Status).GetMethod("Add");
-        var types = new Type[] { statusType, typeof(DurationStatusCondition) };
+        var types = new[] { statusType, typeof(DurationStatusCondition) };
         var constructed = mi.MakeGenericMethod(types);
 
         var status = target.content.GetComponent<Status>();

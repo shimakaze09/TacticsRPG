@@ -46,19 +46,16 @@ public class InputController : MonoBehaviour
 
     private Repeater _hor = new("Horizontal");
     private Repeater _ver = new("Vertical");
-    private string[] _buttons = new string[] { "Fire1", "Fire2", "Fire3" };
+    private string[] _buttons = { "Fire1", "Fire2", "Fire3" };
 
     private void Update()
     {
         var x = _hor.Update();
         var y = _ver.Update();
-        if (x != 0 || y != 0)
-            if (moveEvent != null)
-                moveEvent(this, new InfoEventArgs<Point>(new Point(x, y)));
+        if (x != 0 || y != 0) moveEvent?.Invoke(this, new InfoEventArgs<Point>(new Point(x, y)));
 
-        for (var i = 0; i < 3; ++i)
+        for (var i = 0; i < 3; i++)
             if (Input.GetButtonUp(_buttons[i]))
-                if (fireEvent != null)
-                    fireEvent(this, new InfoEventArgs<int>(i));
+                fireEvent?.Invoke(this, new InfoEventArgs<int>(i));
     }
 }

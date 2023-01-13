@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class TurnOrderController : MonoBehaviour
 {
@@ -34,15 +35,12 @@ public class TurnOrderController : MonoBehaviour
             this.PostNotification(RoundBeganNotification);
 
             var units = new List<Unit>(bc.units);
-            for (var i = 0; i < units.Count; ++i)
-            {
-                var s = units[i].GetComponent<Stats>();
-                s[StatTypes.CTR] += s[StatTypes.SPD];
-            }
+            foreach (var stats in units.Select(unit => unit.GetComponent<Stats>()))
+                stats[StatTypes.CTR] += stats[StatTypes.SPD];
 
             units.Sort((a, b) => GetCounter(a).CompareTo(GetCounter(b)));
 
-            for (var i = units.Count - 1; i >= 0; --i)
+            for (var i = units.Count - 1; i >= 0; i--)
                 if (CanTakeTurn(units[i]))
                 {
                     bc.turn.Change(units[i]);

@@ -5,7 +5,7 @@ public class Job : MonoBehaviour
 {
     #region Fields / Properties
 
-    public static readonly StatTypes[] statOrder = new StatTypes[]
+    public static readonly StatTypes[] statOrder =
     {
         StatTypes.MHP,
         StatTypes.MMP,
@@ -39,14 +39,14 @@ public class Job : MonoBehaviour
         this.AddObserver(OnLvlChangeNotification, Stats.DidChangeNotification(StatTypes.LVL), stats);
 
         var features = GetComponentsInChildren<Feature>();
-        for (var i = 0; i < features.Length; ++i)
+        for (var i = 0; i < features.Length; i++)
             features[i].Activate(gameObject);
     }
 
     public void UnEmploy()
     {
         var features = GetComponentsInChildren<Feature>();
-        for (var i = 0; i < features.Length; ++i)
+        for (var i = 0; i < features.Length; i++)
             features[i].Deactivate();
 
         this.RemoveObserver(OnLvlChangeNotification, Stats.DidChangeNotification(StatTypes.LVL), stats);
@@ -55,7 +55,7 @@ public class Job : MonoBehaviour
 
     public void LoadDefaultStats()
     {
-        for (var i = 0; i < statOrder.Length; ++i)
+        for (var i = 0; i < statOrder.Length; i++)
         {
             var type = statOrder[i];
             stats.SetValue(type, baseStats[i], false);
@@ -74,7 +74,7 @@ public class Job : MonoBehaviour
         var oldValue = (int)args;
         var newValue = stats[StatTypes.LVL];
 
-        for (var i = oldValue; i < newValue; ++i)
+        for (var i = oldValue; i < newValue; i++)
             LevelUp();
     }
 
@@ -84,7 +84,7 @@ public class Job : MonoBehaviour
 
     private void LevelUp()
     {
-        for (var i = 0; i < statOrder.Length; ++i)
+        for (var i = 0; i < statOrder.Length; i++)
         {
             var type = statOrder[i];
             var whole = Mathf.FloorToInt(growStats[i]);

@@ -49,13 +49,15 @@ public class GameObjectPoolController : MonoBehaviour
         if (pools.ContainsKey(key))
             return false;
 
-        var data = new PoolData();
-        data.prefab = prefab;
-        data.maxCount = maxCount;
-        data.pool = new Queue<Poolable>(prepopulate);
+        var data = new PoolData
+        {
+            prefab = prefab,
+            maxCount = maxCount,
+            pool = new Queue<Poolable>(prepopulate)
+        };
         pools.Add(key, data);
 
-        for (var i = 0; i < prepopulate; ++i)
+        for (var i = 0; i < prepopulate; i++)
             Enqueue(CreateInstance(key, prefab));
 
         return true;

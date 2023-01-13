@@ -51,7 +51,7 @@ public class EasingControl : MonoBehaviour
     public PlayState previousPlayState { get; private set; }
     public EndBehaviour endBehaviour = EndBehaviour.Constant;
     public LoopType loopType = LoopType.Repeat;
-    public bool IsPlaying => playState == PlayState.Playing || playState == PlayState.Reversing;
+    public bool IsPlaying => playState is PlayState.Playing or PlayState.Reversing;
 
     public float startValue = 0.0f;
     public float endValue = 1.0f;
@@ -138,26 +138,22 @@ public class EasingControl : MonoBehaviour
 
     protected virtual void OnUpdate()
     {
-        if (updateEvent != null)
-            updateEvent(this, EventArgs.Empty);
+        updateEvent?.Invoke(this, EventArgs.Empty);
     }
 
     protected virtual void OnLoop()
     {
-        if (loopedEvent != null)
-            loopedEvent(this, EventArgs.Empty);
+        loopedEvent?.Invoke(this, EventArgs.Empty);
     }
 
     protected virtual void OnComplete()
     {
-        if (completedEvent != null)
-            completedEvent(this, EventArgs.Empty);
+        completedEvent?.Invoke(this, EventArgs.Empty);
     }
 
     protected virtual void OnStateChange()
     {
-        if (stateChangeEvent != null)
-            stateChangeEvent(this, EventArgs.Empty);
+        stateChangeEvent?.Invoke(this, EventArgs.Empty);
     }
 
     #endregion

@@ -118,7 +118,7 @@ public static class UnitFactory
             return;
         }
 
-        for (var i = 0; i < recipe.categories.Length; ++i)
+        for (var i = 0; i < recipe.categories.Length; i++)
         {
             var category = new GameObject(recipe.categories[i].name);
             category.transform.SetParent(main.transform);

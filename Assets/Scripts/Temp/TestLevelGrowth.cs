@@ -35,7 +35,7 @@ public class TestLevelGrowth : MonoBehaviour
 
     private void VerifySharedExperienceDistribution()
     {
-        var names = new string[] { "Russell", "Brian", "Josh", "Ian", "Adam", "Andy" };
+        var names = new[] { "Russell", "Brian", "Josh", "Ian", "Adam", "Andy" };
         var heroes = new Party();
         foreach (var name in names)
         {

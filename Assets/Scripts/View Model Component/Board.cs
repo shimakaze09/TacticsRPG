@@ -34,12 +34,12 @@ public class Board : MonoBehaviour
         _min = new Point(int.MaxValue, int.MaxValue);
         _max = new Point(int.MinValue, int.MinValue);
 
-        for (var i = 0; i < data.tiles.Count; ++i)
+        foreach (var tile in data.tiles)
         {
-            var instance = Instantiate(tilePrefab) as GameObject;
+            var instance = Instantiate(tilePrefab);
             instance.transform.SetParent(transform);
             var t = instance.GetComponent<Tile>();
-            t.Load(data.tiles[i]);
+            t.Load(tile);
             tiles.Add(t.pos, t);
 
             _min.x = Mathf.Min(_min.x, t.pos.x);
@@ -56,8 +56,7 @@ public class Board : MonoBehaviour
 
     public List<Tile> Search(Tile start, Func<Tile, Tile, bool> addTile)
     {
-        var retValue = new List<Tile>();
-        retValue.Add(start);
+        var retValue = new List<Tile> { start };
 
         ClearSearch();
         var checkNext = new Queue<Tile>();
@@ -69,7 +68,7 @@ public class Board : MonoBehaviour
         while (checkNow.Count > 0)
         {
             var t = checkNow.Dequeue();
-            for (var i = 0; i < 4; ++i)
+            for (var i = 0; i < 4; i++)
             {
                 var next = GetTile(t.pos + dirs[i]);
                 if (next == null || next.distance <= t.distance + 1)
@@ -93,14 +92,14 @@ public class Board : MonoBehaviour
 
     public void SelectTiles(List<Tile> tiles)
     {
-        for (var i = tiles.Count - 1; i >= 0; --i)
-            tiles[i].GetComponent<Renderer>().material.SetColor("_BaseColor", selectedTileColor);
+        foreach (var tile in tiles)
+            tile.GetComponent<Renderer>().material.SetColor("_BaseColor", selectedTileColor);
     }
 
     public void DeSelectTiles(List<Tile> tiles)
     {
-        for (var i = tiles.Count - 1; i >= 0; --i)
-            tiles[i].GetComponent<Renderer>().material.SetColor("_BaseColor", defaultTileColor);
+        foreach (var tile in tiles)
+            tile.GetComponent<Renderer>().material.SetColor("_BaseColor", defaultTileColor);
     }
 
     #endregion

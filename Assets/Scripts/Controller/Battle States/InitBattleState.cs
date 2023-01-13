@@ -24,7 +24,7 @@ public class InitBattleState : BattleState
 
     private void SpawnTestUnits()
     {
-        var recipes = new string[]
+        var recipes = new[]
         {
             "Alaois",
             "Hania",
@@ -38,10 +38,10 @@ public class InitBattleState : BattleState
         unitContainer.transform.SetParent(owner.transform);
 
         var locations = new List<Tile>(board.tiles.Values);
-        for (var i = 0; i < recipes.Length; ++i)
+        foreach (var recipe in recipes)
         {
             var level = Random.Range(9, 12);
-            var instance = UnitFactory.Create(recipes[i], level);
+            var instance = UnitFactory.Create(recipe, level);
             instance.transform.SetParent(unitContainer.transform);
 
             var random = Random.Range(0, locations.Count);

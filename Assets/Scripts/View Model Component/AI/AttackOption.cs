@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class AttackOption
 {
@@ -56,8 +57,8 @@ public class AttackOption
             return 0;
 
         var score = 0;
-        for (var i = 0; i < marks.Count; ++i)
-            if (marks[i].isMatch)
+        foreach (var mark in marks)
+            if (mark.isMatch)
                 score++;
             else
                 score--;
@@ -86,9 +87,9 @@ public class AttackOption
             caster.dir = direction;
 
             var bestOptions = new List<Tile>();
-            for (var i = 0; i < moveTargets.Count; ++i)
+            foreach (var tile in moveTargets)
             {
-                caster.Place(moveTargets[i]);
+                caster.Place(tile);
                 var score = GetAngleBasedScore(caster);
                 if (score > bestAngleBasedScore)
                 {
@@ -96,7 +97,7 @@ public class AttackOption
                     bestOptions.Clear();
                 }
 
-                if (score == bestAngleBasedScore) bestOptions.Add(moveTargets[i]);
+                if (score == bestAngleBasedScore) bestOptions.Add(tile);
             }
 
             caster.Place(startTile);
@@ -116,7 +117,7 @@ public class AttackOption
     private bool IsAbilityAngleBased(Ability ability)
     {
         var isAngleBased = false;
-        for (var i = 0; i < ability.transform.childCount; ++i)
+        for (var i = 0; i < ability.transform.childCount; i++)
         {
             var hr = ability.transform.GetChild(i).GetComponent<HitRate>();
             if (hr.IsAngleBased)
@@ -133,15 +134,10 @@ public class AttackOption
     // and considers the angle of attack to each mark
     private int GetAngleBasedScore(Unit caster)
     {
-        var score = 0;
-        for (var i = 0; i < marks.Count; ++i)
-        {
-            var value = marks[i].isMatch ? 1 : -1;
-            var multiplier = MultiplierForAngle(caster, marks[i].tile);
-            score += value * multiplier;
-        }
-
-        return score;
+        return (from t in marks
+            let value = t.isMatch ? 1 : -1
+            let multiplier = MultiplierForAngle(caster, t.tile)
+            select value * multiplier).Sum();
     }
 
     private void FilterBestMoves(List<Tile> list)
@@ -149,16 +145,10 @@ public class AttackOption
         if (!isCasterMatch)
             return;
 
-        var canTargetSelf = false;
-        for (var i = 0; i < list.Count; ++i)
-            if (areaTargets.Contains(list[i]))
-            {
-                canTargetSelf = true;
-                break;
-            }
+        var canTargetSelf = list.Any(t => areaTargets.Contains(t));
 
         if (canTargetSelf)
-            for (var i = list.Count - 1; i >= 0; --i)
+            for (var i = list.Count - 1; i >= 0; i--)
                 if (!areaTargets.Contains(list[i]))
                     list.RemoveAt(i);
     }

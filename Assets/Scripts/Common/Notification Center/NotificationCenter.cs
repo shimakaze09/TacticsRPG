@@ -126,7 +126,7 @@ public class NotificationCenter
         var notKeys = new string[_table.Keys.Count];
         _table.Keys.CopyTo(notKeys, 0);
 
-        for (var i = notKeys.Length - 1; i >= 0; --i)
+        for (var i = notKeys.Length - 1; i >= 0; i--)
         {
             var notificationName = notKeys[i];
             var senderTable = _table[notificationName];
@@ -175,7 +175,7 @@ public class NotificationCenter
         {
             var handlers = subTable[sender];
             _invoking.Add(handlers);
-            for (var i = 0; i < handlers.Count; ++i)
+            for (var i = 0; i < handlers.Count; i++)
                 handlers[i](sender, e);
             _invoking.Remove(handlers);
         }
@@ -185,7 +185,7 @@ public class NotificationCenter
         {
             var handlers = subTable[this];
             _invoking.Add(handlers);
-            for (var i = 0; i < handlers.Count; ++i)
+            for (var i = 0; i < handlers.Count; i++)
                 handlers[i](sender, e);
             _invoking.Remove(handlers);
         }

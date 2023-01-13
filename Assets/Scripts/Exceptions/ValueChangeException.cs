@@ -39,7 +39,7 @@ public class ValueChangeException : BaseException
 
         var value = toValue;
         modifiers.Sort(Compare);
-        for (var i = 0; i < modifiers.Count; ++i)
+        for (var i = 0; i < modifiers.Count; i++)
             value = modifiers[i].Modify(fromValue, value);
 
         return value;

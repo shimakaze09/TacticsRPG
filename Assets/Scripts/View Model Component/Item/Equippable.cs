@@ -41,8 +41,8 @@ public class Equippable : MonoBehaviour
         _isEquipped = true;
 
         var features = GetComponentsInChildren<Feature>();
-        for (var i = 0; i < features.Length; ++i)
-            features[i].Activate(gameObject);
+        foreach (var feature in features)
+            feature.Activate(gameObject);
     }
 
     public void OnUnEquip()
@@ -53,8 +53,8 @@ public class Equippable : MonoBehaviour
         _isEquipped = false;
 
         var features = GetComponentsInChildren<Feature>();
-        for (var i = 0; i < features.Length; ++i)
-            features[i].Deactivate();
+        foreach (var feature in features)
+            feature.Deactivate();
     }
 
     #endregion

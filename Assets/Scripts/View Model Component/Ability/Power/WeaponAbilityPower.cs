@@ -26,7 +26,7 @@ public class WeaponAbilityPower : BaseAbilityPower
         var item = eq.GetItem(EquipSlots.Primary);
         var features = item.GetComponentsInChildren<StatModifierFeature>();
 
-        for (var i = 0; i < features.Length; ++i)
+        for (var i = 0; i < features.Length; i++)
             if (features[i].type == StatTypes.ATK)
                 power += features[i].amount;
 
@@ -36,7 +36,7 @@ public class WeaponAbilityPower : BaseAbilityPower
     private int UnarmedPower()
     {
         var job = GetComponentInParent<Job>();
-        for (var i = 0; i < Job.statOrder.Length; ++i)
+        for (var i = 0; i < Job.statOrder.Length; i++)
             if (Job.statOrder[i] == StatTypes.ATK)
                 return job.baseStats[i];
         return 0;

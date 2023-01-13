@@ -48,10 +48,10 @@ public class AbilityMenuPanelController : MonoBehaviour
         canvas.SetActive(true);
         Clear();
         titleLabel.text = title;
-        for (var i = 0; i < options.Count; ++i)
+        foreach (var option in options)
         {
             var entry = Dequeue();
-            entry.Title = options[i];
+            entry.Title = option;
             menuEntries.Add(entry);
         }
 
@@ -84,7 +84,7 @@ public class AbilityMenuPanelController : MonoBehaviour
 
     public void Next()
     {
-        for (var i = selection + 1; i < selection + menuEntries.Count; ++i)
+        for (var i = selection + 1; i < selection + menuEntries.Count; i++)
         {
             var index = i % menuEntries.Count;
             if (SetSelection(index))
@@ -94,7 +94,7 @@ public class AbilityMenuPanelController : MonoBehaviour
 
     public void Previous()
     {
-        for (var i = selection - 1 + menuEntries.Count; i > selection; --i)
+        for (var i = selection - 1 + menuEntries.Count; i > selection; i--)
         {
             var index = i % menuEntries.Count;
             if (SetSelection(index))
@@ -125,8 +125,9 @@ public class AbilityMenuPanelController : MonoBehaviour
 
     private void Clear()
     {
-        for (var i = menuEntries.Count - 1; i >= 0; --i)
-            Enqueue(menuEntries[i]);
+        foreach (var entity in menuEntries)
+            Enqueue(entity);
+
         menuEntries.Clear();
     }
 

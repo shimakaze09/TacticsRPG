@@ -23,10 +23,12 @@ public class CommandSelectionState : BaseAbilityMenuState
         if (menuOptions == null)
         {
             menuTitle = "Commands";
-            menuOptions = new List<string>(3);
-            menuOptions.Add("Move");
-            menuOptions.Add("Action");
-            menuOptions.Add("Wait");
+            menuOptions = new List<string>(3)
+            {
+                "Move",
+                "Action",
+                "Wait"
+            };
         }
 
         abilityMenuPanelController.Show(menuTitle, menuOptions);

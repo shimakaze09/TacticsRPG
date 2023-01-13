@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class ConfirmAbilityTargetState : BattleState
 {
@@ -59,9 +60,8 @@ public class ConfirmAbilityTargetState : BattleState
     private void FindTargets()
     {
         turn.targets = new List<Tile>();
-        for (var i = 0; i < tiles.Count; ++i)
-            if (turn.ability.IsTarget(tiles[i]))
-                turn.targets.Add(tiles[i]);
+        foreach (var tile in tiles.Where(t => turn.ability.IsTarget(t)))
+            turn.targets.Add(tile);
     }
 
     private void SetTarget(int target)
@@ -86,7 +86,7 @@ public class ConfirmAbilityTargetState : BattleState
         var target = turn.targets[index];
 
         var obj = turn.ability.transform;
-        for (var i = 0; i < obj.childCount; ++i)
+        for (var i = 0; i < obj.childCount; i++)
         {
             var targeter = obj.GetChild(i).GetComponent<AbilityEffectTarget>();
             if (targeter.IsTarget(target))

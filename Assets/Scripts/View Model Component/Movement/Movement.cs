@@ -51,7 +51,7 @@ public abstract class Movement : MonoBehaviour
 
     protected virtual void Filter(List<Tile> tiles)
     {
-        for (var i = tiles.Count - 1; i >= 0; --i)
+        for (var i = 0; i < tiles.Count; i++)
             if (tiles[i].content != null)
                 tiles.RemoveAt(i);
     }
@@ -65,8 +65,8 @@ public abstract class Movement : MonoBehaviour
         // rotates the most efficient way (since 0 and 360 are treated the same)
         if (Mathf.Approximately(t.startTweenValue.y, 0f) && Mathf.Approximately(t.endTweenValue.y, 270f))
             t.startTweenValue = new Vector3(t.startTweenValue.x, 360f, t.startTweenValue.z);
-        else if (Mathf.Approximately(t.startTweenValue.y, 270) && Mathf.Approximately(t.endTweenValue.y, 0))
-            t.endTweenValue = new Vector3(t.startTweenValue.x, 360f, t.startTweenValue.z);
+        else if (Mathf.Approximately(t.startTweenValue.y, 270f) && Mathf.Approximately(t.endTweenValue.y, 0f))
+            t.endTweenValue = new Vector3(t.endTweenValue.x, 360f, t.endTweenValue.z);
 
         unit.dir = dir;
 

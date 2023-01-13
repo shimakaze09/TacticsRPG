@@ -67,21 +67,17 @@ public class ConversationController : MonoBehaviour
 
     private IEnumerator Sequence(ConversationData data)
     {
-        for (var i = 0; i < data.list.Count; ++i)
+        foreach (var sd in data.list)
         {
-            var sd = data.list[i];
-
             var currentPanel =
-                sd.anchor == TextAnchor.UpperLeft || sd.anchor == TextAnchor.MiddleLeft ||
-                sd.anchor == TextAnchor.LowerLeft
+                sd.anchor is TextAnchor.UpperLeft or TextAnchor.MiddleLeft or TextAnchor.LowerLeft
                     ? leftPanel
                     : rightPanel;
             var presenter = currentPanel.Display(sd);
             presenter.MoveNext();
 
             string show, hide;
-            if (sd.anchor == TextAnchor.UpperLeft || sd.anchor == TextAnchor.UpperCenter ||
-                sd.anchor == TextAnchor.UpperRight)
+            if (sd.anchor is TextAnchor.UpperLeft or TextAnchor.UpperCenter or TextAnchor.UpperRight)
             {
                 show = ShowTop;
                 hide = HideTop;
@@ -106,8 +102,7 @@ public class ConversationController : MonoBehaviour
         }
 
         canvas.gameObject.SetActive(false);
-        if (completeEvent != null)
-            completeEvent(this, EventArgs.Empty);
+        completeEvent?.Invoke(this, EventArgs.Empty);
     }
 
     private void MovePanel(ConversationPanel obj, string pos)

@@ -28,7 +28,7 @@ public class BoardCreator : MonoBehaviour
         {
             if (_marker == null)
             {
-                var instance = Instantiate(tileSelectionIndicatorPrefab) as GameObject;
+                var instance = Instantiate(tileSelectionIndicatorPrefab);
                 _marker = instance.transform;
             }
 
@@ -72,7 +72,7 @@ public class BoardCreator : MonoBehaviour
 
     public void Clear()
     {
-        for (var i = transform.childCount - 1; i >= 0; --i)
+        for (var i = transform.childCount - 1; i >= 0; i--)
             DestroyImmediate(transform.GetChild(i).gameObject);
         tiles.Clear();
     }
@@ -130,8 +130,8 @@ public class BoardCreator : MonoBehaviour
 
     private void GrowRect(Rect rect)
     {
-        for (var y = (int)rect.yMin; y < (int)rect.yMax; ++y)
-        for (var x = (int)rect.xMin; x < (int)rect.xMax; ++x)
+        for (var y = (int)rect.yMin; y < (int)rect.yMax; y++)
+        for (var x = (int)rect.xMin; x < (int)rect.xMax; x++)
         {
             var p = new Point(x, y);
             GrowSingle(p);
@@ -140,8 +140,8 @@ public class BoardCreator : MonoBehaviour
 
     private void ShrinkRect(Rect rect)
     {
-        for (var y = (int)rect.yMin; y < (int)rect.yMax; ++y)
-        for (var x = (int)rect.xMin; x < (int)rect.xMax; ++x)
+        for (var y = (int)rect.yMin; y < (int)rect.yMax; y++)
+        for (var x = (int)rect.xMin; x < (int)rect.xMax; x++)
         {
             var p = new Point(x, y);
             ShrinkSingle(p);
@@ -150,7 +150,7 @@ public class BoardCreator : MonoBehaviour
 
     private Tile Create()
     {
-        var instance = Instantiate(tileViewPrefab) as GameObject;
+        var instance = Instantiate(tileViewPrefab);
         instance.transform.parent = transform;
         return instance.GetComponent<Tile>();
     }

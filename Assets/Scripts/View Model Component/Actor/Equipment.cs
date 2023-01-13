@@ -44,7 +44,7 @@ public class Equipment : MonoBehaviour
 
     public void UnEquip(EquipSlots slots)
     {
-        for (var i = _items.Count - 1; i >= 0; --i)
+        for (var i = _items.Count - 1; i >= 0; i--)
         {
             var item = _items[i];
             if ((item.slots & slots) != EquipSlots.None)
@@ -54,7 +54,7 @@ public class Equipment : MonoBehaviour
 
     public Equippable GetItem(EquipSlots slots)
     {
-        for (var i = _items.Count - 1; i >= 0; --i)
+        for (var i = _items.Count - 1; i >= 0; i--)
         {
             var item = _items[i];
             if ((item.slots & slots) != EquipSlots.None)

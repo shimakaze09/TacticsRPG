@@ -10,11 +10,11 @@ public class EsunaAbilityEffect : BaseAbilityEffect
         get
         {
             if (_curableTypes == null)
-            {
-                _curableTypes = new HashSet<Type>();
-                _curableTypes.Add(typeof(PoisonStatusEffect));
-                _curableTypes.Add(typeof(BlindStatusEffect));
-            }
+                _curableTypes = new HashSet<Type>
+                {
+                    typeof(PoisonStatusEffect),
+                    typeof(BlindStatusEffect)
+                };
 
             return _curableTypes;
         }
@@ -33,11 +33,11 @@ public class EsunaAbilityEffect : BaseAbilityEffect
         var status = defender.GetComponentInChildren<Status>();
 
         var candidates = status.GetComponentsInChildren<DurationStatusCondition>();
-        for (var i = candidates.Length - 1; i >= 0; --i)
+        foreach (var condition in candidates)
         {
-            var effect = candidates[i].GetComponentInParent<StatusEffect>();
+            var effect = condition.GetComponentInParent<StatusEffect>();
             if (CurableTypes.Contains(effect.GetType()))
-                candidates[i].Remove();
+                condition.Remove();
         }
 
         return 0;

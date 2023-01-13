@@ -73,25 +73,22 @@ public class AudioTracker : MonoBehaviour
 
     private void AudioSourceBegan()
     {
-        if (onPlay != null) onPlay(this);
+        onPlay?.Invoke(this);
     }
 
     private void AudioSourceLooped()
     {
-        if (onLoop != null)
-            onLoop(this);
+        onLoop?.Invoke(this);
     }
 
     private void AudioSourceCompleted()
     {
-        if (onComplete != null)
-            onComplete(this);
+        onComplete?.Invoke(this);
     }
 
     private void AudioSourcePaused()
     {
-        if (onPause != null)
-            onPause(this);
+        onPause?.Invoke(this);
     }
 
     private void SetIsPlaying(bool isPlaying)

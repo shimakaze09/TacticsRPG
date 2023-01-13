@@ -33,9 +33,8 @@ public class AudioSequence : MonoBehaviour
             UnPause();
 
         var startTime = GetNextStartTime();
-        for (var i = 0; i < clips.Length; ++i)
+        foreach (var clip in clips)
         {
-            var clip = clips[i];
             var data = GetData(clip);
             data.Schedule(startTime);
             startTime += clip.length;

@@ -30,7 +30,7 @@ public abstract class BaseAbilityPicker : MonoBehaviour
 
     protected Ability Find(string abilityName)
     {
-        for (var i = 0; i < ac.transform.childCount; ++i)
+        for (var i = 0; i < ac.transform.childCount; i++)
         {
             var category = ac.transform.GetChild(i);
             var child = category.Find(abilityName);

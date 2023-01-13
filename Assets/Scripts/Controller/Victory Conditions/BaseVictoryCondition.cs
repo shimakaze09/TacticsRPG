@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Linq;
 
 public abstract class BaseVictoryCondition : MonoBehaviour
 {
@@ -55,17 +56,11 @@ public abstract class BaseVictoryCondition : MonoBehaviour
 
     protected virtual bool PartyDefeated(Alliances type)
     {
-        for (var i = 0; i < bc.units.Count; ++i)
-        {
-            var a = bc.units[i].GetComponent<Alliance>();
-            if (a == null)
-                continue;
-
-            if (a.type == type && !IsDefeated(bc.units[i]))
-                return false;
-        }
-
-        return true;
+        return !(from t in bc.units
+            let a = t.GetComponent<Alliance>()
+            where a != null
+            where a.type == type && !IsDefeated(t)
+            select t).Any();
     }
 
     protected virtual bool IsDefeated(Unit unit)

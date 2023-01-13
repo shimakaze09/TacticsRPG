@@ -83,15 +83,13 @@ public class ComputerPlayer : MonoBehaviour
         var ar = poa.ability.GetComponent<AbilityRange>();
         var moveOptions = GetMoveOptions();
 
-        for (var i = 0; i < moveOptions.Count; ++i)
+        foreach (var moveTile in moveOptions)
         {
-            var moveTile = moveOptions[i];
             actor.Place(moveTile);
             var fireOptions = ar.GetTilesInRange(bc.board);
 
-            for (var j = 0; j < fireOptions.Count; ++j)
+            foreach (var fireTile in fireOptions)
             {
-                var fireTile = fireOptions[j];
                 AttackOption ao = null;
                 if (map.ContainsKey(fireTile))
                 {
@@ -122,17 +120,18 @@ public class ComputerPlayer : MonoBehaviour
         var list = new List<AttackOption>();
         var moveOptions = GetMoveOptions();
 
-        for (var i = 0; i < moveOptions.Count; ++i)
+        foreach (var moveTile in moveOptions)
         {
-            var moveTile = moveOptions[i];
             actor.Place(moveTile);
 
             for (var j = 0; j < 4; ++j)
             {
                 actor.dir = (Directions)j;
-                var ao = new AttackOption();
-                ao.target = moveTile;
-                ao.direction = actor.dir;
+                var ao = new AttackOption
+                {
+                    target = moveTile,
+                    direction = actor.dir
+                };
                 RateFireLocation(poa, ao);
                 ao.AddMoveTarget(moveTile);
                 list.Add(ao);
@@ -173,10 +172,9 @@ public class ComputerPlayer : MonoBehaviour
         option.areaTargets = tiles;
         option.isCasterMatch = IsAbilityTargetMatch(poa, actor.tile);
 
-        for (var i = 0; i < tiles.Count; ++i)
+        foreach (var tile in tiles)
         {
-            var tile = tiles[i];
-            if (actor.tile == tiles[i] || !poa.ability.IsTarget(tile))
+            if (actor.tile == tile || !poa.ability.IsTarget(tile))
                 continue;
 
             var isMatch = IsAbilityTargetMatch(poa, tile);
@@ -188,9 +186,8 @@ public class ComputerPlayer : MonoBehaviour
     {
         var bestScore = 1;
         var bestOptions = new List<AttackOption>();
-        for (var i = 0; i < list.Count; ++i)
+        foreach (var option in list)
         {
-            var option = list[i];
             var score = option.GetScore(actor, poa.ability);
             if (score > bestScore)
             {
@@ -212,9 +209,8 @@ public class ComputerPlayer : MonoBehaviour
 
         var finalPicks = new List<AttackOption>();
         bestScore = 0;
-        for (var i = 0; i < bestOptions.Count; ++i)
+        foreach (var option in bestOptions)
         {
-            var option = bestOptions[i];
             var score = option.bestAngleBasedScore;
             if (score > bestScore)
             {
@@ -287,7 +283,7 @@ public class ComputerPlayer : MonoBehaviour
         if (nearestFoe != null)
         {
             var start = actor.dir;
-            for (var i = 0; i < 4; ++i)
+            for (var i = 0; i < 4; i++)
             {
                 actor.dir = (Directions)i;
                 if (nearestFoe.GetFacing(actor) == Facings.Front)
