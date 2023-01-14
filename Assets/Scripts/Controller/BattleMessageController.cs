@@ -2,10 +2,11 @@
 using UnityEngine.UI;
 using System;
 using System.Collections;
+using TMPro;
 
 public class BattleMessageController : MonoBehaviour
 {
-    [SerializeField] private Text label;
+    [SerializeField] private TextMeshProUGUI label;
     [SerializeField] private GameObject canvas;
     [SerializeField] private CanvasGroup group;
     private EasingControl ec;

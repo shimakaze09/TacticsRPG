@@ -37,9 +37,13 @@ public class EndFacingState : BattleState
                 owner.ChangeState<SelectUnitState>();
                 break;
             case 1:
-                turn.actor.dir = startDir;
-                turn.actor.Match();
-                owner.ChangeState<CommandSelectionState>();
+                if (!turn.hasUnitMoved || !turn.hasUnitActed)
+                {
+                    turn.actor.dir = startDir;
+                    turn.actor.Match();
+                    owner.ChangeState<CommandSelectionState>();
+                }
+
                 break;
         }
     }

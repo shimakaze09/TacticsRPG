@@ -163,11 +163,12 @@ public class AttackOption
             return 0;
 
         var facing = caster.GetFacing(defender);
-        if (facing == Facings.Back)
-            return 90;
-        if (facing == Facings.Side)
-            return 75;
-        return 50;
+        return facing switch
+        {
+            Facings.Back => 90,
+            Facings.Side => 75,
+            _ => 50
+        };
     }
 
     #endregion

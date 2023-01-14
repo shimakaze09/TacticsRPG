@@ -162,7 +162,9 @@ public class ComputerPlayer : MonoBehaviour
 
     private List<Tile> GetMoveOptions()
     {
-        return actor.GetComponent<Movement>().GetTilesInRange(bc.board);
+        var options = actor.GetComponent<Movement>().GetTilesInRange(bc.board);
+        options.Add(actor.tile);
+        return options;
     }
 
     private void RateFireLocation(PlanOfAttack poa, AttackOption option)

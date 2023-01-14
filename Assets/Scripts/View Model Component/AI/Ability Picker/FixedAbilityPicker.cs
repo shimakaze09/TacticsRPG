@@ -11,7 +11,7 @@ public class FixedAbilityPicker : BaseAbilityPicker
         plan.target = target;
         plan.ability = Find(ability);
 
-        if (plan.ability == null)
+        if (plan.ability == null || !plan.ability.CanPerform())
         {
             plan.ability = Default();
             plan.target = Targets.Foe;
