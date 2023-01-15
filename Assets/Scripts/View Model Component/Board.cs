@@ -7,7 +7,6 @@ public class Board : MonoBehaviour
 {
     #region Fields / Properties
 
-    [SerializeField] private GameObject tilePrefab;
     public Dictionary<Point, Tile> tiles = new();
     public Point min => _min;
     public Point max => _max;
@@ -34,12 +33,14 @@ public class Board : MonoBehaviour
         _min = new Point(int.MaxValue, int.MaxValue);
         _max = new Point(int.MinValue, int.MinValue);
 
-        foreach (var tile in data.tiles)
+        foreach (var key in data.tiles)
         {
-            var instance = Instantiate(tilePrefab);
-            instance.transform.SetParent(transform);
+            data.tileSkins.TryGetValue(key, out var prefabName);
+            var variableForPrefab = (GameObject)Resources.Load("Prefabs/Blocks/" + prefabName, typeof(GameObject));
+            var instance = Instantiate(variableForPrefab);
             var t = instance.GetComponent<Tile>();
-            t.Load(tile);
+            t.Load(key);
+
             tiles.Add(t.pos, t);
 
             _min.x = Mathf.Min(_min.x, t.pos.x);

@@ -13,13 +13,16 @@ public class BoardCreator : MonoBehaviour
     [SerializeField] private int width = 10;
     [SerializeField] private int depth = 10;
     [SerializeField] private int height = 8;
+    [SerializeField] private Point _pos;
     [SerializeField] private LevelData levelData;
+    [SerializeField] private string levelName;
     private Dictionary<Point, Tile> tiles = new();
+    private const string _defaultSkin = "Tile";
 
     public Point pos
     {
-        get => pos;
-        set => pos = value;
+        get => _pos;
+        set => _pos = value;
     }
 
     private Transform marker
@@ -72,7 +75,8 @@ public class BoardCreator : MonoBehaviour
 
     public void Clear()
     {
-        for (var i = transform.childCount - 1; i >= 0; i--)
+        levelName = "";
+        for (var i = 0; i < transform.childCount; i++)
             DestroyImmediate(transform.GetChild(i).gameObject);
         tiles.Clear();
     }
@@ -82,13 +86,21 @@ public class BoardCreator : MonoBehaviour
         var filePath = Application.dataPath + "/Resources/Levels";
         if (!Directory.Exists(filePath))
             CreateSaveDirectory();
-
         var board = ScriptableObject.CreateInstance<LevelData>();
         board.tiles = new List<Vector3>(tiles.Count);
-        foreach (var t in tiles.Values)
-            board.tiles.Add(new Vector3(t.pos.x, t.height, t.pos.y));
+        board.tileSkins = new TileSkins();
 
-        var fileName = string.Format("Assets/Resources/Levels/{1}.asset", filePath, name);
+        foreach (var t in tiles.Values)
+        {
+            var pos = new Vector3(t.pos.x, t.height, t.pos.y);
+            board.tiles.Add(pos);
+
+            var prefabName = t.name;
+            prefabName = prefabName[..^7];
+            board.tileSkins.Add(pos, prefabName);
+        }
+
+        var fileName = $"Assets/Resources/Levels/{levelName}.asset";
         AssetDatabase.CreateAsset(board, fileName);
     }
 
@@ -98,10 +110,17 @@ public class BoardCreator : MonoBehaviour
         if (levelData == null)
             return;
 
-        foreach (var v in levelData.tiles)
+        levelName = levelData.name;
+
+        foreach (var key in levelData.tiles)
         {
-            var t = Create();
-            t.Load(v);
+            levelData.tileSkins.TryGetValue(key, out var prefabName);
+            prefabName ??= _defaultSkin;
+            var variableForPrefab = (GameObject)Resources.Load("Prefabs/Blocks/" + prefabName, typeof(GameObject));
+            var instance = Instantiate(variableForPrefab);
+            instance.transform.SetParent(gameObject.transform);
+            var t = instance.GetComponent<Tile>();
+            t.Load(key);
             tiles.Add(t.pos, t);
         }
     }
