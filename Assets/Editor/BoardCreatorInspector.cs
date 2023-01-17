@@ -24,13 +24,11 @@ public class BoardCreatorInspector : Editor
             current.Save();
         if (GUILayout.Button("Load"))
             current.Load();
-
-        if (GUI.changed)
-            current.UpdateMarker();
-
         if (GUILayout.Button("Create Base"))
             current.CreateBase();
 
+        if (GUI.changed)
+            current.UpdateMarker();
 
         var e = Event.current;
         switch (e.type)
@@ -54,11 +52,9 @@ public class BoardCreatorInspector : Editor
 
                     case KeyCode.J:
                         current.Grow();
-                        current.UpdateMarker();
                         break;
                     case KeyCode.K:
                         current.Shrink();
-                        current.UpdateMarker();
                         break;
                 }
 

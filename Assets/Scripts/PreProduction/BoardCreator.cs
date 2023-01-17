@@ -75,10 +75,9 @@ public class BoardCreator : MonoBehaviour
 
     public void Clear()
     {
-        levelName = "";
-        for (var i = 0; i < transform.childCount; i++)
-            DestroyImmediate(transform.GetChild(i).gameObject);
+        while (transform.childCount > 0) DestroyImmediate(transform.GetChild(0).gameObject);
         tiles.Clear();
+        levelName = "";
     }
 
     public void Save()

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using GameObject = UnityEngine.GameObject;
 
 public abstract class BattleState : State
 {
@@ -100,5 +101,15 @@ public abstract class BattleState : State
     protected virtual bool IsBattleOver()
     {
         return owner.GetComponent<BaseVictoryCondition>().Victor != Alliances.None;
+    }
+
+    protected virtual void HideSelector()
+    {
+        tileSelectionIndicator.gameObject.SetActive(false);
+    }
+
+    protected virtual void ShowSelector()
+    {
+        tileSelectionIndicator.gameObject.SetActive(true);
     }
 }

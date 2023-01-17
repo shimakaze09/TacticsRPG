@@ -63,6 +63,7 @@ public abstract class Movement : MonoBehaviour
 
         // When rotating between North and West, we must make an exception so it looks like the unit
         // rotates the most efficient way (since 0 and 360 are treated the same)
+        t.startTweenValue.y = Mathf.RoundToInt(t.startTweenValue.y);
         if (Mathf.Approximately(t.startTweenValue.y, 0f) && Mathf.Approximately(t.endTweenValue.y, 270f))
             t.startTweenValue = new Vector3(t.startTweenValue.x, 360f, t.startTweenValue.z);
         else if (Mathf.Approximately(t.startTweenValue.y, 270f) && Mathf.Approximately(t.endTweenValue.y, 0f))

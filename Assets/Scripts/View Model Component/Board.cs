@@ -22,6 +22,7 @@ public class Board : MonoBehaviour
     };
 
     private Color selectedTileColor = new(0, 1, 1, 1);
+    private Color confirmedTileColor = new(1, 0.5f, 0.5f, 1);
     private Color defaultTileColor = new(1, 1, 1, 1);
 
     #endregion
@@ -95,6 +96,12 @@ public class Board : MonoBehaviour
     {
         foreach (var tile in tiles)
             tile.GetComponent<Renderer>().material.SetColor("_BaseColor", selectedTileColor);
+    }
+
+    public void ConfirmTiles(List<Tile> tiles)
+    {
+        foreach (var tile in tiles)
+            tile.GetComponent<Renderer>().material.SetColor("_BaseColor", confirmedTileColor);
     }
 
     public void DeSelectTiles(List<Tile> tiles)

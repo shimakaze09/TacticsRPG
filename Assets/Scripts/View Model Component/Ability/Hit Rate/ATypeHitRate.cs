@@ -15,7 +15,7 @@ public class ATypeHitRate : HitRate
         var evade = GetEvade(defender);
         evade = AdjustForRelativeFacing(defender, evade);
         evade = AdjustForStatusEffects(defender, evade);
-        evade = Mathf.Clamp(evade, 5, 95);
+        evade = Mathf.Clamp(evade, 0, 100);
         return Final(evade);
     }
 
@@ -27,14 +27,11 @@ public class ATypeHitRate : HitRate
 
     private int AdjustForRelativeFacing(Unit target, int rate)
     {
-        switch (attacker.GetFacing(target))
+        return attacker.GetFacing(target) switch
         {
-            case Facings.Front:
-                return rate;
-            case Facings.Side:
-                return rate / 2;
-            default:
-                return rate / 4;
-        }
+            Facings.Front => rate,
+            Facings.Side => rate / 2,
+            _ => rate / 4
+        };
     }
 }

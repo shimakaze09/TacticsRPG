@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SlienceStatusEffect : StatusEffect
+public class SilenceStatusEffect : StatusEffect
 {
     private Unit owner;
 
@@ -21,7 +21,7 @@ public class SlienceStatusEffect : StatusEffect
     private void OnCanPerformCheck(object sender, object args)
     {
         var unit = (sender as Ability).GetComponentInParent<Unit>();
-        if (owner == unit)
+        if (owner == unit && (sender as Ability).TryGetComponent(typeof(AbilityMagicCost), out _))
         {
             var exc = args as BaseException;
             if (exc.defaultToggle)
