@@ -7,7 +7,7 @@ public class ConfirmAbilityTargetState : BattleState
 {
     private List<Tile> tiles;
     private AbilityArea aa;
-    private int index = 0;
+    private int index;
 
     public override void Enter()
     {

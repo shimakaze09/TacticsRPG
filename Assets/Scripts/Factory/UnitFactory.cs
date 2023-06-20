@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.IO;
 using System.Collections;
+using Object = UnityEngine.Object;
 
 public static class UnitFactory
 {
@@ -35,6 +37,7 @@ public static class UnitFactory
         AddAbilityCatalog(obj, recipe.abilityCatalog);
         AddAlliance(obj, recipe.alliance);
         AddAttackPattern(obj, recipe.strategy);
+        AddElement(obj, recipe.element);
         return obj;
     }
 
@@ -118,14 +121,14 @@ public static class UnitFactory
             return;
         }
 
-        for (var i = 0; i < recipe.categories.Length; i++)
+        foreach (var categoryName in recipe.categories)
         {
-            var category = new GameObject(recipe.categories[i].name);
+            var category = new GameObject(categoryName.name);
             category.transform.SetParent(main.transform);
 
-            for (var j = 0; j < recipe.categories[i].entries.Length; ++j)
+            foreach (var entry in categoryName.entries)
             {
-                var abilityName = $"Abilities/{recipe.categories[i].name}/{recipe.categories[i].entries[j]}";
+                var abilityName = $"Abilities/{categoryName.name}/{entry}";
                 var ability = InstantiatePrefab(abilityName);
                 ability.transform.SetParent(category.transform);
             }
@@ -145,6 +148,19 @@ public static class UnitFactory
             var instance = InstantiatePrefab("Attack Pattern/" + name);
             instance.transform.SetParent(obj.transform);
         }
+    }
+
+    private static void AddElement(GameObject obj, string name)
+    {
+        if (!Enum.TryParse(name, out ElementTypes elementType))
+        {
+            Debug.Log("Invalid input");
+            return;
+        }
+
+        var element = obj.AddComponent<Elements>();
+        element.types = elementType;
+        (element.advantaged, element.restrained) = ElementRelationship.elementRestriction[elementType];
     }
 
     #endregion

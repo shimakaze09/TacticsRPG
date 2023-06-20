@@ -46,15 +46,7 @@ public class Panel : MonoBehaviour
     public Tweener Transition { get; private set; }
     public bool InTransition => Transition != null;
 
-    public Position this[string name]
-    {
-        get
-        {
-            if (positionMap.ContainsKey(name))
-                return positionMap[name];
-            return null;
-        }
-    }
+    public Position this[string name] => positionMap.ContainsKey(name) ? positionMap[name] : null;
 
     #endregion
 
@@ -108,11 +100,9 @@ public class Panel : MonoBehaviour
             Transition = anchor.MoveToAnchorPosition(p.myAnchor, p.parentAnchor, p.offset);
             return Transition;
         }
-        else
-        {
-            anchor.SnapToAnchorPosition(p.myAnchor, p.parentAnchor, p.offset);
-            return null;
-        }
+
+        anchor.SnapToAnchorPosition(p.myAnchor, p.parentAnchor, p.offset);
+        return null;
     }
 
     #endregion

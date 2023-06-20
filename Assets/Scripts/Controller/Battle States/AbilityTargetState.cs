@@ -12,6 +12,7 @@ public class AbilityTargetState : BattleState
         base.Enter();
         ar = turn.ability.GetComponent<AbilityRange>();
         SelectTiles();
+        SelectTile(turn.actor.tile.pos);
         statPanelController.ShowPrimary(turn.actor.gameObject);
         if (ar.directionOriented)
             RefreshSecondaryStatPanel(pos);

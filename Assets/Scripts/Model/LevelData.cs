@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 [System.Serializable]
-public class TileSkins : SerializableDictionary<Vector3, string>
+public class TileSkins : Utils.SerializableDictionary<Vector3, string>
 {
 }
 

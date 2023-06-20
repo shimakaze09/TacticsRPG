@@ -4,6 +4,7 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 
+#if UNITY_EDITOR
 public class BoardCreator : MonoBehaviour
 {
     #region Fields / Properties
@@ -220,3 +221,4 @@ public class BoardCreator : MonoBehaviour
 
     #endregion
 }
+#endif

@@ -29,7 +29,7 @@ public class TurnOrderController : MonoBehaviour
     public IEnumerator Round()
     {
         var bc = GetComponent<BattleController>();
-        ;
+
         while (true)
         {
             this.PostNotification(RoundBeganNotification);

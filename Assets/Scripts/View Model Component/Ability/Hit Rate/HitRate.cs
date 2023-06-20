@@ -27,6 +27,7 @@ public abstract class HitRate : MonoBehaviour
     #region Fields
 
     public virtual bool IsAngleBased => true;
+    public int accuracy = 100;
     protected Unit attacker;
 
     #endregion
@@ -82,7 +83,7 @@ public abstract class HitRate : MonoBehaviour
 
     protected virtual int Final(int evade)
     {
-        return 100 - evade;
+        return accuracy - evade;
     }
 
     #endregion

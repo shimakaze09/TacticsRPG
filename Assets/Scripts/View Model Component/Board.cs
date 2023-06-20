@@ -39,6 +39,7 @@ public class Board : MonoBehaviour
             data.tileSkins.TryGetValue(key, out var prefabName);
             var variableForPrefab = (GameObject)Resources.Load("Prefabs/Blocks/" + prefabName, typeof(GameObject));
             var instance = Instantiate(variableForPrefab);
+            instance.transform.SetParent(transform);
             var t = instance.GetComponent<Tile>();
             t.Load(key);
 

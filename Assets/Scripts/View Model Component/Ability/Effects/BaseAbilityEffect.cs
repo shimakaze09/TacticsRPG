@@ -5,6 +5,10 @@ using System.Linq;
 
 public abstract class BaseAbilityEffect : MonoBehaviour
 {
+    #region Classes
+
+    #endregion
+
     #region Consts & Notifications
 
     protected const int minDamage = -999;

@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityObject = UnityEngine.Object;
 
+#if UNITY_EDITOR
 public abstract class DictionaryDrawer<TK, TV> : PropertyDrawer
 {
     private SerializableDictionary<TK, TV> _Dictionary;
@@ -171,3 +172,5 @@ public abstract class DictionaryDrawer<TK, TV> : PropertyDrawer
 public class TileSkinsDrawer : DictionaryDrawer<Vector3, string>
 {
 }
+
+#endif

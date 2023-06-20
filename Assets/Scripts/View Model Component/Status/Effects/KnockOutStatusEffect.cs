@@ -28,15 +28,15 @@ public class KnockOutStatusEffect : StatusEffect
 
     private void OnTurnCheck(object sender, object args)
     {
-        // Dont allow a KO'd unit to take turns
+        // Don't allow a KO'd unit to take turns
         var exc = args as BaseException;
-        if (exc.defaultToggle == true)
+        if (exc.defaultToggle)
             exc.FlipToggle();
     }
 
     private void OnStatCounterWillChange(object sender, object args)
     {
-        // Dont allow a KO'd unit to increment the turn order counter
+        // Don't allow a KO'd unit to increment the turn order counter
         var exc = args as ValueChangeException;
         if (exc.toValue > exc.fromValue)
             exc.FlipToggle();

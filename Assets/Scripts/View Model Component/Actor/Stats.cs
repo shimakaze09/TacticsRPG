@@ -9,14 +9,14 @@ public class Stats : MonoBehaviour
     public static string WillChangeNotification(StatTypes type)
     {
         if (!_willChangeNotifications.ContainsKey(type))
-            _willChangeNotifications.Add(type, $"Stats.{type.ToString()}WillChange");
+            _willChangeNotifications.Add(type, $"Stats.{type}WillChange");
         return _willChangeNotifications[type];
     }
 
     public static string DidChangeNotification(StatTypes type)
     {
         if (!_didChangeNotifications.ContainsKey(type))
-            _didChangeNotifications.Add(type, $"Stats.{type.ToString()}DidChange");
+            _didChangeNotifications.Add(type, $"Stats.{type}DidChange");
         return _didChangeNotifications[type];
     }
 

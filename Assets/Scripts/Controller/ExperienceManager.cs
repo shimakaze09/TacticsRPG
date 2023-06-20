@@ -30,7 +30,7 @@ public static class ExperienceManager
         float summedWeights = 0;
         for (var i = ranks.Count - 1; i >= 0; i--)
         {
-            var percent = (float)(ranks[i].LVL - min) / (float)(max - min);
+            var percent = (float)(ranks[i].LVL - min) / (max - min);
             weights[i] = Mathf.Lerp(minLevelBonus, maxLevelBonus, percent);
             summedWeights += weights[i];
         }

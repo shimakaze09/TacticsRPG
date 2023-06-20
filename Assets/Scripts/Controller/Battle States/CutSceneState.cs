@@ -16,17 +16,11 @@ public class CutSceneState : BattleState
     public override void Enter()
     {
         base.Enter();
-        if (IsBattleOver())
-        {
-            if (DidPlayerWin())
-                data = Resources.Load<ConversationData>("Conversations/OutroSceneWin");
-            else
-                data = Resources.Load<ConversationData>("Conversations/OutroSceneLose");
-        }
-        else
-        {
-            data = Resources.Load<ConversationData>("Conversations/IntroScene");
-        }
+        data = IsBattleOver()
+            ? Resources.Load<ConversationData>(DidPlayerWin()
+                ? "Conversations/OutroSceneWin"
+                : "Conversations/OutroSceneLose")
+            : Resources.Load<ConversationData>("Conversations/IntroScene");
 
         conversationController.Show(data);
     }

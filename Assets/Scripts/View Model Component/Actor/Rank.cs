@@ -21,7 +21,7 @@ public class Rank : MonoBehaviour
         set => stats[StatTypes.EXP] = value;
     }
 
-    public float LevelPercent => (float)(LVL - minLevel) / (float)(maxLevel - minLevel);
+    public float LevelPercent => (float)(LVL - minLevel) / (maxLevel - minLevel);
 
     private Stats stats;
 
@@ -67,7 +67,7 @@ public class Rank : MonoBehaviour
 
     public static int ExperienceForLevel(int level)
     {
-        var levelPercent = Mathf.Clamp01((float)(level - minLevel) / (float)(maxLevel - minLevel));
+        var levelPercent = Mathf.Clamp01((float)(level - minLevel) / (maxLevel - minLevel));
         return (int)EasingEquations.EaseInQuad(0, maxExperience, levelPercent);
     }
 

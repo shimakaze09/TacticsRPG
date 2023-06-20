@@ -13,7 +13,7 @@ public class Tile : MonoBehaviour
 
     public Point pos;
     public int height;
-    public Vector3 center => new Vector3(pos.x, height * stepHeight, pos.y);
+    public Vector3 center => new(pos.x, height * stepHeight, pos.y);
     public GameObject content;
     [HideInInspector] public Tile prev;
     [HideInInspector] public int distance;
