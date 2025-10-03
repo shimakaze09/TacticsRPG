@@ -9,6 +9,7 @@ public class MoveSequenceState : BattleState
     public override void Enter()
     {
         base.Enter();
+        tiles.Clear();
         tiles.Add(board.GetTile(pos));
         board.ConfirmTiles(tiles);
         HideSelector();
