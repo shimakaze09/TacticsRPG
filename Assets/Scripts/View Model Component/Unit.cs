@@ -6,11 +6,11 @@ public class Unit : MonoBehaviour, IDataPersistence
     public Tile tile { get; protected set; }
     public Directions dir;
 
-    private string name;
+    private string _name;
 
     private void Start()
     {
-        name = gameObject.name;
+        _name = gameObject.name;
     }
 
     public void Place(Tile target)
@@ -34,14 +34,14 @@ public class Unit : MonoBehaviour, IDataPersistence
 
     public void LoadData(GameData data)
     {
-        if (data.unitLevel.TryGetValue(name, out var exp))
+        if (data.unitLevel.TryGetValue(_name, out var exp))
             GetComponent<Stats>().SetValue(StatTypes.EXP, exp, false);
     }
 
     public void SaveData(ref GameData data)
     {
-        if (data.unitLevel.ContainsKey(name))
-            data.unitLevel.Remove(name);
-        data.unitLevel.Add(name, GetComponent<Rank>().EXP);
+        if (data.unitLevel.ContainsKey(_name))
+            data.unitLevel.Remove(_name);
+        data.unitLevel.Add(_name, GetComponent<Rank>().EXP);
     }
 }
