@@ -1,8 +1,8 @@
 using System;
-using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using UnityEngine;
 
 namespace Utils
@@ -11,44 +11,16 @@ namespace Utils
     [DebuggerDisplay("Count = {Count}")]
     public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>
     {
-        [SerializeField] [HideInInspector] private int[] _Buckets;
-        [SerializeField] [HideInInspector] private int[] _HashCodes;
-        [SerializeField] [HideInInspector] private int[] _Next;
-        [SerializeField] [HideInInspector] private int _Count;
-        [SerializeField] [HideInInspector] private int _Version;
-        [SerializeField] [HideInInspector] private int _FreeList;
-        [SerializeField] [HideInInspector] private int _FreeCount;
-        [SerializeField] [HideInInspector] private TKey[] _Keys;
-        [SerializeField] [HideInInspector] private TValue[] _Values;
-
         private readonly IEqualityComparer<TKey> _Comparer;
-
-        // Mainly for debugging purposes - to get the key-value pairs display
-        public Dictionary<TKey, TValue> AsDictionary => new(this);
-
-        public int Count => _Count - _FreeCount;
-
-        public TValue this[TKey key, TValue defaultValue]
-        {
-            get
-            {
-                var index = FindIndex(key);
-                return index >= 0 ? _Values[index] : defaultValue;
-            }
-        }
-
-        public TValue this[TKey key]
-        {
-            get
-            {
-                var index = FindIndex(key);
-                if (index >= 0)
-                    return _Values[index];
-                throw new KeyNotFoundException(key.ToString());
-            }
-
-            set => Insert(key, value, false);
-        }
+        [SerializeField] [HideInInspector] private int[] _Buckets;
+        [SerializeField] [HideInInspector] private int _Count;
+        [SerializeField] [HideInInspector] private int _FreeCount;
+        [SerializeField] [HideInInspector] private int _FreeList;
+        [SerializeField] [HideInInspector] private int[] _HashCodes;
+        [SerializeField] [HideInInspector] private TKey[] _Keys;
+        [SerializeField] [HideInInspector] private int[] _Next;
+        [SerializeField] [HideInInspector] private TValue[] _Values;
+        [SerializeField] [HideInInspector] private int _Version;
 
         public SerializableDictionary()
             : this(0, null)
@@ -90,23 +62,31 @@ namespace Utils
                 Add(current.Key, current.Value);
         }
 
-        public bool ContainsValue(TValue value)
+        // Mainly for debugging purposes - to get the key-value pairs display
+        public Dictionary<TKey, TValue> AsDictionary => new(this);
+
+        public TValue this[TKey key, TValue defaultValue]
         {
-            if (value == null)
+            get
             {
-                for (var i = 0; i < _Count; i++)
-                    if (_HashCodes[i] >= 0 && _Values[i] == null)
-                        return true;
+                var index = FindIndex(key);
+                return index >= 0 ? _Values[index] : defaultValue;
             }
-            else
+        }
+
+        public int Count => _Count - _FreeCount;
+
+        public TValue this[TKey key]
+        {
+            get
             {
-                var defaultComparer = EqualityComparer<TValue>.Default;
-                for (var i = 0; i < _Count; i++)
-                    if (_HashCodes[i] >= 0 && defaultComparer.Equals(_Values[i], value))
-                        return true;
+                var index = FindIndex(key);
+                if (index >= 0)
+                    return _Values[index];
+                throw new KeyNotFoundException(key.ToString());
             }
 
-            return false;
+            set => Insert(key, value, false);
         }
 
         public bool ContainsKey(TKey key)
@@ -136,6 +116,121 @@ namespace Utils
         public void Add(TKey key, TValue value)
         {
             Insert(key, value, true);
+        }
+
+        public bool Remove(TKey key)
+        {
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+
+            var hash = _Comparer.GetHashCode(key) & 2147483647;
+            var index = hash % _Buckets.Length;
+            var num = -1;
+            for (var i = _Buckets[index]; i >= 0; i = _Next[i])
+            {
+                if (_HashCodes[i] == hash && _Comparer.Equals(_Keys[i], key))
+                {
+                    if (num < 0)
+                        _Buckets[index] = _Next[i];
+                    else
+                        _Next[num] = _Next[i];
+
+                    _HashCodes[i] = -1;
+                    _Next[i] = _FreeList;
+                    _Keys[i] = default;
+                    _Values[i] = default;
+                    _FreeList = i;
+                    _FreeCount++;
+                    _Version++;
+                    return true;
+                }
+
+                num = i;
+            }
+
+            return false;
+        }
+
+        public bool TryGetValue(TKey key, out TValue value)
+        {
+            var index = FindIndex(key);
+            if (index >= 0)
+            {
+                value = _Values[index];
+                return true;
+            }
+
+            value = default;
+            return false;
+        }
+
+        public ICollection<TKey> Keys => _Keys.Take(Count).ToArray();
+
+        public ICollection<TValue> Values => _Values.Take(Count).ToArray();
+
+        public void Add(KeyValuePair<TKey, TValue> item)
+        {
+            Add(item.Key, item.Value);
+        }
+
+        public bool Contains(KeyValuePair<TKey, TValue> item)
+        {
+            var index = FindIndex(item.Key);
+            return index >= 0 &&
+                   EqualityComparer<TValue>.Default.Equals(_Values[index], item.Value);
+        }
+
+        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int index)
+        {
+            if (array == null)
+                throw new ArgumentNullException(nameof(array));
+
+            if (index < 0 || index > array.Length)
+                throw new ArgumentOutOfRangeException($"index = {index} array.Length = {array.Length}");
+
+            if (array.Length - index < Count)
+                throw new ArgumentException(
+                    $"The number of elements in the dictionary ({Count}) is greater than the available space from index to the end of the destination array {array.Length}.");
+
+            for (var i = 0; i < _Count; i++)
+                if (_HashCodes[i] >= 0)
+                    array[index++] = new KeyValuePair<TKey, TValue>(_Keys[i], _Values[i]);
+        }
+
+        public bool IsReadOnly => false;
+
+        public bool Remove(KeyValuePair<TKey, TValue> item)
+        {
+            return Remove(item.Key);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public bool ContainsValue(TValue value)
+        {
+            if (value == null)
+            {
+                for (var i = 0; i < _Count; i++)
+                    if (_HashCodes[i] >= 0 && _Values[i] == null)
+                        return true;
+            }
+            else
+            {
+                var defaultComparer = EqualityComparer<TValue>.Default;
+                for (var i = 0; i < _Count; i++)
+                    if (_HashCodes[i] >= 0 && defaultComparer.Equals(_Values[i], value))
+                        return true;
+            }
+
+            return false;
         }
 
         private void Resize(int newSize, bool forceNewHashCodes)
@@ -176,39 +271,6 @@ namespace Utils
         private void Resize()
         {
             Resize(PrimeHelper.ExpandPrime(_Count), false);
-        }
-
-        public bool Remove(TKey key)
-        {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
-
-            var hash = _Comparer.GetHashCode(key) & 2147483647;
-            var index = hash % _Buckets.Length;
-            var num = -1;
-            for (var i = _Buckets[index]; i >= 0; i = _Next[i])
-            {
-                if (_HashCodes[i] == hash && _Comparer.Equals(_Keys[i], key))
-                {
-                    if (num < 0)
-                        _Buckets[index] = _Next[i];
-                    else
-                        _Next[num] = _Next[i];
-
-                    _HashCodes[i] = -1;
-                    _Next[i] = _FreeList;
-                    _Keys[i] = default;
-                    _Values[i] = default;
-                    _FreeList = i;
-                    _FreeCount++;
-                    _Version++;
-                    return true;
-                }
-
-                num = i;
-            }
-
-            return false;
         }
 
         private void Insert(TKey key, TValue value, bool add)
@@ -302,17 +364,9 @@ namespace Utils
             return -1;
         }
 
-        public bool TryGetValue(TKey key, out TValue value)
+        public Enumerator GetEnumerator()
         {
-            var index = FindIndex(key);
-            if (index >= 0)
-            {
-                value = _Values[index];
-                return true;
-            }
-
-            value = default;
-            return false;
+            return new Enumerator(this);
         }
 
         private static class PrimeHelper
@@ -397,7 +451,7 @@ namespace Utils
             {
                 if ((candidate & 1) != 0)
                 {
-                    var num = (int)Math.Sqrt((double)candidate);
+                    var num = (int)Math.Sqrt(candidate);
                     for (var i = 3; i <= num; i += 2)
                         if (candidate % i == 0)
                             return false;
@@ -430,75 +484,19 @@ namespace Utils
             }
         }
 
-        public ICollection<TKey> Keys => _Keys.Take(Count).ToArray();
-
-        public ICollection<TValue> Values => _Values.Take(Count).ToArray();
-
-        public void Add(KeyValuePair<TKey, TValue> item)
-        {
-            Add(item.Key, item.Value);
-        }
-
-        public bool Contains(KeyValuePair<TKey, TValue> item)
-        {
-            var index = FindIndex(item.Key);
-            return index >= 0 &&
-                   EqualityComparer<TValue>.Default.Equals(_Values[index], item.Value);
-        }
-
-        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int index)
-        {
-            if (array == null)
-                throw new ArgumentNullException(nameof(array));
-
-            if (index < 0 || index > array.Length)
-                throw new ArgumentOutOfRangeException($"index = {index} array.Length = {array.Length}");
-
-            if (array.Length - index < Count)
-                throw new ArgumentException(
-                    $"The number of elements in the dictionary ({Count}) is greater than the available space from index to the end of the destination array {array.Length}.");
-
-            for (var i = 0; i < _Count; i++)
-                if (_HashCodes[i] >= 0)
-                    array[index++] = new KeyValuePair<TKey, TValue>(_Keys[i], _Values[i]);
-        }
-
-        public bool IsReadOnly => false;
-
-        public bool Remove(KeyValuePair<TKey, TValue> item)
-        {
-            return Remove(item.Key);
-        }
-
-        public Enumerator GetEnumerator()
-        {
-            return new Enumerator(this);
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
         public struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>
         {
             private readonly SerializableDictionary<TKey, TValue> _Dictionary;
-            private int _Version;
+            private readonly int _Version;
             private int _Index;
-            private KeyValuePair<TKey, TValue> _Current;
 
-            public KeyValuePair<TKey, TValue> Current => _Current;
+            public KeyValuePair<TKey, TValue> Current { get; private set; }
 
             internal Enumerator(SerializableDictionary<TKey, TValue> dictionary)
             {
                 _Dictionary = dictionary;
                 _Version = dictionary._Version;
-                _Current = default;
+                Current = default;
                 _Index = 0;
             }
 
@@ -512,7 +510,7 @@ namespace Utils
                 {
                     if (_Dictionary._HashCodes[_Index] >= 0)
                     {
-                        _Current = new KeyValuePair<TKey, TValue>(_Dictionary._Keys[_Index],
+                        Current = new KeyValuePair<TKey, TValue>(_Dictionary._Keys[_Index],
                             _Dictionary._Values[_Index]);
                         _Index++;
                         return true;
@@ -522,7 +520,7 @@ namespace Utils
                 }
 
                 _Index = _Dictionary._Count + 1;
-                _Current = default;
+                Current = default;
                 return false;
             }
 
@@ -533,7 +531,7 @@ namespace Utils
                         $"Enumerator version {_Version} != Dictionary version {_Dictionary._Version}");
 
                 _Index = 0;
-                _Current = default;
+                Current = default;
             }
 
             object IEnumerator.Current => Current;

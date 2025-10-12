@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public enum Directions
+﻿public enum Directions
 {
     North,
     East,

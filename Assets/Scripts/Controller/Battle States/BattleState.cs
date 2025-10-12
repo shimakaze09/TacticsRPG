@@ -1,12 +1,10 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
-using GameObject = UnityEngine.GameObject;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public abstract class BattleState : State
 {
-    protected BattleController owner;
     protected Driver driver;
+    protected BattleController owner;
     public CameraRig cameraRig => owner.cameraRig;
     public Board board => owner.board;
     public LevelData levelData => owner.levelData;

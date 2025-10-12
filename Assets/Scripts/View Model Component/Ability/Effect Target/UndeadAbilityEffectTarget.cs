@@ -1,11 +1,8 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class UndeadAbilityEffectTarget : AbilityEffectTarget
+﻿public class UndeadAbilityEffectTarget : AbilityEffectTarget
 {
     /// <summary>
-    /// Indicates whether the Undead component must be present (true)
-    /// or must not be present (false) for the target to be valid.
+    ///     Indicates whether the Undead component must be present (true)
+    ///     or must not be present (false) for the target to be valid.
     /// </summary>
     public bool toggle;
 

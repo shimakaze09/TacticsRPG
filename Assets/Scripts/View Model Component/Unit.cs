@@ -1,14 +1,30 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class Unit : MonoBehaviour, IDataPersistence
 {
-    public Tile tile { get; protected set; }
-    public Directions dir;
-
     private string _name;
-    private Stats stats;
+    public Directions dir;
     private Rank rank;
+    private Stats stats;
+    public Tile tile { get; protected set; }
+
+    public void LoadData(GameData data)
+    {
+        stats ??= GetComponent<Stats>();
+        if (stats != null && data.unitLevel.TryGetValue(_name, out var exp))
+            stats.SetValue(StatTypes.EXP, exp, false);
+    }
+
+    public void SaveData(ref GameData data)
+    {
+        rank ??= GetComponent<Rank>();
+        if (rank == null)
+            return;
+
+        if (data.unitLevel.ContainsKey(_name))
+            data.unitLevel.Remove(_name);
+        data.unitLevel.Add(_name, rank.EXP);
+    }
 
     private void Awake()
     {
@@ -44,23 +60,5 @@ public class Unit : MonoBehaviour, IDataPersistence
     {
         transform.localPosition = tile.center;
         transform.localEulerAngles = dir.ToEuler();
-    }
-
-    public void LoadData(GameData data)
-    {
-        stats ??= GetComponent<Stats>();
-        if (stats != null && data.unitLevel.TryGetValue(_name, out var exp))
-            stats.SetValue(StatTypes.EXP, exp, false);
-    }
-
-    public void SaveData(ref GameData data)
-    {
-        rank ??= GetComponent<Rank>();
-        if (rank == null)
-            return;
-
-        if (data.unitLevel.ContainsKey(_name))
-            data.unitLevel.Remove(_name);
-        data.unitLevel.Add(_name, rank.EXP);
     }
 }

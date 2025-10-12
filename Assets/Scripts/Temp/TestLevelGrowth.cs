@@ -42,7 +42,7 @@ public class TestLevelGrowth : MonoBehaviour
             var actor = new GameObject(name);
             actor.AddComponent<Stats>();
             var rank = actor.AddComponent<Rank>();
-            rank.Init((int)Random.Range(1, 5));
+            rank.Init(Random.Range(1, 5));
             heroes.Add(actor);
         }
 

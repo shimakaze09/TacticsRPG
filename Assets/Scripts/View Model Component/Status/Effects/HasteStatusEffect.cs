@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class HasteStatusEffect : StatusEffect
+﻿public class HasteStatusEffect : StatusEffect
 {
     private Stats myStats;
 

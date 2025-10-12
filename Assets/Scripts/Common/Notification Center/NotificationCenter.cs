@@ -1,7 +1,5 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 /// <summary>
 /// This delegate is similar to an EventHandler:
 ///     The first parameter is the sender, 
@@ -22,12 +20,12 @@ public class NotificationCenter
     #region Properties
 
     /// <summary>
-    /// The dictionary "key" (string) represents a notificationName property to be observed
-    /// The dictionary "value" (SenderTable) maps between sender and observer sub tables
+    ///     The dictionary "key" (string) represents a notificationName property to be observed
+    ///     The dictionary "value" (SenderTable) maps between sender and observer sub tables
     /// </summary>
-    private Dictionary<string, SenderTable> _table = new();
+    private readonly Dictionary<string, SenderTable> _table = new();
 
-    private HashSet<List<Handler>> _invoking = new();
+    private readonly HashSet<List<Handler>> _invoking = new();
 
     #endregion
 

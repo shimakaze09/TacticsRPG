@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class SlowStatusEffect : StatusEffect
+﻿public class SlowStatusEffect : StatusEffect
 {
     private Stats myStats;
 

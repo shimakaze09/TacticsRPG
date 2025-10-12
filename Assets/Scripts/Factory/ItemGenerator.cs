@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -7,13 +6,13 @@ using Random = UnityEngine.Random;
 
 public class ItemGenerator : MonoBehaviour
 {
-    [SerializeField] private TextAsset weaponNames;
     [SerializeField] private Sprite[] icons;
     private string[] lines;
+    [SerializeField] private TextAsset weaponNames;
 
     private void Start()
     {
-        lines = weaponNames.text.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
+        lines = weaponNames.text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
         var items = new List<Item>(icons.Length);
         items.AddRange(icons.Select(Create));
 

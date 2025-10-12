@@ -1,13 +1,13 @@
-using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class TestItems : MonoBehaviour
 {
     #region Fields
 
-    private List<GameObject> inventory = new();
-    private List<GameObject> combatants = new();
+    private readonly List<GameObject> inventory = new();
+    private readonly List<GameObject> combatants = new();
 
     #endregion
 

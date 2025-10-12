@@ -1,18 +1,20 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Linq;
+﻿using System.Linq;
+using UnityEngine;
 
 public abstract class BaseVictoryCondition : MonoBehaviour
 {
-    #region Fields & Properties
+    #region Notification Handlers
 
-    public Alliances Victor
+    protected virtual void OnHPDidChangeNotification(object sender, object args)
     {
-        get => victor;
-        protected set => victor = value;
+        CheckForGameOver();
     }
 
-    private Alliances victor = Alliances.None;
+    #endregion
+
+    #region Fields & Properties
+
+    public Alliances Victor { get; protected set; } = Alliances.None;
 
     protected BattleController bc;
 
@@ -33,15 +35,6 @@ public abstract class BaseVictoryCondition : MonoBehaviour
     protected virtual void OnDisable()
     {
         this.RemoveObserver(OnHPDidChangeNotification, Stats.DidChangeNotification(StatTypes.HP));
-    }
-
-    #endregion
-
-    #region Notification Handlers
-
-    protected virtual void OnHPDidChangeNotification(object sender, object args)
-    {
-        CheckForGameOver();
     }
 
     #endregion

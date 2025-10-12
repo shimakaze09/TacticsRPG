@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 /// <summary>
-/// Assumes that all direct children are categories
-/// and that the direct children of categories
-/// are abilities
+///     Assumes that all direct children are categories
+///     and that the direct children of categories
+///     are abilities
 /// </summary>
 public class AbilityCatalog : MonoBehaviour
 {

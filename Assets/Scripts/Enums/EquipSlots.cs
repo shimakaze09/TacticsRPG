@@ -1,7 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System;
 
-[System.Flags]
+[Flags]
 public enum EquipSlots
 {
     None = 0,

@@ -1,11 +1,32 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class Tile : MonoBehaviour
 {
     #region Const
 
     public const float stepHeight = 0.25f;
+
+    #endregion
+
+    #region MonoBehaviour
+
+    private void Awake()
+    {
+        cachedRenderer = GetComponent<Renderer>();
+        if (cachedRenderer == null)
+            cachedRenderer = GetComponentInChildren<Renderer>();
+        propertyBlock = new MaterialPropertyBlock();
+    }
+
+    #endregion
+
+    #region Private
+
+    private void Match()
+    {
+        transform.localPosition = new Vector3(pos.x, height * stepHeight / 2f, pos.y);
+        transform.localScale = new Vector3(1, height * stepHeight, 1);
+    }
 
     #endregion
 
@@ -21,18 +42,6 @@ public class Tile : MonoBehaviour
     private Renderer cachedRenderer;
     private MaterialPropertyBlock propertyBlock;
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
-
-    #endregion
-
-    #region MonoBehaviour
-
-    private void Awake()
-    {
-        cachedRenderer = GetComponent<Renderer>();
-        if (cachedRenderer == null)
-            cachedRenderer = GetComponentInChildren<Renderer>();
-        propertyBlock = new MaterialPropertyBlock();
-    }
 
     #endregion
 
@@ -84,16 +93,6 @@ public class Tile : MonoBehaviour
         propertyBlock ??= new MaterialPropertyBlock();
         propertyBlock.SetColor(BaseColorId, color);
         cachedRenderer.SetPropertyBlock(propertyBlock);
-    }
-
-    #endregion
-
-    #region Private
-
-    private void Match()
-    {
-        transform.localPosition = new Vector3(pos.x, height * stepHeight / 2f, pos.y);
-        transform.localScale = new Vector3(1, height * stepHeight, 1);
     }
 
     #endregion

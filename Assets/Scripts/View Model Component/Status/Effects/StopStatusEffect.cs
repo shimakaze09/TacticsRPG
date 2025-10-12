@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class StopStatusEffect : StatusEffect
+﻿public class StopStatusEffect : StatusEffect
 {
     private Stats myStats;
 

@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class AddValueModifier : ValueModifier
+﻿public class AddValueModifier : ValueModifier
 {
     public readonly float toAdd;
 

@@ -1,8 +1,6 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TMPro;
+using UnityEngine;
 
 public class AbilityMenuPanelController : MonoBehaviour
 {
@@ -21,7 +19,7 @@ public class AbilityMenuPanelController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI titleLabel;
     [SerializeField] private Panel panel;
     [SerializeField] private GameObject canvas;
-    private List<AbilityMenuEntry> menuEntries = new(MenuCount);
+    private readonly List<AbilityMenuEntry> menuEntries = new(MenuCount);
     public int selection { get; private set; }
 
     #endregion
@@ -69,10 +67,11 @@ public class AbilityMenuPanelController : MonoBehaviour
                 Clear();
                 canvas.SetActive(false);
             }
+
             return;
         }
 
-        t.completedEvent += delegate (object sender, System.EventArgs e)
+        t.completedEvent += delegate
         {
             if (panel.CurrentPosition == panel[HideKey])
             {
@@ -167,6 +166,7 @@ public class AbilityMenuPanelController : MonoBehaviour
             t.duration = 0.5f;
             t.equation = EasingEquations.EaseOutQuad;
         }
+
         return t;
     }
 

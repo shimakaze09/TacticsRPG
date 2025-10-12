@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class ClampValueModifier : ValueModifier
 {
-    public readonly float min;
     public readonly float max;
+    public readonly float min;
 
     public ClampValueModifier(int sortOrder, float min, float max) : base(sortOrder)
     {

@@ -1,8 +1,7 @@
-﻿using UnityEngine;
-using UnityEditor;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Collections;
-using System.Collections.Generic;
+using UnityEditor;
+using UnityEngine;
 
 #if UNITY_EDITOR
 public class BoardCreator : MonoBehaviour
@@ -11,13 +10,13 @@ public class BoardCreator : MonoBehaviour
 
     [SerializeField] private GameObject tileViewPrefab;
     [SerializeField] private GameObject tileSelectionIndicatorPrefab;
-    [SerializeField] private int width = 10;
-    [SerializeField] private int depth = 10;
-    [SerializeField] private int height = 8;
+    [SerializeField] private readonly int width = 10;
+    [SerializeField] private readonly int depth = 10;
+    [SerializeField] private readonly int height = 8;
     [SerializeField] private Point _pos;
     [SerializeField] private LevelData levelData;
     [SerializeField] private string levelName;
-    private Dictionary<Point, Tile> tiles = new();
+    private readonly Dictionary<Point, Tile> tiles = new();
     private const string _defaultSkin = "Tile";
 
     public Point pos
@@ -130,8 +129,8 @@ public class BoardCreator : MonoBehaviour
         Clear();
 
         for (var i = 0; i < width; i++)
-            for (var j = 0; j < depth; j++)
-                GrowSingle(new Point(i, j));
+        for (var j = 0; j < depth; j++)
+            GrowSingle(new Point(i, j));
     }
 
     #endregion
@@ -150,21 +149,21 @@ public class BoardCreator : MonoBehaviour
     private void GrowRect(Rect rect)
     {
         for (var y = (int)rect.yMin; y < (int)rect.yMax; y++)
-            for (var x = (int)rect.xMin; x < (int)rect.xMax; x++)
-            {
-                var p = new Point(x, y);
-                GrowSingle(p);
-            }
+        for (var x = (int)rect.xMin; x < (int)rect.xMax; x++)
+        {
+            var p = new Point(x, y);
+            GrowSingle(p);
+        }
     }
 
     private void ShrinkRect(Rect rect)
     {
         for (var y = (int)rect.yMin; y < (int)rect.yMax; y++)
-            for (var x = (int)rect.xMin; x < (int)rect.xMax; x++)
-            {
-                var p = new Point(x, y);
-                ShrinkSingle(p);
-            }
+        for (var x = (int)rect.xMin; x < (int)rect.xMax; x++)
+        {
+            var p = new Point(x, y);
+            ShrinkSingle(p);
+        }
     }
 
     private Tile Create()

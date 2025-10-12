@@ -1,42 +1,8 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class Stats : MonoBehaviour
 {
-    #region Notifications
-
-    public static string WillChangeNotification(StatTypes type)
-    {
-        if (!_willChangeNotifications.ContainsKey(type))
-            _willChangeNotifications.Add(type, $"Stats.{type}WillChange");
-        return _willChangeNotifications[type];
-    }
-
-    public static string DidChangeNotification(StatTypes type)
-    {
-        if (!_didChangeNotifications.ContainsKey(type))
-            _didChangeNotifications.Add(type, $"Stats.{type}DidChange");
-        return _didChangeNotifications[type];
-    }
-
-    private static Dictionary<StatTypes, string> _willChangeNotifications = new();
-    private static Dictionary<StatTypes, string> _didChangeNotifications = new();
-
-    #endregion
-
-    #region Fields / Properties
-
-    public int this[StatTypes s]
-    {
-        get => _data[(int)s];
-        set => SetValue(s, value, true);
-    }
-
-    private int[] _data = new int[(int)StatTypes.Count];
-
-    #endregion
-
     #region Public
 
     public void SetValue(StatTypes type, int value, bool allowExceptions)
@@ -64,6 +30,39 @@ public class Stats : MonoBehaviour
         _data[(int)type] = value;
         this.PostNotification(DidChangeNotification(type), oldValue);
     }
+
+    #endregion
+
+    #region Notifications
+
+    public static string WillChangeNotification(StatTypes type)
+    {
+        if (!_willChangeNotifications.ContainsKey(type))
+            _willChangeNotifications.Add(type, $"Stats.{type}WillChange");
+        return _willChangeNotifications[type];
+    }
+
+    public static string DidChangeNotification(StatTypes type)
+    {
+        if (!_didChangeNotifications.ContainsKey(type))
+            _didChangeNotifications.Add(type, $"Stats.{type}DidChange");
+        return _didChangeNotifications[type];
+    }
+
+    private static readonly Dictionary<StatTypes, string> _willChangeNotifications = new();
+    private static readonly Dictionary<StatTypes, string> _didChangeNotifications = new();
+
+    #endregion
+
+    #region Fields / Properties
+
+    public int this[StatTypes s]
+    {
+        get => _data[(int)s];
+        set => SetValue(s, value, true);
+    }
+
+    private readonly int[] _data = new int[(int)StatTypes.Count];
 
     #endregion
 }

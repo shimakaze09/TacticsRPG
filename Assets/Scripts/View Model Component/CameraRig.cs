@@ -1,11 +1,10 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class CameraRig : MonoBehaviour
 {
-    public float speed = 3f;
-    public Transform follow;
     private Transform _transform;
+    public Transform follow;
+    public float speed = 3f;
 
     private void Awake()
     {

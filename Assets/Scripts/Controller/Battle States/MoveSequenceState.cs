@@ -1,10 +1,9 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 
 public class MoveSequenceState : BattleState
 {
-    private List<Tile> tiles = new();
+    private readonly List<Tile> tiles = new();
 
     public override void Enter()
     {

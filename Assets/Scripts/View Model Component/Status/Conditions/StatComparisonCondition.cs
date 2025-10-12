@@ -1,9 +1,17 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 
 public class StatComparisonCondition : StatusCondition
 {
+    #region Notification Handlers
+
+    private void OnStatChanged(object sender, object args)
+    {
+        if (condition != null && !condition())
+            Remove();
+    }
+
+    #endregion
+
     #region Fields
 
     public StatTypes type { get; private set; }
@@ -60,16 +68,6 @@ public class StatComparisonCondition : StatusCondition
     public bool GreaterThanOrEqualTo()
     {
         return stats[type] >= value;
-    }
-
-    #endregion
-
-    #region Notification Handlers
-
-    private void OnStatChanged(object sender, object args)
-    {
-        if (condition != null && !condition())
-            Remove();
     }
 
     #endregion

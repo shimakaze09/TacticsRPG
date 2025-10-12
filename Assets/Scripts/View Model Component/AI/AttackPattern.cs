@@ -1,11 +1,10 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class AttackPattern : MonoBehaviour
 {
-    public List<BaseAbilityPicker> pickers;
     private int index;
+    public List<BaseAbilityPicker> pickers;
 
     public void Pick(PlanOfAttack plan)
     {

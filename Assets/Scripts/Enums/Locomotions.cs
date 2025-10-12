@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public enum Locomotions
+﻿public enum Locomotions
 {
     Walk,
     Fly,

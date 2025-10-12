@@ -1,15 +1,14 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using System;
+﻿using System;
 using System.Collections;
 using TMPro;
+using UnityEngine;
 
 public class BattleMessageController : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI label;
     [SerializeField] private GameObject canvas;
-    [SerializeField] private CanvasGroup group;
     private EasingControl ec;
+    [SerializeField] private CanvasGroup group;
+    [SerializeField] private TextMeshProUGUI label;
 
     private void Awake()
     {

@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class DefeatTargetVictoryCondition : BaseVictoryCondition
+﻿public class DefeatTargetVictoryCondition : BaseVictoryCondition
 {
     public Unit target;
 

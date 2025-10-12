@@ -1,18 +1,8 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class ComputerPlayer : MonoBehaviour
 {
-    #region Fields
-
-    private BattleController bc;
-    private Unit actor => bc.turn.actor;
-    private Alliance alliance => actor.GetComponent<Alliance>();
-    private Unit nearestFoe;
-
-    #endregion
-
     #region MonoBehaviour
 
     private void Awake()
@@ -45,6 +35,15 @@ public class ComputerPlayer : MonoBehaviour
 
         return poa;
     }
+
+    #endregion
+
+    #region Fields
+
+    private BattleController bc;
+    private Unit actor => bc.turn.actor;
+    private Alliance alliance => actor.GetComponent<Alliance>();
+    private Unit nearestFoe;
 
     #endregion
 

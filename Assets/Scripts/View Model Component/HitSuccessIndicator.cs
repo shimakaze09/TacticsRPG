@@ -1,17 +1,16 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
-using TMPro;
 
 public class HitSuccessIndicator : MonoBehaviour
 {
     private const string ShowKey = "Show";
     private const string HideKey = "Hide";
+    [SerializeField] private Image arrow;
 
     [SerializeField] private Canvas canvas;
-    [SerializeField] private Panel panel;
-    [SerializeField] private Image arrow;
     [SerializeField] private TextMeshProUGUI label;
+    [SerializeField] private Panel panel;
     private Tweener transition;
 
     private void Start()
@@ -41,10 +40,7 @@ public class HitSuccessIndicator : MonoBehaviour
             return;
         }
 
-        transition.completedEvent += delegate (object sender, System.EventArgs e)
-        {
-            canvas.gameObject.SetActive(false);
-        };
+        transition.completedEvent += delegate { canvas.gameObject.SetActive(false); };
     }
 
     private bool TrySetPanelPos(string pos)

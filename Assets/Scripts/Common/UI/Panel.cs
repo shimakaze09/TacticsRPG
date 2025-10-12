@@ -1,7 +1,6 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 [RequireComponent(typeof(LayoutAnchor))]
 public class Panel : MonoBehaviour
@@ -11,10 +10,10 @@ public class Panel : MonoBehaviour
     [Serializable]
     public class Position
     {
-        public string name;
         public TextAnchor myAnchor;
-        public TextAnchor parentAnchor;
+        public string name;
         public Vector2 offset;
+        public TextAnchor parentAnchor;
 
         public Position(string name)
         {

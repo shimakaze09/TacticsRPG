@@ -1,11 +1,11 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class AbilityTargetState : BattleState
 {
-    private List<Tile> tiles;
     private AbilityRange ar;
+    private List<Tile> tiles;
 
     public override void Enter()
     {

@@ -1,5 +1,5 @@
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
 
 [CustomEditor(typeof(BoardCreator))]
 public class BoardCreatorInspector : Editor

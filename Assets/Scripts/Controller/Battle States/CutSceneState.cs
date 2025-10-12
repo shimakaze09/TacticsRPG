@@ -1,6 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System;
+using UnityEngine;
 
 public class CutSceneState : BattleState
 {
@@ -50,7 +49,7 @@ public class CutSceneState : BattleState
         conversationController.Next();
     }
 
-    private void OnCompleteConversation(object sender, System.EventArgs e)
+    private void OnCompleteConversation(object sender, EventArgs e)
     {
         if (IsBattleOver())
             owner.ChangeState<EndBattleState>();

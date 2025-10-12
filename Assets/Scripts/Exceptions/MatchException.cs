@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class MatchException : BaseException
+﻿public class MatchException : BaseException
 {
     public readonly Unit attacker;
     public readonly Unit target;

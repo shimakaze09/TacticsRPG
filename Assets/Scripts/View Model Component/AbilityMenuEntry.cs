@@ -1,13 +1,22 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
+﻿using System;
 using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class AbilityMenuEntry : MonoBehaviour
 {
+    #region Public
+
+    public void Reset()
+    {
+        State = States.None;
+    }
+
+    #endregion
+
     #region Enums
 
-    [System.Flags]
+    [Flags]
     private enum States
     {
         None = 0,
@@ -86,16 +95,6 @@ public class AbilityMenuEntry : MonoBehaviour
     [SerializeField] private Sprite selectedSprite;
     [SerializeField] private Sprite disabledSprite;
     [SerializeField] private TextMeshProUGUI label;
-
-    #endregion
-
-
-    #region Public
-
-    public void Reset()
-    {
-        State = States.None;
-    }
 
     #endregion
 }

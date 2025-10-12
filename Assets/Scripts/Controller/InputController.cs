@@ -1,14 +1,13 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
+using UnityEngine;
 
 internal class Repeater
 {
     private const float threshold = 0.5f;
     private const float rate = 0.25f;
-    private float _next;
+    private readonly string _axis;
     private bool _hold;
-    private string _axis;
+    private float _next;
 
     public Repeater(string axisName)
     {
@@ -41,12 +40,12 @@ internal class Repeater
 
 public class InputController : MonoBehaviour
 {
+    private readonly string[] _buttons = { "Fire1", "Fire2", "Fire3" };
+
+    private readonly Repeater _hor = new("Horizontal");
+    private readonly Repeater _ver = new("Vertical");
     public static event EventHandler<InfoEventArgs<Point>> moveEvent;
     public static event EventHandler<InfoEventArgs<int>> fireEvent;
-
-    private Repeater _hor = new("Horizontal");
-    private Repeater _ver = new("Vertical");
-    private string[] _buttons = { "Fire1", "Fire2", "Fire3" };
 
     private void Update()
     {

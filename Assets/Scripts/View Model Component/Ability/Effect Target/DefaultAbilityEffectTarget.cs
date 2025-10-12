@@ -1,6 +1,3 @@
-using UnityEngine;
-using System.Collections;
-
 public class DefaultAbilityEffectTarget : AbilityEffectTarget
 {
     public override bool IsTarget(Tile tile)

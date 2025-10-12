@@ -1,6 +1,5 @@
-using UnityEngine;
-using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class Equipment : MonoBehaviour
 {
@@ -14,7 +13,7 @@ public class Equipment : MonoBehaviour
     #region Fields / Properties
 
     public IList<Equippable> items => _items.AsReadOnly();
-    private List<Equippable> _items = new();
+    private readonly List<Equippable> _items = new();
 
     #endregion
 

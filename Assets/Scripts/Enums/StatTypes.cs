@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public enum StatTypes
+﻿public enum StatTypes
 {
     LVL, // Level
     EXP, // Experience

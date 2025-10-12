@@ -1,18 +1,16 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 public class Turn
 {
-    public Unit actor;
-    public bool hasUnitMoved;
-    public bool hasUnitActed;
-    public bool lockMove;
     public Ability ability;
-    public List<Tile> targets;
+    public Unit actor;
+    public bool hasUnitActed;
+    public bool hasUnitMoved;
+    public bool lockMove;
     public PlanOfAttack plan;
-    private Tile startTile;
     private Directions startDir;
+    private Tile startTile;
+    public List<Tile> targets;
 
     public void Change(Unit current)
     {

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,13 +5,13 @@ using UnityEngine.UI;
 public class ItemCell : MonoBehaviour
 {
     public const string BuyNotification = "ItemCell.BuyNotification";
+    [SerializeField] private TextMeshProUGUI atkLabel;
+    [SerializeField] private Image icon;
+    [SerializeField] private TextMeshProUGUI lvlLabel;
+    [SerializeField] private TextMeshProUGUI nameLabel;
+    [SerializeField] private TextMeshProUGUI priceLabel;
 
     public Item item { get; private set; }
-    [SerializeField] private Image icon;
-    [SerializeField] private TextMeshProUGUI nameLabel;
-    [SerializeField] private TextMeshProUGUI atkLabel;
-    [SerializeField] private TextMeshProUGUI lvlLabel;
-    [SerializeField] private TextMeshProUGUI priceLabel;
 
     public void Load(Item item)
     {

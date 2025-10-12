@@ -1,15 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public abstract class BaseAbilityPicker : MonoBehaviour
 {
-    #region Fields
-
-    protected Unit owner;
-    protected AbilityCatalog ac;
-
-    #endregion
-
     #region MonoBehaviour
 
     private void Start()
@@ -23,6 +15,13 @@ public abstract class BaseAbilityPicker : MonoBehaviour
     #region Public
 
     public abstract void Pick(PlanOfAttack plan);
+
+    #endregion
+
+    #region Fields
+
+    protected Unit owner;
+    protected AbilityCatalog ac;
 
     #endregion
 

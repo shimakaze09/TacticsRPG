@@ -1,7 +1,6 @@
-using System.Collections;
 using System;
-using UnityEngine;
 using TMPro;
+using UnityEngine;
 
 public static class TextMeshProAnimationExtension
 {
@@ -18,7 +17,7 @@ public static class TextMeshProAnimationExtension
     public static Tweener ChangeColor(this TextMeshProUGUI t, Color32 change, float duration,
         Func<float, float, float, float> equation)
     {
-        ColorTweener tweener = t.gameObject.AddComponent<ColorTweener>();
+        var tweener = t.gameObject.AddComponent<ColorTweener>();
         Color color;
 
         tweener.startTweenValue = t.color;

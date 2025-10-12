@@ -1,16 +1,15 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class StateMachine : MonoBehaviour
 {
+    protected State _currentState;
+    protected bool _inTransition;
+
     public virtual State CurrentState
     {
         get => _currentState;
         set => Transition(value);
     }
-
-    protected State _currentState;
-    protected bool _inTransition;
 
     public virtual T GetState<T>() where T : State
     {

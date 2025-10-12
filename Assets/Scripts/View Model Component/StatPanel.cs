@@ -1,19 +1,18 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
-using TMPro;
 
 public class StatPanel : MonoBehaviour
 {
-    public Panel panel;
     public Sprite allyBackground;
-    public Sprite enemyBackground;
-    public Image background;
     public Image avatar;
-    public TextMeshProUGUI nameLabel;
+    public Image background;
+    public Sprite enemyBackground;
     public TextMeshProUGUI hpLabel;
-    public TextMeshProUGUI mpLabel;
     public TextMeshProUGUI lvLabel;
+    public TextMeshProUGUI mpLabel;
+    public TextMeshProUGUI nameLabel;
+    public Panel panel;
 
     public void Display(GameObject obj)
     {

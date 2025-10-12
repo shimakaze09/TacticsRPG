@@ -1,14 +1,9 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 public abstract class BaseAbilityEffect : MonoBehaviour
 {
-    #region Classes
-
-    #endregion
-
     #region Consts & Notifications
 
     protected const int minDamage = -999;

@@ -1,14 +1,14 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
+﻿using System.Collections;
 using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class ConversationPanel : MonoBehaviour
 {
-    public TextMeshProUGUI message;
-    public Image speaker;
     public GameObject arrow;
+    public TextMeshProUGUI message;
     public Panel panel;
+    public Image speaker;
 
     private void Start()
     {

@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class FileDataHandler
 {
-    private string dataDirPath;
-    private string dataFileName;
+    private readonly string dataDirPath;
+    private readonly string dataFileName;
 
     public FileDataHandler(string dataDirPath, string dataFileName)
     {

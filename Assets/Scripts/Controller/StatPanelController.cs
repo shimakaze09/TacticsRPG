@@ -1,8 +1,36 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class StatPanelController : MonoBehaviour
 {
+    #region MonoBehaviour
+
+    private void Start()
+    {
+        if (primaryPanel.panel.CurrentPosition == null)
+            primaryPanel.panel.SetPosition(HideKey, false);
+        if (secondaryPanel.panel.CurrentPosition == null)
+            secondaryPanel.panel.SetPosition(HideKey, false);
+    }
+
+    #endregion
+
+    #region Private
+
+    private void MovePanel(StatPanel obj, string pos, ref Tweener t)
+    {
+        var target = obj.panel[pos];
+        if (obj.panel.CurrentPosition != target)
+        {
+            if (t != null)
+                t.Stop();
+            t = obj.panel.SetPosition(pos, true);
+            t.duration = 0.5f;
+            t.equation = EasingEquations.EaseOutQuad;
+        }
+    }
+
+    #endregion
+
     #region Const
 
     private const string ShowKey = "Show";
@@ -17,18 +45,6 @@ public class StatPanelController : MonoBehaviour
 
     private Tweener primaryTransition;
     private Tweener secondaryTransition;
-
-    #endregion
-
-    #region MonoBehaviour
-
-    private void Start()
-    {
-        if (primaryPanel.panel.CurrentPosition == null)
-            primaryPanel.panel.SetPosition(HideKey, false);
-        if (secondaryPanel.panel.CurrentPosition == null)
-            secondaryPanel.panel.SetPosition(HideKey, false);
-    }
 
     #endregion
 
@@ -54,23 +70,6 @@ public class StatPanelController : MonoBehaviour
     public void HideSecondary()
     {
         MovePanel(secondaryPanel, HideKey, ref secondaryTransition);
-    }
-
-    #endregion
-
-    #region Private
-
-    private void MovePanel(StatPanel obj, string pos, ref Tweener t)
-    {
-        var target = obj.panel[pos];
-        if (obj.panel.CurrentPosition != target)
-        {
-            if (t != null)
-                t.Stop();
-            t = obj.panel.SetPosition(pos, true);
-            t.duration = 0.5f;
-            t.equation = EasingEquations.EaseOutQuad;
-        }
     }
 
     #endregion

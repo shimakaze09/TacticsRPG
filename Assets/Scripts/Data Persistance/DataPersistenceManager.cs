@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class DataPersistenceManager : MonoBehaviour
 {
-    [Header("File Storage Config")]
-    [SerializeField]
+    private readonly List<IDataPersistence> dataPersistenceObjects = new();
+    private FileDataHandler dataHandler;
+
+    [Header("File Storage Config")] [SerializeField]
     private string fileName;
 
     private GameData gameData;
-    private readonly List<IDataPersistence> dataPersistenceObjects = new();
-    private FileDataHandler dataHandler;
 
     public static DataPersistenceManager Instance { get; private set; }
 

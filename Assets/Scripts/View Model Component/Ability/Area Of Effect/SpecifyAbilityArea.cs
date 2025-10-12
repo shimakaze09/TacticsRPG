@@ -1,12 +1,11 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class SpecifyAbilityArea : AbilityArea
 {
     public int horizontal;
-    public int vertical;
     private Tile tile;
+    public int vertical;
 
     public override List<Tile> GetTilesInArea(Board board, Point pos)
     {

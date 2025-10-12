@@ -1,8 +1,21 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class AbsorbDamageAbilityEffectTarget : BaseAbilityEffect
+﻿public class AbsorbDamageAbilityEffectTarget : BaseAbilityEffect
 {
+    #region Private
+
+    private BaseAbilityEffect GetTrackedEffect()
+    {
+        var owner = GetComponentInParent<Ability>().transform;
+        if (trackedSiblingIndex >= 0 && trackedSiblingIndex < owner.childCount)
+        {
+            var sibling = owner.GetChild(trackedSiblingIndex);
+            return sibling.GetComponent<BaseAbilityEffect>();
+        }
+
+        return null;
+    }
+
+    #endregion
+
     #region Fields
 
     public int trackedSiblingIndex;
@@ -58,22 +71,6 @@ public class AbsorbDamageAbilityEffectTarget : BaseAbilityEffect
     private void OnEffectMiss(object sender, object args)
     {
         amount = 0;
-    }
-
-    #endregion
-
-    #region Private
-
-    private BaseAbilityEffect GetTrackedEffect()
-    {
-        var owner = GetComponentInParent<Ability>().transform;
-        if (trackedSiblingIndex >= 0 && trackedSiblingIndex < owner.childCount)
-        {
-            var sibling = owner.GetChild(trackedSiblingIndex);
-            return sibling.GetComponent<BaseAbilityEffect>();
-        }
-
-        return null;
     }
 
     #endregion

@@ -1,29 +1,10 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 public class TurnOrderController : MonoBehaviour
 {
-    #region Constants
-
-    private const int turnActivation = 1000;
-    private const int turnCost = 500;
-    private const int moveCost = 300;
-    private const int actionCost = 200;
-
-    #endregion
-
-    #region Notifications
-
-    public const string RoundBeganNotification = "TurnOrderController.roundBegan";
-    public const string TurnCheckNotification = "TurnOrderController.turnCheck";
-    public const string TurnBeganNotification = "TurnOrderController.TurnBeganNotification";
-    public const string TurnCompletedNotification = "TurnOrderController.turnCompleted";
-    public const string RoundEndedNotification = "TurnOrderController.roundEnded";
-
-    #endregion
-
     #region Public
 
     public IEnumerator Round()
@@ -63,6 +44,25 @@ public class TurnOrderController : MonoBehaviour
             this.PostNotification(RoundEndedNotification);
         }
     }
+
+    #endregion
+
+    #region Constants
+
+    private const int turnActivation = 1000;
+    private const int turnCost = 500;
+    private const int moveCost = 300;
+    private const int actionCost = 200;
+
+    #endregion
+
+    #region Notifications
+
+    public const string RoundBeganNotification = "TurnOrderController.roundBegan";
+    public const string TurnCheckNotification = "TurnOrderController.turnCheck";
+    public const string TurnBeganNotification = "TurnOrderController.TurnBeganNotification";
+    public const string TurnCompletedNotification = "TurnOrderController.turnCompleted";
+    public const string RoundEndedNotification = "TurnOrderController.roundEnded";
 
     #endregion
 

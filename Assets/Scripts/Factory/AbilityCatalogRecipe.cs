@@ -1,14 +1,14 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System;
+using UnityEngine;
 
 public class AbilityCatalogRecipe : ScriptableObject
 {
-    [System.Serializable]
+    public Category[] categories;
+
+    [Serializable]
     public class Category
     {
-        public string name;
         public string[] entries;
+        public string name;
     }
-
-    public Category[] categories;
 }

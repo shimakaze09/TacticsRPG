@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class FullTypeHitRate : HitRate
+﻿public class FullTypeHitRate : HitRate
 {
     public override bool IsAngleBased => false;
 

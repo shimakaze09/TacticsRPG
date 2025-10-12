@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class Info<T0>
+﻿public class Info<T0>
 {
     public T0 arg0;
 

@@ -1,12 +1,26 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections;
+using UnityEngine;
 
 public class ConversationController : MonoBehaviour
 {
     #region Events
 
     public static event EventHandler completeEvent;
+
+    #endregion
+
+    #region MonoBehaviour
+
+    private void Start()
+    {
+        canvas = GetComponentInChildren<Canvas>();
+        if (leftPanel.panel.CurrentPosition == null)
+            leftPanel.panel.SetPosition(HideBottom, false);
+        if (rightPanel.panel.CurrentPosition == null)
+            rightPanel.panel.SetPosition(HideBottom, false);
+        canvas.gameObject.SetActive(false);
+    }
 
     #endregion
 
@@ -27,20 +41,6 @@ public class ConversationController : MonoBehaviour
     private Canvas canvas;
     private IEnumerator conversation;
     private Tweener transition;
-
-    #endregion
-
-    #region MonoBehaviour
-
-    private void Start()
-    {
-        canvas = GetComponentInChildren<Canvas>();
-        if (leftPanel.panel.CurrentPosition == null)
-            leftPanel.panel.SetPosition(HideBottom, false);
-        if (rightPanel.panel.CurrentPosition == null)
-            rightPanel.panel.SetPosition(HideBottom, false);
-        canvas.gameObject.SetActive(false);
-    }
 
     #endregion
 
@@ -96,7 +96,7 @@ public class ConversationController : MonoBehaviour
                 yield return null;
 
             MovePanel(currentPanel, hide);
-            transition.completedEvent += delegate(object sender, EventArgs e) { conversation.MoveNext(); };
+            transition.completedEvent += delegate { conversation.MoveNext(); };
 
             yield return null;
         }

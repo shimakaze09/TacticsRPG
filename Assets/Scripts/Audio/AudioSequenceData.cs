@@ -1,8 +1,17 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class AudioSequenceData
 {
+    #region Constructor
+
+    public AudioSequenceData(AudioSource source)
+    {
+        this.source = source;
+        startTime = -1;
+    }
+
+    #endregion
+
     #region Fields & Properties
 
     public double startTime { get; private set; }
@@ -11,16 +20,6 @@ public class AudioSequenceData
     public bool isScheduled => startTime > 0;
 
     public double endTime => startTime + source.clip.length;
-
-    #endregion
-
-    #region Constructor
-
-    public AudioSequenceData(AudioSource source)
-    {
-        this.source = source;
-        startTime = -1;
-    }
 
     #endregion
 

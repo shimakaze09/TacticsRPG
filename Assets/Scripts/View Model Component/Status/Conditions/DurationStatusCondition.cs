@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class DurationStatusCondition : StatusCondition
+﻿public class DurationStatusCondition : StatusCondition
 {
     public int duration = 10;
 

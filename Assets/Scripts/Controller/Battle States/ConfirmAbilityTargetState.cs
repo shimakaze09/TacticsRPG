@@ -1,13 +1,13 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 public class ConfirmAbilityTargetState : BattleState
 {
-    private List<Tile> tiles;
     private AbilityArea aa;
     private int index;
+    private List<Tile> tiles;
 
     public override void Enter()
     {

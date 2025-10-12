@@ -1,6 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class AudioSequence : MonoBehaviour
 {
@@ -17,7 +16,7 @@ public class AudioSequence : MonoBehaviour
 
     #region Fields
 
-    private Dictionary<AudioClip, AudioSequenceData> playMap = new();
+    private readonly Dictionary<AudioClip, AudioSequenceData> playMap = new();
     private PlayMode playMode = PlayMode.Stopped;
     private double pauseTime;
 
@@ -121,8 +120,7 @@ public class AudioSequence : MonoBehaviour
         var lastToPlay = GetLast();
         if (lastToPlay != null && lastToPlay.endTime > AudioSettings.dspTime)
             return lastToPlay.endTime;
-        else
-            return AudioSettings.dspTime;
+        return AudioSettings.dspTime;
     }
 
     #endregion

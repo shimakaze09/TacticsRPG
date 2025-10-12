@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class AudioSourceVolumeTweener : Tweener
 {
+    protected AudioSource _source;
+
     public AudioSource source
     {
         get
@@ -13,8 +14,6 @@ public class AudioSourceVolumeTweener : Tweener
         }
         set => _source = value;
     }
-
-    protected AudioSource _source;
 
     protected override void OnUpdate()
     {

@@ -1,10 +1,10 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
+using UnityEngine;
 
 public class InflictAbilityEffect : BaseAbilityEffect
 {
-    public string statusName;
     public int duration;
+    public string statusName;
 
     public override int Predict(Tile target)
     {

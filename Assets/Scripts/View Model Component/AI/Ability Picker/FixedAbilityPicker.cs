@@ -1,10 +1,7 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class FixedAbilityPicker : BaseAbilityPicker
+﻿public class FixedAbilityPicker : BaseAbilityPicker
 {
-    public Targets target;
     public string ability;
+    public Targets target;
 
     public override void Pick(PlanOfAttack plan)
     {

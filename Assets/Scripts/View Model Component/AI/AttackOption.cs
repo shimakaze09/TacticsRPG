@@ -1,7 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 public class AttackOption
 {
@@ -9,8 +8,8 @@ public class AttackOption
 
     private class Mark
     {
-        public Tile tile;
-        public bool isMatch;
+        public readonly bool isMatch;
+        public readonly Tile tile;
 
         public Mark(Tile tile, bool isMatch)
         {
@@ -29,8 +28,8 @@ public class AttackOption
     public bool isCasterMatch;
     public Tile bestMoveTile { get; private set; }
     public int bestAngleBasedScore { get; private set; }
-    private List<Mark> marks = new();
-    private List<Tile> moveTargets = new();
+    private readonly List<Mark> marks = new();
+    private readonly List<Tile> moveTargets = new();
 
     #endregion
 

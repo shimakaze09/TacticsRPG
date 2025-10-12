@@ -1,6 +1,6 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections;
+using UnityEngine;
 
 public class AudioTracker : MonoBehaviour
 {
@@ -105,7 +105,7 @@ public class AudioTracker : MonoBehaviour
         else
             AudioSourcePaused();
 
-        if (isPlaying == false && autoStop == true)
+        if (isPlaying == false && autoStop)
             StopCoroutine(trackingCoroutine);
     }
 

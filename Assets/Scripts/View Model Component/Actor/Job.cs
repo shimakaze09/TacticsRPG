@@ -1,68 +1,12 @@
 using UnityEngine;
-using System.Collections;
 
 public class Job : MonoBehaviour
 {
-    #region Fields / Properties
-
-    public static readonly StatTypes[] statOrder =
-    {
-        StatTypes.MHP,
-        StatTypes.MMP,
-        StatTypes.ATK,
-        StatTypes.DEF,
-        StatTypes.MAT,
-        StatTypes.MDF,
-        StatTypes.SPD
-    };
-
-    public int[] baseStats = new int[statOrder.Length];
-    public float[] growStats = new float[statOrder.Length];
-    private Stats stats;
-
-    #endregion
-
     #region MonoBehaviour
 
     private void OnDestroy()
     {
         this.RemoveObserver(OnLvlChangeNotification, Stats.DidChangeNotification(StatTypes.LVL), stats);
-    }
-
-    #endregion
-
-    #region Public
-
-    public void Employ()
-    {
-        stats = gameObject.GetComponentInParent<Stats>();
-        this.AddObserver(OnLvlChangeNotification, Stats.DidChangeNotification(StatTypes.LVL), stats);
-
-        var features = GetComponentsInChildren<Feature>();
-        for (var i = 0; i < features.Length; i++)
-            features[i].Activate(gameObject);
-    }
-
-    public void UnEmploy()
-    {
-        var features = GetComponentsInChildren<Feature>();
-        for (var i = 0; i < features.Length; i++)
-            features[i].Deactivate();
-
-        this.RemoveObserver(OnLvlChangeNotification, Stats.DidChangeNotification(StatTypes.LVL), stats);
-        stats = null;
-    }
-
-    public void LoadDefaultStats()
-    {
-        for (var i = 0; i < statOrder.Length; i++)
-        {
-            var type = statOrder[i];
-            stats.SetValue(type, baseStats[i], false);
-        }
-
-        stats.SetValue(StatTypes.HP, stats[StatTypes.MHP], false);
-        stats.SetValue(StatTypes.MP, stats[StatTypes.MMP], false);
     }
 
     #endregion
@@ -96,6 +40,61 @@ public class Job : MonoBehaviour
                 value++;
 
             stats.SetValue(type, value, false);
+        }
+
+        stats.SetValue(StatTypes.HP, stats[StatTypes.MHP], false);
+        stats.SetValue(StatTypes.MP, stats[StatTypes.MMP], false);
+    }
+
+    #endregion
+
+    #region Fields / Properties
+
+    public static readonly StatTypes[] statOrder =
+    {
+        StatTypes.MHP,
+        StatTypes.MMP,
+        StatTypes.ATK,
+        StatTypes.DEF,
+        StatTypes.MAT,
+        StatTypes.MDF,
+        StatTypes.SPD
+    };
+
+    public int[] baseStats = new int[statOrder.Length];
+    public float[] growStats = new float[statOrder.Length];
+    private Stats stats;
+
+    #endregion
+
+    #region Public
+
+    public void Employ()
+    {
+        stats = gameObject.GetComponentInParent<Stats>();
+        this.AddObserver(OnLvlChangeNotification, Stats.DidChangeNotification(StatTypes.LVL), stats);
+
+        var features = GetComponentsInChildren<Feature>();
+        for (var i = 0; i < features.Length; i++)
+            features[i].Activate(gameObject);
+    }
+
+    public void UnEmploy()
+    {
+        var features = GetComponentsInChildren<Feature>();
+        for (var i = 0; i < features.Length; i++)
+            features[i].Deactivate();
+
+        this.RemoveObserver(OnLvlChangeNotification, Stats.DidChangeNotification(StatTypes.LVL), stats);
+        stats = null;
+    }
+
+    public void LoadDefaultStats()
+    {
+        for (var i = 0; i < statOrder.Length; i++)
+        {
+            var type = statOrder[i];
+            stats.SetValue(type, baseStats[i], false);
         }
 
         stats.SetValue(StatTypes.HP, stats[StatTypes.MHP], false);

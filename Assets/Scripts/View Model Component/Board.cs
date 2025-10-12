@@ -1,7 +1,6 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class Board : MonoBehaviour
 {
@@ -13,7 +12,7 @@ public class Board : MonoBehaviour
     private Point _min;
     private Point _max;
 
-    private Point[] dirs = new Point[4]
+    private readonly Point[] dirs = new Point[4]
     {
         new(0, 1),
         new(0, -1),
@@ -21,9 +20,9 @@ public class Board : MonoBehaviour
         new(-1, 0)
     };
 
-    private Color selectedTileColor = new(0, 1, 1, 1);
-    private Color confirmedTileColor = new(1, 0.5f, 0.5f, 1);
-    private Color defaultTileColor = new(1, 1, 1, 1);
+    private readonly Color selectedTileColor = new(0, 1, 1, 1);
+    private readonly Color confirmedTileColor = new(1, 0.5f, 0.5f, 1);
+    private readonly Color defaultTileColor = new(1, 1, 1, 1);
 
     #endregion
 
@@ -45,6 +44,7 @@ public class Board : MonoBehaviour
                 Debug.LogError($"No block prefab found for key '{prefabName}'.");
                 continue;
             }
+
             var instance = Instantiate(variableForPrefab);
             instance.transform.SetParent(transform);
             var t = instance.GetComponent<Tile>();

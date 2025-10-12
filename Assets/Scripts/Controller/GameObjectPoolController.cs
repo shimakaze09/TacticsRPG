@@ -1,9 +1,20 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class GameObjectPoolController : MonoBehaviour
 {
+    #region MonoBehaviour
+
+    private void Awake()
+    {
+        if (instance != null && instance != this)
+            Destroy(gameObject);
+        else
+            instance = this;
+    }
+
+    #endregion
+
     #region Fields / Properties
 
     private static GameObjectPoolController Instance
@@ -18,22 +29,7 @@ public class GameObjectPoolController : MonoBehaviour
 
     private static GameObjectPoolController instance;
 
-    private static Dictionary<string, PoolData> pools = new();
-
-    #endregion
-
-    #region MonoBehaviour
-
-    private void Awake()
-    {
-        if (instance != null && instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        else
-            instance = this;
-    }
+    private static readonly Dictionary<string, PoolData> pools = new();
 
     #endregion
 

@@ -1,18 +1,7 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 public class ValueChangeException : BaseException
 {
-    #region Fields / Properteis
-
-    public readonly float fromValue;
-    public readonly float toValue;
-    public float delta => toValue - fromValue;
-    private List<ValueModifier> modifiers;
-
-    #endregion
-
     #region Constructor
 
     public ValueChangeException(float fromValue, float toValue) : base(true)
@@ -20,6 +9,24 @@ public class ValueChangeException : BaseException
         this.fromValue = fromValue;
         this.toValue = toValue;
     }
+
+    #endregion
+
+    #region Private
+
+    private int Compare(ValueModifier x, ValueModifier y)
+    {
+        return x.sortOrder.CompareTo(y.sortOrder);
+    }
+
+    #endregion
+
+    #region Fields / Properteis
+
+    public readonly float fromValue;
+    public readonly float toValue;
+    public float delta => toValue - fromValue;
+    private List<ValueModifier> modifiers;
 
     #endregion
 
@@ -43,15 +50,6 @@ public class ValueChangeException : BaseException
             value = modifiers[i].Modify(fromValue, value);
 
         return value;
-    }
-
-    #endregion
-
-    #region Private
-
-    private int Compare(ValueModifier x, ValueModifier y)
-    {
-        return x.sortOrder.CompareTo(y.sortOrder);
     }
 
     #endregion

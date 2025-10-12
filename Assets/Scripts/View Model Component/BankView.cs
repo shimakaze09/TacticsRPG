@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using TMPro;
 using UnityEngine;
 
@@ -52,7 +51,7 @@ public class BankView : MonoBehaviour
         ec.Play();
     }
 
-    private void OnEasingUpdate(object sender, System.EventArgs e)
+    private void OnEasingUpdate(object sender, EventArgs e)
     {
         if (ec.IsPlaying)
         {

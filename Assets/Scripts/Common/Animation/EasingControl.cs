@@ -1,6 +1,6 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections;
+using UnityEngine;
 
 public class EasingControl : MonoBehaviour
 {
@@ -20,7 +20,7 @@ public class EasingControl : MonoBehaviour
         Normal,
         Real,
         Fixed
-    };
+    }
 
     public enum PlayState
     {
@@ -28,19 +28,19 @@ public class EasingControl : MonoBehaviour
         Paused,
         Playing,
         Reversing
-    };
+    }
 
     public enum EndBehaviour
     {
         Constant,
         Reset
-    };
+    }
 
     public enum LoopType
     {
         Repeat,
         PingPong
-    };
+    }
 
     #endregion
 

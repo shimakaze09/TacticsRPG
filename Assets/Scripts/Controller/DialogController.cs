@@ -1,18 +1,16 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class DialogController : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI titleLabel;
-    [SerializeField] private TextMeshProUGUI messageLabel;
-    [SerializeField] private Transform content;
     [SerializeField] private GameObject blocker;
-    private Tweener tweener;
-    private Action onConfirm;
+    [SerializeField] private Transform content;
+    [SerializeField] private TextMeshProUGUI messageLabel;
     private Action onCancel;
+    private Action onConfirm;
+    [SerializeField] private TextMeshProUGUI titleLabel;
+    private Tweener tweener;
 
     private void Start()
     {

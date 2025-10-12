@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class Demo : MonoBehaviour
 {
-    private Unit cursedUnit;
     private Equippable cursedItem;
+    private Unit cursedUnit;
     private int step;
 
     private void OnEnable()

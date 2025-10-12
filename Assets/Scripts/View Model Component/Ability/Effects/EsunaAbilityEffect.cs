@@ -1,10 +1,10 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 
 public class EsunaAbilityEffect : BaseAbilityEffect
 {
+    private static HashSet<Type> _curableTypes;
+
     private static HashSet<Type> CurableTypes
     {
         get
@@ -19,8 +19,6 @@ public class EsunaAbilityEffect : BaseAbilityEffect
             return _curableTypes;
         }
     }
-
-    private static HashSet<Type> _curableTypes;
 
     public override int Predict(Tile target)
     {

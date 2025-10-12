@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class DefeatAllEnemiesVictoryCondition : BaseVictoryCondition
+﻿public class DefeatAllEnemiesVictoryCondition : BaseVictoryCondition
 {
     protected override void CheckForGameOver()
     {
