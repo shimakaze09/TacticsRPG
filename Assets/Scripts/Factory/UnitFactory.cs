@@ -1,16 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
-using System.IO;
-using System.Collections;
 using Object = UnityEngine.Object;
 
 public static class UnitFactory
 {
+    #region Cached Resources
+
+    private static readonly Dictionary<string, GameObject> prefabCache = new();
+    private static readonly Dictionary<string, UnitRecipe> unitRecipeCache = new();
+    private static readonly Dictionary<string, AbilityCatalogRecipe> abilityCatalogCache = new();
+
+    #endregion
+
     #region Public
 
     public static GameObject Create(string name, int level)
     {
-        var recipe = Resources.Load<UnitRecipe>("Unit Recipes/" + name);
+        var recipe = LoadUnitRecipe(name);
         if (recipe == null)
         {
             Debug.LogError("No Unit Recipe for name: " + name);
@@ -45,9 +52,37 @@ public static class UnitFactory
 
     #region Private
 
+    private static UnitRecipe LoadUnitRecipe(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+            return null;
+
+        if (!unitRecipeCache.TryGetValue(name, out var recipe) || recipe == null)
+        {
+            recipe = Resources.Load<UnitRecipe>("Unit Recipes/" + name);
+            unitRecipeCache[name] = recipe;
+        }
+
+        return recipe;
+    }
+
+    private static AbilityCatalogRecipe LoadAbilityCatalogRecipe(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+            return null;
+
+        if (!abilityCatalogCache.TryGetValue(name, out var recipe) || recipe == null)
+        {
+            recipe = Resources.Load<AbilityCatalogRecipe>("Ability Catalog Recipes/" + name);
+            abilityCatalogCache[name] = recipe;
+        }
+
+        return recipe;
+    }
+
     private static GameObject InstantiatePrefab(string name)
     {
-        var prefab = Resources.Load<GameObject>(name);
+        var prefab = LoadPrefab(name);
         if (prefab == null)
         {
             Debug.LogError("No Prefab for name: " + name);
@@ -57,6 +92,17 @@ public static class UnitFactory
         var instance = Object.Instantiate(prefab);
         instance.name = instance.name.Replace("(Clone)", "");
         return instance;
+    }
+
+    private static GameObject LoadPrefab(string path)
+    {
+        if (!prefabCache.TryGetValue(path, out var prefab) || prefab == null)
+        {
+            prefab = Resources.Load<GameObject>(path);
+            prefabCache[path] = prefab;
+        }
+
+        return prefab;
     }
 
     private static void AddStats(GameObject obj)
@@ -114,7 +160,7 @@ public static class UnitFactory
         main.transform.SetParent(obj.transform);
         main.AddComponent<AbilityCatalog>();
 
-        var recipe = Resources.Load<AbilityCatalogRecipe>("Ability Catalog Recipes/" + name);
+        var recipe = LoadAbilityCatalogRecipe(name);
         if (recipe == null)
         {
             Debug.LogError("No Ability Catalog Recipe Found: " + name);

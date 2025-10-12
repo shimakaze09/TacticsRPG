@@ -3,14 +3,22 @@ using System.Collections;
 
 public class SelectUnitState : BattleState
 {
+    private Coroutine changeUnitRoutine;
+
     public override void Enter()
     {
         base.Enter();
-        StartCoroutine("ChangeCurrentUnit");
+        changeUnitRoutine = StartCoroutine(ChangeCurrentUnit());
     }
 
     public override void Exit()
     {
+        if (changeUnitRoutine != null)
+        {
+            StopCoroutine(changeUnitRoutine);
+            changeUnitRoutine = null;
+        }
+
         base.Exit();
         statPanelController.HidePrimary();
     }
@@ -22,5 +30,7 @@ public class SelectUnitState : BattleState
         RefreshPrimaryStatPanel(pos);
         yield return null;
         owner.ChangeState<CommandSelectionState>();
+
+        changeUnitRoutine = null;
     }
 }

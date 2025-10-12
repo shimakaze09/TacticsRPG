@@ -6,6 +6,16 @@ public class PlayerProgress : MonoBehaviour, IDataPersistence
 {
     private float playTime;
 
+    private void OnEnable()
+    {
+        DataPersistenceManager.Register(this);
+    }
+
+    private void OnDisable()
+    {
+        DataPersistenceManager.Unregister(this);
+    }
+
     private void Update()
     {
         playTime += Time.deltaTime;

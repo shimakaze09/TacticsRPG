@@ -30,25 +30,37 @@ public class HitSuccessIndicator : MonoBehaviour
     public void Show()
     {
         canvas.gameObject.SetActive(true);
-        SetPanelPos(ShowKey);
+        TrySetPanelPos(ShowKey);
     }
 
     public void Hide()
     {
-        SetPanelPos(HideKey);
-        transition.completedEvent += delegate(object sender, System.EventArgs e)
+        if (!TrySetPanelPos(HideKey))
+        {
+            canvas.gameObject.SetActive(false);
+            return;
+        }
+
+        transition.completedEvent += delegate (object sender, System.EventArgs e)
         {
             canvas.gameObject.SetActive(false);
         };
     }
 
-    private void SetPanelPos(string pos)
+    private bool TrySetPanelPos(string pos)
     {
         if (transition != null && transition.IsPlaying)
+        {
             transition.Stop();
+            transition = null;
+        }
 
         transition = panel.SetPosition(pos, true);
+        if (transition == null)
+            return false;
+
         transition.duration = 0.5f;
         transition.equation = EasingEquations.EaseInOutQuad;
+        return true;
     }
 }

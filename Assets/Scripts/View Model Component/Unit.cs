@@ -7,10 +7,24 @@ public class Unit : MonoBehaviour, IDataPersistence
     public Directions dir;
 
     private string _name;
+    private Stats stats;
+    private Rank rank;
 
-    private void Start()
+    private void Awake()
     {
         _name = gameObject.name;
+        stats = GetComponent<Stats>();
+        rank = GetComponent<Rank>();
+    }
+
+    private void OnEnable()
+    {
+        DataPersistenceManager.Register(this);
+    }
+
+    private void OnDisable()
+    {
+        DataPersistenceManager.Unregister(this);
     }
 
     public void Place(Tile target)
@@ -34,14 +48,19 @@ public class Unit : MonoBehaviour, IDataPersistence
 
     public void LoadData(GameData data)
     {
-        if (data.unitLevel.TryGetValue(_name, out var exp))
-            GetComponent<Stats>().SetValue(StatTypes.EXP, exp, false);
+        stats ??= GetComponent<Stats>();
+        if (stats != null && data.unitLevel.TryGetValue(_name, out var exp))
+            stats.SetValue(StatTypes.EXP, exp, false);
     }
 
     public void SaveData(ref GameData data)
     {
+        rank ??= GetComponent<Rank>();
+        if (rank == null)
+            return;
+
         if (data.unitLevel.ContainsKey(_name))
             data.unitLevel.Remove(_name);
-        data.unitLevel.Add(_name, GetComponent<Rank>().EXP);
+        data.unitLevel.Add(_name, rank.EXP);
     }
 }

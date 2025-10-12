@@ -28,6 +28,8 @@ public class Tile : MonoBehaviour
     private void Awake()
     {
         cachedRenderer = GetComponent<Renderer>();
+        if (cachedRenderer == null)
+            cachedRenderer = GetComponentInChildren<Renderer>();
         propertyBlock = new MaterialPropertyBlock();
     }
 
@@ -62,7 +64,11 @@ public class Tile : MonoBehaviour
     public void SetColor(Color color)
     {
         if (cachedRenderer == null)
-            return;
+        {
+            cachedRenderer = GetComponentInChildren<Renderer>();
+            if (cachedRenderer == null)
+                return;
+        }
 
         propertyBlock ??= new MaterialPropertyBlock();
         propertyBlock.SetColor(BaseColorId, color);

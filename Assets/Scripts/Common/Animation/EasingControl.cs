@@ -64,6 +64,8 @@ public class EasingControl : MonoBehaviour
     public float currentOffset { get; private set; }
     public int loops { get; private set; }
 
+    private Coroutine tickerRoutine;
+
     #endregion
 
     #region MonoBehaviour
@@ -170,9 +172,14 @@ public class EasingControl : MonoBehaviour
             previousPlayState = playState;
             playState = target;
             OnStateChange();
-            StopCoroutine("Ticker");
+            if (tickerRoutine != null)
+            {
+                StopCoroutine(tickerRoutine);
+                tickerRoutine = null;
+            }
+
             if (IsPlaying)
-                StartCoroutine("Ticker");
+                tickerRoutine = StartCoroutine(Ticker());
         }
         else
         {

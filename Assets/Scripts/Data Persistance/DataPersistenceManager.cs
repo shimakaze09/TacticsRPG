@@ -1,7 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Linq;
+using UnityEngine;
 
 public class DataPersistenceManager : MonoBehaviour
 {
@@ -10,7 +9,7 @@ public class DataPersistenceManager : MonoBehaviour
     private string fileName;
 
     private GameData gameData;
-    private List<IDataPersistence> dataPersistenceObjects;
+    private readonly List<IDataPersistence> dataPersistenceObjects = new();
     private FileDataHandler dataHandler;
 
     public static DataPersistenceManager Instance { get; private set; }
@@ -33,8 +32,7 @@ public class DataPersistenceManager : MonoBehaviour
     private void Start()
     {
         dataHandler = new FileDataHandler(Application.persistentDataPath, fileName);
-        dataHandler = new FileDataHandler(Application.persistentDataPath, fileName);
-        RefreshPersistenceObjects();
+        RegisterExistingSceneObjects();
         LoadGame();
     }
 
@@ -54,7 +52,7 @@ public class DataPersistenceManager : MonoBehaviour
 
     public void LoadGame()
     {
-        RefreshPersistenceObjects();
+        PruneNullEntries();
 
         // load any saved data from a file using the data handler
         gameData = dataHandler.Load();
@@ -77,7 +75,7 @@ public class DataPersistenceManager : MonoBehaviour
         if (gameData == null)
             gameData = new GameData();
 
-        RefreshPersistenceObjects();
+        PruneNullEntries();
 
         // pass the data to other scripts so they can update it
 
@@ -92,16 +90,72 @@ public class DataPersistenceManager : MonoBehaviour
 
     #region Private
 
-    private List<IDataPersistence> FindAllDataPersistenceObjects()
+    private IEnumerable<IDataPersistence> FindAllDataPersistenceObjects()
     {
-        var dataPersistenceObjects = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).OfType<IDataPersistence>();
-
-        return new List<IDataPersistence>(dataPersistenceObjects);
+        return FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).OfType<IDataPersistence>();
     }
 
-    private void RefreshPersistenceObjects()
+    private void PruneNullEntries()
     {
-        dataPersistenceObjects = FindAllDataPersistenceObjects();
+        for (var i = dataPersistenceObjects.Count - 1; i >= 0; i--)
+            if (dataPersistenceObjects[i] == null)
+                dataPersistenceObjects.RemoveAt(i);
+    }
+
+    private void RegisterExistingSceneObjects()
+    {
+        foreach (var persistence in FindAllDataPersistenceObjects())
+            RegisterInternal(persistence);
+    }
+
+    private void RegisterInternal(IDataPersistence persistence)
+    {
+        if (persistence == null || dataPersistenceObjects.Contains(persistence))
+            return;
+
+        dataPersistenceObjects.Add(persistence);
+    }
+
+    private void UnregisterInternal(IDataPersistence persistence)
+    {
+        if (persistence == null)
+            return;
+
+        dataPersistenceObjects.Remove(persistence);
+    }
+
+    #endregion
+
+    #region Static API
+
+    public static void Register(IDataPersistence persistence)
+    {
+        if (persistence == null)
+            return;
+
+        if (Instance == null)
+        {
+            var manager = FindAnyObjectByType<DataPersistenceManager>();
+            manager?.RegisterInternal(persistence);
+            return;
+        }
+
+        Instance.RegisterInternal(persistence);
+    }
+
+    public static void Unregister(IDataPersistence persistence)
+    {
+        if (persistence == null)
+            return;
+
+        if (Instance == null)
+        {
+            var manager = FindAnyObjectByType<DataPersistenceManager>();
+            manager?.UnregisterInternal(persistence);
+            return;
+        }
+
+        Instance.UnregisterInternal(persistence);
     }
 
     #endregion
