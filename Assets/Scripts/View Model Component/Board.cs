@@ -31,6 +31,8 @@ public class Board : MonoBehaviour
 
     public void Load(LevelData data)
     {
+        Clear();
+
         _min = new Point(int.MaxValue, int.MaxValue);
         _max = new Point(int.MinValue, int.MinValue);
 
@@ -38,10 +40,23 @@ public class Board : MonoBehaviour
         {
             data.tileSkins.TryGetValue(key, out var prefabName);
             var variableForPrefab = (GameObject)Resources.Load("Prefabs/Blocks/" + prefabName, typeof(GameObject));
+            if (variableForPrefab == null)
+            {
+                Debug.LogError($"No block prefab found for key '{prefabName}'.");
+                continue;
+            }
             var instance = Instantiate(variableForPrefab);
             instance.transform.SetParent(transform);
             var t = instance.GetComponent<Tile>();
             t.Load(key);
+            t.SetColor(defaultTileColor);
+
+            if (tiles.ContainsKey(t.pos))
+            {
+                Debug.LogWarning($"Duplicate tile position encountered at {t.pos} while loading level {data.name}.");
+                Destroy(instance);
+                continue;
+            }
 
             tiles.Add(t.pos, t);
 
@@ -96,24 +111,32 @@ public class Board : MonoBehaviour
     public void SelectTiles(List<Tile> tiles)
     {
         foreach (var tile in tiles)
-            tile.GetComponent<Renderer>().material.SetColor("_BaseColor", selectedTileColor);
+            tile.SetColor(selectedTileColor);
     }
 
     public void ConfirmTiles(List<Tile> tiles)
     {
         foreach (var tile in tiles)
-            tile.GetComponent<Renderer>().material.SetColor("_BaseColor", confirmedTileColor);
+            tile.SetColor(confirmedTileColor);
     }
 
     public void DeSelectTiles(List<Tile> tiles)
     {
         foreach (var tile in tiles)
-            tile.GetComponent<Renderer>().material.SetColor("_BaseColor", defaultTileColor);
+            tile.SetColor(defaultTileColor);
     }
 
     #endregion
 
     #region Private
+
+    private void Clear()
+    {
+        tiles.Clear();
+
+        for (var i = transform.childCount - 1; i >= 0; i--)
+            Destroy(transform.GetChild(i).gameObject);
+    }
 
     private void ClearSearch()
     {

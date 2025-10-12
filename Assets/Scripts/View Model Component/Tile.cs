@@ -17,6 +17,19 @@ public class Tile : MonoBehaviour
     public GameObject content;
     [HideInInspector] public Tile prev;
     [HideInInspector] public int distance;
+    private Renderer cachedRenderer;
+    private MaterialPropertyBlock propertyBlock;
+    private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+
+    #endregion
+
+    #region MonoBehaviour
+
+    private void Awake()
+    {
+        cachedRenderer = GetComponent<Renderer>();
+        propertyBlock = new MaterialPropertyBlock();
+    }
 
     #endregion
 
@@ -44,6 +57,16 @@ public class Tile : MonoBehaviour
     public void Load(Vector3 v)
     {
         Load(new Point((int)v.x, (int)v.z), (int)v.y);
+    }
+
+    public void SetColor(Color color)
+    {
+        if (cachedRenderer == null)
+            return;
+
+        propertyBlock ??= new MaterialPropertyBlock();
+        propertyBlock.SetColor(BaseColorId, color);
+        cachedRenderer.SetPropertyBlock(propertyBlock);
     }
 
     #endregion

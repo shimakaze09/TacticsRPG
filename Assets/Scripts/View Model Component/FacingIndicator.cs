@@ -11,6 +11,6 @@ public class FacingIndicator : MonoBehaviour
     {
         var index = (int)dir;
         for (var i = 0; i < 4; i++)
-            directions[i].material = i == index ? selected : normal;
+            directions[i].sharedMaterial = i == index ? selected : normal;
     }
 }

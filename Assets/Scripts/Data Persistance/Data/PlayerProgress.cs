@@ -4,16 +4,11 @@ using UnityEngine;
 
 public class PlayerProgress : MonoBehaviour, IDataPersistence
 {
-    private float playTime, startTime;
-
-    private void Start()
-    {
-        startTime = Time.time;
-    }
+    private float playTime;
 
     private void Update()
     {
-        playTime += Time.time - startTime;
+        playTime += Time.deltaTime;
     }
 
     public void LoadData(GameData data)

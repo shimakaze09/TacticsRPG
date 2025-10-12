@@ -51,7 +51,7 @@ public abstract class Movement : MonoBehaviour
 
     protected virtual void Filter(List<Tile> tiles)
     {
-        for (var i = 0; i < tiles.Count; i++)
+        for (var i = tiles.Count - 1; i >= 0; i--)
             if (tiles[i].content != null)
                 tiles.RemoveAt(i);
     }
