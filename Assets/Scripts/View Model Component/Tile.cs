@@ -38,7 +38,7 @@ public class Tile : MonoBehaviour
     public GameObject content;
     [HideInInspector] public Tile prev;
     [HideInInspector] public int distance;
-    [SerializeField] private TileTraversalFlags allowedTraversals = TileTraversalFlags.All;
+    [SerializeField] private TileTraversalFlags allowedTraversals = TileTraversalFlags.Ground | TileTraversalFlags.Fly | TileTraversalFlags.Teleport;
     private Renderer cachedRenderer;
     private MaterialPropertyBlock propertyBlock;
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");

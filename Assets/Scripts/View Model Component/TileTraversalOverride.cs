@@ -3,7 +3,7 @@ using UnityEngine;
 public class TileTraversalOverride : MonoBehaviour
 {
     [SerializeField] private bool applyOnEnable;
-    [SerializeField] private readonly TileTraversalFlags overrideFlags = TileTraversalFlags.All;
+    [SerializeField] private readonly TileTraversalFlags overrideFlags = TileTraversalFlags.Ground | TileTraversalFlags.Fly | TileTraversalFlags.Teleport;
 
     private void Awake()
     {
