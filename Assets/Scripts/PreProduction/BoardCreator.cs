@@ -88,7 +88,7 @@ public class BoardCreator : MonoBehaviour
             CreateSaveDirectory();
         var board = ScriptableObject.CreateInstance<LevelData>();
         board.tiles = new List<Vector3>(tiles.Count);
-        board.tileSkins = new TileSkins();
+        board.tileSkins = new Utils.SerializableDictionary<Vector3, string>();
 
         foreach (var t in tiles.Values)
         {
@@ -130,8 +130,8 @@ public class BoardCreator : MonoBehaviour
         Clear();
 
         for (var i = 0; i < width; i++)
-        for (var j = 0; j < depth; j++)
-            GrowSingle(new Point(i, j));
+            for (var j = 0; j < depth; j++)
+                GrowSingle(new Point(i, j));
     }
 
     #endregion
@@ -150,21 +150,21 @@ public class BoardCreator : MonoBehaviour
     private void GrowRect(Rect rect)
     {
         for (var y = (int)rect.yMin; y < (int)rect.yMax; y++)
-        for (var x = (int)rect.xMin; x < (int)rect.xMax; x++)
-        {
-            var p = new Point(x, y);
-            GrowSingle(p);
-        }
+            for (var x = (int)rect.xMin; x < (int)rect.xMax; x++)
+            {
+                var p = new Point(x, y);
+                GrowSingle(p);
+            }
     }
 
     private void ShrinkRect(Rect rect)
     {
         for (var y = (int)rect.yMin; y < (int)rect.yMax; y++)
-        for (var x = (int)rect.xMin; x < (int)rect.xMax; x++)
-        {
-            var p = new Point(x, y);
-            ShrinkSingle(p);
-        }
+            for (var x = (int)rect.xMin; x < (int)rect.xMax; x++)
+            {
+                var p = new Point(x, y);
+                ShrinkSingle(p);
+            }
     }
 
     private Tile Create()

@@ -3,6 +3,8 @@ using System.Collections;
 
 public class FlyMovement : Movement
 {
+    protected override TileTraversalFlags TraversalMask => TileTraversalFlags.Fly;
+
     public override IEnumerator Traverse(Tile tile)
     {
         // Store the distance between the start tile and target tile

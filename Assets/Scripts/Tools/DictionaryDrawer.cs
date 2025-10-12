@@ -7,7 +7,7 @@ using UnityObject = UnityEngine.Object;
 #if UNITY_EDITOR
 public abstract class DictionaryDrawer<TK, TV> : PropertyDrawer
 {
-    private SerializableDictionary<TK, TV> _Dictionary;
+    private Utils.SerializableDictionary<TK, TV> _Dictionary;
     private bool _Foldout;
     private const float kButtonWidth = 18f;
 
@@ -105,10 +105,10 @@ public abstract class DictionaryDrawer<TK, TV> : PropertyDrawer
         if (_Dictionary == null)
         {
             var target = property.serializedObject.targetObject;
-            _Dictionary = fieldInfo.GetValue(target) as SerializableDictionary<TK, TV>;
+            _Dictionary = fieldInfo.GetValue(target) as Utils.SerializableDictionary<TK, TV>;
             if (_Dictionary == null)
             {
-                _Dictionary = new SerializableDictionary<TK, TV>();
+                _Dictionary = new Utils.SerializableDictionary<TK, TV>();
                 fieldInfo.SetValue(target, _Dictionary);
             }
 
@@ -168,7 +168,7 @@ public abstract class DictionaryDrawer<TK, TV> : PropertyDrawer
     }
 }
 
-[CustomPropertyDrawer(typeof(TileSkins))]
+[CustomPropertyDrawer(typeof(Utils.SerializableDictionary<Vector3, string>))]
 public class TileSkinsDrawer : DictionaryDrawer<Vector3, string>
 {
 }

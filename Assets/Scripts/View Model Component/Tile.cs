@@ -17,6 +17,7 @@ public class Tile : MonoBehaviour
     public GameObject content;
     [HideInInspector] public Tile prev;
     [HideInInspector] public int distance;
+    [SerializeField] private TileTraversalFlags allowedTraversals = TileTraversalFlags.All;
     private Renderer cachedRenderer;
     private MaterialPropertyBlock propertyBlock;
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
@@ -59,6 +60,16 @@ public class Tile : MonoBehaviour
     public void Load(Vector3 v)
     {
         Load(new Point((int)v.x, (int)v.z), (int)v.y);
+    }
+
+    public bool AllowsTraversal(TileTraversalFlags flags)
+    {
+        return (allowedTraversals & flags) != 0;
+    }
+
+    public void SetAllowedTraversals(TileTraversalFlags flags)
+    {
+        allowedTraversals = flags;
     }
 
     public void SetColor(Color color)

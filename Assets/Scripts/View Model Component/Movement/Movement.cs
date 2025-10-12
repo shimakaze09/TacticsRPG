@@ -11,6 +11,7 @@ public abstract class Movement : MonoBehaviour
     protected Unit unit;
     protected Transform jumper;
     protected Stats stats;
+    protected virtual TileTraversalFlags TraversalMask => TileTraversalFlags.Ground;
 
     #endregion
 
@@ -46,13 +47,16 @@ public abstract class Movement : MonoBehaviour
 
     protected virtual bool ExpandSearch(Tile from, Tile to)
     {
+        if (to != null && !to.AllowsTraversal(TraversalMask))
+            return false;
+
         return from.distance + 1 <= range;
     }
 
     protected virtual void Filter(List<Tile> tiles)
     {
         for (var i = tiles.Count - 1; i >= 0; i--)
-            if (tiles[i].content != null)
+            if (tiles[i].content != null || !tiles[i].AllowsTraversal(TraversalMask))
                 tiles.RemoveAt(i);
     }
 

@@ -3,6 +3,8 @@ using System.Collections;
 
 public class TeleportMovement : Movement
 {
+    protected override TileTraversalFlags TraversalMask => TileTraversalFlags.Teleport;
+
     public override IEnumerator Traverse(Tile tile)
     {
         unit.Place(tile);
