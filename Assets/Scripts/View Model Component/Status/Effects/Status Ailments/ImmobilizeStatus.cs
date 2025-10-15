@@ -4,16 +4,13 @@ using UnityEngine;
 /// Immobilize: Unit cannot move. At end of AT, CT is decremented as if unit had moved.
 /// Lasts for 24 ticks (~2-3 turns).
 /// </summary>
-public class ImmobilizeStatus : TurnBasedStatusEffect
+public class ImmobilizeStatus : StatusEffect
 {
     private Unit owner;
 
     private void OnEnable()
     {
         owner = GetComponentInParent<Unit>();
-
-        // In FFT, Immobilize lasts 24 clock ticks
-        remainingTurns = 3;
 
         if (owner)
         {

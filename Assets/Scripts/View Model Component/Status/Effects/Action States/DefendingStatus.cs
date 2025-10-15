@@ -4,7 +4,7 @@ using UnityEngine;
 /// The unit has assumed a defensive stance, doubling their evasion stats.
 /// Lasts until they take another turn.
 /// </summary>
-public class DefendingStatus : TurnBasedStatusEffect
+public class DefendingStatus : StatusEffect
 {
     private Stats stats;
 
@@ -17,9 +17,6 @@ public class DefendingStatus : TurnBasedStatusEffect
             // Subscribe to stat changes to double evasion
             this.SubscribeToSender<StatWillChangeEvent>(OnStatWillChange, stats);
         }
-
-        // Set to expire after 1 turn (the defending lasts until next action)
-        remainingTurns = 1;
     }
 
     private void OnDisable()

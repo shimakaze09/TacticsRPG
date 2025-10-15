@@ -5,7 +5,7 @@ using UnityEngine;
 /// Cannot evade or use reaction abilities.
 /// Wears off after 20 ticks (~2 turns).
 /// </summary>
-public class StopStatus : TurnBasedStatusEffect
+public class StopStatus : StatusEffect
 {
     private Unit owner;
     private Stats stats;
@@ -14,9 +14,6 @@ public class StopStatus : TurnBasedStatusEffect
     {
         owner = GetComponentInParent<Unit>();
         stats = GetComponentInParent<Stats>();
-
-        // In FFT, Stop lasts 20 clock ticks
-        remainingTurns = 2;
 
         if (owner)
         {

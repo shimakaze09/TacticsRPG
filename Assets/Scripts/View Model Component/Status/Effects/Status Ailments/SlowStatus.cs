@@ -4,7 +4,7 @@ using UnityEngine;
 /// Slow: Unit's effective speed is halved (round down).
 /// Lasts for 32 ticks (~3-4 turns). Opposed to Haste.
 /// </summary>
-public class SlowStatus : TurnBasedStatusEffect
+public class SlowStatus : StatusEffect
 {
     [Tooltip("CT gain multiplier (0.5 = half CT gain)")]
     public float ctMultiplier = 0.5f;
@@ -14,9 +14,6 @@ public class SlowStatus : TurnBasedStatusEffect
     private void OnEnable()
     {
         stats = GetComponentInParent<Stats>();
-
-        // In FFT, Slow lasts 32 clock ticks
-        remainingTurns = 4;
 
         if (stats != null)
         {

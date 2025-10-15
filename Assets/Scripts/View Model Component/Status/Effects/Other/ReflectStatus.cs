@@ -5,16 +5,13 @@ using UnityEngine;
 /// Target tile changes from target to a tile in same position as if target were casting the spell.
 /// Lasts for 32 clock ticks (~3-4 turns).
 /// </summary>
-public class ReflectStatus : TurnBasedStatusEffect
+public class ReflectStatus : StatusEffect
 {
     private Unit owner;
 
     private void OnEnable()
     {
         owner = GetComponentInParent<Unit>();
-
-        // In FFT, Reflect lasts 32 clock ticks
-        remainingTurns = 4;
     }
 
     private void OnDisable()

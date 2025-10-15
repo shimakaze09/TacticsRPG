@@ -4,7 +4,7 @@ using UnityEngine;
 /// Protect: Physical attacks against this unit have their effective physical attack reduced by 1/3.
 /// Lasts for 32 clock ticks (~3-4 turns).
 /// </summary>
-public class ProtectStatus : TurnBasedStatusEffect
+public class ProtectStatus : StatusEffect
 {
     [Tooltip("Physical defense multiplier (0.667 = reduce damage by 1/3)")]
     public float defenseMultiplier = 0.667f;
@@ -14,9 +14,6 @@ public class ProtectStatus : TurnBasedStatusEffect
     private void OnEnable()
     {
         stats = GetComponentInParent<Stats>();
-
-        // In FFT, Protect lasts 32 clock ticks
-        remainingTurns = 4;
 
         if (stats != null)
         {

@@ -5,7 +5,7 @@ using UnityEngine;
 /// At end of AT, CT is decremented as if they had acted.
 /// Lasts for 24 ticks (~2-3 turns).
 /// </summary>
-public class DisableStatus : TurnBasedStatusEffect
+public class DisableStatus : StatusEffect
 {
     private Unit owner;
     private Stats stats;
@@ -14,9 +14,6 @@ public class DisableStatus : TurnBasedStatusEffect
     {
         owner = GetComponentInParent<Unit>();
         stats = GetComponentInParent<Stats>();
-
-        // In FFT, Disable lasts 24 clock ticks
-        remainingTurns = 3;
 
         if (owner)
         {

@@ -5,7 +5,7 @@ using UnityEngine;
 /// Does not directly affect Speed stat. Lasts for 32 clock ticks (~3-4 turns).
 /// Opposed to Slow.
 /// </summary>
-public class HasteStatus : TurnBasedStatusEffect
+public class HasteStatus : StatusEffect
 {
     [Tooltip("CT gain multiplier (2.0 = double CT gain = 50% more)")]
     public float ctMultiplier = 1.5f;
@@ -15,9 +15,6 @@ public class HasteStatus : TurnBasedStatusEffect
     private void OnEnable()
     {
         stats = GetComponentInParent<Stats>();
-
-        // In FFT, Haste lasts 32 clock ticks
-        remainingTurns = 4;
 
         if (stats != null)
         {

@@ -6,16 +6,13 @@ using UnityEngine;
 /// All magic cast on unit has no effect.
 /// Lasts for 32 ticks (~3-4 turns). Cannot be protected against or healed.
 /// </summary>
-public class AtheistStatus : TurnBasedStatusEffect
+public class AtheistStatus : StatusEffect
 {
     private Stats stats;
 
     private void OnEnable()
     {
         stats = GetComponentInParent<Stats>();
-
-        // In FFT, Atheist lasts 32 clock ticks
-        remainingTurns = 4;
 
         if (stats != null)
         {
