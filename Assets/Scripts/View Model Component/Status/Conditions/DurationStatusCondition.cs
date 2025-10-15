@@ -4,15 +4,15 @@
 
     private void OnEnable()
     {
-        this.AddObserver(OnNewTurn, TurnOrderController.TurnBeganNotification);
+        this.Subscribe<TurnBeganEvent>(OnNewTurn);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnNewTurn, TurnOrderController.TurnBeganNotification);
+        this.Unsubscribe<TurnBeganEvent>(OnNewTurn);
     }
 
-    private void OnNewTurn(object sender, object args)
+    private void OnNewTurn(TurnBeganEvent e)
     {
         duration--;
         if (duration <= 0)

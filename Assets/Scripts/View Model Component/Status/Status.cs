@@ -2,9 +2,6 @@
 
 public class Status : MonoBehaviour
 {
-    public const string AddedNotification = "Status.AddedNotification";
-    public const string RemovedNotification = "Status.RemovedNotification";
-
     public U Add<T, U>() where T : StatusEffect where U : StatusCondition
     {
         var effect = GetComponentInChildren<T>();
@@ -12,7 +9,7 @@ public class Status : MonoBehaviour
         if (effect == null)
         {
             effect = gameObject.AddChildComponent<T>();
-            this.PostNotification(AddedNotification, effect);
+            this.Publish(new StatusEffectAddedEvent(this, effect));
         }
 
         return effect.gameObject.AddChildComponent<U>();
@@ -30,7 +27,7 @@ public class Status : MonoBehaviour
         {
             effect.transform.SetParent(null);
             Destroy(effect.gameObject);
-            this.PostNotification(RemovedNotification, effect);
+            this.Publish(new StatusEffectRemovedEvent(this, effect));
         }
     }
 }

@@ -6,15 +6,20 @@ public class AttackedStatusCondition : StatusCondition
     {
         stats = GetComponentInParent<Stats>();
         if (stats)
-            this.AddObserver(OnHitNotification, Stats.DidChangeNotification(StatTypes.HP), stats);
+            this.SubscribeToSender<StatDidChangeEvent>(OnHitNotification, stats);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnHitNotification, Stats.DidChangeNotification(StatTypes.HP), stats);
+        if (stats)
+            this.UnsubscribeFromSender<StatDidChangeEvent>(OnHitNotification, stats);
     }
 
-    private void OnHitNotification(object sender, object args)
+    private void OnHitNotification(StatDidChangeEvent e)
     {
+        if (e.StatType == StatTypes.HP && e.NewValue < e.OldValue)
+        {
+            Remove();
+        }
     }
 }

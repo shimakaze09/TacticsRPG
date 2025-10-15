@@ -6,22 +6,21 @@ public class SilenceStatusEffect : StatusEffect
     {
         owner = GetComponentInParent<Unit>();
         if (owner)
-            this.AddObserver(OnCanPerformCheck, Ability.CanPerformCheck);
+            this.Subscribe<AbilityCanPerformCheckEvent>(OnCanPerformCheck);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnCanPerformCheck, Ability.CanPerformCheck);
+        this.Unsubscribe<AbilityCanPerformCheckEvent>(OnCanPerformCheck);
     }
 
-    private void OnCanPerformCheck(object sender, object args)
+    private void OnCanPerformCheck(AbilityCanPerformCheckEvent e)
     {
-        var unit = (sender as Ability).GetComponentInParent<Unit>();
-        if (owner == unit && (sender as Ability).TryGetComponent(typeof(AbilityMagicCost), out _))
+        var unit = e.Ability.GetComponentInParent<Unit>();
+        if (owner == unit && e.Ability.TryGetComponent(typeof(AbilityMagicCost), out _))
         {
-            var exc = args as BaseException;
-            if (exc.defaultToggle)
-                exc.FlipToggle();
+            if (e.Exception.defaultToggle)
+                e.Exception.FlipToggle();
         }
     }
 }

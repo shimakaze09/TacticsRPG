@@ -11,18 +11,18 @@ public class DamageAbilityEffect : BaseAbilityEffect
 
         // Get the attackers base attack stat considering
         // mission items, support check, status check, and equipment, etc
-        var attack = GetStat(attacker, defender, GetAttackNotification, 0);
+        var attack = GetStat(attacker, defender, typeof(GetAttackStatEvent), 0);
 
         // Get the targets base defense stat considering
         // mission items, support check, status check, and equipment, etc
-        var defense = GetStat(attacker, defender, GetDefenseNotification, 0);
+        var defense = GetStat(attacker, defender, typeof(GetDefenseStatEvent), 0);
 
         // Calculate base damage
         var damage = attack - defense / 2;
         damage = Mathf.Max(damage, 1);
 
         // Get the abilities power stat considering possible variations
-        var power = GetStat(attacker, defender, GetPowerNotification, 0);
+        var power = GetStat(attacker, defender, typeof(GetPowerEvent), 0);
 
         // Apply power bonus
         damage = power * damage / 100;
@@ -30,7 +30,7 @@ public class DamageAbilityEffect : BaseAbilityEffect
 
         // Tweak the damage based on a variety of other checks like
         // Elemental damage, Critical Hits, Damage multipliers, etc.
-        damage = GetStat(attacker, defender, TweakDamageNotification, damage);
+        damage = GetStat(attacker, defender, typeof(TweakDamageEvent), damage);
 
         // Clamp the damage to a range
         damage = Mathf.Clamp(damage, minDamage, maxDamage);

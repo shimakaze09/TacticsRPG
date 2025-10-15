@@ -33,14 +33,17 @@
 
     private void OnEnable()
     {
-        this.AddObserver(OnEffectHit, HitNotification, effect);
-        this.AddObserver(OnEffectMiss, MissedNotification, effect);
+        this.SubscribeToSender<AbilityHitEvent>(OnEffectHit, effect);
+        this.SubscribeToSender<AbilityMissedEvent>(OnEffectMiss, effect);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnEffectHit, HitNotification, effect);
-        this.RemoveObserver(OnEffectMiss, MissedNotification, effect);
+        if (effect != null)
+        {
+            this.UnsubscribeFromSender<AbilityHitEvent>(OnEffectHit, effect);
+            this.UnsubscribeFromSender<AbilityMissedEvent>(OnEffectMiss, effect);
+        }
     }
 
     #endregion
@@ -63,12 +66,12 @@
 
     #region Event Handlers
 
-    private void OnEffectHit(object sender, object args)
+    private void OnEffectHit(AbilityHitEvent e)
     {
-        amount = (int)args * -1;
+        amount = e.Damage * -1;
     }
 
-    private void OnEffectMiss(object sender, object args)
+    private void OnEffectMiss(AbilityMissedEvent e)
     {
         amount = 0;
     }

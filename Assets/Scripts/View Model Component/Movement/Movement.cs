@@ -11,7 +11,6 @@ public abstract class Movement : MonoBehaviour
     protected Unit unit;
     protected Transform jumper;
     protected Stats stats;
-    public const string CanMoveCheck = "Movement.CanMoveCheck";
 
     protected virtual TileTraversalFlags TraversalMask => TileTraversalFlags.Ground;
 
@@ -36,7 +35,7 @@ public abstract class Movement : MonoBehaviour
     public bool CanMove()
     {
         var exc = new BaseException(true);
-        this.PostNotification(CanMoveCheck, exc);
+        this.Publish(new MovementCanMoveCheckEvent(this, exc));
         return exc.toggle;
     }
 

@@ -13,7 +13,8 @@ public class TurnOrderController : MonoBehaviour
 
         while (true)
         {
-            this.PostNotification(RoundBeganNotification);
+            // Publish round began event
+            this.Publish(new RoundBeganEvent());
 
             var units = new List<Unit>(bc.units);
             foreach (var stats in units.Select(unit => unit.GetComponent<Stats>()))
@@ -25,7 +26,9 @@ public class TurnOrderController : MonoBehaviour
                 if (CanTakeTurn(units[i]))
                 {
                     bc.turn.Change(units[i]);
-                    units[i].PostNotification(TurnBeganNotification);
+
+                    // Publish turn began event from the unit
+                    units[i].Publish(new TurnBeganEvent(units[i]));
 
                     yield return units[i];
 
@@ -38,10 +41,12 @@ public class TurnOrderController : MonoBehaviour
                     var s = units[i].GetComponent<Stats>();
                     s.SetValue(StatTypes.CTR, s[StatTypes.CTR] - cost, false);
 
-                    units[i].PostNotification(TurnCompletedNotification);
+                    // Publish turn completed event from the unit
+                    units[i].Publish(new TurnCompletedEvent(units[i]));
                 }
 
-            this.PostNotification(RoundEndedNotification);
+            // Publish round ended event
+            this.Publish(new RoundEndedEvent());
         }
     }
 
@@ -56,22 +61,15 @@ public class TurnOrderController : MonoBehaviour
 
     #endregion
 
-    #region Notifications
 
-    public const string RoundBeganNotification = "TurnOrderController.roundBegan";
-    public const string TurnCheckNotification = "TurnOrderController.turnCheck";
-    public const string TurnBeganNotification = "TurnOrderController.TurnBeganNotification";
-    public const string TurnCompletedNotification = "TurnOrderController.turnCompleted";
-    public const string RoundEndedNotification = "TurnOrderController.roundEnded";
-
-    #endregion
 
     #region Private
 
     private bool CanTakeTurn(Unit target)
     {
         var exc = new BaseException(GetCounter(target) >= turnActivation);
-        target.PostNotification(TurnCheckNotification, exc);
+        // Publish turn check event from the unit
+        target.Publish(new TurnCheckEvent(target, exc));
         return exc.toggle;
     }
 

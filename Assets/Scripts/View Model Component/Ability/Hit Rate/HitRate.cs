@@ -11,27 +11,6 @@ public abstract class HitRate : MonoBehaviour
 
     #endregion
 
-    #region Notifications
-
-    /// <summary>
-    ///     Includes a toggleable MatchException argument which defaults to false.
-    /// </summary>
-    public const string AutomaticHitCheckNotification = "HitRate.AutomaticHitCheckNotification";
-
-    /// <summary>
-    ///     Includes a toggleable MatchException argument which defaults to false.
-    /// </summary>
-    public const string AutomaticMissCheckNotification = "HitRate.AutomaticMissCheckNotification";
-
-    /// <summary>
-    ///     Includes an Info argument with three parameters: Attacker (Unit), Defender (Unit),
-    ///     and Defender's calculated Evade / Resistance (int).  Status effects which modify Hit Rate
-    ///     should modify the arg2 parameter.
-    /// </summary>
-    public const string StatusCheckNotification = "HitRate.StatusCheckNotification";
-
-    #endregion
-
     #region Fields
 
     public virtual bool IsAngleBased => true;
@@ -62,22 +41,22 @@ public abstract class HitRate : MonoBehaviour
     protected virtual bool AutomaticHit(Unit target)
     {
         var exc = new MatchException(attacker, target);
-        this.PostNotification(AutomaticHitCheckNotification, exc);
+        this.Publish(new AutomaticHitCheckEvent(attacker, target, exc));
         return exc.toggle;
     }
 
     protected virtual bool AutomaticMiss(Unit target)
     {
         var exc = new MatchException(attacker, target);
-        this.PostNotification(AutomaticMissCheckNotification, exc);
+        this.Publish(new AutomaticMissCheckEvent(attacker, target, exc));
         return exc.toggle;
     }
 
     protected virtual int AdjustForStatusEffects(Unit target, int rate)
     {
-        var args = new Info<Unit, Unit, int>(attacker, target, rate);
-        this.PostNotification(StatusCheckNotification, args);
-        return args.arg2;
+        var args = new HitRateStatusCheckArgs(rate);
+        this.Publish(new HitRateStatusCheckEvent(attacker, target, args));
+        return args.HitRate;
     }
 
     protected virtual int Final(int evade)

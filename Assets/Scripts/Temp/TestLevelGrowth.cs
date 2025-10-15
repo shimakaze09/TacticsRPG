@@ -5,14 +5,14 @@ public class TestLevelGrowth : MonoBehaviour
 {
     private void OnEnable()
     {
-        this.AddObserver(OnLevelChange, Stats.DidChangeNotification(StatTypes.LVL));
-        this.AddObserver(OnExperienceException, Stats.WillChangeNotification(StatTypes.EXP));
+        this.Subscribe<StatDidChangeEvent>(OnLevelChange);
+        this.Subscribe<StatWillChangeEvent>(OnExperienceException);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnLevelChange, Stats.DidChangeNotification(StatTypes.LVL));
-        this.RemoveObserver(OnExperienceException, Stats.WillChangeNotification(StatTypes.EXP));
+        this.Unsubscribe<StatDidChangeEvent>(OnLevelChange);
+        this.Unsubscribe<StatWillChangeEvent>(OnExperienceException);
     }
 
     private void Start()
@@ -63,16 +63,21 @@ public class TestLevelGrowth : MonoBehaviour
         }
     }
 
-    private void OnLevelChange(object sender, object args)
+    private void OnLevelChange(StatDidChangeEvent e)
     {
-        var stats = sender as Stats;
-        Debug.Log(stats.name + " leveled up!");
+        if (e.StatType != StatTypes.LVL)
+            return;
+
+        Debug.Log(e.Stats.name + " leveled up!");
     }
 
-    private void OnExperienceException(object sender, object args)
+    private void OnExperienceException(StatWillChangeEvent e)
     {
-        var actor = (sender as Stats).gameObject;
-        var vce = args as ValueChangeException;
+        if (e.StatType != StatTypes.EXP)
+            return;
+
+        var actor = e.Stats.gameObject;
+        var vce = e.Exception;
         var roll = Random.Range(0, 5);
         switch (roll)
         {

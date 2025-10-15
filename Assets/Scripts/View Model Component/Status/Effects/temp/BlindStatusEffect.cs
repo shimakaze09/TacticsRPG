@@ -2,23 +2,22 @@
 {
     private void OnEnable()
     {
-        this.AddObserver(OnHitRateStatusCheck, HitRate.StatusCheckNotification);
+        this.Subscribe<HitRateStatusCheckEvent>(OnHitRateStatusCheck);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnHitRateStatusCheck, HitRate.StatusCheckNotification);
+        this.Unsubscribe<HitRateStatusCheckEvent>(OnHitRateStatusCheck);
     }
 
-    private void OnHitRateStatusCheck(object sender, object args)
+    private void OnHitRateStatusCheck(HitRateStatusCheckEvent e)
     {
-        var info = args as Info<Unit, Unit, int>;
         var owner = GetComponentInParent<Unit>();
-        if (owner == info.arg0)
+        if (owner == e.Attacker)
             // The attacker is blind
-            info.arg2 += 50;
-        else if (owner == info.arg1)
+            e.Args.HitRate += 50;
+        else if (owner == e.Target)
             // The defender is blind
-            info.arg2 -= 20;
+            e.Args.HitRate -= 20;
     }
 }

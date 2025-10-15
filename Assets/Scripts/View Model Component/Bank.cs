@@ -4,7 +4,6 @@ public class Bank
 {
     #region Consts
 
-    public const string GoldChanged = "Bank.GoldChanged";
     private const string GoldKey = "Bank.GoldKey";
 
     #endregion
@@ -18,9 +17,10 @@ public class Bank
         {
             if (_gold == value)
                 return;
+            int oldGold = _gold;
             _gold = value;
             Save();
-            this.PostNotification(GoldChanged);
+            ServiceLocator.Instance.Get<GameEventBus>().Publish(this, new GoldChangedEvent(oldGold, value));
         }
     }
 

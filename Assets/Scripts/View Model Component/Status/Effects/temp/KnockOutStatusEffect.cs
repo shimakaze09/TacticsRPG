@@ -14,30 +14,32 @@ public class KnockOutStatusEffect : StatusEffect
     private void OnEnable()
     {
         owner.transform.localScale = new Vector3(0.75f, 0.1f, 0.75f);
-        this.AddObserver(OnTurnCheck, TurnOrderController.TurnCheckNotification, owner);
-        this.AddObserver(OnStatCounterWillChange, Stats.WillChangeNotification(StatTypes.CTR), stats);
+        this.SubscribeToSender<TurnCheckEvent>(OnTurnCheck, owner);
+        this.SubscribeToSender<StatWillChangeEvent>(OnStatCounterWillChange, stats);
     }
 
     private void OnDisable()
     {
         owner.transform.localScale = Vector3.one;
-        this.RemoveObserver(OnTurnCheck, TurnOrderController.TurnCheckNotification, owner);
-        this.RemoveObserver(OnStatCounterWillChange, Stats.WillChangeNotification(StatTypes.CTR), stats);
+        this.UnsubscribeFromSender<TurnCheckEvent>(OnTurnCheck, owner);
+        if (stats != null)
+            this.UnsubscribeFromSender<StatWillChangeEvent>(OnStatCounterWillChange, stats);
     }
 
-    private void OnTurnCheck(object sender, object args)
+    private void OnTurnCheck(TurnCheckEvent e)
     {
         // Don't allow a KO'd unit to take turns
-        var exc = args as BaseException;
-        if (exc.defaultToggle)
-            exc.FlipToggle();
+        if (e.Exception.defaultToggle)
+            e.Exception.FlipToggle();
     }
 
-    private void OnStatCounterWillChange(object sender, object args)
+    private void OnStatCounterWillChange(StatWillChangeEvent e)
     {
+        if (e.StatType != StatTypes.CTR)
+            return;
+
         // Don't allow a KO'd unit to increment the turn order counter
-        var exc = args as ValueChangeException;
-        if (exc.toValue > exc.fromValue)
-            exc.FlipToggle();
+        if (e.Exception.toValue > e.Exception.fromValue)
+            e.Exception.FlipToggle();
     }
 }

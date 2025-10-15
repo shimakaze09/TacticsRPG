@@ -4,7 +4,6 @@ using UnityEngine.UI;
 
 public class ItemCell : MonoBehaviour
 {
-    public const string BuyNotification = "ItemCell.BuyNotification";
     [SerializeField] private TextMeshProUGUI atkLabel;
     [SerializeField] private Image icon;
     [SerializeField] private TextMeshProUGUI lvlLabel;
@@ -25,6 +24,6 @@ public class ItemCell : MonoBehaviour
 
     public void OnBuyButton()
     {
-        this.PostNotification(BuyNotification);
+        this.Publish(new ItemPurchasedEvent(item));
     }
 }

@@ -5,7 +5,6 @@ public class ItemShop : MonoBehaviour
 {
     #region Consts
 
-    public const string BuyNotification = "ItemShop.BuyNotification";
     private const string CellKey = "ItemShop.cellPrefab";
 
     #endregion
@@ -23,12 +22,12 @@ public class ItemShop : MonoBehaviour
 
     private void OnEnable()
     {
-        this.AddObserver(OnBuyItemNotification, ItemCell.BuyNotification);
+        this.Subscribe<ItemPurchasedEvent>(OnBuyItemNotification);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnBuyItemNotification, ItemCell.BuyNotification);
+        this.Unsubscribe<ItemPurchasedEvent>(OnBuyItemNotification);
     }
 
     #endregion
@@ -56,11 +55,10 @@ public class ItemShop : MonoBehaviour
 
     #region Event Handlers
 
-    private void OnBuyItemNotification(object sender, object args)
+    private void OnBuyItemNotification(ItemPurchasedEvent e)
     {
-        var cell = sender as ItemCell;
-        if (Bank.Instance.gold >= cell.item.price)
-            Purchase(cell.item);
+        if (Bank.Instance.gold >= e.Item.price)
+            Purchase(e.Item);
         else
             GetComponent<DialogController>().Show("Need Gold!",
                 "You don't have enough gold to complete this purchase.  Would you like to buy more?", FakeBuyGold,
@@ -103,7 +101,7 @@ public class ItemShop : MonoBehaviour
     private void Purchase(Item item)
     {
         Bank.Instance.gold -= item.price;
-        this.PostNotification(BuyNotification, item);
+        this.Publish(new ItemPurchasedEvent(item));
     }
 
     private void EnqueueCells()

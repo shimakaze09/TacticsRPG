@@ -27,13 +27,13 @@ public class BankView : MonoBehaviour
 
     private void OnEnable()
     {
-        this.AddObserver(OnGoldChanged, Bank.GoldChanged);
+        this.Subscribe<GoldChangedEvent>(OnGoldChanged);
         ec.updateEvent += OnEasingUpdate;
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnGoldChanged, Bank.GoldChanged);
+        this.Unsubscribe<GoldChangedEvent>(OnGoldChanged);
         ec.updateEvent -= OnEasingUpdate;
     }
 
@@ -41,12 +41,12 @@ public class BankView : MonoBehaviour
 
     #region Event Handlers
 
-    private void OnGoldChanged(object sender, object args)
+    private void OnGoldChanged(GoldChangedEvent e)
     {
         if (ec.IsPlaying)
             ec.Stop();
         startGold = currentGold;
-        endGold = Bank.Instance.gold;
+        endGold = e.NewAmount;
         ec.SeekToBeginning();
         ec.Play();
     }

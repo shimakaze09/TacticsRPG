@@ -35,28 +35,33 @@ public class Rank : MonoBehaviour
 
     private void OnEnable()
     {
-        this.AddObserver(OnExpWillChange, Stats.WillChangeNotification(StatTypes.EXP), stats);
-        this.AddObserver(OnExpDidChange, Stats.DidChangeNotification(StatTypes.EXP), stats);
+        this.SubscribeToSender<StatWillChangeEvent>(OnExpWillChange, stats);
+        this.SubscribeToSender<StatDidChangeEvent>(OnExpDidChange, stats);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnExpWillChange, Stats.WillChangeNotification(StatTypes.EXP), stats);
-        this.RemoveObserver(OnExpDidChange, Stats.DidChangeNotification(StatTypes.EXP), stats);
+        this.UnsubscribeFromSender<StatWillChangeEvent>(OnExpWillChange, stats);
+        this.UnsubscribeFromSender<StatDidChangeEvent>(OnExpDidChange, stats);
     }
 
     #endregion
 
     #region Event Handlers
 
-    private void OnExpWillChange(object sender, object args)
+    private void OnExpWillChange(StatWillChangeEvent e)
     {
-        var vce = args as ValueChangeException;
-        vce.AddModifier(new ClampValueModifier(int.MaxValue, EXP, maxExperience));
+        if (e.StatType != StatTypes.EXP)
+            return;
+
+        e.Exception.AddModifier(new ClampValueModifier(int.MaxValue, EXP, maxExperience));
     }
 
-    private void OnExpDidChange(object sender, object args)
+    private void OnExpDidChange(StatDidChangeEvent e)
     {
+        if (e.StatType != StatTypes.EXP)
+            return;
+
         stats.SetValue(StatTypes.LVL, LevelForExperience(EXP), false);
     }
 

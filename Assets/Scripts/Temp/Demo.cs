@@ -8,20 +8,19 @@ public class Demo : MonoBehaviour
 
     private void OnEnable()
     {
-        this.AddObserver(OnTurnCheck, TurnOrderController.TurnCheckNotification);
+        this.Subscribe<TurnCheckEvent>(OnTurnCheck);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnTurnCheck, TurnOrderController.TurnCheckNotification);
+        this.Unsubscribe<TurnCheckEvent>(OnTurnCheck);
     }
 
-    private void OnTurnCheck(object sender, object args)
+    private void OnTurnCheck(TurnCheckEvent e)
     {
-        var exc = args as BaseException;
-        if (exc.toggle == false)
+        if (e.Exception.toggle == false)
             return;
-        var target = sender as Unit;
+        var target = e.Unit;
         switch (step)
         {
             case 0:

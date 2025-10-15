@@ -30,29 +30,34 @@ public class Health : MonoBehaviour
 
     private void OnEnable()
     {
-        this.AddObserver(OnHPWillChange, Stats.WillChangeNotification(StatTypes.HP), stats);
-        this.AddObserver(OnMHPDidChange, Stats.DidChangeNotification(StatTypes.MHP), stats);
+        this.SubscribeToSender<StatWillChangeEvent>(OnHPWillChange, stats);
+        this.SubscribeToSender<StatDidChangeEvent>(OnMHPDidChange, stats);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnHPWillChange, Stats.WillChangeNotification(StatTypes.HP), stats);
-        this.RemoveObserver(OnMHPDidChange, Stats.DidChangeNotification(StatTypes.MHP), stats);
+        this.UnsubscribeFromSender<StatWillChangeEvent>(OnHPWillChange, stats);
+        this.UnsubscribeFromSender<StatDidChangeEvent>(OnMHPDidChange, stats);
     }
 
     #endregion
 
     #region Event Handlers
 
-    private void OnHPWillChange(object sender, object args)
+    private void OnHPWillChange(StatWillChangeEvent e)
     {
-        var vce = args as ValueChangeException;
-        vce.AddModifier(new ClampValueModifier(int.MaxValue, MinHP, stats[StatTypes.MHP]));
+        if (e.StatType != StatTypes.HP)
+            return;
+
+        e.Exception.AddModifier(new ClampValueModifier(int.MaxValue, MinHP, stats[StatTypes.MHP]));
     }
 
-    private void OnMHPDidChange(object sender, object args)
+    private void OnMHPDidChange(StatDidChangeEvent e)
     {
-        var oldMHP = (int)args;
+        if (e.StatType != StatTypes.MHP)
+            return;
+
+        var oldMHP = e.OldValue;
         if (MHP > oldMHP)
             HP += MHP - oldMHP;
         else

@@ -6,7 +6,7 @@ public class HealAbilityEffect : BaseAbilityEffect
     {
         var attacker = GetComponentInParent<Unit>();
         var defender = target.content.GetComponent<Unit>();
-        return GetStat(attacker, defender, GetPowerNotification, 0);
+        return GetStat(attacker, defender, typeof(GetPowerEvent), 0);
     }
 
     protected override int OnApply(Tile target)

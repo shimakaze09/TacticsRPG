@@ -31,38 +31,43 @@ public class Mana : MonoBehaviour
 
     private void OnEnable()
     {
-        this.AddObserver(OnMPWillChange, Stats.WillChangeNotification(StatTypes.MP), stats);
-        this.AddObserver(OnMMPDidChange, Stats.DidChangeNotification(StatTypes.MMP), stats);
-        this.AddObserver(OnTurnBegan, TurnOrderController.TurnBeganNotification, unit);
+        this.SubscribeToSender<StatWillChangeEvent>(OnMPWillChange, stats);
+        this.SubscribeToSender<StatDidChangeEvent>(OnMMPDidChange, stats);
+        this.SubscribeToSender<TurnBeganEvent>(OnTurnBegan, unit);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnMPWillChange, Stats.WillChangeNotification(StatTypes.MP), stats);
-        this.RemoveObserver(OnMMPDidChange, Stats.DidChangeNotification(StatTypes.MMP), stats);
-        this.RemoveObserver(OnTurnBegan, TurnOrderController.TurnBeganNotification, unit);
+        this.UnsubscribeFromSender<StatWillChangeEvent>(OnMPWillChange, stats);
+        this.UnsubscribeFromSender<StatDidChangeEvent>(OnMMPDidChange, stats);
+        this.UnsubscribeFromSender<TurnBeganEvent>(OnTurnBegan, unit);
     }
 
     #endregion
 
     #region Event Handlers
 
-    private void OnMPWillChange(object sender, object args)
+    private void OnMPWillChange(StatWillChangeEvent e)
     {
-        var vce = args as ValueChangeException;
-        vce.AddModifier(new ClampValueModifier(int.MaxValue, 0, stats[StatTypes.MHP]));
+        if (e.StatType != StatTypes.MP)
+            return;
+
+        e.Exception.AddModifier(new ClampValueModifier(int.MaxValue, 0, stats[StatTypes.MHP]));
     }
 
-    private void OnMMPDidChange(object sender, object args)
+    private void OnMMPDidChange(StatDidChangeEvent e)
     {
-        var oldMMP = (int)args;
+        if (e.StatType != StatTypes.MMP)
+            return;
+
+        var oldMMP = e.OldValue;
         if (MMP > oldMMP)
             MP += MMP - oldMMP;
         else
             MP = Mathf.Clamp(MP, 0, MMP);
     }
 
-    private void OnTurnBegan(object sender, object args)
+    private void OnTurnBegan(TurnBeganEvent e)
     {
         if (MP < MMP)
             MP += Mathf.Max(Mathf.FloorToInt(MMP * 0.1f), 1);

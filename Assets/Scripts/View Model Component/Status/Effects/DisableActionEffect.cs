@@ -13,9 +13,9 @@ public class DisableActionEffectBase : MonoBehaviour
         if (owner != null)
         {
             if (blockActions)
-                this.AddObserver(OnCanPerformCheck, Ability.CanPerformCheck);
+                this.Subscribe<AbilityCanPerformCheckEvent>(OnCanPerformCheck);
             if (blockMovement)
-                this.AddObserver(OnCanMoveCheck, Movement.CanMoveCheck);
+                this.Subscribe<MovementCanMoveCheckEvent>(OnCanMoveCheck);
         }
     }
 
@@ -24,34 +24,30 @@ public class DisableActionEffectBase : MonoBehaviour
         if (owner != null)
         {
             if (blockActions)
-                this.RemoveObserver(OnCanPerformCheck, Ability.CanPerformCheck);
-            // if (blockMovement)
-            //     this.RemoveObserver(OnCanMoveCheck, Movement.CanMoveCheck);
+                this.Unsubscribe<AbilityCanPerformCheckEvent>(OnCanPerformCheck);
+            if (blockMovement)
+                this.Unsubscribe<MovementCanMoveCheckEvent>(OnCanMoveCheck);
         }
     }
 
-    private void OnCanPerformCheck(object sender, object args)
+    private void OnCanPerformCheck(AbilityCanPerformCheckEvent e)
     {
-        // sender is the Ability component; find its unit and block only if it is the owner.
-        var ability = sender as Ability ?? (sender as Component)?.GetComponent<Ability>();
-        var unit = ability?.GetComponentInParent<Unit>();
+        // Find the unit that owns this ability and block only if it is the owner.
+        var unit = e.Ability.GetComponentInParent<Unit>();
         if (unit != owner)
             return;
 
-        var exc = args as BaseException;
-        if (exc != null && exc.defaultToggle)
-            exc.FlipToggle();
+        if (e.Exception != null && e.Exception.defaultToggle)
+            e.Exception.FlipToggle();
     }
 
-    private void OnCanMoveCheck(object sender, object args)
+    private void OnCanMoveCheck(MovementCanMoveCheckEvent e)
     {
-        var movement = sender as Movement ?? (sender as Component)?.GetComponent<Movement>();
-        var unit = movement?.GetComponentInParent<Unit>();
+        var unit = e.Movement.GetComponentInParent<Unit>();
         if (unit != owner)
             return;
 
-        var exc = args as BaseException;
-        if (exc != null && exc.defaultToggle)
-            exc.FlipToggle();
+        if (e.Exception != null && e.Exception.defaultToggle)
+            e.Exception.FlipToggle();
     }
 }

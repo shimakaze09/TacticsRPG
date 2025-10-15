@@ -19,21 +19,17 @@ public class PeriodicEffect : MonoBehaviour
         owner = GetComponentInParent<Unit>();
         stats = GetComponentInParent<Stats>();
         if (owner != null)
-            this.AddObserver(OnTurnBegan, TurnOrderController.TurnBeganNotification, owner);
+            this.SubscribeToSender<TurnBeganEvent>(OnTurnBegan, owner);
     }
 
     private void OnDisable()
     {
         if (owner != null)
-            this.RemoveObserver(OnTurnBegan, TurnOrderController.TurnBeganNotification, owner);
+            this.UnsubscribeFromSender<TurnBeganEvent>(OnTurnBegan, owner);
     }
 
-    private void OnTurnBegan(object sender, object args)
+    private void OnTurnBegan(TurnBeganEvent e)
     {
-        var unit = sender as Unit ?? (sender as Component)?.GetComponentInParent<Unit>();
-        if (unit != owner)
-            return;
-
         counter++;
         if (counter >= tickCooldown)
         {

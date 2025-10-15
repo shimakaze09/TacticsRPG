@@ -18,31 +18,30 @@ public class AbilityMagicCost : MonoBehaviour
 
     private void OnEnable()
     {
-        this.AddObserver(OnCanPerformCheck, Ability.CanPerformCheck, owner);
-        this.AddObserver(OnDidPerformNotification, Ability.DidPerformNotification, owner);
+        this.SubscribeToSender<AbilityCanPerformCheckEvent>(OnCanPerformCheck, owner);
+        this.SubscribeToSender<AbilityDidPerformEvent>(OnDidPerformNotification, owner);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnCanPerformCheck, Ability.CanPerformCheck, owner);
-        this.RemoveObserver(OnDidPerformNotification, Ability.DidPerformNotification, owner);
+        this.UnsubscribeFromSender<AbilityCanPerformCheckEvent>(OnCanPerformCheck, owner);
+        this.UnsubscribeFromSender<AbilityDidPerformEvent>(OnDidPerformNotification, owner);
     }
 
     #endregion
 
-    #region Notification Handlers
+    #region Event Handlers
 
-    private void OnCanPerformCheck(object sender, object args)
+    private void OnCanPerformCheck(AbilityCanPerformCheckEvent e)
     {
         var s = GetComponentInParent<Stats>();
         if (s[StatTypes.MP] < amount)
         {
-            var exc = (BaseException)args;
-            exc.FlipToggle();
+            e.Exception.FlipToggle();
         }
     }
 
-    private void OnDidPerformNotification(object sender, object args)
+    private void OnDidPerformNotification(AbilityDidPerformEvent e)
     {
         var s = GetComponentInParent<Stats>();
         s[StatTypes.MP] -= amount;

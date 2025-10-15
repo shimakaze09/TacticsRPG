@@ -11,17 +11,20 @@ public class RegenStatusEffect : StatusEffect
     private void OnEnable()
     {
         stats = GetComponentInParent<Stats>();
-        if (stats)
-            this.AddObserver(OnNewTurn, TurnOrderController.TurnBeganNotification, GetComponentInParent<Unit>());
+        var owner = GetComponentInParent<Unit>();
+        if (owner)
+            this.SubscribeToSender<TurnBeganEvent>(OnNewTurn, owner);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnNewTurn, TurnOrderController.TurnBeganNotification, GetComponentInParent<Unit>());
+        var owner = GetComponentInParent<Unit>();
+        if (owner != null)
+            this.UnsubscribeFromSender<TurnBeganEvent>(OnNewTurn, owner);
     }
 
 
-    private void OnNewTurn(object sender, object args)
+    private void OnNewTurn(TurnBeganEvent e)
     {
         var s = GetComponentInParent<Stats>();
         var maxHP = s[StatTypes.MHP];

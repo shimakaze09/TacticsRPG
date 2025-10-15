@@ -11,23 +11,22 @@ public class TransformEffect : MonoBehaviour
     {
         stats = GetComponentInParent<Stats>();
         if (capAtk > 0 && stats != null)
-            this.AddObserver(OnAtkWillChange, Stats.WillChangeNotification(StatTypes.ATK), stats);
+            this.SubscribeToSender<StatWillChangeEvent>(OnAtkWillChange, stats);
     }
 
     private void OnDisable()
     {
         if (capAtk > 0 && stats != null)
-            this.RemoveObserver(OnAtkWillChange, Stats.WillChangeNotification(StatTypes.ATK), stats);
+            this.UnsubscribeFromSender<StatWillChangeEvent>(OnAtkWillChange, stats);
     }
 
-    private void OnAtkWillChange(object sender, object args)
+    private void OnAtkWillChange(StatWillChangeEvent e)
     {
-        var exc = args as ValueChangeException;
-        if (exc == null)
+        if (e.StatType != StatTypes.ATK)
             return;
 
         if (capAtk > 0)
-            exc.AddModifier(new MinValueModifier(0, capAtk));
+            e.Exception.AddModifier(new MinValueModifier(0, capAtk));
     }
 
     // Visual/model swap hooks can be added here (e.g., enabling a "frog" child object, swapping animator, etc.)

@@ -11,22 +11,17 @@ public abstract class TurnBasedStatusEffect : StatusEffect
     {
         ownerUnit = GetComponentInParent<Unit>();
         if (ownerUnit != null)
-            this.AddObserver(OnTurnBegan, TurnOrderController.TurnBeganNotification, ownerUnit);
+            this.SubscribeToSender<TurnBeganEvent>(OnTurnBegan, ownerUnit);
     }
 
     private void OnDisable()
     {
         if (ownerUnit != null)
-            this.RemoveObserver(OnTurnBegan, TurnOrderController.TurnBeganNotification, ownerUnit);
+            this.UnsubscribeFromSender<TurnBeganEvent>(OnTurnBegan, ownerUnit);
     }
 
-    private void OnTurnBegan(object sender, object args)
+    private void OnTurnBegan(TurnBeganEvent e)
     {
-        // args are whatever your TurnOrderController uses; we only need to decrement when it's this unit's turn.
-        var unit = sender as Unit ?? (sender as Component)?.GetComponentInParent<Unit>();
-        if (unit != ownerUnit)
-            return;
-
         remainingTurns = Mathf.Max(remainingTurns - 1, 0);
         if (remainingTurns <= 0)
         {

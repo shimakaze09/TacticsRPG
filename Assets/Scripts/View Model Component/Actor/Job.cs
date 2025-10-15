@@ -6,17 +6,21 @@ public class Job : MonoBehaviour
 
     private void OnDestroy()
     {
-        this.RemoveObserver(OnLvlChangeNotification, Stats.DidChangeNotification(StatTypes.LVL), stats);
+        if (stats != null)
+            this.UnsubscribeFromSender<StatDidChangeEvent>(OnLvlChangeNotification, stats);
     }
 
     #endregion
 
     #region Event Handlers
 
-    protected virtual void OnLvlChangeNotification(object sender, object args)
+    protected virtual void OnLvlChangeNotification(StatDidChangeEvent e)
     {
-        var oldValue = (int)args;
-        var newValue = stats[StatTypes.LVL];
+        if (e.StatType != StatTypes.LVL)
+            return;
+
+        var oldValue = e.OldValue;
+        var newValue = e.NewValue;
 
         for (var i = oldValue; i < newValue; i++)
             LevelUp();
@@ -72,7 +76,7 @@ public class Job : MonoBehaviour
     public void Employ()
     {
         stats = gameObject.GetComponentInParent<Stats>();
-        this.AddObserver(OnLvlChangeNotification, Stats.DidChangeNotification(StatTypes.LVL), stats);
+        this.SubscribeToSender<StatDidChangeEvent>(OnLvlChangeNotification, stats);
 
         var features = GetComponentsInChildren<Feature>();
         for (var i = 0; i < features.Length; i++)
@@ -85,7 +89,8 @@ public class Job : MonoBehaviour
         for (var i = 0; i < features.Length; i++)
             features[i].Deactivate();
 
-        this.RemoveObserver(OnLvlChangeNotification, Stats.DidChangeNotification(StatTypes.LVL), stats);
+        if (stats != null)
+            this.UnsubscribeFromSender<StatDidChangeEvent>(OnLvlChangeNotification, stats);
         stats = null;
     }
 

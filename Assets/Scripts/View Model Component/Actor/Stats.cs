@@ -16,8 +16,8 @@ public class Stats : MonoBehaviour
             // Allow exceptions to the rule here
             var exc = new ValueChangeException(oldValue, value);
 
-            // The notification is unique per stat type
-            this.PostNotification(WillChangeNotification(type), exc);
+            // Publish the WillChange event for this stat type
+            this.Publish(new StatWillChangeEvent(this, type, exc));
 
             // Did anything modify the value?
             value = Mathf.FloorToInt(exc.GetModifiedValue());
@@ -28,31 +28,14 @@ public class Stats : MonoBehaviour
         }
 
         _data[(int)type] = value;
-        this.PostNotification(DidChangeNotification(type), oldValue);
+
+        // Publish the DidChange event for this stat type
+        this.Publish(new StatDidChangeEvent(this, type, oldValue, value));
     }
 
     #endregion
 
-    #region Notifications
 
-    public static string WillChangeNotification(StatTypes type)
-    {
-        if (!_willChangeNotifications.ContainsKey(type))
-            _willChangeNotifications.Add(type, $"Stats.{type}WillChange");
-        return _willChangeNotifications[type];
-    }
-
-    public static string DidChangeNotification(StatTypes type)
-    {
-        if (!_didChangeNotifications.ContainsKey(type))
-            _didChangeNotifications.Add(type, $"Stats.{type}DidChange");
-        return _didChangeNotifications[type];
-    }
-
-    private static readonly Dictionary<StatTypes, string> _willChangeNotifications = new();
-    private static readonly Dictionary<StatTypes, string> _didChangeNotifications = new();
-
-    #endregion
 
     #region Fields / Properties
 

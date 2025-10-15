@@ -4,20 +4,22 @@ public class AutoStatusController : MonoBehaviour
 {
     private void OnEnable()
     {
-        this.AddObserver(OnHPDidChangeNotification, Stats.DidChangeNotification(StatTypes.HP));
+        this.Subscribe<StatDidChangeEvent>(OnHPDidChangeNotification);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnHPDidChangeNotification, Stats.DidChangeNotification(StatTypes.HP));
+        this.Unsubscribe<StatDidChangeEvent>(OnHPDidChangeNotification);
     }
 
-    private void OnHPDidChangeNotification(object sender, object args)
+    private void OnHPDidChangeNotification(StatDidChangeEvent e)
     {
-        var stats = sender as Stats;
-        if (stats[StatTypes.HP] == 0)
+        if (e.StatType != StatTypes.HP)
+            return;
+
+        if (e.NewValue == 0)
         {
-            var status = stats.GetComponentInChildren<Status>();
+            var status = e.Stats.GetComponentInChildren<Status>();
             var c = status.Add<KnockOutStatusEffect, StatComparisonCondition>();
             c.Init(StatTypes.HP, 0, c.EqualTo);
         }

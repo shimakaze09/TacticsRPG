@@ -12,18 +12,21 @@ public class ShellStatusEffect : StatusEffect
     {
         myStats = GetComponentInParent<Stats>();
         if (myStats)
-            this.AddObserver(OnStatWillChange, Stats.WillChangeNotification(StatTypes.MDF), myStats);
+            this.SubscribeToSender<StatWillChangeEvent>(OnStatWillChange, myStats);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnStatWillChange, Stats.WillChangeNotification(StatTypes.MDF), myStats);
+        if (myStats != null)
+            this.UnsubscribeFromSender<StatWillChangeEvent>(OnStatWillChange, myStats);
     }
 
-    private void OnStatWillChange(object sender, object args)
+    private void OnStatWillChange(StatWillChangeEvent e)
     {
-        var exc = args as ValueChangeException;
+        if (e.StatType != StatTypes.MDF)
+            return;
+
         var m = new MultValueModifier(0, mdfMultiplier);
-        exc.AddModifier(m);
+        e.Exception.AddModifier(m);
     }
 }

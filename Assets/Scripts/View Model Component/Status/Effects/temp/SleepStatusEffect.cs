@@ -12,37 +12,36 @@ public class SleepStatusEffect : StatusEffect
         stats = GetComponentInParent<Stats>();
 
         if (owner)
-            this.AddObserver(OnCanPerformCheck, Ability.CanPerformCheck);
+            this.Subscribe<AbilityCanPerformCheckEvent>(OnCanPerformCheck);
 
         if (stats)
-            this.AddObserver(OnHitNotification, Stats.DidChangeNotification(StatTypes.HP), stats);
+            this.SubscribeToSender<StatDidChangeEvent>(OnHitNotification, stats);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnCanPerformCheck, Ability.CanPerformCheck);
-        this.RemoveObserver(OnHitNotification, Stats.DidChangeNotification(StatTypes.HP), stats);
+        this.Unsubscribe<AbilityCanPerformCheckEvent>(OnCanPerformCheck);
+        if (stats != null)
+            this.UnsubscribeFromSender<StatDidChangeEvent>(OnHitNotification, stats);
     }
 
-    private void OnCanPerformCheck(object sender, object args)
+    private void OnCanPerformCheck(AbilityCanPerformCheckEvent e)
     {
-        var unit = (sender as Ability).GetComponentInParent<Unit>();
+        var unit = e.Ability.GetComponentInParent<Unit>();
         if (owner == unit)
         {
-            var exc = args as BaseException;
-            if (exc.defaultToggle)
-                exc.FlipToggle(); // prevent performing ability while asleep
+            if (e.Exception.defaultToggle)
+                e.Exception.FlipToggle(); // prevent performing ability while asleep
         }
     }
 
-    private void OnHitNotification(object sender, object args)
+    private void OnHitNotification(StatDidChangeEvent e)
     {
-        // If unit takes damage, wake up (remove status)
-        var vce = args as ValueChangeException;
-        if (vce == null)
+        if (e.StatType != StatTypes.HP)
             return;
 
-        if (vce.GetModifiedValue() < vce.fromValue)
+        // If unit takes damage, wake up (remove status)
+        if (e.NewValue < e.OldValue)
         {
             // HP decreased -> remove sleep
             var cond = GetComponentInChildren<StatusCondition>();

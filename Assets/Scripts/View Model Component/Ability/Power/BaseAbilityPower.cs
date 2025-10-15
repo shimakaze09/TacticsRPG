@@ -9,48 +9,65 @@ public abstract class BaseAbilityPower : MonoBehaviour
 
     private void OnEnable()
     {
-        this.AddObserver(OnGetBaseAttack, BaseAbilityEffect.GetAttackNotification);
-        this.AddObserver(OnGetBaseDefense, BaseAbilityEffect.GetDefenseNotification);
-        this.AddObserver(OnGetPower, BaseAbilityEffect.GetPowerNotification);
+        // Subscribe to events from any BaseAbilityEffect within our same Ability
+        // This ensures we only respond to our own ability's calculations
+        var myAbility = GetComponentInParent<Ability>();
+        if (myAbility != null)
+        {
+            // Subscribe to events from all effects in this ability
+            var effects = myAbility.GetComponentsInChildren<BaseAbilityEffect>();
+            foreach (var effect in effects)
+            {
+                this.SubscribeToSender<GetAttackStatEvent>(OnGetBaseAttack, effect);
+                this.SubscribeToSender<GetDefenseStatEvent>(OnGetBaseDefense, effect);
+                this.SubscribeToSender<GetPowerEvent>(OnGetPower, effect);
+            }
+        }
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnGetBaseAttack, BaseAbilityEffect.GetAttackNotification);
-        this.RemoveObserver(OnGetBaseDefense, BaseAbilityEffect.GetDefenseNotification);
-        this.RemoveObserver(OnGetPower, BaseAbilityEffect.GetPowerNotification);
-    }
-
-    private void OnGetBaseAttack(object sender, object args)
-    {
-        if (IsMyEffect(sender))
+        var myAbility = GetComponentInParent<Ability>();
+        if (myAbility != null)
         {
-            var info = args as Info<Unit, Unit, List<ValueModifier>>;
-            info.arg2.Add(new AddValueModifier(0, GetBaseAttack()));
+            var effects = myAbility.GetComponentsInChildren<BaseAbilityEffect>();
+            foreach (var effect in effects)
+            {
+                this.UnsubscribeFromSender<GetAttackStatEvent>(OnGetBaseAttack, effect);
+                this.UnsubscribeFromSender<GetDefenseStatEvent>(OnGetBaseDefense, effect);
+                this.UnsubscribeFromSender<GetPowerEvent>(OnGetPower, effect);
+            }
         }
     }
 
-    private void OnGetBaseDefense(object sender, object args)
+    private void OnGetBaseAttack(GetAttackStatEvent e)
     {
-        if (IsMyEffect(sender))
+        if (IsMyUnit(e.Attacker))
         {
-            var info = args as Info<Unit, Unit, List<ValueModifier>>;
-            info.arg2.Add(new AddValueModifier(0, GetBaseDefense(info.arg1)));
+            e.Modifiers.Add(new AddValueModifier(0, GetBaseAttack()));
         }
     }
 
-    private void OnGetPower(object sender, object args)
+    private void OnGetBaseDefense(GetDefenseStatEvent e)
     {
-        if (IsMyEffect(sender))
+        if (IsMyUnit(e.Target))
         {
-            var info = args as Info<Unit, Unit, List<ValueModifier>>;
-            info.arg2.Add(new AddValueModifier(0, GetPower()));
+            e.Modifiers.Add(new AddValueModifier(0, GetBaseDefense(e.Target)));
         }
     }
 
-    private bool IsMyEffect(object sender)
+    private void OnGetPower(GetPowerEvent e)
     {
-        var obj = sender as MonoBehaviour;
-        return obj != null && obj.transform.parent == transform;
+        if (IsMyUnit(e.Attacker))
+        {
+            e.Modifiers.Add(new AddValueModifier(0, GetPower()));
+        }
+    }
+
+    private bool IsMyUnit(Unit unit)
+    {
+        // Check if the unit is the one that owns this component
+        var myUnit = GetComponentInParent<Unit>();
+        return myUnit == unit;
     }
 }

@@ -8,23 +8,22 @@ public abstract class DamageRemovableStatusEffect : StatusEffect
     {
         stats = GetComponentInParent<Stats>();
         if (stats != null)
-            this.AddObserver(OnStatsChanged, Stats.DidChangeNotification(StatTypes.HP), stats);
+            this.SubscribeToSender<StatDidChangeEvent>(OnStatsChanged, stats);
     }
 
     private void OnDisable()
     {
         if (stats != null)
-            this.RemoveObserver(OnStatsChanged, Stats.DidChangeNotification(StatTypes.HP), stats);
+            this.UnsubscribeFromSender<StatDidChangeEvent>(OnStatsChanged, stats);
     }
 
-    private void OnStatsChanged(object sender, object args)
+    private void OnStatsChanged(StatDidChangeEvent e)
     {
-        var vce = args as ValueChangeException;
-        if (vce == null)
+        if (e.StatType != StatTypes.HP)
             return;
 
         // If HP decreased, clear the status
-        if (vce.GetModifiedValue() < vce.fromValue)
+        if (e.NewValue < e.OldValue)
         {
             var cond = GetComponentInChildren<StatusCondition>() ?? GetComponent<StatusCondition>();
             if (cond != null)

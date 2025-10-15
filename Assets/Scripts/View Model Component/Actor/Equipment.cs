@@ -3,13 +3,6 @@ using UnityEngine;
 
 public class Equipment : MonoBehaviour
 {
-    #region Notifications
-
-    public const string EquippedNotification = "Equipment.EquippedNotification";
-    public const string UnEquippedNotification = "Equipment.UnEquippedNotification";
-
-    #endregion
-
     #region Fields / Properties
 
     public IList<Equippable> items => _items.AsReadOnly();
@@ -28,7 +21,7 @@ public class Equipment : MonoBehaviour
         item.slots = slots;
         item.OnEquip();
 
-        this.PostNotification(EquippedNotification, item);
+        this.Publish(new ItemEquippedEvent(item.gameObject));
     }
 
     public void UnEquip(Equippable item)
@@ -38,7 +31,7 @@ public class Equipment : MonoBehaviour
         item.transform.SetParent(transform);
         _items.Remove(item);
 
-        this.PostNotification(UnEquippedNotification, item);
+        this.Publish(new ItemUnequippedEvent(item.gameObject));
     }
 
     public void UnEquip(EquipSlots slots)

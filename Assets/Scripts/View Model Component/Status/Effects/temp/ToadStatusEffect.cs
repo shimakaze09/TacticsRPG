@@ -12,19 +12,22 @@ public class ToadStatusEffect : StatusEffect
     {
         myStats = GetComponentInParent<Stats>();
         if (myStats)
-            this.AddObserver(OnAtkWillChange, Stats.WillChangeNotification(StatTypes.ATK), myStats);
+            this.SubscribeToSender<StatWillChangeEvent>(OnAtkWillChange, myStats);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnAtkWillChange, Stats.WillChangeNotification(StatTypes.ATK), myStats);
+        if (myStats != null)
+            this.UnsubscribeFromSender<StatWillChangeEvent>(OnAtkWillChange, myStats);
     }
 
-    private void OnAtkWillChange(object sender, object args)
+    private void OnAtkWillChange(StatWillChangeEvent e)
     {
-        var exc = args as ValueChangeException;
+        if (e.StatType != StatTypes.ATK)
+            return;
+
         // Use a MinValueModifier to cap the final ATK value to maxAtkWhileToad.
         var m = new MinValueModifier(0, maxAtkWhileToad);
-        exc.AddModifier(m);
+        e.Exception.AddModifier(m);
     }
 }

@@ -4,8 +4,11 @@ public class StatComparisonCondition : StatusCondition
 {
     #region Notification Handlers
 
-    private void OnStatChanged(object sender, object args)
+    private void OnStatChanged(StatDidChangeEvent e)
     {
+        if (e.StatType != type)
+            return;
+
         if (condition != null && !condition())
             Remove();
     }
@@ -30,7 +33,8 @@ public class StatComparisonCondition : StatusCondition
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnStatChanged, Stats.DidChangeNotification(type), stats);
+        if (stats)
+            this.UnsubscribeFromSender<StatDidChangeEvent>(OnStatChanged, stats);
     }
 
     #endregion
@@ -42,7 +46,7 @@ public class StatComparisonCondition : StatusCondition
         this.type = type;
         this.value = value;
         this.condition = condition;
-        this.AddObserver(OnStatChanged, Stats.DidChangeNotification(type), stats);
+        this.SubscribeToSender<StatDidChangeEvent>(OnStatChanged, stats);
     }
 
     public bool EqualTo()

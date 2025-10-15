@@ -4,18 +4,10 @@ using UnityEngine;
 
 public abstract class BaseAbilityEffect : MonoBehaviour
 {
-    #region Consts & Notifications
+    #region Consts
 
     protected const int minDamage = -999;
     protected const int maxDamage = 999;
-
-    public const string GetAttackNotification = "BaseAbilityEffect.GetAttackNotification";
-    public const string GetDefenseNotification = "BaseAbilityEffect.GetDefenseNotification";
-    public const string GetPowerNotification = "BaseAbilityEffect.GetPowerNotification";
-    public const string TweakDamageNotification = "BaseAbilityEffect.TweakDamageNotification";
-
-    public const string MissedNotification = "BaseAbilityEffect.MissedNotification";
-    public const string HitNotification = "BaseAbilityEffect.HitNotification";
 
     #endregion
 
@@ -28,10 +20,18 @@ public abstract class BaseAbilityEffect : MonoBehaviour
         if (GetComponent<AbilityEffectTarget>().IsTarget(target) == false)
             return;
 
+        var attacker = GetComponentInParent<Unit>();
+        var targetUnit = target.content?.GetComponent<Unit>();
+
         if (GetComponent<HitRate>().RollForHit(target))
-            this.PostNotification(HitNotification, OnApply(target));
+        {
+            var damage = OnApply(target);
+            this.Publish(new AbilityHitEvent(attacker, targetUnit, damage));
+        }
         else
-            this.PostNotification(MissedNotification);
+        {
+            this.Publish(new AbilityMissedEvent(attacker, targetUnit));
+        }
     }
 
     #endregion
@@ -40,11 +40,20 @@ public abstract class BaseAbilityEffect : MonoBehaviour
 
     protected abstract int OnApply(Tile target);
 
-    protected virtual int GetStat(Unit attacker, Unit target, string notification, int startValue)
+    protected virtual int GetStat(Unit attacker, Unit target, System.Type eventType, int startValue)
     {
         var mods = new List<ValueModifier>();
-        var info = new Info<Unit, Unit, List<ValueModifier>>(attacker, target, mods);
-        this.PostNotification(notification, info);
+
+        // Publish the appropriate event based on type
+        if (eventType == typeof(GetAttackStatEvent))
+            this.Publish(new GetAttackStatEvent(attacker, target, mods));
+        else if (eventType == typeof(GetDefenseStatEvent))
+            this.Publish(new GetDefenseStatEvent(attacker, target, mods));
+        else if (eventType == typeof(GetPowerEvent))
+            this.Publish(new GetPowerEvent(attacker, target, mods));
+        else if (eventType == typeof(TweakDamageEvent))
+            this.Publish(new TweakDamageEvent(attacker, target, mods));
+
         mods.Sort(Compare);
 
         var value = mods.Aggregate<ValueModifier, float>(startValue, (current, t) => t.Modify(startValue, current));

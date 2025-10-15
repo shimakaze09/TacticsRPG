@@ -3,14 +3,10 @@ using UnityEngine;
 
 public class Ability : MonoBehaviour
 {
-    public const string CanPerformCheck = "Ability.CanPerformCheck";
-    public const string FailedNotification = "Ability.FailedNotification";
-    public const string DidPerformNotification = "Ability.DidPerformNotification";
-
     public bool CanPerform()
     {
         var exc = new BaseException(true);
-        this.PostNotification(CanPerformCheck, exc);
+        this.Publish(new AbilityCanPerformCheckEvent(this, exc));
         return exc.toggle;
     }
 
@@ -18,14 +14,14 @@ public class Ability : MonoBehaviour
     {
         if (!CanPerform())
         {
-            this.PostNotification(FailedNotification);
+            this.Publish(new AbilityFailedEvent(this));
             return;
         }
 
         foreach (var tile in targets)
             Perform(tile);
 
-        this.PostNotification(DidPerformNotification);
+        this.Publish(new AbilityDidPerformEvent(this));
     }
 
     public bool IsTarget(Tile tile)

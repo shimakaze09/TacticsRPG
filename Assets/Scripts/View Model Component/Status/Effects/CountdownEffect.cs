@@ -11,21 +11,17 @@ public class CountdownEffect : MonoBehaviour
     {
         owner = GetComponentInParent<Unit>();
         if (owner != null)
-            this.AddObserver(OnTurnBegan, TurnOrderController.TurnBeganNotification, owner);
+            this.SubscribeToSender<TurnBeganEvent>(OnTurnBegan, owner);
     }
 
     private void OnDisable()
     {
         if (owner != null)
-            this.RemoveObserver(OnTurnBegan, TurnOrderController.TurnBeganNotification, owner);
+            this.UnsubscribeFromSender<TurnBeganEvent>(OnTurnBegan, owner);
     }
 
-    private void OnTurnBegan(object sender, object args)
+    private void OnTurnBegan(TurnBeganEvent e)
     {
-        var unit = sender as Unit ?? (sender as Component)?.GetComponentInParent<Unit>();
-        if (unit != owner)
-            return;
-
         remainingTurns = Mathf.Max(remainingTurns - 1, 0);
         if (remainingTurns <= 0)
         {

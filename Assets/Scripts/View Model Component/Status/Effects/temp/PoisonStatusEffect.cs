@@ -8,15 +8,16 @@ public class PoisonStatusEffect : StatusEffect
     {
         owner = GetComponentInParent<Unit>();
         if (owner)
-            this.AddObserver(OnNewTurn, TurnOrderController.TurnBeganNotification, owner);
+            this.SubscribeToSender<TurnBeganEvent>(OnNewTurn, owner);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnNewTurn, TurnOrderController.TurnBeganNotification, owner);
+        if (owner != null)
+            this.UnsubscribeFromSender<TurnBeganEvent>(OnNewTurn, owner);
     }
 
-    private void OnNewTurn(object sender, object args)
+    private void OnNewTurn(TurnBeganEvent e)
     {
         var s = GetComponentInParent<Stats>();
         var currentHP = s[StatTypes.HP];

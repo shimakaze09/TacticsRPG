@@ -6,27 +6,29 @@
     {
         myStats = GetComponentInParent<Stats>();
         if (myStats)
-            this.AddObserver(OnCounterWillChange, Stats.WillChangeNotification(StatTypes.CTR), myStats);
-        this.AddObserver(OnAutomaticHitCheck, HitRate.AutomaticHitCheckNotification);
+            this.SubscribeToSender<StatWillChangeEvent>(OnCounterWillChange, myStats);
+        this.Subscribe<AutomaticHitCheckEvent>(OnAutomaticHitCheck);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnCounterWillChange, Stats.WillChangeNotification(StatTypes.CTR), myStats);
-        this.RemoveObserver(OnAutomaticHitCheck, HitRate.AutomaticHitCheckNotification);
+        if (myStats != null)
+            this.UnsubscribeFromSender<StatWillChangeEvent>(OnCounterWillChange, myStats);
+        this.Unsubscribe<AutomaticHitCheckEvent>(OnAutomaticHitCheck);
     }
 
-    private void OnCounterWillChange(object sender, object args)
+    private void OnCounterWillChange(StatWillChangeEvent e)
     {
-        var exc = args as ValueChangeException;
-        exc.FlipToggle();
+        if (e.StatType != StatTypes.CTR)
+            return;
+
+        e.Exception.FlipToggle();
     }
 
-    private void OnAutomaticHitCheck(object sender, object args)
+    private void OnAutomaticHitCheck(AutomaticHitCheckEvent e)
     {
         var owner = GetComponentInParent<Unit>();
-        var exc = args as MatchException;
-        if (owner == exc.target)
-            exc.FlipToggle();
+        if (owner == e.Target)
+            e.Exception.FlipToggle();
     }
 }

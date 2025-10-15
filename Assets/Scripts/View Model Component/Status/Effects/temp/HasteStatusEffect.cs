@@ -6,18 +6,21 @@
     {
         myStats = GetComponentInParent<Stats>();
         if (myStats)
-            this.AddObserver(OnCounterWillChange, Stats.WillChangeNotification(StatTypes.CTR), myStats);
+            this.SubscribeToSender<StatWillChangeEvent>(OnCounterWillChange, myStats);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnCounterWillChange, Stats.WillChangeNotification(StatTypes.CTR), myStats);
+        if (myStats != null)
+            this.UnsubscribeFromSender<StatWillChangeEvent>(OnCounterWillChange, myStats);
     }
 
-    private void OnCounterWillChange(object sender, object args)
+    private void OnCounterWillChange(StatWillChangeEvent e)
     {
-        var exc = args as ValueChangeException;
+        if (e.StatType != StatTypes.CTR)
+            return;
+
         var m = new MultDeltaModifier(0, 2);
-        exc.AddModifier(m);
+        e.Exception.AddModifier(m);
     }
 }

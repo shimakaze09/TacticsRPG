@@ -5,9 +5,10 @@ public abstract class BaseVictoryCondition : MonoBehaviour
 {
     #region Notification Handlers
 
-    protected virtual void OnHPDidChangeNotification(object sender, object args)
+    protected virtual void OnHPDidChangeNotification(StatDidChangeEvent e)
     {
-        CheckForGameOver();
+        if (e.StatType == StatTypes.HP)
+            CheckForGameOver();
     }
 
     #endregion
@@ -29,12 +30,12 @@ public abstract class BaseVictoryCondition : MonoBehaviour
 
     protected virtual void OnEnable()
     {
-        this.AddObserver(OnHPDidChangeNotification, Stats.DidChangeNotification(StatTypes.HP));
+        this.Subscribe<StatDidChangeEvent>(OnHPDidChangeNotification);
     }
 
     protected virtual void OnDisable()
     {
-        this.RemoveObserver(OnHPDidChangeNotification, Stats.DidChangeNotification(StatTypes.HP));
+        this.Unsubscribe<StatDidChangeEvent>(OnHPDidChangeNotification);
     }
 
     #endregion
@@ -50,10 +51,10 @@ public abstract class BaseVictoryCondition : MonoBehaviour
     protected virtual bool PartyDefeated(Alliances type)
     {
         return !(from t in bc.units
-            let a = t.GetComponent<Alliance>()
-            where a != null
-            where a.type == type && !IsDefeated(t)
-            select t).Any();
+                 let a = t.GetComponent<Alliance>()
+                 where a != null
+                 where a.type == type && !IsDefeated(t)
+                 select t).Any();
     }
 
     protected virtual bool IsDefeated(Unit unit)

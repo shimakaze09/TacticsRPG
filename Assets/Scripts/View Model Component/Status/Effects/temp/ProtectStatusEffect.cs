@@ -12,20 +12,23 @@ public class ProtectStatusEffect : StatusEffect
     {
         myStats = GetComponentInParent<Stats>();
         if (myStats)
-            this.AddObserver(OnStatWillChange, Stats.WillChangeNotification(StatTypes.DEF), myStats);
+            this.SubscribeToSender<StatWillChangeEvent>(OnStatWillChange, myStats);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnStatWillChange, Stats.WillChangeNotification(StatTypes.DEF), myStats);
+        if (myStats != null)
+            this.UnsubscribeFromSender<StatWillChangeEvent>(OnStatWillChange, myStats);
     }
 
 
-    private void OnStatWillChange(object sender, object args)
+    private void OnStatWillChange(StatWillChangeEvent e)
     {
-        var exc = args as ValueChangeException;
+        if (e.StatType != StatTypes.DEF)
+            return;
+
         // multiply the final value
         var m = new MultValueModifier(0, defMultiplier);
-        exc.AddModifier(m);
+        e.Exception.AddModifier(m);
     }
 }

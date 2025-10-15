@@ -14,30 +14,29 @@ public abstract class StatModifierEffect : StatusEffect
     {
         stats = GetComponentInParent<Stats>();
         if (stats != null)
-            this.AddObserver(OnStatWillChange, Stats.WillChangeNotification(statType), stats);
+            this.SubscribeToSender<StatWillChangeEvent>(OnStatWillChange, stats);
     }
 
     private void OnDisable()
     {
         if (stats != null)
-            this.RemoveObserver(OnStatWillChange, Stats.WillChangeNotification(statType), stats);
+            this.UnsubscribeFromSender<StatWillChangeEvent>(OnStatWillChange, stats);
     }
 
-    private void OnStatWillChange(object sender, object args)
+    private void OnStatWillChange(StatWillChangeEvent e)
     {
-        var exc = args as ValueChangeException;
-        if (exc == null)
+        if (e.StatType != statType)
             return;
 
         if (mode == Mode.Multiply)
         {
             var m = new MultValueModifier(0, value);
-            exc.AddModifier(m);
+            e.Exception.AddModifier(m);
         }
         else
         {
             var a = new AddValueModifier(0, (int)Mathf.Round(value));
-            exc.AddModifier(a);
+            e.Exception.AddModifier(a);
         }
     }
 }

@@ -22,35 +22,33 @@ public class TestItems : MonoBehaviour
 
     private void OnEnable()
     {
-        this.AddObserver(OnEquippedItem, Equipment.EquippedNotification);
-        this.AddObserver(OnUnEquippedItem, Equipment.UnEquippedNotification);
+        this.Subscribe<ItemEquippedEvent>(OnEquippedItem);
+        this.Subscribe<ItemUnequippedEvent>(OnUnEquippedItem);
     }
 
     private void OnDisable()
     {
-        this.RemoveObserver(OnEquippedItem, Equipment.EquippedNotification);
-        this.RemoveObserver(OnUnEquippedItem, Equipment.UnEquippedNotification);
+        this.Unsubscribe<ItemEquippedEvent>(OnEquippedItem);
+        this.Unsubscribe<ItemUnequippedEvent>(OnUnEquippedItem);
     }
 
     #endregion
 
     #region Notification Handlers
 
-    private void OnEquippedItem(object sender, object args)
+    private void OnEquippedItem(ItemEquippedEvent e)
     {
-        var eq = sender as Equipment;
-        var item = args as Equippable;
-        inventory.Remove(item.gameObject);
-        var message = $"{eq.name} equipped {item.name}";
+        var item = e.Item.GetComponent<Equippable>();
+        inventory.Remove(e.Item);
+        var message = $"Equipped {item.name}";
         Debug.Log(message);
     }
 
-    private void OnUnEquippedItem(object sender, object args)
+    private void OnUnEquippedItem(ItemUnequippedEvent e)
     {
-        var eq = sender as Equipment;
-        var item = args as Equippable;
-        inventory.Add(item.gameObject);
-        var message = $"{eq.name} un-equipped {item.name}";
+        var item = e.Item.GetComponent<Equippable>();
+        inventory.Add(e.Item);
+        var message = $"Un-equipped {item.name}";
         Debug.Log(message);
     }
 
