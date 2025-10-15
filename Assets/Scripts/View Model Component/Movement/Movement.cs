@@ -11,6 +11,8 @@ public abstract class Movement : MonoBehaviour
     protected Unit unit;
     protected Transform jumper;
     protected Stats stats;
+    public const string CanMoveCheck = "Movement.CanMoveCheck";
+
     protected virtual TileTraversalFlags TraversalMask => TileTraversalFlags.Ground;
 
     #endregion
@@ -31,6 +33,12 @@ public abstract class Movement : MonoBehaviour
     #endregion
 
     #region Public
+    public bool CanMove()
+    {
+        var exc = new BaseException(true);
+        this.PostNotification(CanMoveCheck, exc);
+        return exc.toggle;
+    }
 
     public virtual List<Tile> GetTilesInRange(Board board)
     {

@@ -31,8 +31,11 @@ public class CommandSelectionState : BaseAbilityMenuState
             };
         }
 
+        var unit = turn.actor;
+        var canMove = unit.GetComponent<Movement>().CanMove();
+
         abilityMenuPanelController.Show(menuTitle, menuOptions);
-        abilityMenuPanelController.SetLocked(0, turn.hasUnitMoved);
+        abilityMenuPanelController.SetLocked(0, turn.hasUnitMoved || !canMove);
         abilityMenuPanelController.SetLocked(1, turn.hasUnitActed);
     }
 

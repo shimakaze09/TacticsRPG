@@ -599,20 +599,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10e27e57552347049817b18b2e53f705, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraRig: {fileID: 2142880691}
+  abilityMenuPanelController: {fileID: 1030889062}
+  battleMessageController: {fileID: 2612171028182722246}
   board: {fileID: 1544800057}
+  cameraRig: {fileID: 2142880691}
+  cpu: {fileID: 421261631}
+  facingIndicator: {fileID: 1293718354}
+  hitSuccessIndicator: {fileID: 1421179873}
   levelData: {fileID: 11400000, guid: 550cdd3a7badcf4439f9b1b5bfadd213, type: 2}
-  tileSelectionIndicator: {fileID: 2073229240}
   pos:
     x: 0
     y: 0
-  abilityMenuPanelController: {fileID: 1030889062}
   statPanelController: {fileID: 1837319753}
-  hitSuccessIndicator: {fileID: 1421179873}
-  battleMessageController: {fileID: 2612171028182722246}
-  facingIndicator: {fileID: 1293718354}
+  tileSelectionIndicator: {fileID: 2073229240}
   units: []
-  cpu: {fileID: 421261631}
 --- !u!4 &421261628
 Transform:
   m_ObjectHideFlags: 0
@@ -977,8 +977,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17a27c0fcfe57f24b91a43448d61ec33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 3
   follow: {fileID: 2073229240}
+  speed: 3
 --- !u!4 &2142880692
 Transform:
   m_ObjectHideFlags: 0

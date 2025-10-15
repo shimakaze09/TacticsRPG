@@ -2,7 +2,6 @@ public class AttackedStatusCondition : StatusCondition
 {
     private Stats stats;
 
-
     private void OnEnable()
     {
         stats = GetComponentInParent<Stats>();

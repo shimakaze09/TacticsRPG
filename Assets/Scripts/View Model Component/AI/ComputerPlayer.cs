@@ -161,6 +161,10 @@ public class ComputerPlayer : MonoBehaviour
 
     private List<Tile> GetMoveOptions()
     {
+        var status = actor.GetComponent<Status>();
+        if (status != null && !GetComponentInChildren<Movement>().CanMove())
+            return new List<Tile> { actor.tile };
+
         var options = actor.GetComponent<Movement>().GetTilesInRange(bc.board);
         options.Add(actor.tile);
         return options;
