@@ -16,11 +16,19 @@ public class GameData
     public float playTime;
     public SerializableDictionary<string, int> unitLevel;
 
+    // Job System Data (FFT-Style)
+    public SerializableDictionary<string, JobProgressData> jobProgressData;
+    public SerializableDictionary<string, AbilityMemory> abilityMemoryData;
+
     // The values defined in this constructor will be the default values
     // the game starts with when there's no data to load
     public GameData()
     {
         playTime = 0;
         unitLevel = new SerializableDictionary<string, int>();
+
+        // Initialize job system data
+        jobProgressData = new SerializableDictionary<string, JobProgressData>();
+        abilityMemoryData = new SerializableDictionary<string, AbilityMemory>();
     }
 }

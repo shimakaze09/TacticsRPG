@@ -90,5 +90,23 @@ public class Rank : MonoBehaviour
         stats.SetValue(StatTypes.EXP, ExperienceForLevel(level), false);
     }
 
+    /// <summary>
+    /// Check if unit leveled up recently (for post-battle checks)
+    /// Compares current level to what level would be if we removed recent EXP
+    /// </summary>
+    public bool DidLevelUp(int recentExpGained = 0)
+    {
+        if (recentExpGained <= 0)
+        {
+            // No way to check without knowing recent EXP
+            // Return false to be safe
+            return false;
+        }
+
+        int previousExp = EXP - recentExpGained;
+        int previousLevel = LevelForExperience(previousExp);
+        return LVL > previousLevel;
+    }
+
     #endregion
 }
