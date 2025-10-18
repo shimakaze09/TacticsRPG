@@ -12,37 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa7883aeabf35bb4aa557d6e6b622593, type: 3}
   m_Name: Lancer
   m_EditorClassIdentifier: 
-  jobName: Lancer
-  description: Spear master with long-range physical attacks.
+  jobName: New Job
+  description: A new job class.
   jobIcon: {fileID: 0}
-  category: 2
+  category: 1
   isUnique: 0
   allowedCharacterNames: []
-  prerequisites:
-  - requiredJob: {fileID: 11400000, guid: 9cb2cad4ea9e0b74688b87450293b217, type: 2}
-    requiredLevel: 5
+  prerequisites: []
   minimumCharacterLevel: 1
-  hpMultiplier: 1.5
-  mpMultiplier: 0.8
-  atkMultiplier: 1.4
-  defMultiplier: 1.2
-  matMultiplier: 0.7
-  mdfMultiplier: 0.9
-  spdMultiplier: 1.1
-  baseStats: 36000000120000000700000006000000030000000400000005000000
+  hpMultiplier: 1.2
+  mpMultiplier: 1
+  atkMultiplier: 1
+  defMultiplier: 1
+  matMultiplier: 1
+  mdfMultiplier: 1
+  spdMultiplier: 1
+  baseStats: 00000000000000000000000000000000000000000000000000000000
   allowedEquipmentSlots: 0100000002000000040000000800000010000000
-  movementBonus: 3
-  jumpBonus: 4
-  evadeBonus: 10
-  abilityUnlocks:
-  - abilityName: Spear Thrust
-    unlockAtJobLevel: 1
-    jpCost: 0
-  - abilityName: Spear Throw
-    unlockAtJobLevel: 3
-    jpCost: 0
-  - abilityName: Dragon Spirit
-    unlockAtJobLevel: 6
-    jpCost: 0
+  movementBonus: 0
+  jumpBonus: 0
+  evadeBonus: 0
+  abilityUnlocks: []
   abilityCatalogName: 
   jpRequirements: 64000000fa000000c2010000bc020000e8030000780500006c070000c4090000

@@ -35,17 +35,29 @@ MonoBehaviour:
   jumpBonus: 4
   evadeBonus: 15
   abilityUnlocks:
-  - abilityName: Charge
+  - abilityName: Arm Shot
     unlockAtJobLevel: 1
-    jpCost: 0
-  - abilityName: Leg Aim
+    jpCost: 100
+  - abilityName: Leg Shot
     unlockAtJobLevel: 2
-    jpCost: 0
-  - abilityName: Arm Aim
+    jpCost: 200
+  - abilityName: Seal Evil
     unlockAtJobLevel: 3
-    jpCost: 0
-  - abilityName: Concentrate
+    jpCost: 300
+  - abilityName: Blaze Gun
+    unlockAtJobLevel: 4
+    jpCost: 400
+  - abilityName: Charge
     unlockAtJobLevel: 5
-    jpCost: 0
-  abilityCatalogName: 
+    jpCost: 500
+  - abilityName: Charge+
+    unlockAtJobLevel: 6
+    jpCost: 600
+  - abilityName: Charge++
+    unlockAtJobLevel: 7
+    jpCost: 700
+  - abilityName: Charge+++
+    unlockAtJobLevel: 8
+    jpCost: 800
+  abilityCatalogName: Archer
   jpRequirements: 64000000fa000000c2010000bc020000e8030000780500006c070000c4090000

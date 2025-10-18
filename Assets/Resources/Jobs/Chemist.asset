@@ -34,17 +34,29 @@ MonoBehaviour:
   jumpBonus: 3
   evadeBonus: 5
   abilityUnlocks:
-  - abilityName: Potion
+  - abilityName: Cure
     unlockAtJobLevel: 1
-    jpCost: 0
-  - abilityName: Phoenix Down
+    jpCost: 100
+  - abilityName: Raise
     unlockAtJobLevel: 2
-    jpCost: 0
-  - abilityName: Antidote
+    jpCost: 200
+  - abilityName: Drain
     unlockAtJobLevel: 3
-    jpCost: 0
-  - abilityName: Auto Potion
+    jpCost: 300
+  - abilityName: Slience
+    unlockAtJobLevel: 4
+    jpCost: 400
+  - abilityName: Holy
     unlockAtJobLevel: 5
-    jpCost: 0
+    jpCost: 500
+  - abilityName: Water
+    unlockAtJobLevel: 6
+    jpCost: 600
+  - abilityName: Blind
+    unlockAtJobLevel: 7
+    jpCost: 700
+  - abilityName: Esuna
+    unlockAtJobLevel: 8
+    jpCost: 800
   abilityCatalogName: DemoCatalog
   jpRequirements: 64000000fa000000c2010000bc020000e8030000780500006c070000c4090000

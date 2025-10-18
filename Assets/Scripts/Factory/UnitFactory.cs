@@ -41,7 +41,6 @@ public static class UnitFactory
         obj.AddComponent<Health>();
         obj.AddComponent<Mana>();
         AddAttack(obj, recipe.attack);
-        AddAbilityCatalog(obj, recipe.abilityCatalog);
         AddAlliance(obj, recipe.alliance);
         AddAttackPattern(obj, recipe.strategy);
         AddElement(obj, recipe.element);
@@ -134,7 +133,52 @@ public static class UnitFactory
         // Calculate initial stats
         jobManager.RecalculateStats();
         
+        // Create ability catalog based on job's catalog name
+        CreateJobAbilityCatalog(obj, jobDefinition.abilityCatalogName);
+        
         Debug.Log($"Added JobManager to {obj.name} with job: {jobDefinition.jobName}");
+    }
+
+    private static void CreateJobAbilityCatalog(GameObject obj, string catalogName)
+    {
+        if (string.IsNullOrEmpty(catalogName))
+        {
+            Debug.LogWarning($"Job has no ability catalog specified for {obj.name}");
+            return;
+        }
+
+        var main = new GameObject("Ability Catalog");
+        main.transform.SetParent(obj.transform);
+        main.AddComponent<AbilityCatalog>();
+
+        var recipe = LoadAbilityCatalogRecipe(catalogName);
+        if (recipe == null)
+        {
+            Debug.LogError($"No Ability Catalog Recipe Found: {catalogName}");
+            return;
+        }
+
+        foreach (var categoryName in recipe.categories)
+        {
+            var category = new GameObject(categoryName.name);
+            category.transform.SetParent(main.transform);
+
+            foreach (var entry in categoryName.entries)
+            {
+                var abilityName = $"Abilities/{categoryName.name}/{entry}";
+                var ability = InstantiatePrefab(abilityName);
+                if (ability != null)
+                {
+                    ability.transform.SetParent(category.transform);
+                }
+                else
+                {
+                    Debug.LogWarning($"Ability not found: {abilityName}");
+                }
+            }
+        }
+
+        Debug.Log($"Created ability catalog '{catalogName}' for {obj.name}");
     }
 
     private static void AddLocomotion(GameObject obj, Locomotions type)

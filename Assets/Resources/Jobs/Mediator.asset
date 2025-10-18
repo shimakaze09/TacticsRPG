@@ -12,40 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa7883aeabf35bb4aa557d6e6b622593, type: 3}
   m_Name: Mediator
   m_EditorClassIdentifier: 
-  jobName: Mediator
-  description: Diplomat who can charm and recruit enemies.
+  jobName: New Job
+  description: A new job class.
   jobIcon: {fileID: 0}
-  category: 2
+  category: 1
   isUnique: 0
   allowedCharacterNames: []
-  prerequisites:
-  - requiredJob: {fileID: 11400000, guid: 1529a2b2bb46f2143b68de3d92ef0360, type: 2}
-    requiredLevel: 5
+  prerequisites: []
   minimumCharacterLevel: 1
-  hpMultiplier: 1.1
-  mpMultiplier: 1.2
-  atkMultiplier: 0.8
-  defMultiplier: 0.9
-  matMultiplier: 1.1
-  mdfMultiplier: 1.2
+  hpMultiplier: 1.2
+  mpMultiplier: 1
+  atkMultiplier: 1
+  defMultiplier: 1
+  matMultiplier: 1
+  mdfMultiplier: 1
   spdMultiplier: 1
-  baseStats: 2e0000001e0000000400000004000000050000000600000004000000
+  baseStats: 00000000000000000000000000000000000000000000000000000000
   allowedEquipmentSlots: 0100000002000000040000000800000010000000
-  movementBonus: 3
-  jumpBonus: 3
-  evadeBonus: 10
-  abilityUnlocks:
-  - abilityName: Negotiate
-    unlockAtJobLevel: 1
-    jpCost: 0
-  - abilityName: Threaten
-    unlockAtJobLevel: 2
-    jpCost: 0
-  - abilityName: Charm
-    unlockAtJobLevel: 4
-    jpCost: 0
-  - abilityName: Invitation
-    unlockAtJobLevel: 6
-    jpCost: 0
+  movementBonus: 0
+  jumpBonus: 0
+  evadeBonus: 0
+  abilityUnlocks: []
   abilityCatalogName: 
   jpRequirements: 64000000fa000000c2010000bc020000e8030000780500006c070000c4090000

@@ -37,12 +37,27 @@ MonoBehaviour:
   abilityUnlocks:
   - abilityName: Draw Out
     unlockAtJobLevel: 1
-    jpCost: 0
+    jpCost: 100
   - abilityName: Iaido
-    unlockAtJobLevel: 3
-    jpCost: 0
+    unlockAtJobLevel: 2
+    jpCost: 200
   - abilityName: Blade Grasp
+    unlockAtJobLevel: 3
+    jpCost: 300
+  - abilityName: Bushido
+    unlockAtJobLevel: 4
+    jpCost: 400
+  - abilityName: Seppuku
+    unlockAtJobLevel: 5
+    jpCost: 500
+  - abilityName: Katana
     unlockAtJobLevel: 6
-    jpCost: 0
-  abilityCatalogName: 
+    jpCost: 600
+  - abilityName: Wakizashi
+    unlockAtJobLevel: 7
+    jpCost: 700
+  - abilityName: Masamune
+    unlockAtJobLevel: 8
+    jpCost: 800
+  abilityCatalogName: Samurai
   jpRequirements: 64000000fa000000c2010000bc020000e8030000780500006c070000c4090000

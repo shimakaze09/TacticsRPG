@@ -12,44 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa7883aeabf35bb4aa557d6e6b622593, type: 3}
   m_Name: Monk
   m_EditorClassIdentifier: 
-  jobName: Monk
-  description: Martial artist with powerful bare-handed attacks. High HP and physical
-    attack.
+  jobName: New Job
+  description: A new job class.
   jobIcon: {fileID: 0}
   category: 1
   isUnique: 0
   allowedCharacterNames: []
-  prerequisites:
-  - requiredJob: {fileID: 11400000, guid: 14b4e28521c9ba64fb84052368903bf1, type: 2}
-    requiredLevel: 3
+  prerequisites: []
   minimumCharacterLevel: 1
-  hpMultiplier: 1.7
-  mpMultiplier: 0.8
-  atkMultiplier: 1.5
-  defMultiplier: 1.1
-  matMultiplier: 0.7
-  mdfMultiplier: 1.1
-  spdMultiplier: 1.2
-  baseStats: 3a000000120000000700000005000000030000000500000005000000
+  hpMultiplier: 1.2
+  mpMultiplier: 1
+  atkMultiplier: 1
+  defMultiplier: 1
+  matMultiplier: 1
+  mdfMultiplier: 1
+  spdMultiplier: 1
+  baseStats: 00000000000000000000000000000000000000000000000000000000
   allowedEquipmentSlots: 0100000002000000040000000800000010000000
-  movementBonus: 4
-  jumpBonus: 4
-  evadeBonus: 20
-  abilityUnlocks:
-  - abilityName: Chakra
-    unlockAtJobLevel: 1
-    jpCost: 0
-  - abilityName: Revive
-    unlockAtJobLevel: 2
-    jpCost: 0
-  - abilityName: Wave Fist
-    unlockAtJobLevel: 3
-    jpCost: 0
-  - abilityName: Earth Slash
-    unlockAtJobLevel: 4
-    jpCost: 0
-  - abilityName: Secret Fist
-    unlockAtJobLevel: 6
-    jpCost: 0
+  movementBonus: 0
+  jumpBonus: 0
+  evadeBonus: 0
+  abilityUnlocks: []
   abilityCatalogName: 
   jpRequirements: 64000000fa000000c2010000bc020000e8030000780500006c070000c4090000

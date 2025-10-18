@@ -66,17 +66,38 @@ public static class FFTJobCreator
         Debug.Log("Created unique FFT jobs: Dark Knight, Holy Knight, Heaven Knight, Temple Knight, Arc Knight, Holy Sword, Princess, Cleric, Sky Pirate, Machinist");
     }
 
-    [MenuItem("Tactics RPG/Create FFT Jobs/Create All Jobs")]
-    public static void CreateAllJobs()
+    [MenuItem("Tactics RPG/Create FFT Jobs/Create All Jobs (Fresh)")]
+    public static void CreateAllJobsFresh()
     {
         EnsureJobsDirectoryExists();
+        
+        // Delete all existing job assets first
+        DeleteAllExistingJobs();
+        
+        // Create all jobs fresh
         CreateAllBasicJobs();
         CreateAllCommonJobs();
         CreateAllSpecialJobs();
         CreateAllUniqueJobs();
+        
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-        Debug.Log("Created all FFT job definitions (30 jobs total)!");
+        Debug.Log("Created all FFT job definitions fresh (30 jobs total)!");
+    }
+
+    private static void DeleteAllExistingJobs()
+    {
+        // Get all .asset files in the Jobs folder
+        string[] jobFiles = System.IO.Directory.GetFiles(JobsPath, "*.asset", System.IO.SearchOption.TopDirectoryOnly);
+        
+        foreach (string file in jobFiles)
+        {
+            string relativePath = "Assets" + file.Substring(Application.dataPath.Length);
+            AssetDatabase.DeleteAsset(relativePath);
+            Debug.Log($"Deleted existing job: {relativePath}");
+        }
+        
+        Debug.Log($"Deleted {jobFiles.Length} existing job assets");
     }
 
     private static void EnsureJobsDirectoryExists()
@@ -117,14 +138,21 @@ public static class FFTJobCreator
         // No prerequisites (starting job)
         job.prerequisites = new System.Collections.Generic.List<JobPrerequisite>();
 
-        // Ability unlocks
+        // Ability unlocks with proper JP costs
         job.abilityUnlocks = new System.Collections.Generic.List<JobAbilityUnlock>
         {
-            new JobAbilityUnlock { abilityName = "Dash", unlockAtJobLevel = 1 },
-            new JobAbilityUnlock { abilityName = "Stone Throw", unlockAtJobLevel = 2 },
-            new JobAbilityUnlock { abilityName = "Accumulate", unlockAtJobLevel = 3 },
-            new JobAbilityUnlock { abilityName = "Defend", unlockAtJobLevel = 4 }
+            new JobAbilityUnlock { abilityName = "Attack", unlockAtJobLevel = 1, jpCost = 100 },
+            new JobAbilityUnlock { abilityName = "Cure", unlockAtJobLevel = 2, jpCost = 200 },
+            new JobAbilityUnlock { abilityName = "Water", unlockAtJobLevel = 3, jpCost = 300 },
+            new JobAbilityUnlock { abilityName = "Defend", unlockAtJobLevel = 4, jpCost = 400 },
+            new JobAbilityUnlock { abilityName = "Raise", unlockAtJobLevel = 5, jpCost = 500 },
+            new JobAbilityUnlock { abilityName = "Blind", unlockAtJobLevel = 6, jpCost = 600 },
+            new JobAbilityUnlock { abilityName = "Holy", unlockAtJobLevel = 7, jpCost = 700 },
+            new JobAbilityUnlock { abilityName = "Esuna", unlockAtJobLevel = 8, jpCost = 800 }
         };
+
+        // Set ability catalog
+        job.abilityCatalogName = "DemoCatalog";
 
         EditorUtility.SetDirty(job);
     }
@@ -156,11 +184,18 @@ public static class FFTJobCreator
 
         job.abilityUnlocks = new System.Collections.Generic.List<JobAbilityUnlock>
         {
-            new JobAbilityUnlock { abilityName = "Potion", unlockAtJobLevel = 1 },
-            new JobAbilityUnlock { abilityName = "Phoenix Down", unlockAtJobLevel = 2 },
-            new JobAbilityUnlock { abilityName = "Antidote", unlockAtJobLevel = 3 },
-            new JobAbilityUnlock { abilityName = "Auto Potion", unlockAtJobLevel = 5 }
+            new JobAbilityUnlock { abilityName = "Cure", unlockAtJobLevel = 1, jpCost = 100 },
+            new JobAbilityUnlock { abilityName = "Raise", unlockAtJobLevel = 2, jpCost = 200 },
+            new JobAbilityUnlock { abilityName = "Drain", unlockAtJobLevel = 3, jpCost = 300 },
+            new JobAbilityUnlock { abilityName = "Slience", unlockAtJobLevel = 4, jpCost = 400 },
+            new JobAbilityUnlock { abilityName = "Holy", unlockAtJobLevel = 5, jpCost = 500 },
+            new JobAbilityUnlock { abilityName = "Water", unlockAtJobLevel = 6, jpCost = 600 },
+            new JobAbilityUnlock { abilityName = "Blind", unlockAtJobLevel = 7, jpCost = 700 },
+            new JobAbilityUnlock { abilityName = "Esuna", unlockAtJobLevel = 8, jpCost = 800 }
         };
+
+        // Set ability catalog
+        job.abilityCatalogName = "DemoCatalog";
 
         EditorUtility.SetDirty(job);
     }
@@ -202,12 +237,18 @@ public static class FFTJobCreator
 
         job.abilityUnlocks = new System.Collections.Generic.List<JobAbilityUnlock>
         {
-            new JobAbilityUnlock { abilityName = "Rend Helm", unlockAtJobLevel = 1 },
-            new JobAbilityUnlock { abilityName = "Rend Armor", unlockAtJobLevel = 2 },
-            new JobAbilityUnlock { abilityName = "Rend Shield", unlockAtJobLevel = 3 },
-            new JobAbilityUnlock { abilityName = "Rend Weapon", unlockAtJobLevel = 4 },
-            new JobAbilityUnlock { abilityName = "Rend Speed", unlockAtJobLevel = 5 }
+            new JobAbilityUnlock { abilityName = "Air Blast", unlockAtJobLevel = 1, jpCost = 100 },
+            new JobAbilityUnlock { abilityName = "Attack", unlockAtJobLevel = 2, jpCost = 200 },
+            new JobAbilityUnlock { abilityName = "Defend", unlockAtJobLevel = 3, jpCost = 300 },
+            new JobAbilityUnlock { abilityName = "First Aid", unlockAtJobLevel = 4, jpCost = 400 },
+            new JobAbilityUnlock { abilityName = "Rend Helm", unlockAtJobLevel = 5, jpCost = 500 },
+            new JobAbilityUnlock { abilityName = "Rend Armor", unlockAtJobLevel = 6, jpCost = 600 },
+            new JobAbilityUnlock { abilityName = "Rend Shield", unlockAtJobLevel = 7, jpCost = 700 },
+            new JobAbilityUnlock { abilityName = "Rend Weapon", unlockAtJobLevel = 8, jpCost = 800 }
         };
+
+        // Set ability catalog
+        job.abilityCatalogName = "Fighter Tech";
 
         EditorUtility.SetDirty(job);
     }
@@ -247,11 +288,18 @@ public static class FFTJobCreator
 
         job.abilityUnlocks = new System.Collections.Generic.List<JobAbilityUnlock>
         {
-            new JobAbilityUnlock { abilityName = "Charge", unlockAtJobLevel = 1 },
-            new JobAbilityUnlock { abilityName = "Leg Aim", unlockAtJobLevel = 2 },
-            new JobAbilityUnlock { abilityName = "Arm Aim", unlockAtJobLevel = 3 },
-            new JobAbilityUnlock { abilityName = "Concentrate", unlockAtJobLevel = 5 }
+            new JobAbilityUnlock { abilityName = "Arm Shot", unlockAtJobLevel = 1, jpCost = 100 },
+            new JobAbilityUnlock { abilityName = "Leg Shot", unlockAtJobLevel = 2, jpCost = 200 },
+            new JobAbilityUnlock { abilityName = "Seal Evil", unlockAtJobLevel = 3, jpCost = 300 },
+            new JobAbilityUnlock { abilityName = "Blaze Gun", unlockAtJobLevel = 4, jpCost = 400 },
+            new JobAbilityUnlock { abilityName = "Charge", unlockAtJobLevel = 5, jpCost = 500 },
+            new JobAbilityUnlock { abilityName = "Charge+", unlockAtJobLevel = 6, jpCost = 600 },
+            new JobAbilityUnlock { abilityName = "Charge++", unlockAtJobLevel = 7, jpCost = 700 },
+            new JobAbilityUnlock { abilityName = "Charge+++", unlockAtJobLevel = 8, jpCost = 800 }
         };
+
+        // Set ability catalog
+        job.abilityCatalogName = "Archer";
 
         EditorUtility.SetDirty(job);
     }
@@ -291,12 +339,18 @@ public static class FFTJobCreator
 
         job.abilityUnlocks = new System.Collections.Generic.List<JobAbilityUnlock>
         {
-            new JobAbilityUnlock { abilityName = "Cure", unlockAtJobLevel = 1 },
-            new JobAbilityUnlock { abilityName = "Esuna", unlockAtJobLevel = 2 },
-            new JobAbilityUnlock { abilityName = "Raise", unlockAtJobLevel = 3 },
-            new JobAbilityUnlock { abilityName = "Cura", unlockAtJobLevel = 4 },
-            new JobAbilityUnlock { abilityName = "Curaga", unlockAtJobLevel = 6 }
+            new JobAbilityUnlock { abilityName = "Cure", unlockAtJobLevel = 1, jpCost = 100 },
+            new JobAbilityUnlock { abilityName = "Cura", unlockAtJobLevel = 2, jpCost = 200 },
+            new JobAbilityUnlock { abilityName = "Curaga", unlockAtJobLevel = 3, jpCost = 300 },
+            new JobAbilityUnlock { abilityName = "Raise", unlockAtJobLevel = 4, jpCost = 400 },
+            new JobAbilityUnlock { abilityName = "Arise", unlockAtJobLevel = 5, jpCost = 500 },
+            new JobAbilityUnlock { abilityName = "Holy", unlockAtJobLevel = 6, jpCost = 600 },
+            new JobAbilityUnlock { abilityName = "Esuna", unlockAtJobLevel = 7, jpCost = 700 },
+            new JobAbilityUnlock { abilityName = "Protect", unlockAtJobLevel = 8, jpCost = 800 }
         };
+
+        // Set ability catalog
+        job.abilityCatalogName = "Priest";
 
         EditorUtility.SetDirty(job);
     }
@@ -336,13 +390,18 @@ public static class FFTJobCreator
 
         job.abilityUnlocks = new System.Collections.Generic.List<JobAbilityUnlock>
         {
-            new JobAbilityUnlock { abilityName = "Fire", unlockAtJobLevel = 1 },
-            new JobAbilityUnlock { abilityName = "Blizzard", unlockAtJobLevel = 2 },
-            new JobAbilityUnlock { abilityName = "Thunder", unlockAtJobLevel = 3 },
-            new JobAbilityUnlock { abilityName = "Fira", unlockAtJobLevel = 4 },
-            new JobAbilityUnlock { abilityName = "Blizzara", unlockAtJobLevel = 5 },
-            new JobAbilityUnlock { abilityName = "Thundara", unlockAtJobLevel = 6 }
+            new JobAbilityUnlock { abilityName = "Fire", unlockAtJobLevel = 1, jpCost = 100 },
+            new JobAbilityUnlock { abilityName = "Blizzard", unlockAtJobLevel = 2, jpCost = 200 },
+            new JobAbilityUnlock { abilityName = "Thunder", unlockAtJobLevel = 3, jpCost = 300 },
+            new JobAbilityUnlock { abilityName = "Fira", unlockAtJobLevel = 4, jpCost = 400 },
+            new JobAbilityUnlock { abilityName = "Blizzara", unlockAtJobLevel = 5, jpCost = 500 },
+            new JobAbilityUnlock { abilityName = "Thundara", unlockAtJobLevel = 6, jpCost = 600 },
+            new JobAbilityUnlock { abilityName = "Firaga", unlockAtJobLevel = 7, jpCost = 700 },
+            new JobAbilityUnlock { abilityName = "Blizzaga", unlockAtJobLevel = 8, jpCost = 800 }
         };
+
+        // Set ability catalog
+        job.abilityCatalogName = "Black Magic";
 
         EditorUtility.SetDirty(job);
     }
@@ -383,11 +442,18 @@ public static class FFTJobCreator
 
         job.abilityUnlocks = new System.Collections.Generic.List<JobAbilityUnlock>
         {
-            new JobAbilityUnlock { abilityName = "Throw", unlockAtJobLevel = 1 },
-            new JobAbilityUnlock { abilityName = "Two Hands", unlockAtJobLevel = 3 },
-            new JobAbilityUnlock { abilityName = "Sunken State", unlockAtJobLevel = 5 },
-            new JobAbilityUnlock { abilityName = "Dual Wield", unlockAtJobLevel = 7 }
+            new JobAbilityUnlock { abilityName = "Throw", unlockAtJobLevel = 1, jpCost = 100 },
+            new JobAbilityUnlock { abilityName = "Two Hands", unlockAtJobLevel = 2, jpCost = 200 },
+            new JobAbilityUnlock { abilityName = "Sunken State", unlockAtJobLevel = 3, jpCost = 300 },
+            new JobAbilityUnlock { abilityName = "Dual Wield", unlockAtJobLevel = 4, jpCost = 400 },
+            new JobAbilityUnlock { abilityName = "Shuriken", unlockAtJobLevel = 5, jpCost = 500 },
+            new JobAbilityUnlock { abilityName = "Smoke Bomb", unlockAtJobLevel = 6, jpCost = 600 },
+            new JobAbilityUnlock { abilityName = "Shadow Bind", unlockAtJobLevel = 7, jpCost = 700 },
+            new JobAbilityUnlock { abilityName = "Shadow Stitch", unlockAtJobLevel = 8, jpCost = 800 }
         };
+
+        // Set ability catalog
+        job.abilityCatalogName = "Ninja";
 
         EditorUtility.SetDirty(job);
     }
@@ -427,10 +493,18 @@ public static class FFTJobCreator
 
         job.abilityUnlocks = new System.Collections.Generic.List<JobAbilityUnlock>
         {
-            new JobAbilityUnlock { abilityName = "Draw Out", unlockAtJobLevel = 1 },
-            new JobAbilityUnlock { abilityName = "Iaido", unlockAtJobLevel = 3 },
-            new JobAbilityUnlock { abilityName = "Blade Grasp", unlockAtJobLevel = 6 }
+            new JobAbilityUnlock { abilityName = "Draw Out", unlockAtJobLevel = 1, jpCost = 100 },
+            new JobAbilityUnlock { abilityName = "Iaido", unlockAtJobLevel = 2, jpCost = 200 },
+            new JobAbilityUnlock { abilityName = "Blade Grasp", unlockAtJobLevel = 3, jpCost = 300 },
+            new JobAbilityUnlock { abilityName = "Bushido", unlockAtJobLevel = 4, jpCost = 400 },
+            new JobAbilityUnlock { abilityName = "Seppuku", unlockAtJobLevel = 5, jpCost = 500 },
+            new JobAbilityUnlock { abilityName = "Katana", unlockAtJobLevel = 6, jpCost = 600 },
+            new JobAbilityUnlock { abilityName = "Wakizashi", unlockAtJobLevel = 7, jpCost = 700 },
+            new JobAbilityUnlock { abilityName = "Masamune", unlockAtJobLevel = 8, jpCost = 800 }
         };
+
+        // Set ability catalog
+        job.abilityCatalogName = "Samurai";
 
         EditorUtility.SetDirty(job);
     }
@@ -470,12 +544,18 @@ public static class FFTJobCreator
 
         job.abilityUnlocks = new System.Collections.Generic.List<JobAbilityUnlock>
         {
-            new JobAbilityUnlock { abilityName = "Chakra", unlockAtJobLevel = 1 },
-            new JobAbilityUnlock { abilityName = "Revive", unlockAtJobLevel = 2 },
-            new JobAbilityUnlock { abilityName = "Wave Fist", unlockAtJobLevel = 3 },
-            new JobAbilityUnlock { abilityName = "Earth Slash", unlockAtJobLevel = 4 },
-            new JobAbilityUnlock { abilityName = "Secret Fist", unlockAtJobLevel = 6 }
+            new JobAbilityUnlock { abilityName = "Chakra", unlockAtJobLevel = 1, jpCost = 100 },
+            new JobAbilityUnlock { abilityName = "Revive", unlockAtJobLevel = 2, jpCost = 200 },
+            new JobAbilityUnlock { abilityName = "Counter", unlockAtJobLevel = 3, jpCost = 300 },
+            new JobAbilityUnlock { abilityName = "Hamedo", unlockAtJobLevel = 4, jpCost = 400 },
+            new JobAbilityUnlock { abilityName = "Return", unlockAtJobLevel = 5, jpCost = 500 },
+            new JobAbilityUnlock { abilityName = "Two Hands", unlockAtJobLevel = 6, jpCost = 600 },
+            new JobAbilityUnlock { abilityName = "Martial Arts", unlockAtJobLevel = 7, jpCost = 700 },
+            new JobAbilityUnlock { abilityName = "Kick", unlockAtJobLevel = 8, jpCost = 800 }
         };
+
+        // Set ability catalog
+        job.abilityCatalogName = "Monk";
 
         EditorUtility.SetDirty(job);
     }
@@ -514,12 +594,18 @@ public static class FFTJobCreator
 
         job.abilityUnlocks = new System.Collections.Generic.List<JobAbilityUnlock>
         {
-            new JobAbilityUnlock { abilityName = "Steal", unlockAtJobLevel = 1 },
-            new JobAbilityUnlock { abilityName = "Steal Helmet", unlockAtJobLevel = 2 },
-            new JobAbilityUnlock { abilityName = "Steal Armor", unlockAtJobLevel = 3 },
-            new JobAbilityUnlock { abilityName = "Steal Accessory", unlockAtJobLevel = 4 },
-            new JobAbilityUnlock { abilityName = "Move-Find Item", unlockAtJobLevel = 6 }
+            new JobAbilityUnlock { abilityName = "Steal", unlockAtJobLevel = 1, jpCost = 100 },
+            new JobAbilityUnlock { abilityName = "Steal Helmet", unlockAtJobLevel = 2, jpCost = 200 },
+            new JobAbilityUnlock { abilityName = "Steal Armor", unlockAtJobLevel = 3, jpCost = 300 },
+            new JobAbilityUnlock { abilityName = "Steal Accessory", unlockAtJobLevel = 4, jpCost = 400 },
+            new JobAbilityUnlock { abilityName = "Steal Weapon", unlockAtJobLevel = 5, jpCost = 500 },
+            new JobAbilityUnlock { abilityName = "Move-Find Item", unlockAtJobLevel = 6, jpCost = 600 },
+            new JobAbilityUnlock { abilityName = "Steal Gil", unlockAtJobLevel = 7, jpCost = 700 },
+            new JobAbilityUnlock { abilityName = "Steal Heart", unlockAtJobLevel = 8, jpCost = 800 }
         };
+
+        // Set ability catalog
+        job.abilityCatalogName = "Battle Tech";
 
         EditorUtility.SetDirty(job);
     }
@@ -558,12 +644,18 @@ public static class FFTJobCreator
 
         job.abilityUnlocks = new System.Collections.Generic.List<JobAbilityUnlock>
         {
-            new JobAbilityUnlock { abilityName = "Protect", unlockAtJobLevel = 1 },
-            new JobAbilityUnlock { abilityName = "Shell", unlockAtJobLevel = 2 },
-            new JobAbilityUnlock { abilityName = "Wall", unlockAtJobLevel = 3 },
-            new JobAbilityUnlock { abilityName = "Reflect", unlockAtJobLevel = 4 },
-            new JobAbilityUnlock { abilityName = "Reraise", unlockAtJobLevel = 6 }
+            new JobAbilityUnlock { abilityName = "Protect", unlockAtJobLevel = 1, jpCost = 100 },
+            new JobAbilityUnlock { abilityName = "Shell", unlockAtJobLevel = 2, jpCost = 200 },
+            new JobAbilityUnlock { abilityName = "Wall", unlockAtJobLevel = 3, jpCost = 300 },
+            new JobAbilityUnlock { abilityName = "Reflect", unlockAtJobLevel = 4, jpCost = 400 },
+            new JobAbilityUnlock { abilityName = "Reraise", unlockAtJobLevel = 5, jpCost = 500 },
+            new JobAbilityUnlock { abilityName = "Haste", unlockAtJobLevel = 6, jpCost = 600 },
+            new JobAbilityUnlock { abilityName = "Slow", unlockAtJobLevel = 7, jpCost = 700 },
+            new JobAbilityUnlock { abilityName = "Regen", unlockAtJobLevel = 8, jpCost = 800 }
         };
+
+        // Set ability catalog
+        job.abilityCatalogName = "Mystic";
 
         EditorUtility.SetDirty(job);
     }
@@ -602,13 +694,18 @@ public static class FFTJobCreator
 
         job.abilityUnlocks = new System.Collections.Generic.List<JobAbilityUnlock>
         {
-            new JobAbilityUnlock { abilityName = "Haste", unlockAtJobLevel = 1 },
-            new JobAbilityUnlock { abilityName = "Slow", unlockAtJobLevel = 2 },
-            new JobAbilityUnlock { abilityName = "Stop", unlockAtJobLevel = 3 },
-            new JobAbilityUnlock { abilityName = "Don't Move", unlockAtJobLevel = 4 },
-            new JobAbilityUnlock { abilityName = "Don't Act", unlockAtJobLevel = 5 },
-            new JobAbilityUnlock { abilityName = "Meteor", unlockAtJobLevel = 7 }
+            new JobAbilityUnlock { abilityName = "Haste", unlockAtJobLevel = 1, jpCost = 100 },
+            new JobAbilityUnlock { abilityName = "Slow", unlockAtJobLevel = 2, jpCost = 200 },
+            new JobAbilityUnlock { abilityName = "Stop", unlockAtJobLevel = 3, jpCost = 300 },
+            new JobAbilityUnlock { abilityName = "Don't Move", unlockAtJobLevel = 4, jpCost = 400 },
+            new JobAbilityUnlock { abilityName = "Don't Act", unlockAtJobLevel = 5, jpCost = 500 },
+            new JobAbilityUnlock { abilityName = "Float", unlockAtJobLevel = 6, jpCost = 600 },
+            new JobAbilityUnlock { abilityName = "Meteor", unlockAtJobLevel = 7, jpCost = 700 },
+            new JobAbilityUnlock { abilityName = "Quick", unlockAtJobLevel = 8, jpCost = 800 }
         };
+
+        // Set ability catalog
+        job.abilityCatalogName = "Time Mage";
 
         EditorUtility.SetDirty(job);
     }
@@ -647,13 +744,18 @@ public static class FFTJobCreator
 
         job.abilityUnlocks = new System.Collections.Generic.List<JobAbilityUnlock>
         {
-            new JobAbilityUnlock { abilityName = "Ifrit", unlockAtJobLevel = 1 },
-            new JobAbilityUnlock { abilityName = "Shiva", unlockAtJobLevel = 2 },
-            new JobAbilityUnlock { abilityName = "Ramuh", unlockAtJobLevel = 3 },
-            new JobAbilityUnlock { abilityName = "Titan", unlockAtJobLevel = 4 },
-            new JobAbilityUnlock { abilityName = "Bahamut", unlockAtJobLevel = 6 },
-            new JobAbilityUnlock { abilityName = "Zodiac", unlockAtJobLevel = 8 }
+            new JobAbilityUnlock { abilityName = "Ifrit", unlockAtJobLevel = 1, jpCost = 100 },
+            new JobAbilityUnlock { abilityName = "Shiva", unlockAtJobLevel = 2, jpCost = 200 },
+            new JobAbilityUnlock { abilityName = "Ramuh", unlockAtJobLevel = 3, jpCost = 300 },
+            new JobAbilityUnlock { abilityName = "Titan", unlockAtJobLevel = 4, jpCost = 400 },
+            new JobAbilityUnlock { abilityName = "Golem", unlockAtJobLevel = 5, jpCost = 500 },
+            new JobAbilityUnlock { abilityName = "Bahamut", unlockAtJobLevel = 6, jpCost = 600 },
+            new JobAbilityUnlock { abilityName = "Zodiac", unlockAtJobLevel = 7, jpCost = 700 },
+            new JobAbilityUnlock { abilityName = "Ultima", unlockAtJobLevel = 8, jpCost = 800 }
         };
+
+        // Set ability catalog
+        job.abilityCatalogName = "Summoner";
 
         EditorUtility.SetDirty(job);
     }
@@ -692,12 +794,18 @@ public static class FFTJobCreator
 
         job.abilityUnlocks = new System.Collections.Generic.List<JobAbilityUnlock>
         {
-            new JobAbilityUnlock { abilityName = "Pitfall", unlockAtJobLevel = 1 },
-            new JobAbilityUnlock { abilityName = "Water Ball", unlockAtJobLevel = 2 },
-            new JobAbilityUnlock { abilityName = "Hell Ivy", unlockAtJobLevel = 3 },
-            new JobAbilityUnlock { abilityName = "Demon Fire", unlockAtJobLevel = 4 },
-            new JobAbilityUnlock { abilityName = "Move on Lava", unlockAtJobLevel = 6 }
+            new JobAbilityUnlock { abilityName = "Pitfall", unlockAtJobLevel = 1, jpCost = 100 },
+            new JobAbilityUnlock { abilityName = "Water Ball", unlockAtJobLevel = 2, jpCost = 200 },
+            new JobAbilityUnlock { abilityName = "Hell Ivy", unlockAtJobLevel = 3, jpCost = 300 },
+            new JobAbilityUnlock { abilityName = "Demon Fire", unlockAtJobLevel = 4, jpCost = 400 },
+            new JobAbilityUnlock { abilityName = "Earth Slash", unlockAtJobLevel = 5, jpCost = 500 },
+            new JobAbilityUnlock { abilityName = "Move on Lava", unlockAtJobLevel = 6, jpCost = 600 },
+            new JobAbilityUnlock { abilityName = "Wind Slash", unlockAtJobLevel = 7, jpCost = 700 },
+            new JobAbilityUnlock { abilityName = "Quake", unlockAtJobLevel = 8, jpCost = 800 }
         };
+
+        // Set ability catalog
+        job.abilityCatalogName = "Geomancer";
 
         EditorUtility.SetDirty(job);
     }
@@ -736,10 +844,18 @@ public static class FFTJobCreator
 
         job.abilityUnlocks = new System.Collections.Generic.List<JobAbilityUnlock>
         {
-            new JobAbilityUnlock { abilityName = "Jump", unlockAtJobLevel = 1 },
-            new JobAbilityUnlock { abilityName = "Vertical Jump", unlockAtJobLevel = 3 },
-            new JobAbilityUnlock { abilityName = "Ignore Height", unlockAtJobLevel = 5 }
+            new JobAbilityUnlock { abilityName = "Jump", unlockAtJobLevel = 1, jpCost = 100 },
+            new JobAbilityUnlock { abilityName = "Lance", unlockAtJobLevel = 2, jpCost = 200 },
+            new JobAbilityUnlock { abilityName = "Vertical Jump", unlockAtJobLevel = 3, jpCost = 300 },
+            new JobAbilityUnlock { abilityName = "Ignore Height", unlockAtJobLevel = 4, jpCost = 400 },
+            new JobAbilityUnlock { abilityName = "Dragon Breath", unlockAtJobLevel = 5, jpCost = 500 },
+            new JobAbilityUnlock { abilityName = "Dragon Crest", unlockAtJobLevel = 6, jpCost = 600 },
+            new JobAbilityUnlock { abilityName = "Dragon Spirit", unlockAtJobLevel = 7, jpCost = 700 },
+            new JobAbilityUnlock { abilityName = "Dragon Soul", unlockAtJobLevel = 8, jpCost = 800 }
         };
+
+        // Set ability catalog
+        job.abilityCatalogName = "Dragoon";
 
         EditorUtility.SetDirty(job);
     }
@@ -778,12 +894,18 @@ public static class FFTJobCreator
 
         job.abilityUnlocks = new System.Collections.Generic.List<JobAbilityUnlock>
         {
-            new JobAbilityUnlock { abilityName = "Life Drain", unlockAtJobLevel = 1 },
-            new JobAbilityUnlock { abilityName = "Spell Absorb", unlockAtJobLevel = 2 },
-            new JobAbilityUnlock { abilityName = "Petrify", unlockAtJobLevel = 3 },
-            new JobAbilityUnlock { abilityName = "Death Sentence", unlockAtJobLevel = 4 },
-            new JobAbilityUnlock { abilityName = "Zombie", unlockAtJobLevel = 5 }
+            new JobAbilityUnlock { abilityName = "Life Drain", unlockAtJobLevel = 1, jpCost = 100 },
+            new JobAbilityUnlock { abilityName = "Spell Absorb", unlockAtJobLevel = 2, jpCost = 200 },
+            new JobAbilityUnlock { abilityName = "Petrify", unlockAtJobLevel = 3, jpCost = 300 },
+            new JobAbilityUnlock { abilityName = "Death Sentence", unlockAtJobLevel = 4, jpCost = 400 },
+            new JobAbilityUnlock { abilityName = "Zombie", unlockAtJobLevel = 5, jpCost = 500 },
+            new JobAbilityUnlock { abilityName = "Dark", unlockAtJobLevel = 6, jpCost = 600 },
+            new JobAbilityUnlock { abilityName = "Darkra", unlockAtJobLevel = 7, jpCost = 700 },
+            new JobAbilityUnlock { abilityName = "Darkga", unlockAtJobLevel = 8, jpCost = 800 }
         };
+
+        // Set ability catalog
+        job.abilityCatalogName = "Oracle";
 
         EditorUtility.SetDirty(job);
     }
@@ -1411,19 +1533,12 @@ public static class FFTJobCreator
     private static JobDefinition CreateJobAsset(string name)
     {
         string assetPath = $"{JobsPath}/{name}.asset";
-
-        // Check if asset already exists
-        var existingAsset = AssetDatabase.LoadAssetAtPath<JobDefinition>(assetPath);
-        if (existingAsset != null)
-        {
-            Debug.LogWarning($"Job asset already exists: {name}. Updating existing asset.");
-            return existingAsset;
-        }
-
-        // Create new asset
+        
+        // Always create new asset (fresh creation)
         var job = ScriptableObject.CreateInstance<JobDefinition>();
         AssetDatabase.CreateAsset(job, assetPath);
         return job;
     }
+
 }
 #endif

@@ -37,18 +37,27 @@ MonoBehaviour:
   abilityUnlocks:
   - abilityName: Cure
     unlockAtJobLevel: 1
-    jpCost: 0
-  - abilityName: Esuna
-    unlockAtJobLevel: 2
-    jpCost: 0
-  - abilityName: Raise
-    unlockAtJobLevel: 3
-    jpCost: 0
+    jpCost: 100
   - abilityName: Cura
-    unlockAtJobLevel: 4
-    jpCost: 0
+    unlockAtJobLevel: 2
+    jpCost: 200
   - abilityName: Curaga
+    unlockAtJobLevel: 3
+    jpCost: 300
+  - abilityName: Raise
+    unlockAtJobLevel: 4
+    jpCost: 400
+  - abilityName: Arise
+    unlockAtJobLevel: 5
+    jpCost: 500
+  - abilityName: Holy
     unlockAtJobLevel: 6
-    jpCost: 0
-  abilityCatalogName: 
+    jpCost: 600
+  - abilityName: Esuna
+    unlockAtJobLevel: 7
+    jpCost: 700
+  - abilityName: Protect
+    unlockAtJobLevel: 8
+    jpCost: 800
+  abilityCatalogName: Priest
   jpRequirements: 64000000fa000000c2010000bc020000e8030000780500006c070000c4090000

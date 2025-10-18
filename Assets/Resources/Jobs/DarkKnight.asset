@@ -12,35 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa7883aeabf35bb4aa557d6e6b622593, type: 3}
   m_Name: DarkKnight
   m_EditorClassIdentifier: 
-  jobName: Dark Knight
-  description: Gafgarion's unique job. Powerful dark sword techniques.
+  jobName: New Job
+  description: A new job class.
   jobIcon: {fileID: 0}
-  category: 3
-  isUnique: 1
+  category: 1
+  isUnique: 0
   allowedCharacterNames: []
   prerequisites: []
   minimumCharacterLevel: 1
-  hpMultiplier: 1.9
+  hpMultiplier: 1.2
   mpMultiplier: 1
-  atkMultiplier: 1.6
-  defMultiplier: 1.5
-  matMultiplier: 0.9
-  mdfMultiplier: 1.1
-  spdMultiplier: 1.2
-  baseStats: 3e000000190000000800000007000000040000000500000005000000
+  atkMultiplier: 1
+  defMultiplier: 1
+  matMultiplier: 1
+  mdfMultiplier: 1
+  spdMultiplier: 1
+  baseStats: 00000000000000000000000000000000000000000000000000000000
   allowedEquipmentSlots: 0100000002000000040000000800000010000000
-  movementBonus: 4
-  jumpBonus: 3
-  evadeBonus: 15
-  abilityUnlocks:
-  - abilityName: Dark Sword
-    unlockAtJobLevel: 1
-    jpCost: 0
-  - abilityName: Night Sword
-    unlockAtJobLevel: 2
-    jpCost: 0
-  - abilityName: Dark Blade
-    unlockAtJobLevel: 4
-    jpCost: 0
+  movementBonus: 0
+  jumpBonus: 0
+  evadeBonus: 0
+  abilityUnlocks: []
   abilityCatalogName: 
   jpRequirements: 64000000fa000000c2010000bc020000e8030000780500006c070000c4090000

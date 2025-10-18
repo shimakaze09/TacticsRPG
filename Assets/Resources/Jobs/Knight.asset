@@ -36,20 +36,29 @@ MonoBehaviour:
   jumpBonus: 3
   evadeBonus: 5
   abilityUnlocks:
-  - abilityName: Rend Helm
+  - abilityName: Air Blast
     unlockAtJobLevel: 1
-    jpCost: 0
-  - abilityName: Rend Armor
+    jpCost: 100
+  - abilityName: Attack
     unlockAtJobLevel: 2
-    jpCost: 0
-  - abilityName: Rend Shield
+    jpCost: 200
+  - abilityName: Defend
     unlockAtJobLevel: 3
-    jpCost: 0
-  - abilityName: Rend Weapon
+    jpCost: 300
+  - abilityName: First Aid
     unlockAtJobLevel: 4
-    jpCost: 0
-  - abilityName: Rend Speed
+    jpCost: 400
+  - abilityName: Rend Helm
     unlockAtJobLevel: 5
-    jpCost: 0
+    jpCost: 500
+  - abilityName: Rend Armor
+    unlockAtJobLevel: 6
+    jpCost: 600
+  - abilityName: Rend Shield
+    unlockAtJobLevel: 7
+    jpCost: 700
+  - abilityName: Rend Weapon
+    unlockAtJobLevel: 8
+    jpCost: 800
   abilityCatalogName: Fighter Tech
   jpRequirements: 64000000fa000000c2010000bc020000e8030000780500006c070000c4090000

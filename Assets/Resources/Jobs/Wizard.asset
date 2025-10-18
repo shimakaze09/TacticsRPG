@@ -37,21 +37,27 @@ MonoBehaviour:
   abilityUnlocks:
   - abilityName: Fire
     unlockAtJobLevel: 1
-    jpCost: 0
+    jpCost: 100
   - abilityName: Blizzard
     unlockAtJobLevel: 2
-    jpCost: 0
+    jpCost: 200
   - abilityName: Thunder
     unlockAtJobLevel: 3
-    jpCost: 0
+    jpCost: 300
   - abilityName: Fira
     unlockAtJobLevel: 4
-    jpCost: 0
+    jpCost: 400
   - abilityName: Blizzara
     unlockAtJobLevel: 5
-    jpCost: 0
+    jpCost: 500
   - abilityName: Thundara
     unlockAtJobLevel: 6
-    jpCost: 0
-  abilityCatalogName: Sagacity Skill
+    jpCost: 600
+  - abilityName: Firaga
+    unlockAtJobLevel: 7
+    jpCost: 700
+  - abilityName: Blizzaga
+    unlockAtJobLevel: 8
+    jpCost: 800
+  abilityCatalogName: Black Magic
   jpRequirements: 64000000fa000000c2010000bc020000e8030000780500006c070000c4090000

@@ -37,15 +37,27 @@ MonoBehaviour:
   abilityUnlocks:
   - abilityName: Throw
     unlockAtJobLevel: 1
-    jpCost: 0
+    jpCost: 100
   - abilityName: Two Hands
-    unlockAtJobLevel: 3
-    jpCost: 0
+    unlockAtJobLevel: 2
+    jpCost: 200
   - abilityName: Sunken State
-    unlockAtJobLevel: 5
-    jpCost: 0
+    unlockAtJobLevel: 3
+    jpCost: 300
   - abilityName: Dual Wield
+    unlockAtJobLevel: 4
+    jpCost: 400
+  - abilityName: Shuriken
+    unlockAtJobLevel: 5
+    jpCost: 500
+  - abilityName: Smoke Bomb
+    unlockAtJobLevel: 6
+    jpCost: 600
+  - abilityName: Shadow Bind
     unlockAtJobLevel: 7
-    jpCost: 0
-  abilityCatalogName: 
+    jpCost: 700
+  - abilityName: Shadow Stitch
+    unlockAtJobLevel: 8
+    jpCost: 800
+  abilityCatalogName: Ninja
   jpRequirements: 64000000fa000000c2010000bc020000e8030000780500006c070000c4090000
