@@ -51,5 +51,5 @@ MonoBehaviour:
   - abilityName: Rend Speed
     unlockAtJobLevel: 5
     jpCost: 0
-  abilityCatalogName: 
+  abilityCatalogName: Fighter Tech
   jpRequirements: 64000000fa000000c2010000bc020000e8030000780500006c070000c4090000

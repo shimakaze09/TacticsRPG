@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa7883aeabf35bb4aa557d6e6b622593, type: 3}
+  m_Name: TempleKnight
+  m_EditorClassIdentifier: 
+  jobName: Temple Knight
+  description: Zalbag/Wiegraf's unique job. Divine knight abilities.
+  jobIcon: {fileID: 0}
+  category: 3
+  isUnique: 1
+  allowedCharacterNames: []
+  prerequisites: []
+  minimumCharacterLevel: 1
+  hpMultiplier: 1.8
+  mpMultiplier: 1.1
+  atkMultiplier: 1.6
+  defMultiplier: 1.5
+  matMultiplier: 1
+  mdfMultiplier: 1.2
+  spdMultiplier: 1.1
+  baseStats: 3c0000001c0000000800000007000000040000000600000005000000
+  allowedEquipmentSlots: 0100000002000000040000000800000010000000
+  movementBonus: 4
+  jumpBonus: 3
+  evadeBonus: 12
+  abilityUnlocks:
+  - abilityName: Break
+    unlockAtJobLevel: 1
+    jpCost: 0
+  - abilityName: Crush
+    unlockAtJobLevel: 2
+    jpCost: 0
+  - abilityName: Destroy
+    unlockAtJobLevel: 3
+    jpCost: 0
+  abilityCatalogName: 
+  jpRequirements: 64000000fa000000c2010000bc020000e8030000780500006c070000c4090000

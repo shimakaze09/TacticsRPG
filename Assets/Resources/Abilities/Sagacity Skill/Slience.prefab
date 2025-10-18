@@ -70,7 +70,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17a5c7acd0e327042b0f528f330c6bfc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  statusName: SlienceStatusEffect
+  statusName: SilenceStatus
   duration: 10
 --- !u!1 &7614966312807789150
 GameObject:

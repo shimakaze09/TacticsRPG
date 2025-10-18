@@ -13,9 +13,7 @@ public class StateMachine : MonoBehaviour
 
     public virtual T GetState<T>() where T : State
     {
-        var target = GetComponent<T>();
-        if (target == null)
-            target = gameObject.AddComponent<T>();
+        var target = GetComponent<T>() ?? gameObject.AddComponent<T>();
         return target;
     }
 

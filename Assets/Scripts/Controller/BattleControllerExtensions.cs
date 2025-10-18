@@ -25,14 +25,19 @@ public static class BattleControllerExtensions
 
         Debug.Log($"[BattleController] Battle ended. Victory: {victory}, EXP: {resultsData.expGained}, JP: {resultsData.jpGained}");
 
-        // Notify GameStateManager
-        if (GameStateManager.Instance != null)
+        // Notify GameFlowController (new system)
+        if (GameFlowController.Instance != null)
+        {
+            GameFlowController.Instance.NotifyBattleEnded();
+        }
+        // Fallback to GameStateManager (legacy system)
+        else if (GameStateManager.Instance != null)
         {
             GameStateManager.Instance.OnBattleEnded(victory, resultsData);
         }
         else
         {
-            Debug.LogError("[BattleController] GameStateManager not found! Cannot transition to PostBattle.");
+            Debug.LogError("[BattleController] No GameFlowController or GameStateManager found! Cannot transition to PostBattle.");
             
             // Fallback: Load main menu
             UnityEngine.SceneManagement.SceneManager.LoadScene(0);

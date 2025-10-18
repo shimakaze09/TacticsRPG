@@ -113,11 +113,28 @@ public static class UnitFactory
 
     private static void AddJob(GameObject obj, string name)
     {
-        var instance = InstantiatePrefab("Jobs/" + name);
-        instance.transform.SetParent(obj.transform);
-        var job = instance.GetComponent<Job>();
-        job.Employ();
-        job.LoadDefaultStats();
+        // Add JobManager component for FFT-style job system
+        var jobManager = obj.AddComponent<JobManager>();
+        
+        // Find the JobDefinition by name
+        var jobDefinition = jobManager.FindJobByName(name);
+        if (jobDefinition == null)
+        {
+            Debug.LogWarning($"JobDefinition '{name}' not found. Using default Squire job.");
+            // JobManager will auto-initialize with Squire if no job found
+            return;
+        }
+        
+        // Initialize with the specified job
+        jobManager.ProgressData.InitializeWithBasicJobs(jobDefinition);
+        
+        // Sync abilities with job progress
+        jobManager.AbilityMemory.SyncLearnedAbilities(jobManager.ProgressData, jobManager.allJobs);
+        
+        // Calculate initial stats
+        jobManager.RecalculateStats();
+        
+        Debug.Log($"Added JobManager to {obj.name} with job: {jobDefinition.jobName}");
     }
 
     private static void AddLocomotion(GameObject obj, Locomotions type)

@@ -26,6 +26,18 @@ public class UIManager : MonoBehaviour
         InitializePanels();
     }
 
+    private void OnEnable()
+    {
+        // Subscribe to GameFlowController events
+        SubscribeToGameFlowEvents();
+    }
+
+    private void OnDisable()
+    {
+        // Unsubscribe from GameFlowController events
+        UnsubscribeFromGameFlowEvents();
+    }
+
     #endregion
 
     #region UI Panel References
@@ -126,6 +138,54 @@ public class UIManager : MonoBehaviour
     /// Fired when menu is shown/hidden
     /// </summary>
     public event Action<MenuType> OnMenuChanged;
+
+    #endregion
+
+    #region GameFlow Integration
+
+    /// <summary>
+    /// Subscribe to GameFlowController state change events
+    /// </summary>
+    private void SubscribeToGameFlowEvents()
+    {
+        if (GameFlowController.Instance != null)
+        {
+            GameFlowController.Instance.OnFlowStateChanged += HandleGameFlowStateChanged;
+        }
+    }
+
+    /// <summary>
+    /// Unsubscribe from GameFlowController events
+    /// </summary>
+    private void UnsubscribeFromGameFlowEvents()
+    {
+        if (GameFlowController.Instance != null)
+        {
+            GameFlowController.Instance.OnFlowStateChanged -= HandleGameFlowStateChanged;
+        }
+    }
+
+    /// <summary>
+    /// Handle GameFlow state changes and update UI accordingly
+    /// </summary>
+    private void HandleGameFlowStateChanged(GameFlowState oldState, GameFlowState newState)
+    {
+        Debug.Log($"[UIManager] Responding to GameFlow state change: {oldState} → {newState}");
+
+        // Map GameFlowState to UIContext
+        UIContext targetContext = newState switch
+        {
+            GameFlowState.Title => UIContext.None,
+            GameFlowState.World => UIContext.None, // World has its own UI
+            GameFlowState.Battle => UIContext.Battle,
+            GameFlowState.PostBattle => UIContext.PostBattle,
+            GameFlowState.Shop => UIContext.Shop,
+            _ => UIContext.None
+        };
+
+        // Set the UI context
+        SetContext(targetContext);
+    }
 
     #endregion
 

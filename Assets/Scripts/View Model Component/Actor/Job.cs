@@ -1,5 +1,20 @@
 using UnityEngine;
 
+/// <summary>
+/// LEGACY JOB COMPONENT - DEPRECATED
+/// 
+/// This is the old job system from Liquid Fire tutorials.
+/// It has been superseded by the new FFT-style JobManager system.
+/// 
+/// MIGRATION GUIDE:
+/// - Replace Job component with JobManager component
+/// - Use JobDefinition ScriptableObjects instead of prefabs
+/// - Use JobProgressData for multi-job stat calculation
+/// 
+/// This component is kept for backwards compatibility only.
+/// New units should use JobManager instead.
+/// </summary>
+[System.Obsolete("Use JobManager instead. This legacy Job component will be removed in future versions.", false)]
 public class Job : MonoBehaviour
 {
     #region MonoBehaviour

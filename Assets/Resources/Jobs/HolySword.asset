@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa7883aeabf35bb4aa557d6e6b622593, type: 3}
+  m_Name: HolySword
+  m_EditorClassIdentifier: 
+  jobName: Holy Sword
+  description: Orlandu's legendary Sword Saint job.
+  jobIcon: {fileID: 0}
+  category: 3
+  isUnique: 1
+  allowedCharacterNames: []
+  prerequisites: []
+  minimumCharacterLevel: 1
+  hpMultiplier: 2
+  mpMultiplier: 1.3
+  atkMultiplier: 1.8
+  defMultiplier: 1.6
+  matMultiplier: 1.2
+  mdfMultiplier: 1.4
+  spdMultiplier: 1.3
+  baseStats: 41000000200000000900000008000000050000000700000006000000
+  allowedEquipmentSlots: 0100000002000000040000000800000010000000
+  movementBonus: 4
+  jumpBonus: 4
+  evadeBonus: 20
+  abilityUnlocks:
+  - abilityName: All Swordskill
+    unlockAtJobLevel: 1
+    jpCost: 0
+  - abilityName: Lightning Stab
+    unlockAtJobLevel: 1
+    jpCost: 0
+  - abilityName: Dark Sword
+    unlockAtJobLevel: 1
+    jpCost: 0
+  abilityCatalogName: 
+  jpRequirements: 64000000fa000000c2010000bc020000e8030000780500006c070000c4090000

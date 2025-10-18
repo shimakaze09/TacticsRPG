@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Alaois
   m_EditorClassIdentifier: 
   model: Hero
-  job: Warrior
+  job: Knight
   attack: Common/Attack
   abilityCatalog: DemoCatalog
   locomotion: 0

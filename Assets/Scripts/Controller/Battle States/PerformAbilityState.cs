@@ -34,6 +34,6 @@ public class PerformAbilityState : BattleState
 
     private bool UnitHasControl()
     {
-        return turn.actor.GetComponentInChildren<KnockOutStatusEffect>() == null;
+        return turn.actor.GetComponentInChildren<KOStatus>() == null;
     }
 }

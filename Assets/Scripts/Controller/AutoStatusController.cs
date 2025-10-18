@@ -20,7 +20,7 @@ public class AutoStatusController : MonoBehaviour
         if (e.NewValue == 0)
         {
             var status = e.Stats.GetComponentInChildren<Status>();
-            var c = status.Add<KnockOutStatusEffect, StatComparisonCondition>();
+            var c = status.Add<KOStatus, StatComparisonCondition>();
             c.Init(StatTypes.HP, 0, c.EqualTo);
         }
     }
