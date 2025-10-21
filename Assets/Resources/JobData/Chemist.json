@@ -1,0 +1,48 @@
+{
+  "jobName": "Chemist",
+  "description": "Item specialist. Can use items effectively and has potion-related abilities.",
+  "category": "Basic",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [],
+  "statMultipliers": {
+    "hp": 1.1,
+    "mp": 1.2,
+    "atk": 0.8,
+    "def": 0.9,
+    "mat": 1.0,
+    "mdf": 1.0,
+    "spd": 0.9
+  },
+  "baseStats": [45, 30, 4, 4, 5, 5, 4],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 3,
+    "evadeBonus": 5
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Poison",
+      "unlockAtJobLevel": 1,
+      "jpCost": 80
+    },
+    {
+      "abilityName": "Sleep",
+      "unlockAtJobLevel": 2,
+      "jpCost": 120
+    },
+    {
+      "abilityName": "Silence",
+      "unlockAtJobLevel": 3,
+      "jpCost": 160
+    },
+    {
+      "abilityName": "Confuse",
+      "unlockAtJobLevel": 4,
+      "jpCost": 200
+    }
+  ],
+  "abilityCatalogName": "Chemist",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}

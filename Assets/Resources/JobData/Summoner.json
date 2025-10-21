@@ -1,0 +1,73 @@
+{
+  "jobName": "Summoner",
+  "description": "Calls forth powerful summon beasts to devastate enemies.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobName": "Time Mage",
+      "requiredLevel": 3
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.0,
+    "mp": 1.7,
+    "atk": 0.6,
+    "def": 0.8,
+    "mat": 1.6,
+    "mdf": 1.4,
+    "spd": 0.9
+  },
+  "baseStats": [43, 48, 3, 4, 7, 7, 4],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 3,
+    "evadeBonus": 5
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Moogle",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityName": "Faerie",
+      "unlockAtJobLevel": 2,
+      "jpCost": 200
+    },
+    {
+      "abilityName": "Shiva",
+      "unlockAtJobLevel": 3,
+      "jpCost": 300
+    },
+    {
+      "abilityName": "Ramuh",
+      "unlockAtJobLevel": 4,
+      "jpCost": 400
+    },
+    {
+      "abilityName": "Ifrit",
+      "unlockAtJobLevel": 5,
+      "jpCost": 500
+    },
+    {
+      "abilityName": "Titan",
+      "unlockAtJobLevel": 6,
+      "jpCost": 600
+    },
+    {
+      "abilityName": "Leviathan",
+      "unlockAtJobLevel": 7,
+      "jpCost": 700
+    },
+    {
+      "abilityName": "Bahamut",
+      "unlockAtJobLevel": 8,
+      "jpCost": 800
+    }
+  ],
+  "abilityCatalogName": "Summoner",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}

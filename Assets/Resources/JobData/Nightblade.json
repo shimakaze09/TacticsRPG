@@ -1,0 +1,68 @@
+{
+  "jobName": "Nightblade",
+  "description": "Shadowy enemy assassin with dark magic.",
+  "category": "Unique",
+  "isUnique": true,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [],
+  "statMultipliers": {
+    "hp": 1.1,
+    "mp": 1.3,
+    "atk": 1.4,
+    "def": 0.9,
+    "mat": 1.3,
+    "mdf": 1.2,
+    "spd": 1.5
+  },
+  "baseStats": [46, 35, 6, 4, 6, 6, 7],
+  "movement": {
+    "movementBonus": 4,
+    "jumpBonus": 4,
+    "evadeBonus": 25
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Shadow Strike",
+      "unlockAtJobLevel": 1,
+      "jpCost": 300
+    },
+    {
+      "abilityName": "Dark Blade",
+      "unlockAtJobLevel": 2,
+      "jpCost": 350
+    },
+    {
+      "abilityName": "Nightmare",
+      "unlockAtJobLevel": 3,
+      "jpCost": 400
+    },
+    {
+      "abilityName": "Shadow Bind",
+      "unlockAtJobLevel": 4,
+      "jpCost": 450
+    },
+    {
+      "abilityName": "Darkness",
+      "unlockAtJobLevel": 5,
+      "jpCost": 500
+    },
+    {
+      "abilityName": "Shadow Walk",
+      "unlockAtJobLevel": 6,
+      "jpCost": 550
+    },
+    {
+      "abilityName": "Void Strike",
+      "unlockAtJobLevel": 7,
+      "jpCost": 600
+    },
+    {
+      "abilityName": "Shadow Master",
+      "unlockAtJobLevel": 8,
+      "jpCost": 650
+    }
+  ],
+  "abilityCatalogName": "Nightblade",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}

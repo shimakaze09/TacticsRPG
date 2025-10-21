@@ -1,0 +1,73 @@
+{
+  "jobName": "Knight",
+  "description": "Heavy armor specialist with high HP and physical attack. Uses swords and armor break abilities.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobName": "Squire",
+      "requiredLevel": 2
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.8,
+    "mp": 0.7,
+    "atk": 1.4,
+    "def": 1.5,
+    "mat": 0.6,
+    "mdf": 0.8,
+    "spd": 0.8
+  },
+  "baseStats": [60, 15, 7, 7, 3, 4, 4],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 3,
+    "evadeBonus": 5
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Rend Weapon",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityName": "Rend Armor",
+      "unlockAtJobLevel": 2,
+      "jpCost": 150
+    },
+    {
+      "abilityName": "Rend Helmet",
+      "unlockAtJobLevel": 3,
+      "jpCost": 200
+    },
+    {
+      "abilityName": "Rend Shield",
+      "unlockAtJobLevel": 4,
+      "jpCost": 250
+    },
+    {
+      "abilityName": "Rend Power",
+      "unlockAtJobLevel": 5,
+      "jpCost": 300
+    },
+    {
+      "abilityName": "Rend Magick",
+      "unlockAtJobLevel": 6,
+      "jpCost": 350
+    },
+    {
+      "abilityName": "Rend MP",
+      "unlockAtJobLevel": 7,
+      "jpCost": 400
+    },
+    {
+      "abilityName": "Rend Speed",
+      "unlockAtJobLevel": 8,
+      "jpCost": 450
+    }
+  ],
+  "abilityCatalogName": "Knight",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}

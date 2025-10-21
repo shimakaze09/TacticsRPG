@@ -1,0 +1,68 @@
+{
+  "jobName": "Rune Knight",
+  "description": "Enemy knight with ancient rune magic.",
+  "category": "Unique",
+  "isUnique": true,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [],
+  "statMultipliers": {
+    "hp": 1.7,
+    "mp": 1.3,
+    "atk": 1.5,
+    "def": 1.4,
+    "mat": 1.2,
+    "mdf": 1.4,
+    "spd": 1.0
+  },
+  "baseStats": [58, 35, 7, 7, 5, 7, 4],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 3,
+    "evadeBonus": 10
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Rune Blade",
+      "unlockAtJobLevel": 1,
+      "jpCost": 350
+    },
+    {
+      "abilityName": "Ancient Strike",
+      "unlockAtJobLevel": 2,
+      "jpCost": 400
+    },
+    {
+      "abilityName": "Rune Shield",
+      "unlockAtJobLevel": 3,
+      "jpCost": 450
+    },
+    {
+      "abilityName": "Mystic Blade",
+      "unlockAtJobLevel": 4,
+      "jpCost": 500
+    },
+    {
+      "abilityName": "Rune Magic",
+      "unlockAtJobLevel": 5,
+      "jpCost": 550
+    },
+    {
+      "abilityName": "Ancient Power",
+      "unlockAtJobLevel": 6,
+      "jpCost": 600
+    },
+    {
+      "abilityName": "Rune Mastery",
+      "unlockAtJobLevel": 7,
+      "jpCost": 650
+    },
+    {
+      "abilityName": "Elder Runes",
+      "unlockAtJobLevel": 8,
+      "jpCost": 700
+    }
+  ],
+  "abilityCatalogName": "Rune Knight",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}

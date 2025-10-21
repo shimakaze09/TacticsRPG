@@ -1,0 +1,68 @@
+{
+  "jobName": "Deathknight",
+  "description": "Undead enemy knight with fell sword techniques.",
+  "category": "Unique",
+  "isUnique": true,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [],
+  "statMultipliers": {
+    "hp": 1.8,
+    "mp": 1.2,
+    "atk": 1.6,
+    "def": 1.5,
+    "mat": 1.1,
+    "mdf": 1.3,
+    "spd": 1.0
+  },
+  "baseStats": [62, 30, 8, 7, 5, 6, 4],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 3,
+    "evadeBonus": 10
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Duskblade",
+      "unlockAtJobLevel": 1,
+      "jpCost": 300
+    },
+    {
+      "abilityName": "Shadowblade",
+      "unlockAtJobLevel": 2,
+      "jpCost": 350
+    },
+    {
+      "abilityName": "Soul Eater",
+      "unlockAtJobLevel": 3,
+      "jpCost": 400
+    },
+    {
+      "abilityName": "Death Strike",
+      "unlockAtJobLevel": 4,
+      "jpCost": 450
+    },
+    {
+      "abilityName": "Darkness",
+      "unlockAtJobLevel": 5,
+      "jpCost": 500
+    },
+    {
+      "abilityName": "Vampire",
+      "unlockAtJobLevel": 6,
+      "jpCost": 550
+    },
+    {
+      "abilityName": "Doom",
+      "unlockAtJobLevel": 7,
+      "jpCost": 600
+    },
+    {
+      "abilityName": "Unyielding Blade",
+      "unlockAtJobLevel": 8,
+      "jpCost": 650
+    }
+  ],
+  "abilityCatalogName": "Deathknight",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}

@@ -1,0 +1,38 @@
+{
+  "jobName": "Ark Knight",
+  "description": "Construct 8's unique mechanical knight job.",
+  "category": "Unique",
+  "isUnique": true,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": ["Construct 8"],
+  "prerequisites": [],
+  "statMultipliers": {
+    "hp": 2.0,
+    "mp": 0.5,
+    "atk": 1.7,
+    "def": 1.8,
+    "mat": 0.5,
+    "mdf": 1.0,
+    "spd": 0.9
+  },
+  "baseStats": [70, 10, 9, 9, 2, 5, 4],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 3,
+    "evadeBonus": 5
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Self Destruct",
+      "unlockAtJobLevel": 1,
+      "jpCost": 200
+    },
+    {
+      "abilityName": "Repair",
+      "unlockAtJobLevel": 2,
+      "jpCost": 300
+    }
+  ],
+  "abilityCatalogName": "Ark Knight",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}

@@ -1,0 +1,81 @@
+{
+  "jobName": "Samurai",
+  "description": "Master swordsman with powerful katana techniques.",
+  "category": "Special",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobName": "Knight",
+      "requiredLevel": 4
+    },
+    {
+      "requiredJobName": "Monk",
+      "requiredLevel": 5
+    },
+    {
+      "requiredJobName": "Dragoon",
+      "requiredLevel": 2
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.5,
+    "mp": 1.0,
+    "atk": 1.5,
+    "def": 1.2,
+    "mat": 0.9,
+    "mdf": 1.0,
+    "spd": 1.1
+  },
+  "baseStats": [55, 25, 7, 6, 4, 5, 5],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 3,
+    "evadeBonus": 10
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Ashura",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityName": "Kotetsu",
+      "unlockAtJobLevel": 2,
+      "jpCost": 200
+    },
+    {
+      "abilityName": "Ame-no-Murakumo",
+      "unlockAtJobLevel": 3,
+      "jpCost": 300
+    },
+    {
+      "abilityName": "Muramasa",
+      "unlockAtJobLevel": 4,
+      "jpCost": 400
+    },
+    {
+      "abilityName": "Kiku-Ichimonji",
+      "unlockAtJobLevel": 5,
+      "jpCost": 500
+    },
+    {
+      "abilityName": "Chirijiraden",
+      "unlockAtJobLevel": 6,
+      "jpCost": 600
+    },
+    {
+      "abilityName": "Murasame",
+      "unlockAtJobLevel": 7,
+      "jpCost": 700
+    },
+    {
+      "abilityName": "Kiyomori",
+      "unlockAtJobLevel": 8,
+      "jpCost": 800
+    }
+  ],
+  "abilityCatalogName": "Samurai",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}

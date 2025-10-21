@@ -1,0 +1,73 @@
+{
+  "jobName": "Mystic",
+  "description": "Yin-yang magic user with both healing and offensive abilities.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobName": "White Mage",
+      "requiredLevel": 3
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.0,
+    "mp": 1.4,
+    "atk": 0.7,
+    "def": 0.8,
+    "mat": 1.3,
+    "mdf": 1.3,
+    "spd": 1.0
+  },
+  "baseStats": [43, 38, 3, 4, 6, 6, 4],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 3,
+    "evadeBonus": 10
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Blind",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityName": "Sleep",
+      "unlockAtJobLevel": 2,
+      "jpCost": 200
+    },
+    {
+      "abilityName": "Silence",
+      "unlockAtJobLevel": 3,
+      "jpCost": 300
+    },
+    {
+      "abilityName": "Confuse",
+      "unlockAtJobLevel": 4,
+      "jpCost": 400
+    },
+    {
+      "abilityName": "Charm",
+      "unlockAtJobLevel": 5,
+      "jpCost": 500
+    },
+    {
+      "abilityName": "Berserk",
+      "unlockAtJobLevel": 6,
+      "jpCost": 600
+    },
+    {
+      "abilityName": "Paralyze",
+      "unlockAtJobLevel": 7,
+      "jpCost": 700
+    },
+    {
+      "abilityName": "Petrify",
+      "unlockAtJobLevel": 8,
+      "jpCost": 800
+    }
+  ],
+  "abilityCatalogName": "Mystic",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}

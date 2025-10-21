@@ -1,0 +1,73 @@
+{
+  "jobName": "Monk",
+  "description": "Martial artist with powerful bare-handed attacks. High HP and physical attack.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobName": "Knight",
+      "requiredLevel": 3
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.7,
+    "mp": 0.8,
+    "atk": 1.5,
+    "def": 1.1,
+    "mat": 0.7,
+    "mdf": 1.1,
+    "spd": 1.2
+  },
+  "baseStats": [58, 18, 7, 5, 3, 5, 5],
+  "movement": {
+    "movementBonus": 4,
+    "jumpBonus": 4,
+    "evadeBonus": 20
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Chakra",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityName": "Revive",
+      "unlockAtJobLevel": 2,
+      "jpCost": 200
+    },
+    {
+      "abilityName": "Purification",
+      "unlockAtJobLevel": 3,
+      "jpCost": 300
+    },
+    {
+      "abilityName": "Aurablast",
+      "unlockAtJobLevel": 4,
+      "jpCost": 400
+    },
+    {
+      "abilityName": "Shockwave",
+      "unlockAtJobLevel": 5,
+      "jpCost": 500
+    },
+    {
+      "abilityName": "Earth Slash",
+      "unlockAtJobLevel": 6,
+      "jpCost": 600
+    },
+    {
+      "abilityName": "Wave Fist",
+      "unlockAtJobLevel": 7,
+      "jpCost": 700
+    },
+    {
+      "abilityName": "Pressure Point",
+      "unlockAtJobLevel": 8,
+      "jpCost": 800
+    }
+  ],
+  "abilityCatalogName": "Monk",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}

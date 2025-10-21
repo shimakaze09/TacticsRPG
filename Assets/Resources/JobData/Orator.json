@@ -1,0 +1,73 @@
+{
+  "jobName": "Orator",
+  "description": "Diplomat who can charm and recruit enemies.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobName": "Mystic",
+      "requiredLevel": 3
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.0,
+    "mp": 1.4,
+    "atk": 0.7,
+    "def": 0.8,
+    "mat": 1.3,
+    "mdf": 1.2,
+    "spd": 0.9
+  },
+  "baseStats": [43, 40, 3, 4, 6, 6, 4],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 3,
+    "evadeBonus": 5
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Invite",
+      "unlockAtJobLevel": 1,
+      "jpCost": 200
+    },
+    {
+      "abilityName": "Negotiate",
+      "unlockAtJobLevel": 2,
+      "jpCost": 250
+    },
+    {
+      "abilityName": "Convince",
+      "unlockAtJobLevel": 3,
+      "jpCost": 300
+    },
+    {
+      "abilityName": "Praise",
+      "unlockAtJobLevel": 4,
+      "jpCost": 350
+    },
+    {
+      "abilityName": "Preach",
+      "unlockAtJobLevel": 5,
+      "jpCost": 400
+    },
+    {
+      "abilityName": "Mimic Daravon",
+      "unlockAtJobLevel": 6,
+      "jpCost": 450
+    },
+    {
+      "abilityName": "Rally",
+      "unlockAtJobLevel": 7,
+      "jpCost": 500
+    },
+    {
+      "abilityName": "Demoralize",
+      "unlockAtJobLevel": 8,
+      "jpCost": 550
+    }
+  ],
+  "abilityCatalogName": "Orator",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}

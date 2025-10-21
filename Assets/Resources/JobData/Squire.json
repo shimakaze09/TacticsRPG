@@ -1,0 +1,53 @@
+{
+  "jobName": "Squire",
+  "description": "Basic soldier class. Well-rounded stats and abilities.",
+  "category": "Basic",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [],
+  "statMultipliers": {
+    "hp": 1.3,
+    "mp": 0.9,
+    "atk": 1.0,
+    "def": 1.0,
+    "mat": 0.8,
+    "mdf": 0.9,
+    "spd": 1.0
+  },
+  "baseStats": [50, 20, 5, 5, 3, 4, 5],
+  "movement": {
+    "movementBonus": 4,
+    "jumpBonus": 3,
+    "evadeBonus": 10
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Focus",
+      "unlockAtJobLevel": 1,
+      "jpCost": 50
+    },
+    {
+      "abilityName": "Stone",
+      "unlockAtJobLevel": 2,
+      "jpCost": 100
+    },
+    {
+      "abilityName": "Rush",
+      "unlockAtJobLevel": 3,
+      "jpCost": 150
+    },
+    {
+      "abilityName": "Salve",
+      "unlockAtJobLevel": 4,
+      "jpCost": 200
+    },
+    {
+      "abilityName": "Armor Break",
+      "unlockAtJobLevel": 5,
+      "jpCost": 250
+    }
+  ],
+  "abilityCatalogName": "Squire",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}

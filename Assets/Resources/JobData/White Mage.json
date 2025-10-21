@@ -1,0 +1,73 @@
+{
+  "jobName": "White Mage",
+  "description": "Holy magic user. Specializes in healing and support magic.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobName": "Chemist",
+      "requiredLevel": 2
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.0,
+    "mp": 1.5,
+    "atk": 0.7,
+    "def": 0.8,
+    "mat": 1.3,
+    "mdf": 1.4,
+    "spd": 0.9
+  },
+  "baseStats": [42, 40, 3, 4, 6, 7, 4],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 3,
+    "evadeBonus": 5
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Cure",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityName": "Cura",
+      "unlockAtJobLevel": 2,
+      "jpCost": 200
+    },
+    {
+      "abilityName": "Curaga",
+      "unlockAtJobLevel": 3,
+      "jpCost": 300
+    },
+    {
+      "abilityName": "Raise",
+      "unlockAtJobLevel": 4,
+      "jpCost": 400
+    },
+    {
+      "abilityName": "Arise",
+      "unlockAtJobLevel": 5,
+      "jpCost": 500
+    },
+    {
+      "abilityName": "Regen",
+      "unlockAtJobLevel": 6,
+      "jpCost": 600
+    },
+    {
+      "abilityName": "Protect",
+      "unlockAtJobLevel": 7,
+      "jpCost": 700
+    },
+    {
+      "abilityName": "Shell",
+      "unlockAtJobLevel": 8,
+      "jpCost": 800
+    }
+  ],
+  "abilityCatalogName": "White Mage",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}

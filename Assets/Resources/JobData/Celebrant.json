@@ -1,0 +1,68 @@
+{
+  "jobName": "Celebrant",
+  "description": "Enemy priest with powerful holy magic.",
+  "category": "Unique",
+  "isUnique": true,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [],
+  "statMultipliers": {
+    "hp": 1.0,
+    "mp": 1.7,
+    "atk": 0.6,
+    "def": 0.8,
+    "mat": 1.6,
+    "mdf": 1.7,
+    "spd": 0.9
+  },
+  "baseStats": [42, 50, 3, 4, 8, 9, 4],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 3,
+    "evadeBonus": 5
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Curaga",
+      "unlockAtJobLevel": 1,
+      "jpCost": 400
+    },
+    {
+      "abilityName": "Cura",
+      "unlockAtJobLevel": 2,
+      "jpCost": 450
+    },
+    {
+      "abilityName": "Arise",
+      "unlockAtJobLevel": 3,
+      "jpCost": 500
+    },
+    {
+      "abilityName": "Esuna",
+      "unlockAtJobLevel": 4,
+      "jpCost": 550
+    },
+    {
+      "abilityName": "Holy",
+      "unlockAtJobLevel": 5,
+      "jpCost": 600
+    },
+    {
+      "abilityName": "Drain",
+      "unlockAtJobLevel": 6,
+      "jpCost": 650
+    },
+    {
+      "abilityName": "Dispel",
+      "unlockAtJobLevel": 7,
+      "jpCost": 700
+    },
+    {
+      "abilityName": "Confuse",
+      "unlockAtJobLevel": 8,
+      "jpCost": 750
+    }
+  ],
+  "abilityCatalogName": "Celebrant",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}

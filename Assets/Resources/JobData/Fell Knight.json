@@ -1,0 +1,68 @@
+{
+  "jobName": "Fell Knight",
+  "description": "Corrupted enemy knight with dark powers.",
+  "category": "Unique",
+  "isUnique": true,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [],
+  "statMultipliers": {
+    "hp": 1.9,
+    "mp": 1.1,
+    "atk": 1.7,
+    "def": 1.6,
+    "mat": 1.0,
+    "mdf": 1.2,
+    "spd": 1.1
+  },
+  "baseStats": [64, 28, 8, 8, 4, 6, 5],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 3,
+    "evadeBonus": 12
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Fell Blade",
+      "unlockAtJobLevel": 1,
+      "jpCost": 350
+    },
+    {
+      "abilityName": "Dark Strike",
+      "unlockAtJobLevel": 2,
+      "jpCost": 400
+    },
+    {
+      "abilityName": "Corruption",
+      "unlockAtJobLevel": 3,
+      "jpCost": 450
+    },
+    {
+      "abilityName": "Soul Drain",
+      "unlockAtJobLevel": 4,
+      "jpCost": 500
+    },
+    {
+      "abilityName": "Necromancy",
+      "unlockAtJobLevel": 5,
+      "jpCost": 550
+    },
+    {
+      "abilityName": "Unholy Aura",
+      "unlockAtJobLevel": 6,
+      "jpCost": 600
+    },
+    {
+      "abilityName": "Death Curse",
+      "unlockAtJobLevel": 7,
+      "jpCost": 650
+    },
+    {
+      "abilityName": "Apocalypse",
+      "unlockAtJobLevel": 8,
+      "jpCost": 700
+    }
+  ],
+  "abilityCatalogName": "Fell Knight",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}

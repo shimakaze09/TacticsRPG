@@ -1,0 +1,73 @@
+{
+  "jobName": "Thief",
+  "description": "Swift and sneaky. Can steal items and has high speed.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobName": "Archer",
+      "requiredLevel": 3
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.1,
+    "mp": 0.8,
+    "atk": 1.1,
+    "def": 0.9,
+    "mat": 0.7,
+    "mdf": 0.8,
+    "spd": 1.4
+  },
+  "baseStats": [47, 18, 5, 4, 3, 4, 6],
+  "movement": {
+    "movementBonus": 4,
+    "jumpBonus": 4,
+    "evadeBonus": 20
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Steal Gil",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityName": "Steal EXP",
+      "unlockAtJobLevel": 2,
+      "jpCost": 200
+    },
+    {
+      "abilityName": "Steal Weapon",
+      "unlockAtJobLevel": 3,
+      "jpCost": 300
+    },
+    {
+      "abilityName": "Steal Armor",
+      "unlockAtJobLevel": 4,
+      "jpCost": 400
+    },
+    {
+      "abilityName": "Steal Helmet",
+      "unlockAtJobLevel": 5,
+      "jpCost": 500
+    },
+    {
+      "abilityName": "Steal Shield",
+      "unlockAtJobLevel": 6,
+      "jpCost": 600
+    },
+    {
+      "abilityName": "Steal Accessory",
+      "unlockAtJobLevel": 7,
+      "jpCost": 700
+    },
+    {
+      "abilityName": "Steal Heart",
+      "unlockAtJobLevel": 8,
+      "jpCost": 800
+    }
+  ],
+  "abilityCatalogName": "Thief",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}

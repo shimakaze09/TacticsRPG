@@ -1,0 +1,73 @@
+{
+  "jobName": "Geomancer",
+  "description": "Uses the power of the land to attack. Terrain-based abilities.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobName": "Monk",
+      "requiredLevel": 4
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.3,
+    "mp": 1.0,
+    "atk": 1.1,
+    "def": 1.0,
+    "mat": 1.2,
+    "mdf": 1.1,
+    "spd": 1.0
+  },
+  "baseStats": [50, 25, 5, 5, 5, 5, 4],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 4,
+    "evadeBonus": 10
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Wind Slash",
+      "unlockAtJobLevel": 1,
+      "jpCost": 120
+    },
+    {
+      "abilityName": "Sandstorm",
+      "unlockAtJobLevel": 2,
+      "jpCost": 150
+    },
+    {
+      "abilityName": "Torrent",
+      "unlockAtJobLevel": 3,
+      "jpCost": 180
+    },
+    {
+      "abilityName": "Snowstorm",
+      "unlockAtJobLevel": 4,
+      "jpCost": 210
+    },
+    {
+      "abilityName": "Magma Surge",
+      "unlockAtJobLevel": 5,
+      "jpCost": 240
+    },
+    {
+      "abilityName": "Tremor",
+      "unlockAtJobLevel": 6,
+      "jpCost": 270
+    },
+    {
+      "abilityName": "Sinkhole",
+      "unlockAtJobLevel": 7,
+      "jpCost": 300
+    },
+    {
+      "abilityName": "Tanglevine",
+      "unlockAtJobLevel": 8,
+      "jpCost": 330
+    }
+  ],
+  "abilityCatalogName": "Geomancer",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}

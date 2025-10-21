@@ -1,0 +1,65 @@
+{
+  "jobName": "Arithmetician",
+  "description": "Mathematical mage with precise formula-based magic.",
+  "category": "Special",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobName": "White Mage",
+      "requiredLevel": 5
+    },
+    {
+      "requiredJobName": "Black Mage",
+      "requiredLevel": 5
+    },
+    {
+      "requiredJobName": "Time Mage",
+      "requiredLevel": 4
+    },
+    {
+      "requiredJobName": "Mystic",
+      "requiredLevel": 4
+    }
+  ],
+  "statMultipliers": {
+    "hp": 0.9,
+    "mp": 1.6,
+    "atk": 0.6,
+    "def": 0.7,
+    "mat": 1.5,
+    "mdf": 1.4,
+    "spd": 0.8
+  },
+  "baseStats": [40, 45, 3, 3, 7, 7, 3],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 3,
+    "evadeBonus": 5
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Level Prime",
+      "unlockAtJobLevel": 1,
+      "jpCost": 500
+    },
+    {
+      "abilityName": "Level Multiple 3",
+      "unlockAtJobLevel": 3,
+      "jpCost": 600
+    },
+    {
+      "abilityName": "Height Prime",
+      "unlockAtJobLevel": 5,
+      "jpCost": 700
+    },
+    {
+      "abilityName": "CT Prime",
+      "unlockAtJobLevel": 7,
+      "jpCost": 800
+    }
+  ],
+  "abilityCatalogName": "Arithmetician",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}

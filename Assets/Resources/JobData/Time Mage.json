@@ -1,0 +1,73 @@
+{
+  "jobName": "Time Mage",
+  "description": "Master of time and gravity magic. Can manipulate speed and stop time.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobName": "Black Mage",
+      "requiredLevel": 3
+    }
+  ],
+  "statMultipliers": {
+    "hp": 0.9,
+    "mp": 1.5,
+    "atk": 0.6,
+    "def": 0.7,
+    "mat": 1.4,
+    "mdf": 1.3,
+    "spd": 1.0
+  },
+  "baseStats": [41, 42, 3, 3, 6, 6, 4],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 3,
+    "evadeBonus": 5
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Haste",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityName": "Slow",
+      "unlockAtJobLevel": 2,
+      "jpCost": 200
+    },
+    {
+      "abilityName": "Stop",
+      "unlockAtJobLevel": 3,
+      "jpCost": 300
+    },
+    {
+      "abilityName": "Quick",
+      "unlockAtJobLevel": 4,
+      "jpCost": 400
+    },
+    {
+      "abilityName": "Teleport",
+      "unlockAtJobLevel": 5,
+      "jpCost": 500
+    },
+    {
+      "abilityName": "Float",
+      "unlockAtJobLevel": 6,
+      "jpCost": 600
+    },
+    {
+      "abilityName": "Gravity",
+      "unlockAtJobLevel": 7,
+      "jpCost": 700
+    },
+    {
+      "abilityName": "Demi",
+      "unlockAtJobLevel": 8,
+      "jpCost": 800
+    }
+  ],
+  "abilityCatalogName": "Time Mage",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}

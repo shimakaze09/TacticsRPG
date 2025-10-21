@@ -1,0 +1,68 @@
+{
+  "jobName": "Assassin",
+  "description": "Deadly enemy assassin with powerful subdual arts.",
+  "category": "Unique",
+  "isUnique": true,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [],
+  "statMultipliers": {
+    "hp": 1.2,
+    "mp": 1.0,
+    "atk": 1.5,
+    "def": 1.0,
+    "mat": 1.2,
+    "mdf": 1.1,
+    "spd": 1.4
+  },
+  "baseStats": [48, 25, 7, 5, 5, 5, 6],
+  "movement": {
+    "movementBonus": 4,
+    "jumpBonus": 4,
+    "evadeBonus": 20
+  },
+  "abilityUnlocks": [
+    {
+      "abilityName": "Petrify",
+      "unlockAtJobLevel": 1,
+      "jpCost": 300
+    },
+    {
+      "abilityName": "Shadowbind",
+      "unlockAtJobLevel": 2,
+      "jpCost": 350
+    },
+    {
+      "abilityName": "Suffocate",
+      "unlockAtJobLevel": 3,
+      "jpCost": 400
+    },
+    {
+      "abilityName": "Death",
+      "unlockAtJobLevel": 4,
+      "jpCost": 450
+    },
+    {
+      "abilityName": "Ultima",
+      "unlockAtJobLevel": 5,
+      "jpCost": 500
+    },
+    {
+      "abilityName": "Charm",
+      "unlockAtJobLevel": 6,
+      "jpCost": 550
+    },
+    {
+      "abilityName": "Poison",
+      "unlockAtJobLevel": 7,
+      "jpCost": 600
+    },
+    {
+      "abilityName": "Sleep",
+      "unlockAtJobLevel": 8,
+      "jpCost": 650
+    }
+  ],
+  "abilityCatalogName": "Assassin",
+  "jpRequirements": [100, 250, 450, 700, 1000, 1400, 1900, 2500]
+}
