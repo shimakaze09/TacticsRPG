@@ -6,14 +6,15 @@ using System.Collections.Generic;
 using UnityEditor;
 
 /// <summary>
-/// Data-driven editor utility to create FFT job definition assets from JSON files
+/// Data-driven editor utility to create all FFT job definition assets from JSON files
+/// Uses a single unified function to process all job types
 /// </summary>
 public static class FFTJobCreator
 {
     private const string JobsPath = "Assets/Resources/Jobs";
     private const string JobDataPath = "Assets/Resources/JobData";
 
-    [MenuItem("Tactics RPG/Create FFT Jobs/Generate from JSON")]
+    [MenuItem("Tactics RPG/Create FFT Jobs/Generate All Jobs from JSON")]
     public static void GenerateJobsFromJSON()
     {
         EnsureDirectoriesExist();
@@ -172,41 +173,6 @@ public static class FFTJobCreator
         return JsonUtility.FromJson<T>(jsonContent);
     }
 
-    // Legacy menu items for backward compatibility
-    [MenuItem("Tactics RPG/Create FFT Jobs/Create All Basic Jobs")]
-    public static void CreateAllBasicJobs()
-    {
-        Debug.LogWarning("Legacy method called. Please use 'Generate from JSON' instead.");
-        GenerateJobsFromJSON();
-    }
-
-    [MenuItem("Tactics RPG/Create FFT Jobs/Create All Common Jobs")]
-    public static void CreateAllCommonJobs()
-    {
-        Debug.LogWarning("Legacy method called. Please use 'Generate from JSON' instead.");
-        GenerateJobsFromJSON();
-    }
-
-    [MenuItem("Tactics RPG/Create FFT Jobs/Create All Special Jobs")]
-    public static void CreateAllSpecialJobs()
-    {
-        Debug.LogWarning("Legacy method called. Please use 'Generate from JSON' instead.");
-        GenerateJobsFromJSON();
-    }
-
-    [MenuItem("Tactics RPG/Create FFT Jobs/Create All Unique Jobs")]
-    public static void CreateAllUniqueJobs()
-    {
-        Debug.LogWarning("Legacy method called. Please use 'Generate from JSON' instead.");
-        GenerateJobsFromJSON();
-    }
-
-    [MenuItem("Tactics RPG/Create FFT Jobs/Create All Jobs (Fresh)")]
-    public static void CreateAllJobsFresh()
-    {
-        Debug.LogWarning("Legacy method called. Please use 'Generate from JSON' instead.");
-        GenerateJobsFromJSON();
-    }
 }
 
 // JSON Data Structures
