@@ -4879,7 +4879,10 @@ public static class FFTAbilityCreator
     {
         var effectGO = new GameObject("Prime");
         effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<DamageAbilityEffect>(); // Prime number targeting
+        effectGO.AddComponent<InflictAbilityEffect>();
+        var effect = effectGO.GetComponent<InflictAbilityEffect>();
+        effect.statusName = "PrimeStatus";
+        effect.duration = 1; // Instant effect for targeting
         effectGO.AddComponent<FullAbilityArea>();
         effectGO.AddComponent<STypeHitRate>();
     }
@@ -4888,7 +4891,10 @@ public static class FFTAbilityCreator
     {
         var effectGO = new GameObject("HpEqualsMp");
         effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<DamageAbilityEffect>(); // HP=MP targeting
+        effectGO.AddComponent<InflictAbilityEffect>();
+        var effect = effectGO.GetComponent<InflictAbilityEffect>();
+        effect.statusName = "HpEqualsMpStatus";
+        effect.duration = 1; // Instant effect for targeting
         effectGO.AddComponent<FullAbilityArea>();
         effectGO.AddComponent<STypeHitRate>();
     }
@@ -4897,7 +4903,10 @@ public static class FFTAbilityCreator
     {
         var effectGO = new GameObject("HpEqualsLevel");
         effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<DamageAbilityEffect>(); // HP=Level targeting
+        effectGO.AddComponent<InflictAbilityEffect>();
+        var effect = effectGO.GetComponent<InflictAbilityEffect>();
+        effect.statusName = "HpEqualsLevelStatus";
+        effect.duration = 1; // Instant effect for targeting
         effectGO.AddComponent<FullAbilityArea>();
         effectGO.AddComponent<STypeHitRate>();
     }
@@ -4906,7 +4915,10 @@ public static class FFTAbilityCreator
     {
         var effectGO = new GameObject("HpEqualsExp");
         effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<DamageAbilityEffect>(); // HP=Exp targeting
+        effectGO.AddComponent<InflictAbilityEffect>();
+        var effect = effectGO.GetComponent<InflictAbilityEffect>();
+        effect.statusName = "HpEqualsExpStatus";
+        effect.duration = 1; // Instant effect for targeting
         effectGO.AddComponent<FullAbilityArea>();
         effectGO.AddComponent<STypeHitRate>();
     }
@@ -4915,7 +4927,10 @@ public static class FFTAbilityCreator
     {
         var effectGO = new GameObject("HpEqualsFaith");
         effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<DamageAbilityEffect>(); // HP=Faith targeting
+        effectGO.AddComponent<InflictAbilityEffect>();
+        var effect = effectGO.GetComponent<InflictAbilityEffect>();
+        effect.statusName = "HpEqualsFaithStatus";
+        effect.duration = 1; // Instant effect for targeting
         effectGO.AddComponent<FullAbilityArea>();
         effectGO.AddComponent<STypeHitRate>();
     }
@@ -4924,7 +4939,10 @@ public static class FFTAbilityCreator
     {
         var effectGO = new GameObject("HpEqualsBrave");
         effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<DamageAbilityEffect>(); // HP=Brave targeting
+        effectGO.AddComponent<InflictAbilityEffect>();
+        var effect = effectGO.GetComponent<InflictAbilityEffect>();
+        effect.statusName = "HpEqualsBraveStatus";
+        effect.duration = 1; // Instant effect for targeting
         effectGO.AddComponent<FullAbilityArea>();
         effectGO.AddComponent<STypeHitRate>();
     }
@@ -4933,7 +4951,10 @@ public static class FFTAbilityCreator
     {
         var effectGO = new GameObject("HpEqualsZodiac");
         effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<DamageAbilityEffect>(); // HP=Zodiac targeting
+        effectGO.AddComponent<InflictAbilityEffect>();
+        var effect = effectGO.GetComponent<InflictAbilityEffect>();
+        effect.statusName = "HpEqualsZodiacStatus";
+        effect.duration = 1; // Instant effect for targeting
         effectGO.AddComponent<FullAbilityArea>();
         effectGO.AddComponent<STypeHitRate>();
     }
@@ -4942,7 +4963,10 @@ public static class FFTAbilityCreator
     {
         var effectGO = new GameObject("HpEqualsHeight");
         effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<DamageAbilityEffect>(); // HP=Height targeting
+        effectGO.AddComponent<InflictAbilityEffect>();
+        var effect = effectGO.GetComponent<InflictAbilityEffect>();
+        effect.statusName = "HpEqualsHeightStatus";
+        effect.duration = 1; // Instant effect for targeting
         effectGO.AddComponent<FullAbilityArea>();
         effectGO.AddComponent<STypeHitRate>();
     }
@@ -4951,7 +4975,10 @@ public static class FFTAbilityCreator
     {
         var effectGO = new GameObject("HpEqualsWeight");
         effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<DamageAbilityEffect>(); // HP=Weight targeting
+        effectGO.AddComponent<InflictAbilityEffect>();
+        var effect = effectGO.GetComponent<InflictAbilityEffect>();
+        effect.statusName = "HpEqualsWeightStatus";
+        effect.duration = 1; // Instant effect for targeting
         effectGO.AddComponent<FullAbilityArea>();
         effectGO.AddComponent<STypeHitRate>();
     }
@@ -4960,7 +4987,10 @@ public static class FFTAbilityCreator
     {
         var effectGO = new GameObject("HpEqualsSpeed");
         effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<DamageAbilityEffect>(); // HP=Speed targeting
+        effectGO.AddComponent<InflictAbilityEffect>();
+        var effect = effectGO.GetComponent<InflictAbilityEffect>();
+        effect.statusName = "HpEqualsSpeedStatus";
+        effect.duration = 1; // Instant effect for targeting
         effectGO.AddComponent<FullAbilityArea>();
         effectGO.AddComponent<STypeHitRate>();
     }
@@ -5128,7 +5158,10 @@ public static class FFTAbilityCreator
     {
         var effectGO = new GameObject("ForbiddenDance");
         effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<DamageAbilityEffect>(); // Damage all enemies
+        effectGO.AddComponent<InflictAbilityEffect>();
+        var effect = effectGO.GetComponent<InflictAbilityEffect>();
+        effect.statusName = "ForbiddenDanceStatus";
+        effect.duration = 1; // Instant damage effect
         effectGO.AddComponent<FullAbilityArea>();
         effectGO.AddComponent<STypeHitRate>();
     }
@@ -5983,6 +6016,9 @@ public static class FFTAbilityCreator
         effectGO.AddComponent<InflictAbilityEffect>();
         var effect = effectGO.GetComponent<InflictAbilityEffect>();
         effect.statusName = "PowerBreakStatus";
+        effect.duration = 3; // Power Break duration
+        effectGO.AddComponent<UnitAbilityArea>();
+        effectGO.AddComponent<STypeHitRate>();
     }
 
     private static void AddArmorBreakEffect(GameObject ability)
@@ -5992,6 +6028,9 @@ public static class FFTAbilityCreator
         effectGO.AddComponent<InflictAbilityEffect>();
         var effect = effectGO.GetComponent<InflictAbilityEffect>();
         effect.statusName = "ArmorBreakStatus";
+        effect.duration = 3; // Armor Break duration
+        effectGO.AddComponent<UnitAbilityArea>();
+        effectGO.AddComponent<STypeHitRate>();
     }
 
     private static void AddMentalBreakEffect(GameObject ability)
@@ -6001,6 +6040,9 @@ public static class FFTAbilityCreator
         effectGO.AddComponent<InflictAbilityEffect>();
         var effect = effectGO.GetComponent<InflictAbilityEffect>();
         effect.statusName = "MentalBreakStatus";
+        effect.duration = 3; // Mental Break duration
+        effectGO.AddComponent<UnitAbilityArea>();
+        effectGO.AddComponent<STypeHitRate>();
     }
 
     private static void AddMagicBreakEffect(GameObject ability)
@@ -6010,6 +6052,9 @@ public static class FFTAbilityCreator
         effectGO.AddComponent<InflictAbilityEffect>();
         var effect = effectGO.GetComponent<InflictAbilityEffect>();
         effect.statusName = "MagicBreakStatus";
+        effect.duration = 3; // Magic Break duration
+        effectGO.AddComponent<UnitAbilityArea>();
+        effectGO.AddComponent<STypeHitRate>();
     }
 
     // Magic damage effect
@@ -6309,7 +6354,10 @@ public static class FFTAbilityCreator
     {
         var effectGO = new GameObject("Gravity");
         effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<DamageAbilityEffect>();
+        effectGO.AddComponent<InflictAbilityEffect>();
+        var effect = effectGO.GetComponent<InflictAbilityEffect>();
+        effect.statusName = "GravityStatus";
+        effect.duration = 1; // Instant damage effect
         effectGO.AddComponent<UnitAbilityArea>();
         effectGO.AddComponent<STypeHitRate>();
         
@@ -6433,315 +6481,133 @@ public static class FFTAbilityCreator
     // Mystic status effects
     private static void AddPoisonEffect(GameObject ability)
     {
-        var effectGO = new GameObject("Poison");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "PoisonStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "PoisonStatus", 3, 14);
     }
 
     private static void AddBlindEffect(GameObject ability)
     {
-        var effectGO = new GameObject("Blind");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "BlindStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "BlindStatus", 3, 16);
     }
 
     private static void AddSilenceEffect(GameObject ability)
     {
-        var effectGO = new GameObject("Silence");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "SilenceStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "SilenceStatus", 3, 18);
     }
 
     private static void AddSleepEffect(GameObject ability)
     {
-        var effectGO = new GameObject("Sleep");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "SleepStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "SleepStatus", 3, 20);
     }
 
     private static void AddConfuseEffect(GameObject ability)
     {
-        var effectGO = new GameObject("Confuse");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "ConfuseStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "ConfuseStatus", 3, 22);
     }
 
     private static void AddBerserkEffect(GameObject ability)
     {
-        var effectGO = new GameObject("Berserk");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "BerserkStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "BerserkStatus", 3, 24);
     }
 
     private static void AddCharmEffect(GameObject ability)
     {
-        var effectGO = new GameObject("Charm");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "CharmStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "CharmStatus", 3, 26);
     }
 
     private static void AddPetrifyEffect(GameObject ability)
     {
-        var effectGO = new GameObject("Petrify");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "PetrifyStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "PetrifyStatus", 3, 32);
     }
 
     private static void AddDeathEffect(GameObject ability)
     {
-        var effectGO = new GameObject("Death");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "DeathStatus";
-        effect.duration = 1;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "DoomStatus", 3, 34);
     }
 
     private static void AddToadEffect(GameObject ability)
     {
-        var effectGO = new GameObject("Toad");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "ToadStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "ToadStatus", 3, 36);
     }
 
     private static void AddPigEffect(GameObject ability)
     {
-        var effectGO = new GameObject("Pig");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "PigStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "PigStatus", 3, 38);
     }
 
     private static void AddChickenEffect(GameObject ability)
     {
-        var effectGO = new GameObject("Chicken");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "ChickenStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "ChickenStatus", 3, 40);
     }
 
     // Oracle effects (similar to Mystic but with Oracle-specific variations)
     private static void AddOraclePoisonEffect(GameObject ability)
     {
-        var effectGO = new GameObject("OraclePoison");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "PoisonStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "PoisonStatus", 3, 16);
     }
 
     private static void AddOracleBlindEffect(GameObject ability)
     {
-        var effectGO = new GameObject("OracleBlind");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "BlindStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "BlindStatus", 3, 18);
     }
 
     private static void AddOracleSilenceEffect(GameObject ability)
     {
-        var effectGO = new GameObject("OracleSilence");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "SilenceStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "SilenceStatus", 3, 20);
     }
 
     private static void AddOracleSleepEffect(GameObject ability)
     {
-        var effectGO = new GameObject("OracleSleep");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "SleepStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "SleepStatus", 3, 22);
     }
 
     private static void AddOracleConfuseEffect(GameObject ability)
     {
-        var effectGO = new GameObject("OracleConfuse");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "ConfuseStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "ConfuseStatus", 3, 24);
     }
 
     private static void AddOracleBerserkEffect(GameObject ability)
     {
-        var effectGO = new GameObject("OracleBerserk");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "BerserkStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "BerserkStatus", 3, 26);
     }
 
     private static void AddOracleCharmEffect(GameObject ability)
     {
-        var effectGO = new GameObject("OracleCharm");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "CharmStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "CharmStatus", 3, 28);
     }
 
     private static void AddOracleDontMoveEffect(GameObject ability)
     {
-        var effectGO = new GameObject("OracleDontMove");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "ImmobilizeStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "ImmobilizeStatus", 3, 30);
     }
 
     private static void AddOracleDontActEffect(GameObject ability)
     {
-        var effectGO = new GameObject("OracleDontAct");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "DisableStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "DisableStatus", 3, 32);
     }
 
     private static void AddOraclePetrifyEffect(GameObject ability)
     {
-        var effectGO = new GameObject("OraclePetrify");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "PetrifyStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "PetrifyStatus", 3, 34);
     }
 
     private static void AddOracleDeathEffect(GameObject ability)
     {
-        var effectGO = new GameObject("OracleDeath");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "DeathStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "DoomStatus", 3, 36);
     }
 
     private static void AddOracleToadEffect(GameObject ability)
     {
-        var effectGO = new GameObject("OracleToad");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "ToadStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "ToadStatus", 3, 38);
     }
 
     private static void AddOraclePigEffect(GameObject ability)
     {
-        var effectGO = new GameObject("OraclePig");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "PigStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "PigStatus", 3, 40);
     }
 
     private static void AddOracleChickenEffect(GameObject ability)
     {
-        var effectGO = new GameObject("OracleChicken");
-        effectGO.transform.SetParent(ability.transform);
-        effectGO.AddComponent<InflictAbilityEffect>();
-        var effect = effectGO.GetComponent<InflictAbilityEffect>();
-        effect.statusName = "ChickenStatus";
-        effect.duration = 3;
-        effectGO.AddComponent<UnitAbilityArea>();
-        effectGO.AddComponent<STypeHitRate>();
+        AddMagicDamageAndStatusEffect(ability, "ChickenStatus", 3, 42);
     }
 
     // Geomancer terrain effects
@@ -6895,6 +6761,73 @@ public static class FFTAbilityCreator
         effectGO.AddComponent<DamageAbilityEffect>(); // Use existing damage effect for katana techniques
         effectGO.AddComponent<UnitAbilityArea>();
         effectGO.AddComponent<STypeHitRate>();
+    }
+
+    // Helper methods for abilities with multiple effects (damage + status)
+    private static void AddDamageAndStatusEffect(GameObject ability, string statusName, int duration, int damagePower = 0)
+    {
+        // Create damage effect child
+        var damageGO = new GameObject("Damage");
+        damageGO.transform.SetParent(ability.transform);
+        damageGO.AddComponent<DamageAbilityEffect>();
+        damageGO.AddComponent<UnitAbilityArea>();
+        damageGO.AddComponent<ATypeHitRate>();
+        
+        var damageHitRate = damageGO.GetComponent<ATypeHitRate>();
+        damageHitRate.accuracy = 100;
+        
+        // Add physical power to the damage child
+        if (damagePower > 0)
+        {
+            var power = damageGO.AddComponent<PhysicalAbilityPower>();
+            power.level = damagePower;
+        }
+        
+        // Create status effect child
+        var statusGO = new GameObject("Status");
+        statusGO.transform.SetParent(ability.transform);
+        statusGO.AddComponent<InflictAbilityEffect>();
+        var statusEffect = statusGO.GetComponent<InflictAbilityEffect>();
+        statusEffect.statusName = statusName;
+        statusEffect.duration = duration;
+        statusGO.AddComponent<UnitAbilityArea>();
+        statusGO.AddComponent<STypeHitRate>();
+        
+        var statusHitRate = statusGO.GetComponent<STypeHitRate>();
+        statusHitRate.accuracy = 100;
+    }
+
+    private static void AddMagicDamageAndStatusEffect(GameObject ability, string statusName, int duration, int magicPower = 0)
+    {
+        // Create magic damage effect child
+        var damageGO = new GameObject("MagicDamage");
+        damageGO.transform.SetParent(ability.transform);
+        damageGO.AddComponent<DamageAbilityEffect>();
+        damageGO.AddComponent<UnitAbilityArea>();
+        damageGO.AddComponent<STypeHitRate>();
+        
+        var damageHitRate = damageGO.GetComponent<STypeHitRate>();
+        damageHitRate.accuracy = 100;
+        
+        // Add magical power to the damage child
+        if (magicPower > 0)
+        {
+            var power = damageGO.AddComponent<MagicalAbilityPower>();
+            power.level = magicPower;
+        }
+        
+        // Create status effect child
+        var statusGO = new GameObject("Status");
+        statusGO.transform.SetParent(ability.transform);
+        statusGO.AddComponent<InflictAbilityEffect>();
+        var statusEffect = statusGO.GetComponent<InflictAbilityEffect>();
+        statusEffect.statusName = statusName;
+        statusEffect.duration = duration;
+        statusGO.AddComponent<UnitAbilityArea>();
+        statusGO.AddComponent<STypeHitRate>();
+        
+        var statusHitRate = statusGO.GetComponent<STypeHitRate>();
+        statusHitRate.accuracy = 100;
     }
 
     // Helper methods for Special Job Abilities

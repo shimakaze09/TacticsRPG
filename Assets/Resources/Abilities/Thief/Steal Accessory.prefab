@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &8094923643788035
+--- !u!1 &378109714994748549
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,11 +8,11 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1070200938276848872}
-  - component: {fileID: 3071615173083634285}
-  - component: {fileID: 1165621987516491436}
-  - component: {fileID: 3660654387296288515}
-  - component: {fileID: 5217661206805807070}
+  - component: {fileID: 3727160351887388370}
+  - component: {fileID: 4930404129780279955}
+  - component: {fileID: 9020401509910628968}
+  - component: {fileID: 3987690203749565399}
+  - component: {fileID: 6832985107792003064}
   m_Layer: 0
   m_Name: Steal Accessory
   m_TagString: Untagged
@@ -20,53 +20,53 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1070200938276848872
+--- !u!4 &3727160351887388370
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8094923643788035}
+  m_GameObject: {fileID: 378109714994748549}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7709717222136772729}
+  - {fileID: 4842470997443696662}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3071615173083634285
+--- !u!114 &4930404129780279955
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8094923643788035}
+  m_GameObject: {fileID: 378109714994748549}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bc1f6877b2b132a4d9ae5284f3ba4d38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1165621987516491436
+--- !u!114 &9020401509910628968
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8094923643788035}
+  m_GameObject: {fileID: 378109714994748549}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 747699440c40f1149ba190d117d70e48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &3660654387296288515
+--- !u!114 &3987690203749565399
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8094923643788035}
+  m_GameObject: {fileID: 378109714994748549}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9177851f4f2edd6489fa3d63e2292439, type: 3}
@@ -74,19 +74,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   horizontal: 1
   vertical: 1
---- !u!114 &5217661206805807070
+--- !u!114 &6832985107792003064
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8094923643788035}
+  m_GameObject: {fileID: 378109714994748549}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d42c8988c89edea4cbd391e2b9feeaf5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &9035718169989334085
+--- !u!1 &3952392681484552131
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -94,10 +94,10 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7709717222136772729}
-  - component: {fileID: 8039116134569062355}
-  - component: {fileID: 2065415366856509449}
-  - component: {fileID: 3245848001522226378}
+  - component: {fileID: 4842470997443696662}
+  - component: {fileID: 5665632246402337546}
+  - component: {fileID: 9110061545295025286}
+  - component: {fileID: 2114867059775376344}
   m_Layer: 0
   m_Name: Steal
   m_TagString: Untagged
@@ -105,28 +105,28 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &7709717222136772729
+--- !u!4 &4842470997443696662
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9035718169989334085}
+  m_GameObject: {fileID: 3952392681484552131}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1070200938276848872}
+  m_Father: {fileID: 3727160351887388370}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8039116134569062355
+--- !u!114 &5665632246402337546
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9035718169989334085}
+  m_GameObject: {fileID: 3952392681484552131}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 17a5c7acd0e327042b0f528f330c6bfc, type: 3}
@@ -134,25 +134,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   duration: 1
   statusName: StealAccessoryStatus
---- !u!114 &2065415366856509449
+--- !u!114 &9110061545295025286
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9035718169989334085}
+  m_GameObject: {fileID: 3952392681484552131}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 49b6d8f17bed4704e8ec9d32e6c22bc6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &3245848001522226378
+--- !u!114 &2114867059775376344
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9035718169989334085}
+  m_GameObject: {fileID: 3952392681484552131}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 57923564170379045ab3f6b8928117b7, type: 3}

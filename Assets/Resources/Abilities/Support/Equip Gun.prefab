@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &2758635339554533257
+--- !u!1 &3178616285403969722
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,10 +8,10 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5106421090821192274}
-  - component: {fileID: 3818971091815945224}
-  - component: {fileID: 5507335881955010619}
-  - component: {fileID: 9163069776873178128}
+  - component: {fileID: 7381285602909201951}
+  - component: {fileID: 2520885739150066548}
+  - component: {fileID: 2582632748200635382}
+  - component: {fileID: 7542692932239135168}
   m_Layer: 0
   m_Name: Equip Gun
   m_TagString: Untagged
@@ -19,53 +19,53 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5106421090821192274
+--- !u!4 &7381285602909201951
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2758635339554533257}
+  m_GameObject: {fileID: 3178616285403969722}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6723788788932508090}
+  - {fileID: 1596576522656798327}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3818971091815945224
+--- !u!114 &2520885739150066548
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2758635339554533257}
+  m_GameObject: {fileID: 3178616285403969722}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bc1f6877b2b132a4d9ae5284f3ba4d38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &5507335881955010619
+--- !u!114 &2582632748200635382
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2758635339554533257}
+  m_GameObject: {fileID: 3178616285403969722}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 747699440c40f1149ba190d117d70e48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &9163069776873178128
+--- !u!114 &7542692932239135168
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2758635339554533257}
+  m_GameObject: {fileID: 3178616285403969722}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe2cd2cfb7d32bb41acc8ff3eff23ced, type: 3}
@@ -73,7 +73,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   horizontal: 1
   vertical: 2147483647
---- !u!1 &6741005214323316284
+--- !u!1 &5939873256738635617
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -81,10 +81,10 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6723788788932508090}
-  - component: {fileID: 4485846303593558384}
-  - component: {fileID: 1318464984812639665}
-  - component: {fileID: 3827499134409891597}
+  - component: {fileID: 1596576522656798327}
+  - component: {fileID: 5637465086409025201}
+  - component: {fileID: 8251650896317430924}
+  - component: {fileID: 5331599852854027377}
   m_Layer: 0
   m_Name: EquipGun
   m_TagString: Untagged
@@ -92,28 +92,28 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6723788788932508090
+--- !u!4 &1596576522656798327
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6741005214323316284}
+  m_GameObject: {fileID: 5939873256738635617}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 5106421090821192274}
+  m_Father: {fileID: 7381285602909201951}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4485846303593558384
+--- !u!114 &5637465086409025201
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6741005214323316284}
+  m_GameObject: {fileID: 5939873256738635617}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 17a5c7acd0e327042b0f528f330c6bfc, type: 3}
@@ -121,25 +121,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   duration: 3
   statusName: EquipGunStatus
---- !u!114 &1318464984812639665
+--- !u!114 &8251650896317430924
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6741005214323316284}
+  m_GameObject: {fileID: 5939873256738635617}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dbe8ea566fb17674bb85957d75f6e36c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &3827499134409891597
+--- !u!114 &5331599852854027377
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6741005214323316284}
+  m_GameObject: {fileID: 5939873256738635617}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 27eacfa27601ba842b199e425f572884, type: 3}

@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &3941364415762119067
+--- !u!1 &4418157925223094528
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,10 +8,10 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2874733102684636079}
-  - component: {fileID: 239560986349303778}
-  - component: {fileID: 3051884612036696189}
-  - component: {fileID: 585157842273781875}
+  - component: {fileID: 2755630973399174182}
+  - component: {fileID: 861023243761715123}
+  - component: {fileID: 4796292723037608474}
+  - component: {fileID: 5142243504067646591}
   m_Layer: 0
   m_Name: Equip Instrument
   m_TagString: Untagged
@@ -19,53 +19,53 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2874733102684636079
+--- !u!4 &2755630973399174182
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3941364415762119067}
+  m_GameObject: {fileID: 4418157925223094528}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 8590758671186415418}
+  - {fileID: 3724138597854873268}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &239560986349303778
+--- !u!114 &861023243761715123
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3941364415762119067}
+  m_GameObject: {fileID: 4418157925223094528}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bc1f6877b2b132a4d9ae5284f3ba4d38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &3051884612036696189
+--- !u!114 &4796292723037608474
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3941364415762119067}
+  m_GameObject: {fileID: 4418157925223094528}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 747699440c40f1149ba190d117d70e48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &585157842273781875
+--- !u!114 &5142243504067646591
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3941364415762119067}
+  m_GameObject: {fileID: 4418157925223094528}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe2cd2cfb7d32bb41acc8ff3eff23ced, type: 3}
@@ -73,7 +73,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   horizontal: 1
   vertical: 2147483647
---- !u!1 &8622066932553018568
+--- !u!1 &6658013411588956208
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -81,10 +81,10 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8590758671186415418}
-  - component: {fileID: 2963405227758159898}
-  - component: {fileID: 2670591509716993744}
-  - component: {fileID: 889981959206133545}
+  - component: {fileID: 3724138597854873268}
+  - component: {fileID: 2838118056757427177}
+  - component: {fileID: 3327164602027116100}
+  - component: {fileID: 7701850385926634520}
   m_Layer: 0
   m_Name: EquipInstrument
   m_TagString: Untagged
@@ -92,28 +92,28 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &8590758671186415418
+--- !u!4 &3724138597854873268
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8622066932553018568}
+  m_GameObject: {fileID: 6658013411588956208}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2874733102684636079}
+  m_Father: {fileID: 2755630973399174182}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2963405227758159898
+--- !u!114 &2838118056757427177
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8622066932553018568}
+  m_GameObject: {fileID: 6658013411588956208}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 17a5c7acd0e327042b0f528f330c6bfc, type: 3}
@@ -121,25 +121,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   duration: 3
   statusName: EquipInstrumentStatus
---- !u!114 &2670591509716993744
+--- !u!114 &3327164602027116100
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8622066932553018568}
+  m_GameObject: {fileID: 6658013411588956208}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dbe8ea566fb17674bb85957d75f6e36c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &889981959206133545
+--- !u!114 &7701850385926634520
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8622066932553018568}
+  m_GameObject: {fileID: 6658013411588956208}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 27eacfa27601ba842b199e425f572884, type: 3}
