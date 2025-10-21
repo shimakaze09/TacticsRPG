@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa7883aeabf35bb4aa557d6e6b622593, type: 3}
+  m_Name: Mystic
+  m_EditorClassIdentifier: 
+  jobName: Mystic
+  description: Yin-yang magic user with both healing and offensive abilities.
+  jobIcon: {fileID: 0}
+  category: 1
+  isUnique: 0
+  allowedCharacterNames: []
+  prerequisites:
+  - requiredJob: {fileID: 11400000, guid: 62201062f4d49a5469e6429b3eaa19ef, type: 2}
+    requiredLevel: 3
+  minimumCharacterLevel: 1
+  hpMultiplier: 1
+  mpMultiplier: 1.4
+  atkMultiplier: 0.7
+  defMultiplier: 0.8
+  matMultiplier: 1.3
+  mdfMultiplier: 1.3
+  spdMultiplier: 1
+  baseStats: 2b000000260000000300000004000000060000000600000004000000
+  allowedEquipmentSlots: 0100000002000000040000000800000010000000
+  movementBonus: 3
+  jumpBonus: 3
+  evadeBonus: 10
+  abilityUnlocks:
+  - abilityName: Blind
+    unlockAtJobLevel: 1
+    jpCost: 100
+  - abilityName: Sleep
+    unlockAtJobLevel: 2
+    jpCost: 200
+  - abilityName: Silence
+    unlockAtJobLevel: 3
+    jpCost: 300
+  - abilityName: Confuse
+    unlockAtJobLevel: 4
+    jpCost: 400
+  - abilityName: Charm
+    unlockAtJobLevel: 5
+    jpCost: 500
+  - abilityName: Berserk
+    unlockAtJobLevel: 6
+    jpCost: 600
+  - abilityName: Paralyze
+    unlockAtJobLevel: 7
+    jpCost: 700
+  - abilityName: Petrify
+    unlockAtJobLevel: 8
+    jpCost: 800
+  abilityCatalogName: Mystic
+  jpRequirements: 64000000fa000000c2010000bc020000e8030000780500006c070000c4090000

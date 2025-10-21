@@ -23,7 +23,10 @@ public static class FFTJobCreator
         // Get all JSON files in the JobData directory
         string[] jsonFiles = Directory.GetFiles(JobDataPath, "*.json", SearchOption.TopDirectoryOnly);
         
+        // First pass: Create all jobs without prerequisites
         int jobsCreated = 0;
+        List<JobDataFile> jobDataList = new List<JobDataFile>();
+        
         foreach (string jsonFile in jsonFiles)
         {
             string fileName = Path.GetFileNameWithoutExtension(jsonFile);
@@ -32,7 +35,8 @@ public static class FFTJobCreator
             try
             {
                 JobDataFile jobData = LoadJsonData<JobDataFile>(relativePath);
-                CreateJobDefinition(jobData);
+                CreateJobDefinitionWithoutPrerequisites(jobData);
+                jobDataList.Add(jobData);
                 jobsCreated++;
                 Debug.Log($"Created job: {jobData.jobName} ({jobData.category})");
             }
@@ -40,6 +44,20 @@ public static class FFTJobCreator
             {
                 Debug.LogError($"Failed to create job from {fileName}: {e.Message}");
                 Debug.LogError($"Attempted path: {relativePath}");
+            }
+        }
+        
+        // Second pass: Set prerequisites now that all jobs exist
+        foreach (var jobData in jobDataList)
+        {
+            try
+            {
+                SetJobPrerequisites(jobData);
+                Debug.Log($"Set prerequisites for: {jobData.jobName}");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"Failed to set prerequisites for {jobData.jobName}: {e.Message}");
             }
         }
         
@@ -75,7 +93,7 @@ public static class FFTJobCreator
         Debug.Log($"Deleted {jobFiles.Length} existing job assets");
     }
 
-    private static void CreateJobDefinition(JobDataFile jobData)
+    private static void CreateJobDefinitionWithoutPrerequisites(JobDataFile jobData)
     {
         string assetPath = $"{JobsPath}/{jobData.jobName}.asset";
         
@@ -95,18 +113,8 @@ public static class FFTJobCreator
             job.allowedCharacterNames = new List<string>(jobData.allowedCharacterNames);
         }
         
-        // Set prerequisites
+        // Prerequisites will be set in second pass
         job.prerequisites = new List<JobPrerequisite>();
-        if (jobData.prerequisites != null)
-        {
-            foreach (var prereqData in jobData.prerequisites)
-            {
-                var prereq = new JobPrerequisite();
-                prereq.requiredJob = AssetDatabase.LoadAssetAtPath<JobDefinition>($"{JobsPath}/{prereqData.requiredJobName}.asset");
-                prereq.requiredLevel = prereqData.requiredLevel;
-                job.prerequisites.Add(prereq);
-            }
-        }
         
         // Set stat multipliers
         job.hpMultiplier = jobData.statMultipliers.hp;
@@ -150,6 +158,41 @@ public static class FFTJobCreator
         
         // Create the asset
         AssetDatabase.CreateAsset(job, assetPath);
+        EditorUtility.SetDirty(job);
+    }
+
+    private static void SetJobPrerequisites(JobDataFile jobData)
+    {
+        string assetPath = $"{JobsPath}/{jobData.jobName}.asset";
+        var job = AssetDatabase.LoadAssetAtPath<JobDefinition>(assetPath);
+        
+        if (job == null)
+        {
+            Debug.LogError($"Could not find job asset: {assetPath}");
+            return;
+        }
+        
+        // Set prerequisites now that all jobs exist
+        job.prerequisites = new List<JobPrerequisite>();
+        if (jobData.prerequisites != null)
+        {
+            foreach (var prereqData in jobData.prerequisites)
+            {
+                var prereq = new JobPrerequisite();
+                prereq.requiredJob = AssetDatabase.LoadAssetAtPath<JobDefinition>($"{JobsPath}/{prereqData.requiredJobName}.asset");
+                prereq.requiredLevel = prereqData.requiredLevel;
+                
+                if (prereq.requiredJob == null)
+                {
+                    Debug.LogError($"Could not find prerequisite job: {prereqData.requiredJobName}");
+                }
+                else
+                {
+                    job.prerequisites.Add(prereq);
+                }
+            }
+        }
+        
         EditorUtility.SetDirty(job);
     }
 
