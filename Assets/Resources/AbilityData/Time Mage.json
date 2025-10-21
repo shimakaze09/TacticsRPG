@@ -1,0 +1,242 @@
+{
+  "job": "Time Mage",
+  "abilities": [
+    {
+      "name": "Haste",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 8,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Default",
+          "status": "Haste"
+        }
+      ]
+    },
+    {
+      "name": "Slow",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 8,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Slow"
+        }
+      ]
+    },
+    {
+      "name": "Stop",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 12,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Stop"
+        }
+      ]
+    },
+    {
+      "name": "Quick",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 20,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Default",
+          "status": "Quick"
+        }
+      ]
+    },
+    {
+      "name": "Teleport",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 10,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Default",
+          "status": "Teleport"
+        }
+      ]
+    },
+    {
+      "name": "Float",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 6,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Default",
+          "status": "Float"
+        }
+      ]
+    },
+    {
+      "name": "Gravity",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 50
+      },
+      "mpCost": 12,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Demi",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 75
+      },
+      "mpCost": 16,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Meteor",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Specify"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 100
+      },
+      "mpCost": 40,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Old",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 15,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Old"
+        }
+      ]
+    }
+  ]
+}

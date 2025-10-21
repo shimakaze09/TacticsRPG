@@ -1,0 +1,21 @@
+{
+  "catalogName": "Arithmetician",
+  "description": "Mathematical targeting abilities for Arithmetician job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Level Prime",
+        "Level Multiple 3",
+        "Level Multiple 4",
+        "Level Multiple 5",
+        "Level Multiple 6",
+        "Level Multiple 7",
+        "Level Multiple 8",
+        "Level Multiple 9",
+        "Level Multiple 10",
+        "Level Multiple 11"
+      ]
+    }
+  ]
+}

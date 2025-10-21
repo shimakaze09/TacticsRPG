@@ -13,13 +13,15 @@ MonoBehaviour:
   m_Name: Bard
   m_EditorClassIdentifier: 
   categories:
-  - name: Bard
-    entries:
-    - Sing
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
+  - entries:
+    - Seraph Song
+    - Life's Anthem
+    - Rousing Melody
+    - Battle Chant
+    - Magickal Refrain
+    - Bravery Song
+    - Faith Song
+    - Protection Song
+    - Nameless Song
+    - Finale
+    name: Abilities

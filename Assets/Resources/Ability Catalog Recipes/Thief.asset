@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: Thief
   m_EditorClassIdentifier: 
   categories:
-  - name: Thief
-    entries:
-    - Steal
-    - Mug
-    - Steal Heart
+  - entries:
+    - Steal Gil
+    - Steal EXP
     - Steal Weapon
     - Steal Armor
+    - Steal Helmet
+    - Steal Shield
     - Steal Accessory
-    - Steal Gil
-    - Steal Item
+    - Steal Heart
+    name: Abilities

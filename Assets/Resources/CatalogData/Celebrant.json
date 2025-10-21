@@ -1,0 +1,21 @@
+{
+  "catalogName": "Celebrant",
+  "description": "Holy priest abilities for Celebrant job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Holy",
+        "Curaga",
+        "Cura",
+        "Arise",
+        "Esuna",
+        "Dispel",
+        "Confuse",
+        "Sleep",
+        "Silence",
+        "Drain"
+      ]
+    }
+  ]
+}

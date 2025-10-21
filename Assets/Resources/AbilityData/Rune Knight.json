@@ -1,0 +1,243 @@
+{
+  "job": "Rune Knight",
+  "abilities": [
+    {
+      "name": "Power Break",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "AttackDown"
+        }
+      ]
+    },
+    {
+      "name": "Armor Break",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "DefenseDown"
+        }
+      ]
+    },
+    {
+      "name": "Mental Break",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "MagicDefenseDown"
+        }
+      ]
+    },
+    {
+      "name": "Magic Break",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "MagicAttackDown"
+        }
+      ]
+    },
+    {
+      "name": "Speed Break",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "Slow"
+        }
+      ]
+    },
+    {
+      "name": "Mind Break",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "Confuse"
+        }
+      ]
+    },
+    {
+      "name": "Magic Attack Break",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "MagicAttackDown"
+        }
+      ]
+    },
+    {
+      "name": "Magic Defense Break",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "MagicDefenseDown"
+        }
+      ]
+    },
+    {
+      "name": "Rune Blade",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 50
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Rune Strike",
+      "range": {
+        "type": "Constant",
+        "value": 2,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 45
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        }
+      ]
+    }
+  ]
+}

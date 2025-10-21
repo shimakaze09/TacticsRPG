@@ -1,0 +1,19 @@
+{
+  "catalogName": "Black Mage",
+  "description": "Elemental offense abilities for Black Mage job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Fire",
+        "Fira",
+        "Ice",
+        "Blizzard",
+        "Bolt",
+        "Thunder",
+        "Bio",
+        "Drain"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+{
+  "job": "Archer",
+  "abilities": [
+    {
+      "name": "Quick Shot",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 18
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Aim",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 25
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Leg Shot",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 12
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "Slow"
+        }
+      ]
+    },
+    {
+      "name": "Arm Shot",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 10
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "AttackDown"
+        }
+      ]
+    },
+    {
+      "name": "Head Shot",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 15
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "Confuse"
+        }
+      ]
+    },
+    {
+      "name": "Multi Shot",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Specify"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 12
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        }
+      ]
+    }
+  ]
+}

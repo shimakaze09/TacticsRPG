@@ -13,13 +13,15 @@ MonoBehaviour:
   m_Name: Samurai
   m_EditorClassIdentifier: 
   categories:
-  - name: Samurai
-    entries:
-    - Iaido
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
+  - entries:
+    - Ashura
+    - Kotetsu
+    - Ame-no-Murakumo
+    - Muramasa
+    - Kiku-Ichimonji
+    - Chirijiraden
+    - Murasame
+    - Kiyomori
+    - Masamune
+    - Osafune
+    name: Abilities

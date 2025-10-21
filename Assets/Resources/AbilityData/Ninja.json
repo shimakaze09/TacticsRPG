@@ -1,0 +1,196 @@
+{
+  "job": "Ninja",
+  "abilities": [
+    {
+      "name": "Throw Stone",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 20
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Throw Shuriken",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 25
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Throw Bomb",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 1
+      },
+      "area": {
+        "type": "Specify"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 30
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Throw Potion",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 30
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Heal",
+          "hitRate": "S",
+          "target": "Default"
+        }
+      ]
+    },
+    {
+      "name": "Throw Phoenix Down",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Revive",
+          "hitRate": "S",
+          "target": "KOd"
+        }
+      ]
+    },
+    {
+      "name": "Shadow Strike",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 35
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Poison Dart",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 15
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "Poison"
+        }
+      ]
+    },
+    {
+      "name": "Smoke Bomb",
+      "range": {
+        "type": "Self",
+        "value": 0,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 8,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Self",
+          "status": "Invisible"
+        }
+      ]
+    }
+  ]
+}

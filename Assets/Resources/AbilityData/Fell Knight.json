@@ -1,0 +1,255 @@
+{
+  "job": "Fell Knight",
+  "abilities": [
+    {
+      "name": "Duskblade",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 20
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        },
+        {
+          "type": "Heal",
+          "hitRate": "A",
+          "target": "Self"
+        }
+      ]
+    },
+    {
+      "name": "Shadowblade",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 25
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        },
+        {
+          "type": "Heal",
+          "hitRate": "A",
+          "target": "Self"
+        }
+      ]
+    },
+    {
+      "name": "Dark Sword",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 30
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Death Sword",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 35
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Drain Sword",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 28
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        },
+        {
+          "type": "Heal",
+          "hitRate": "A",
+          "target": "Self"
+        }
+      ]
+    },
+    {
+      "name": "Absorb Sword",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 32
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        },
+        {
+          "type": "Heal",
+          "hitRate": "A",
+          "target": "Self"
+        }
+      ]
+    },
+    {
+      "name": "Soul Sword",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 40
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Demon Sword",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 45
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Void Sword",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 50
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Fell Blade",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 55
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        }
+      ]
+    }
+  ]
+}

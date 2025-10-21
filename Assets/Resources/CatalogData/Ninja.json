@@ -1,0 +1,19 @@
+{
+  "catalogName": "Ninja",
+  "description": "Stealth and throwing abilities for Ninja job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Throw Stone",
+        "Throw Shuriken",
+        "Throw Bomb",
+        "Poison Dart",
+        "Throw Potion",
+        "Throw Phoenix Down",
+        "Shadow Strike",
+        "Smoke Bomb"
+      ]
+    }
+  ]
+}

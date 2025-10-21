@@ -1,0 +1,101 @@
+{
+  "job": "Chemist",
+  "abilities": [
+    {
+      "name": "Poison",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 4,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Poison"
+        }
+      ]
+    },
+    {
+      "name": "Sleep",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 5,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Sleep"
+        }
+      ]
+    },
+    {
+      "name": "Silence",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 4,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Silence"
+        }
+      ]
+    },
+    {
+      "name": "Confuse",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 6,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Confuse"
+        }
+      ]
+    }
+  ]
+}

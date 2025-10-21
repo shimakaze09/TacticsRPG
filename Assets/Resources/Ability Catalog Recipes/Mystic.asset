@@ -13,13 +13,15 @@ MonoBehaviour:
   m_Name: Mystic
   m_EditorClassIdentifier: 
   categories:
-  - name: Mystic
-    entries:
-    - Teleport
-    - Float
-    - Reflect
-    - Absorb
-    - Drain
-    - Osmose
-    - Demi
-    - Gravity
+  - entries:
+    - Blind
+    - Sleep
+    - Silence
+    - Confuse
+    - Charm
+    - Berserk
+    - Paralyze
+    - Petrify
+    - Drain HP
+    - Drain MP
+    name: Abilities

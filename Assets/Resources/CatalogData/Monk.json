@@ -1,0 +1,19 @@
+{
+  "catalogName": "Monk",
+  "description": "Unarmed combat abilities for Monk job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Chakra",
+        "Revive",
+        "Purification",
+        "Aurablast",
+        "Shockwave",
+        "Earth Slash",
+        "Wave Fist",
+        "Pressure Point"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "catalogName": "Samurai",
+  "description": "Mystical sword techniques for Samurai job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Ashura",
+        "Kotetsu",
+        "Ame-no-Murakumo",
+        "Muramasa",
+        "Kiku-Ichimonji",
+        "Chirijiraden",
+        "Murasame",
+        "Kiyomori",
+        "Masamune",
+        "Osafune"
+      ]
+    }
+  ]
+}

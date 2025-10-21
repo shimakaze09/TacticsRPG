@@ -1,0 +1,19 @@
+{
+  "catalogName": "Thief",
+  "description": "Stealing abilities for Thief job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Steal Gil",
+        "Steal EXP",
+        "Steal Weapon",
+        "Steal Armor",
+        "Steal Helmet",
+        "Steal Shield",
+        "Steal Accessory",
+        "Steal Heart"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "catalogName": "Summoner",
+  "description": "Summoning abilities for Summoner job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Moogle",
+        "Faerie",
+        "Shiva",
+        "Ramuh",
+        "Ifrit",
+        "Titan",
+        "Leviathan",
+        "Golem",
+        "Carbuncle",
+        "Bahamut"
+      ]
+    }
+  ]
+}

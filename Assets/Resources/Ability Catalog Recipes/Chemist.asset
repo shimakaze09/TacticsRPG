@@ -13,13 +13,9 @@ MonoBehaviour:
   m_Name: Chemist
   m_EditorClassIdentifier: 
   categories:
-  - name: Chemist
-    entries:
-    - Potion
-    - Phoenix Down
-    - Antidote
-    - Eye Drop
-    - Echo Grass
-    - Remedy
-    - Auto Potion
-    - Throw Item
+  - entries:
+    - Poison
+    - Sleep
+    - Silence
+    - Confuse
+    name: Abilities

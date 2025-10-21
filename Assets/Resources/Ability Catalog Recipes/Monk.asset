@@ -13,12 +13,13 @@ MonoBehaviour:
   m_Name: Monk
   m_EditorClassIdentifier: 
   categories:
-  - name: Monk
-    entries:
+  - entries:
     - Chakra
-    - Counter
-    - Hamedo
-    - Return
-    - Two Hands
-    - Martial Arts
-    - Kick
+    - Revive
+    - Purification
+    - Aurablast
+    - Shockwave
+    - Earth Slash
+    - Wave Fist
+    - Pressure Point
+    name: Abilities

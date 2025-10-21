@@ -1,0 +1,21 @@
+{
+  "catalogName": "Mime",
+  "description": "Mimic abilities for Mime job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Mimic",
+        "Copy Magic",
+        "Copy Heal",
+        "Copy Status",
+        "Copy Summon",
+        "Copy Dance",
+        "Copy Song",
+        "Copy Throw",
+        "Copy Steal",
+        "Perfect Mimic"
+      ]
+    }
+  ]
+}

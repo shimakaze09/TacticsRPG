@@ -1,0 +1,21 @@
+{
+  "catalogName": "Rune Knight",
+  "description": "Elite rune warrior abilities for Rune Knight job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Power Break",
+        "Armor Break",
+        "Mental Break",
+        "Magic Break",
+        "Speed Break",
+        "Mind Break",
+        "Magic Attack Break",
+        "Magic Defense Break",
+        "Rune Blade",
+        "Rune Strike"
+      ]
+    }
+  ]
+}

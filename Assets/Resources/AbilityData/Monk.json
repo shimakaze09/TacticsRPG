@@ -1,0 +1,196 @@
+{
+  "job": "Monk",
+  "abilities": [
+    {
+      "name": "Chakra",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 40
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Heal",
+          "hitRate": "S",
+          "target": "Default"
+        }
+      ]
+    },
+    {
+      "name": "Revive",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Revive",
+          "hitRate": "S",
+          "target": "KOd"
+        }
+      ]
+    },
+    {
+      "name": "Aurablast",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 35
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Shockwave",
+      "range": {
+        "type": "Line",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 30
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Purification",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Default",
+          "status": "CureAll"
+        }
+      ]
+    },
+    {
+      "name": "Earth Slash",
+      "range": {
+        "type": "Constant",
+        "value": 2,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 40
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Wave Fist",
+      "range": {
+        "type": "Constant",
+        "value": 2,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 25
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Pressure Point",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Physical",
+        "value": 20
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy"
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "Slow"
+        }
+      ]
+    }
+  ]
+}

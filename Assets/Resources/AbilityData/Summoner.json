@@ -1,0 +1,237 @@
+{
+  "job": "Summoner",
+  "abilities": [
+    {
+      "name": "Moogle",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 40
+      },
+      "mpCost": 20,
+      "effects": [
+        {
+          "type": "Heal",
+          "hitRate": "S",
+          "target": "Default"
+        }
+      ]
+    },
+    {
+      "name": "Shiva",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 35
+      },
+      "mpCost": 18,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Ramuh",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 35
+      },
+      "mpCost": 18,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Ifrit",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 35
+      },
+      "mpCost": 18,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Titan",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 35
+      },
+      "mpCost": 18,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Golem",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 25,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Default",
+          "status": "Protect"
+        }
+      ]
+    },
+    {
+      "name": "Carbuncle",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 22,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Default",
+          "status": "Reflect"
+        }
+      ]
+    },
+    {
+      "name": "Bahamut",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 60
+      },
+      "mpCost": 40,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Leviathan",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 50
+      },
+      "mpCost": 35,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Faerie",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 60
+      },
+      "mpCost": 25,
+      "effects": [
+        {
+          "type": "Heal",
+          "hitRate": "S",
+          "target": "Default"
+        }
+      ]
+    }
+  ]
+}

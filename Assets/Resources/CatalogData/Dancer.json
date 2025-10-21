@@ -1,0 +1,21 @@
+{
+  "catalogName": "Dancer",
+  "description": "Battlefield-wide debuff abilities for Dancer job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Witch Hunt",
+        "Mincing Minuet",
+        "Slow Dance",
+        "Polka",
+        "Disillusion",
+        "Nameless Dance",
+        "Sleep Dance",
+        "Stop Dance",
+        "Charm Dance",
+        "Last Waltz"
+      ]
+    }
+  ]
+}

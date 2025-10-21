@@ -13,13 +13,15 @@ MonoBehaviour:
   m_Name: Dancer
   m_EditorClassIdentifier: 
   categories:
-  - name: Dancer
-    entries:
-    - Dance
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
+  - entries:
+    - Witch Hunt
+    - Mincing Minuet
+    - Slow Dance
+    - Polka
+    - Disillusion
+    - Nameless Dance
+    - Sleep Dance
+    - Stop Dance
+    - Charm Dance
+    - Last Waltz
+    name: Abilities

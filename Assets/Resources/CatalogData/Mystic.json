@@ -1,0 +1,21 @@
+{
+  "catalogName": "Mystic",
+  "description": "Advanced status effect abilities for Mystic job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Blind",
+        "Sleep",
+        "Silence",
+        "Confuse",
+        "Charm",
+        "Berserk",
+        "Paralyze",
+        "Petrify",
+        "Drain HP",
+        "Drain MP"
+      ]
+    }
+  ]
+}

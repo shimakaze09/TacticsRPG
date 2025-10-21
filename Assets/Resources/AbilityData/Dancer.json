@@ -1,0 +1,244 @@
+{
+  "job": "Dancer",
+  "abilities": [
+    {
+      "name": "Witch Hunt",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "DrainMP"
+        }
+      ]
+    },
+    {
+      "name": "Mincing Minuet",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 20
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy"
+        }
+      ]
+    },
+    {
+      "name": "Slow Dance",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Slow"
+        }
+      ]
+    },
+    {
+      "name": "Polka",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "AttackDown"
+        }
+      ]
+    },
+    {
+      "name": "Disillusion",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "MagicAttackDown"
+        }
+      ]
+    },
+    {
+      "name": "Nameless Dance",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Confuse"
+        }
+      ]
+    },
+    {
+      "name": "Sleep Dance",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Sleep"
+        }
+      ]
+    },
+    {
+      "name": "Stop Dance",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Stop"
+        }
+      ]
+    },
+    {
+      "name": "Charm Dance",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Charm"
+        }
+      ]
+    },
+    {
+      "name": "Last Waltz",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "CTReset"
+        }
+      ]
+    }
+  ]
+}

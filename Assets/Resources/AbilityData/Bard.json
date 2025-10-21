@@ -1,0 +1,243 @@
+{
+  "job": "Bard",
+  "abilities": [
+    {
+      "name": "Seraph Song",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 30
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Heal",
+          "hitRate": "S",
+          "target": "Default"
+        }
+      ]
+    },
+    {
+      "name": "Life's Anthem",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 40
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Heal",
+          "hitRate": "S",
+          "target": "Default"
+        }
+      ]
+    },
+    {
+      "name": "Rousing Melody",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Default",
+          "status": "Haste"
+        }
+      ]
+    },
+    {
+      "name": "Battle Chant",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Default",
+          "status": "AttackUp"
+        }
+      ]
+    },
+    {
+      "name": "Magickal Refrain",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Default",
+          "status": "MagicAttackUp"
+        }
+      ]
+    },
+    {
+      "name": "Bravery Song",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Default",
+          "status": "BraveryUp"
+        }
+      ]
+    },
+    {
+      "name": "Faith Song",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Default",
+          "status": "FaithUp"
+        }
+      ]
+    },
+    {
+      "name": "Protection Song",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Default",
+          "status": "Protect"
+        }
+      ]
+    },
+    {
+      "name": "Nameless Song",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Default",
+          "status": "Reraise"
+        }
+      ]
+    },
+    {
+      "name": "Finale",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Full"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Default",
+          "status": "CTMax"
+        }
+      ]
+    }
+  ]
+}

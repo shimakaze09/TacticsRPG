@@ -1,0 +1,16 @@
+{
+  "catalogName": "Squire",
+  "description": "Basic abilities for Squire job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Focus",
+        "Stone",
+        "Rush",
+        "Salve",
+        "Armor Break"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "catalogName": "Dragoon",
+  "description": "Aerial assault abilities for Dragoon job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Jump",
+        "Spear Thrust",
+        "Dragon's Breath",
+        "Lancet",
+        "Wyrm Tamer",
+        "Dragon Spirit"
+      ]
+    }
+  ]
+}

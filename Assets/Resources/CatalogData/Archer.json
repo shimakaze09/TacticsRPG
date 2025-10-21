@@ -1,0 +1,17 @@
+{
+  "catalogName": "Archer",
+  "description": "Ranged combat abilities for Archer job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Quick Shot",
+        "Aim",
+        "Leg Shot",
+        "Arm Shot",
+        "Head Shot",
+        "Multi Shot"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "catalogName": "Geomancer",
+  "description": "Terrain-based elemental abilities for Geomancer job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Wind Slash",
+        "Sandstorm",
+        "Torrent",
+        "Snowstorm",
+        "Magma Surge",
+        "Tremor",
+        "Sinkhole",
+        "Tanglevine",
+        "Quicksand",
+        "Will-o'-the-Wisp"
+      ]
+    }
+  ]
+}

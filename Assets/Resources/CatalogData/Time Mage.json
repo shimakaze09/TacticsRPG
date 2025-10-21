@@ -1,0 +1,21 @@
+{
+  "catalogName": "Time Mage",
+  "description": "Time manipulation abilities for Time Mage job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Haste",
+        "Slow",
+        "Stop",
+        "Quick",
+        "Teleport",
+        "Float",
+        "Gravity",
+        "Demi",
+        "Meteor",
+        "Old"
+      ]
+    }
+  ]
+}

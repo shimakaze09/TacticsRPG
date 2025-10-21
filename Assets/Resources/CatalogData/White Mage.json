@@ -1,0 +1,21 @@
+{
+  "catalogName": "White Mage",
+  "description": "Healing and support abilities for White Mage job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Cure",
+        "Cura",
+        "Curaga",
+        "Raise",
+        "Arise",
+        "Regen",
+        "Protect",
+        "Shell",
+        "Esuna",
+        "Holy"
+      ]
+    }
+  ]
+}

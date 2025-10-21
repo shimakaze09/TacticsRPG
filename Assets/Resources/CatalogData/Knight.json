@@ -1,0 +1,19 @@
+{
+  "catalogName": "Knight",
+  "description": "Equipment and stat debuff abilities for Knight job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Rend Weapon",
+        "Rend Armor",
+        "Rend Helmet",
+        "Rend Shield",
+        "Rend Power",
+        "Rend Magick",
+        "Rend MP",
+        "Rend Speed"
+      ]
+    }
+  ]
+}

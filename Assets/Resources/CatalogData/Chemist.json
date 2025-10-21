@@ -1,0 +1,15 @@
+{
+  "catalogName": "Chemist",
+  "description": "Status magic abilities for Chemist job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Poison",
+        "Sleep",
+        "Silence",
+        "Confuse"
+      ]
+    }
+  ]
+}

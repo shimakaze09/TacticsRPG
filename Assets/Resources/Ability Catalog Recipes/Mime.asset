@@ -13,13 +13,15 @@ MonoBehaviour:
   m_Name: Mime
   m_EditorClassIdentifier: 
   categories:
-  - name: Mime
-    entries:
+  - entries:
     - Mimic
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
+    - Copy Magic
+    - Copy Heal
+    - Copy Status
+    - Copy Summon
+    - Copy Dance
+    - Copy Song
+    - Copy Throw
+    - Copy Steal
+    - Perfect Mimic
+    name: Abilities

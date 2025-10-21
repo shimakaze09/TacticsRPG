@@ -1,0 +1,21 @@
+{
+  "catalogName": "Ark Knight",
+  "description": "Demonic sword abilities for Ark Knight job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Sword Spirit",
+        "Ashura",
+        "Kotetsu",
+        "Osafune",
+        "Muramasa",
+        "Kiku-ichimonji",
+        "Chirijiraden",
+        "Blade of Ruin",
+        "Vampire",
+        "Unyielding Blade"
+      ]
+    }
+  ]
+}

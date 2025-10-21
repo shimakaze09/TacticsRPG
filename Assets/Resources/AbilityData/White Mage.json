@@ -1,0 +1,239 @@
+{
+  "job": "White Mage",
+  "abilities": [
+    {
+      "name": "Cure",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 30
+      },
+      "mpCost": 6,
+      "effects": [
+        {
+          "type": "Heal",
+          "hitRate": "S",
+          "target": "Default"
+        }
+      ]
+    },
+    {
+      "name": "Cura",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 60
+      },
+      "mpCost": 10,
+      "effects": [
+        {
+          "type": "Heal",
+          "hitRate": "S",
+          "target": "Default"
+        }
+      ]
+    },
+    {
+      "name": "Curaga",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 120
+      },
+      "mpCost": 16,
+      "effects": [
+        {
+          "type": "Heal",
+          "hitRate": "S",
+          "target": "Default"
+        }
+      ]
+    },
+    {
+      "name": "Raise",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 10,
+      "effects": [
+        {
+          "type": "Revive",
+          "hitRate": "S",
+          "target": "KOd"
+        }
+      ]
+    },
+    {
+      "name": "Arise",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 20,
+      "effects": [
+        {
+          "type": "Revive",
+          "hitRate": "S",
+          "target": "KOd"
+        }
+      ]
+    },
+    {
+      "name": "Regen",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 8,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Default",
+          "status": "Regen"
+        }
+      ]
+    },
+    {
+      "name": "Protect",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 6,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Default",
+          "status": "Protect"
+        }
+      ]
+    },
+    {
+      "name": "Shell",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 6,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Default",
+          "status": "Shell"
+        }
+      ]
+    },
+    {
+      "name": "Esuna",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 0
+      },
+      "mpCost": 18,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Default",
+          "status": "CureAll"
+        }
+      ]
+    },
+    {
+      "name": "Holy",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit"
+      },
+      "power": {
+        "type": "Magical",
+        "value": 80
+      },
+      "mpCost": 56,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy"
+        }
+      ]
+    }
+  ]
+}

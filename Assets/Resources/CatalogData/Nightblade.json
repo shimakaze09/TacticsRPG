@@ -1,0 +1,21 @@
+{
+  "catalogName": "Nightblade",
+  "description": "Dark warrior abilities for Nightblade job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Rend Weapon",
+        "Rend Armor",
+        "Rend Helmet",
+        "Rend Shield",
+        "Rend Power",
+        "Rend Magick",
+        "Rend MP",
+        "Rend Speed",
+        "Jump",
+        "Dark Blade"
+      ]
+    }
+  ]
+}

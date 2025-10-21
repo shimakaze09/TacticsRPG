@@ -13,13 +13,11 @@ MonoBehaviour:
   m_Name: Archer
   m_EditorClassIdentifier: 
   categories:
-  - name: Archer
-    entries:
-    - Charge
-    - Charge+
-    - Charge++
-    - Charge+++
-    - Arm Shot
+  - entries:
+    - Quick Shot
+    - Aim
     - Leg Shot
-    - Blaze Gun
-    - Seal Evil
+    - Arm Shot
+    - Head Shot
+    - Multi Shot
+    name: Abilities

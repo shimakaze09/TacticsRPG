@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: Ninja
   m_EditorClassIdentifier: 
   categories:
-  - name: Ninja
-    entries:
-    - Throw
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
-    - Art of War
+  - entries:
+    - Throw Stone
+    - Throw Shuriken
+    - Throw Bomb
+    - Poison Dart
+    - Throw Potion
+    - Throw Phoenix Down
+    - Shadow Strike
+    - Smoke Bomb
+    name: Abilities

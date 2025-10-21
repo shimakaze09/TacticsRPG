@@ -1,0 +1,21 @@
+{
+  "catalogName": "Deathknight",
+  "description": "Undead dark warrior abilities for Deathknight job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Duskblade",
+        "Shadowblade",
+        "Dark Sword",
+        "Death Sword",
+        "Drain Sword",
+        "Absorb Sword",
+        "Soul Sword",
+        "Demon Sword",
+        "Void Sword",
+        "Fell Blade"
+      ]
+    }
+  ]
+}

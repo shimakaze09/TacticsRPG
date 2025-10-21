@@ -1,0 +1,21 @@
+{
+  "catalogName": "Bard",
+  "description": "Battlefield-wide support abilities for Bard job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Seraph Song",
+        "Life's Anthem",
+        "Rousing Melody",
+        "Battle Chant",
+        "Magickal Refrain",
+        "Bravery Song",
+        "Faith Song",
+        "Protection Song",
+        "Nameless Song",
+        "Finale"
+      ]
+    }
+  ]
+}

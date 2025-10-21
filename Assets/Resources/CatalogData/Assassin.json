@@ -1,0 +1,21 @@
+{
+  "catalogName": "Assassin",
+  "description": "Lethal status abilities for Assassin job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Petrify",
+        "Shadowbind",
+        "Suffocate",
+        "Ultima",
+        "Charm",
+        "Death",
+        "Poison",
+        "Sleep",
+        "Silence",
+        "Blind"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "catalogName": "Orator",
+  "description": "Social manipulation abilities for Orator job",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Invite",
+        "Negotiate",
+        "Convince",
+        "Praise",
+        "Preach",
+        "Mimic Daravon",
+        "Rally",
+        "Demoralize"
+      ]
+    }
+  ]
+}
