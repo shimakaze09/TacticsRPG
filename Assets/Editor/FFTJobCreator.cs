@@ -139,10 +139,12 @@ public static class FFTJobCreator
         {
             foreach (var unlockData in jobData.abilityUnlocks)
             {
-                var unlock = new JobAbilityUnlock();
-                unlock.abilityName = unlockData.abilityName;
-                unlock.unlockAtJobLevel = unlockData.unlockAtJobLevel;
-                unlock.jpCost = unlockData.jpCost;
+                var unlock = new JobAbilityUnlock
+                {
+                    abilityName = unlockData.abilityName,
+                    unlockAtJobLevel = unlockData.unlockAtJobLevel,
+                    jpCost = unlockData.jpCost
+                };
                 job.abilityUnlocks.Add(unlock);
             }
         }
@@ -178,10 +180,13 @@ public static class FFTJobCreator
         {
             foreach (var prereqData in jobData.prerequisites)
             {
-                var prereq = new JobPrerequisite();
-                prereq.requiredJob = AssetDatabase.LoadAssetAtPath<JobDefinition>($"{JobsPath}/{prereqData.requiredJobName}.asset");
-                prereq.requiredLevel = prereqData.requiredLevel;
-                
+                var prereq = new JobPrerequisite
+                {
+                    requiredJob = AssetDatabase.LoadAssetAtPath<JobDefinition>($"{JobsPath}/{prereqData.requiredJobName}.asset"),
+                    requiredLevel = prereqData.requiredLevel
+                };
+
+
                 if (prereq.requiredJob == null)
                 {
                     Debug.LogError($"Could not find prerequisite job: {prereqData.requiredJobName}");

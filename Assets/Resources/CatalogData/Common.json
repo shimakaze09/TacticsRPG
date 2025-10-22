@@ -1,0 +1,11 @@
+{
+  "catalogName": "Common",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Attack"
+      ]
+    }
+  ]
+}

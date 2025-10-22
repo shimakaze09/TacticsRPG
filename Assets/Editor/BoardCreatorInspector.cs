@@ -4,31 +4,31 @@ using UnityEngine;
 [CustomEditor(typeof(BoardCreator))]
 public class BoardCreatorInspector : Editor
 {
-    public BoardCreator current => (BoardCreator)target;
+    public BoardCreator Current => (BoardCreator)target;
 
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
 
         if (GUILayout.Button("Clear"))
-            current.Clear();
+            Current.Clear();
         if (GUILayout.Button("Grow"))
-            current.Grow();
+            Current.Grow();
         if (GUILayout.Button("Shrink"))
-            current.Shrink();
+            Current.Shrink();
         if (GUILayout.Button("Grow Area"))
-            current.GrowArea();
+            Current.GrowArea();
         if (GUILayout.Button("Shrink Area"))
-            current.ShrinkArea();
+            Current.ShrinkArea();
         if (GUILayout.Button("Save"))
-            current.Save();
+            Current.Save();
         if (GUILayout.Button("Load"))
-            current.Load();
+            Current.Load();
         if (GUILayout.Button("Create Base"))
-            current.CreateBase();
+            Current.CreateBase();
 
         if (GUI.changed)
-            current.UpdateMarker();
+            Current.UpdateMarker();
 
         var e = Event.current;
         switch (e.type)
@@ -38,27 +38,27 @@ public class BoardCreatorInspector : Editor
                 switch (Event.current.keyCode)
                 {
                     case KeyCode.LeftArrow:
-                        current.pos += new Point(-1, 0);
+                        Current.pos += new Point(-1, 0);
                         break;
                     case KeyCode.RightArrow:
-                        current.pos += new Point(1, 0);
+                        Current.pos += new Point(1, 0);
                         break;
                     case KeyCode.UpArrow:
-                        current.pos += new Point(0, 1);
+                        Current.pos += new Point(0, 1);
                         break;
                     case KeyCode.DownArrow:
-                        current.pos += new Point(0, -1);
+                        Current.pos += new Point(0, -1);
                         break;
 
                     case KeyCode.J:
-                        current.Grow();
+                        Current.Grow();
                         break;
                     case KeyCode.K:
-                        current.Shrink();
+                        Current.Shrink();
                         break;
                 }
 
-                current.UpdateMarker();
+                Current.UpdateMarker();
                 break;
             }
         }

@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3da9535a71a6614409872bac9ae33fdb, type: 3}
   m_Name: Alaois
   m_EditorClassIdentifier: 
-  model: Hero
-  job: Knight
-  attack: Common/Attack
   abilityCatalog: DemoCatalog
-  locomotion: 0
   alliance: 2
+  attack: Common/Attack
+  element: 
+  job: Squire
+  locomotion: 0
+  model: Hero
+  strategy: 

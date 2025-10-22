@@ -1,0 +1,13 @@
+{
+  "job": "Common",
+  "abilities": [
+    {
+      "name": "Attack",
+      "range": { "type": "Constant", "value": 1, "height": 0 },
+      "area": { "type": "Unit" },
+      "power": { "type": "Physical", "value": 20 },
+      "mpCost": 0,
+      "effects": [ { "type": "Damage", "hitRate": "A", "target": "Enemy" } ]
+    }
+  ]
+}

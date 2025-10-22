@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3da9535a71a6614409872bac9ae33fdb, type: 3}
   m_Name: Enemy Warrior
   m_EditorClassIdentifier: 
-  model: Monster
-  job: Warrior
-  attack: Common/Attack
   abilityCatalog: Enemy Warrior
-  strategy: Warrior Attack Pattern
-  locomotion: 0
   alliance: 4
+  attack: Common/Attack
+  element: 
+  job: Squire
+  locomotion: 0
+  model: Monster
+  strategy: Warrior Attack Pattern

@@ -165,7 +165,9 @@ public static class UnitFactory
 
             foreach (var entry in categoryName.entries)
             {
-                var abilityName = $"Abilities/{categoryName.name}/{entry}";
+                // Updated path structure for new data-driven system
+                // Format: "Abilities/{JobName}/{AbilityName}"
+                var abilityName = $"Abilities/{catalogName}/{entry}";
                 var ability = InstantiatePrefab(abilityName);
                 if (ability != null)
                 {
@@ -211,8 +213,18 @@ public static class UnitFactory
 
     private static void AddAttack(GameObject obj, string name)
     {
-        var instance = InstantiatePrefab("Abilities/" + name);
-        instance.transform.SetParent(obj.transform);
+        // Handle the attack ability path
+        // name format: "Common/Attack" -> "Abilities/Common/Attack"
+        var abilityPath = "Abilities/" + name;
+        var instance = InstantiatePrefab(abilityPath);
+        if (instance != null)
+        {
+            instance.transform.SetParent(obj.transform);
+        }
+        else
+        {
+            Debug.LogWarning($"Attack ability not found: {abilityPath}");
+        }
     }
 
     private static void AddAbilityCatalog(GameObject obj, string name)
@@ -235,9 +247,18 @@ public static class UnitFactory
 
             foreach (var entry in categoryName.entries)
             {
-                var abilityName = $"Abilities/{categoryName.name}/{entry}";
+                // Updated path structure for new data-driven system
+                // Format: "Abilities/{JobName}/{AbilityName}"
+                var abilityName = $"Abilities/{name}/{entry}";
                 var ability = InstantiatePrefab(abilityName);
-                ability.transform.SetParent(category.transform);
+                if (ability != null)
+                {
+                    ability.transform.SetParent(category.transform);
+                }
+                else
+                {
+                    Debug.LogWarning($"Ability not found: {abilityName}");
+                }
             }
         }
     }
