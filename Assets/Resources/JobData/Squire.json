@@ -25,27 +25,27 @@
     {
       "abilityName": "Focus",
       "unlockAtJobLevel": 1,
-      "jpCost": 50
+      "jpCost": 300
     },
     {
       "abilityName": "Stone",
       "unlockAtJobLevel": 2,
-      "jpCost": 100
+      "jpCost": 90
     },
     {
       "abilityName": "Rush",
       "unlockAtJobLevel": 3,
-      "jpCost": 150
+      "jpCost": 80
     },
     {
       "abilityName": "Salve",
       "unlockAtJobLevel": 4,
-      "jpCost": 200
+      "jpCost": 150
     },
     {
       "abilityName": "Armor Break",
       "unlockAtJobLevel": 5,
-      "jpCost": 250
+      "jpCost": 400
     }
   ],
   "abilityCatalogName": "Squire",

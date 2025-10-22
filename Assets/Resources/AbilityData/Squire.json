@@ -18,9 +18,10 @@
       "mpCost": 0,
       "effects": [
         {
-          "type": "Damage",
-          "hitRate": "A",
-          "target": "Self"
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Self",
+          "status": "Focus"
         }
       ]
     },
