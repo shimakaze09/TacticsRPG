@@ -19,7 +19,7 @@
       "effects": [
         {
           "type": "Heal",
-          "hitRate": "S",
+          "hitRate": "Full",
           "target": "Default"
         }
       ]
@@ -134,7 +134,7 @@
       "effects": [
         {
           "type": "Inflict",
-          "hitRate": "S",
+          "hitRate": "Full",
           "target": "Default",
           "status": "Protect"
         }
@@ -158,7 +158,7 @@
       "effects": [
         {
           "type": "Inflict",
-          "hitRate": "S",
+          "hitRate": "Full",
           "target": "Default",
           "status": "Reflect"
         }
@@ -228,7 +228,7 @@
       "effects": [
         {
           "type": "Heal",
-          "hitRate": "S",
+          "hitRate": "Full",
           "target": "Default"
         }
       ]

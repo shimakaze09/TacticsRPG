@@ -188,6 +188,11 @@
           "type": "Damage",
           "hitRate": "S",
           "target": "Enemy"
+        },
+        {
+          "type": "Heal",
+          "hitRate": "Full",
+          "target": "Self"
         }
       ]
     }

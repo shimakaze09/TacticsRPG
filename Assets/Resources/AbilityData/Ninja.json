@@ -88,7 +88,7 @@
       "effects": [
         {
           "type": "Heal",
-          "hitRate": "S",
+          "hitRate": "Full",
           "target": "Default"
         }
       ]
@@ -111,7 +111,7 @@
       "effects": [
         {
           "type": "Revive",
-          "hitRate": "S",
+          "hitRate": "Full",
           "target": "KOd"
         }
       ]

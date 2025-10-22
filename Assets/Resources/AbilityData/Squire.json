@@ -89,7 +89,7 @@
       "effects": [
         {
           "type": "Heal",
-          "hitRate": "A",
+          "hitRate": "Full",
           "target": "Self"
         }
       ]

@@ -135,7 +135,7 @@
       "effects": [
         {
           "type": "Inflict",
-          "hitRate": "S",
+          "hitRate": "Full",
           "target": "Self",
           "status": "Reraise"
         }

@@ -19,7 +19,7 @@
       "effects": [
         {
           "type": "Inflict",
-          "hitRate": "S",
+          "hitRate": "Full",
           "target": "Default",
           "status": "Haste"
         }
@@ -91,7 +91,7 @@
       "effects": [
         {
           "type": "Inflict",
-          "hitRate": "S",
+          "hitRate": "Full",
           "target": "Default",
           "status": "Quick"
         }
@@ -115,7 +115,7 @@
       "effects": [
         {
           "type": "Inflict",
-          "hitRate": "S",
+          "hitRate": "Full",
           "target": "Default",
           "status": "Teleport"
         }
@@ -139,7 +139,7 @@
       "effects": [
         {
           "type": "Inflict",
-          "hitRate": "S",
+          "hitRate": "Full",
           "target": "Default",
           "status": "Float"
         }

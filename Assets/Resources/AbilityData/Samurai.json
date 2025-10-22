@@ -89,7 +89,7 @@
       "effects": [
         {
           "type": "Heal",
-          "hitRate": "S",
+          "hitRate": "Full",
           "target": "Default"
         }
       ]
@@ -135,13 +135,13 @@
       "effects": [
         {
           "type": "Inflict",
-          "hitRate": "S",
+          "hitRate": "Full",
           "target": "Default",
           "status": "Protect"
         },
         {
           "type": "Inflict",
-          "hitRate": "S",
+          "hitRate": "Full",
           "target": "Default",
           "status": "Shell"
         }
@@ -217,13 +217,13 @@
       "effects": [
         {
           "type": "Inflict",
-          "hitRate": "S",
+          "hitRate": "Full",
           "target": "Default",
           "status": "Haste"
         },
         {
           "type": "Inflict",
-          "hitRate": "S",
+          "hitRate": "Full",
           "target": "Default",
           "status": "Regen"
         }

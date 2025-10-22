@@ -43,7 +43,7 @@
       "effects": [
         {
           "type": "Inflict",
-          "hitRate": "S",
+          "hitRate": "Full",
           "target": "Default",
           "status": "BraveryUp"
         }
@@ -67,7 +67,7 @@
       "effects": [
         {
           "type": "Inflict",
-          "hitRate": "S",
+          "hitRate": "Full",
           "target": "Default",
           "status": "FaithUp"
         }
@@ -163,7 +163,7 @@
       "effects": [
         {
           "type": "Inflict",
-          "hitRate": "S",
+          "hitRate": "Full",
           "target": "Default",
           "status": "Haste"
         }

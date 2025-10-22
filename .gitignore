@@ -101,3 +101,8 @@ InitTestScene*.unity*
 # User-specific files
 *.md
 !/README.md
+
+# metadata and prefabs
+/Assets/Resources/Abilities
+/Assets/Resources/Ability Catalog Recipes
+/Assets/Resources/Jobs
