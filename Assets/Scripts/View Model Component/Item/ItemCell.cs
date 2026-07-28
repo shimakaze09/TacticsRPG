@@ -24,6 +24,6 @@ public class ItemCell : MonoBehaviour
 
     public void OnBuyButton()
     {
-        this.Publish(new ItemPurchasedEvent(item));
+        this.Publish(new ItemPurchaseRequestedEvent(item));
     }
 }

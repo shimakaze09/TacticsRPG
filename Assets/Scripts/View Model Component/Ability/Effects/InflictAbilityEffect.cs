@@ -13,10 +13,10 @@ public class InflictAbilityEffect : BaseAbilityEffect
 
     protected override int OnApply(Tile target)
     {
-        var statusType = Type.GetType(statusName);
-        if (statusType == null || !statusType.IsSubclassOf(typeof(StatusEffect)))
+        var statusType = ResolveStatusType(statusName);
+        if (statusType == null)
         {
-            Debug.LogError("Invalid Status Type");
+            Debug.LogError($"Invalid Status Type: {statusName}");
             return 0;
         }
 
@@ -30,5 +30,21 @@ public class InflictAbilityEffect : BaseAbilityEffect
         var condition = retValue as DurationStatusCondition;
         condition.duration = duration;
         return 0;
+    }
+
+    // Status data uses bare names ("Poison") while the classes are suffixed
+    // ("PoisonStatus"), so try both spellings.
+    private static Type ResolveStatusType(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+            return null;
+
+        var type = Type.GetType(name);
+        if (type == null || !type.IsSubclassOf(typeof(StatusEffect)))
+            type = Type.GetType(name + "Status");
+
+        if (type != null && type.IsSubclassOf(typeof(StatusEffect)))
+            return type;
+        return null;
     }
 }

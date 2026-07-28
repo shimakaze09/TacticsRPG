@@ -50,7 +50,10 @@ public abstract class BaseAbilityPower : MonoBehaviour
 
     private void OnGetBaseDefense(GetDefenseStatEvent e)
     {
-        if (IsMyUnit(e.Target))
+        // This power component belongs to the attacker's ability, so the
+        // ownership check must be against the attacker; the defense value
+        // itself is still read from the target.
+        if (IsMyUnit(e.Attacker))
         {
             e.Modifiers.Add(new AddValueModifier(0, GetBaseDefense(e.Target)));
         }

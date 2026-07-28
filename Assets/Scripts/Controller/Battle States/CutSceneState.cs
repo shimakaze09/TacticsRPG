@@ -33,7 +33,11 @@ public class CutSceneState : BattleState
 
     protected override void AddListeners()
     {
-        base.AddListeners();
+        // Cutscenes are always advanced by the player, even when the battle
+        // ended on a computer-driven turn, so bypass the driver gate in
+        // BattleState.AddListeners and subscribe unconditionally.
+        InputController.moveEvent += OnMove;
+        InputController.fireEvent += OnFire;
         ConversationController.completeEvent += OnCompleteConversation;
     }
 

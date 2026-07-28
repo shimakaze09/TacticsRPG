@@ -15,6 +15,10 @@ public static class FFTAbilityCreator
     private const string AbilitiesPath = "Assets/Resources/Abilities";
     private const string AbilityDataPath = "Assets/Resources/AbilityData";
 
+    // Fallback for Inflict effects whose JSON entry omits "duration" — without
+    // this the status would be removed on the very next turn tick.
+    private const int DefaultStatusDuration = 3;
+
     #region JSON Data Structures
 
     [System.Serializable]
@@ -63,6 +67,7 @@ public static class FFTAbilityCreator
         public string hitRate; // A, B, C, D, S
         public string target; // Enemy, Ally, Self, etc.
         public string status; // For Inflict effects
+        public int duration; // Turns an inflicted status lasts (0 = use default)
     }
 
     #endregion
@@ -335,6 +340,9 @@ public static class FFTAbilityCreator
                 {
                     inflictEffect.statusName = effectData.status;
                 }
+                inflictEffect.duration = effectData.duration > 0
+                    ? effectData.duration
+                    : DefaultStatusDuration;
                 break;
             case "Revive":
                 AddComponent<ReviveAbilityEffect>(go);

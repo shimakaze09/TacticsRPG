@@ -22,12 +22,12 @@ public class ItemShop : MonoBehaviour
 
     private void OnEnable()
     {
-        this.Subscribe<ItemPurchasedEvent>(OnBuyItemNotification);
+        this.Subscribe<ItemPurchaseRequestedEvent>(OnBuyItemNotification);
     }
 
     private void OnDisable()
     {
-        this.Unsubscribe<ItemPurchasedEvent>(OnBuyItemNotification);
+        this.Unsubscribe<ItemPurchaseRequestedEvent>(OnBuyItemNotification);
     }
 
     #endregion
@@ -55,7 +55,7 @@ public class ItemShop : MonoBehaviour
 
     #region Event Handlers
 
-    private void OnBuyItemNotification(ItemPurchasedEvent e)
+    private void OnBuyItemNotification(ItemPurchaseRequestedEvent e)
     {
         if (Bank.Instance.gold >= e.Item.price)
             Purchase(e.Item);

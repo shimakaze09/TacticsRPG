@@ -213,12 +213,12 @@ Verified acyclic. WotL-accurate for Archer, Knight, Monk, Geomancer, Dragoon, Ni
 
 ## 9. Recommended remediation order
 
-**Phase 0 — make it runnable (small, high-leverage):**
-1. Fix `DictionaryDrawer.cs` guard (C1); fix build-settings scene list (C2).
-2. Document + verify the JSON→prefab generation step in the README; consider committing generated assets or generating at load time (C3).
-3. Fix `IsMyUnit` defense check (C4); map JSON status names → `{Name}Status` and add a `duration` field to the generator (C5).
-4. Register `GameEventBus` in the `ServiceLocator`; fix the swapped `Publish` args; split `ItemPurchasedEvent` into request/confirmation events (C6 + shop recursion).
-5. Subscribe input in cutscenes regardless of driver, or auto-advance CPU-driven conversations (C7). Wire a `TurnCheckEvent` subscriber into `KOStatus` (C8) — then give KO a proper tick source for its death counter.
+**Phase 0 — make it runnable (small, high-leverage):** *(all items below fixed on this branch, 2026-07-28)*
+1. ~~Fix `DictionaryDrawer.cs` guard (C1); fix build-settings scene list (C2).~~ **Done** — `using UnityEditor;` moved inside the guard; build settings now list StartMenu (index 0), Battle (index 1), BoardCreator (disabled). Note: the legacy `LoadScene(0)` fallback in `EndBattleState` now lands on the title screen instead of a phantom scene.
+2. ~~Document the JSON→prefab generation step (C3).~~ **Done** — README now documents the three `Tactics RPG → Create FFT …` menu items and the required order. (Committing/generating at load time remains an option for later.)
+3. ~~Fix `IsMyUnit` defense check (C4); map JSON status names → `{Name}Status` and add a `duration` field to the generator (C5).~~ **Done** — `OnGetBaseDefense` now gates on `e.Attacker`; `InflictAbilityEffect.ResolveStatusType` tries both `"X"` and `"XStatus"`; `FFTAbilityCreator.EffectData` gained a `duration` field with a 3-turn default. **Requires re-running the ability generator in Unity for prefabs to pick up durations.**
+4. ~~Register `GameEventBus` in the `ServiceLocator`; fix the swapped `Publish` args; split `ItemPurchasedEvent` into request/confirmation events (C6 + shop recursion).~~ **Done** — `ServiceBootstrap` registers the bus at startup; `Bank` publishes via the standard extension (correct arg order); `ItemCell` now publishes `ItemPurchaseRequestedEvent`, `ItemPurchasedEvent` is confirmation-only.
+5. ~~Subscribe input in cutscenes regardless of driver (C7). Wire a `TurnCheckEvent` subscriber into `KOStatus` (C8).~~ **Done** — `CutSceneState.AddListeners` subscribes unconditionally; `KOStatus` now denies turns via `TurnCheckEvent`, ticking its death counter and resetting CTR on each denied activation (FFT-style).
 
 **Phase 1 — one architecture, not two:** pick `GameFlowController` or `GameStateManager` (recommendation: keep `GameFlowController`, port the results payload into `NotifyBattleEnded`), delete the loser, and pick one reward implementation. Fix persistence registration/apply-on-load, stop keying saves by name, move gold into `GameData`.
 

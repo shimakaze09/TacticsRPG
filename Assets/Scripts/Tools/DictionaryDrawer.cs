@@ -1,10 +1,10 @@
+#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityObject = UnityEngine.Object;
 
-#if UNITY_EDITOR
 public abstract class DictionaryDrawer<TK, TV> : PropertyDrawer
 {
     private const float kButtonWidth = 18f;

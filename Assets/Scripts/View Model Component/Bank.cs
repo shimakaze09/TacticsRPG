@@ -20,7 +20,7 @@ public class Bank
             int oldGold = _gold;
             _gold = value;
             Save();
-            ServiceLocator.Instance.Get<GameEventBus>().Publish(this, new GoldChangedEvent(oldGold, value));
+            this.Publish(new GoldChangedEvent(oldGold, value));
         }
     }
 

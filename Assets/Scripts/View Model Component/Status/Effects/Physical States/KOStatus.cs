@@ -22,7 +22,7 @@ public class KOStatus : StatusEffect
 
         if (owner != null)
         {
-            this.SubscribeToSender<TurnBeganEvent>(OnTurnBegan, owner);
+            this.SubscribeToSender<TurnCheckEvent>(OnTurnCheck, owner);
         }
 
         if (stats != null)
@@ -35,16 +35,25 @@ public class KOStatus : StatusEffect
     private void OnDisable()
     {
         if (owner != null)
-            this.UnsubscribeFromSender<TurnBeganEvent>(OnTurnBegan, owner);
-        
+            this.UnsubscribeFromSender<TurnCheckEvent>(OnTurnCheck, owner);
+
         if (stats != null)
             this.UnsubscribeFromSender<StatDidChangeEvent>(OnStatChanged, stats);
     }
 
-    private void OnTurnBegan(TurnBeganEvent e)
+    private void OnTurnCheck(TurnCheckEvent e)
     {
-        currentCounter--;
+        // A KO'd unit never acts. Each time it *would* have activated, the
+        // death counter ticks down instead (and CT resets, as in FFT).
+        if (!e.Exception.toggle)
+            return;
 
+        e.Exception.FlipToggle();
+
+        if (stats != null)
+            stats.SetValue(StatTypes.CTR, 0, false);
+
+        currentCounter--;
         if (currentCounter <= 0)
         {
             // Become crystal or treasure
