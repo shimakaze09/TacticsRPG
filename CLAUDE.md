@@ -1,8 +1,9 @@
 # TacticsRPG — project conventions
 
 Unity 6 (6000.5.5f1) tactics RPG set in an original world ("The Long Autumn").
-Key docs: `Docs/WORLD.md` (setting, roster, naming), `Docs/BATTLE_PLAN.md`
-(battle work queue), `Docs/PROJECT_REVIEW.md` + `Docs/CODE_AUDIT.md` (history).
+Key docs: `Docs/ROADMAP.md` (**the master work queue — start here**),
+`Docs/WORLD.md` (setting, roster, naming), `Docs/BATTLE_PLAN.md` (battle
+work queue), `Docs/PROJECT_REVIEW.md` + `Docs/CODE_AUDIT.md` (history).
 
 ## Documentation convention (mandatory)
 
