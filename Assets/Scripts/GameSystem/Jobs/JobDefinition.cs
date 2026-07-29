@@ -40,6 +40,9 @@ public class JobDefinition : ScriptableObject
     #region Basic Info
     
     [Header("Basic Information")]
+    [Tooltip("Stable identifier (never changes once shipped; safe to rename jobName freely). Used for saves, prerequisites, and cross-references.")]
+    public string id = "";
+
     [Tooltip("Display name of the job")]
     public string jobName = "New Job";
     
@@ -180,10 +183,13 @@ public class JobDefinition : ScriptableObject
         if (characterLevel < minimumCharacterLevel)
             return false;
 
-        // Check if job is character-specific
-        if (isUnique && allowedCharacterNames.Count > 0)
+        // Check if job is character-specific. A unique job with an empty
+        // allow-list is locked for everyone (data error) rather than open to all.
+        if (isUnique)
         {
-            if (string.IsNullOrEmpty(characterName) || !allowedCharacterNames.Contains(characterName))
+            if (allowedCharacterNames.Count == 0 ||
+                string.IsNullOrEmpty(characterName) ||
+                !allowedCharacterNames.Contains(characterName))
                 return false;
         }
 
@@ -208,7 +214,7 @@ public class JobDefinition : ScriptableObject
         for (int i = jpRequirements.Length - 1; i >= 0; i--)
         {
             if (jp >= jpRequirements[i])
-                return i + 2; // +2 because array starts at level 2 requirements
+                return Mathf.Min(i + 2, 8); // +2 because array starts at level 2 requirements; max job level is 8
         }
 
         return 1;
@@ -229,20 +235,21 @@ public class JobDefinition : ScriptableObject
     }
 
     /// <summary>
-    /// Gets all abilities unlocked at or below a specific job level
+    /// Gets stable ids of all abilities unlocked at or below a specific job level.
+    /// Falls back to the display name for entries without an id (legacy data).
     /// </summary>
     public List<string> GetUnlockedAbilities(int jobLevel)
     {
         var unlockedAbilities = new List<string>();
-        
+
         foreach (var unlock in abilityUnlocks)
         {
             if (unlock != null && unlock.unlockAtJobLevel <= jobLevel)
             {
-                unlockedAbilities.Add(unlock.abilityName);
+                unlockedAbilities.Add(string.IsNullOrEmpty(unlock.abilityId) ? unlock.abilityName : unlock.abilityId);
             }
         }
-        
+
         return unlockedAbilities;
     }
 
@@ -302,7 +309,10 @@ public class JobDefinition : ScriptableObject
 [System.Serializable]
 public class JobAbilityUnlock
 {
-    [Tooltip("Name/path of the ability to unlock")]
+    [Tooltip("Stable id of the ability to unlock (used in AbilityMemory/saves)")]
+    public string abilityId;
+
+    [Tooltip("Display name of the ability to unlock")]
     public string abilityName;
     
     [Tooltip("Job level at which this ability unlocks")]

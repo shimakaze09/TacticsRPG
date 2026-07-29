@@ -26,22 +26,52 @@ using UnityEngine;
 public class JobProgressData
 {
     #region Serialized Data
-    
-    [Tooltip("Reference to currently active job")]
+
+    [Tooltip("Stable id of the currently active job (survives save/load and display renames)")]
+    public string currentJobId = "";
+
+    [Tooltip("Runtime reference to the currently active job. Not serialized — a ScriptableObject reference does not survive JsonUtility round-trips; resolved from currentJobId on load.")]
+    [NonSerialized]
     public JobDefinition currentJob;
-    
-    [Tooltip("Dictionary mapping job names to JP accumulated")]
+
+    [Tooltip("Dictionary mapping job ids to JP accumulated")]
     public SerializableDictionary<string, int> jobJP = new SerializableDictionary<string, int>();
-    
-    [Tooltip("Dictionary mapping job names to job levels achieved")]
+
+    [Tooltip("Dictionary mapping job ids to job levels achieved")]
     public SerializableDictionary<string, int> jobLevels = new SerializableDictionary<string, int>();
-    
-    [Tooltip("Set of unlocked job names")]
+
+    [Tooltip("Set of unlocked job ids")]
     public List<string> unlockedJobs = new List<string>();
-    
+
     [Tooltip("Character level at time of last stat calculation (for validation)")]
     public int lastCalculatedLevel = 1;
-    
+
+    #endregion
+
+    #region Identity
+
+    /// <summary>
+    /// Stable key for a job in progress/save data. Prefers the job's id;
+    /// falls back to display name for legacy assets without ids.
+    /// </summary>
+    public static string JobKey(JobDefinition job)
+    {
+        if (job == null)
+            return "";
+        return string.IsNullOrEmpty(job.id) ? job.jobName : job.id;
+    }
+
+    /// <summary>
+    /// Restores the currentJob reference from currentJobId after deserialization.
+    /// </summary>
+    public void ResolveCurrentJob(List<JobDefinition> allJobs)
+    {
+        if (string.IsNullOrEmpty(currentJobId) || allJobs == null)
+            return;
+
+        currentJob = allJobs.Find(j => j != null && JobKey(j) == currentJobId);
+    }
+
     #endregion
 
     #region Constructor
@@ -65,6 +95,7 @@ public class JobProgressData
         }
 
         currentJob = startingJob;
+        currentJobId = JobKey(startingJob);
         UnlockJob(startingJob);
         SetJobJP(startingJob, 0);
         SetJobLevel(startingJob, 1);
@@ -85,18 +116,18 @@ public class JobProgressData
             return;
         }
 
-        string jobName = job.jobName;
-        
-        if (!unlockedJobs.Contains(jobName))
+        string key = JobKey(job);
+
+        if (!unlockedJobs.Contains(key))
         {
-            unlockedJobs.Add(jobName);
-            
+            unlockedJobs.Add(key);
+
             // Initialize JP and level if not already present
-            if (!jobJP.ContainsKey(jobName))
-                jobJP[jobName] = 0;
-            
-            if (!jobLevels.ContainsKey(jobName))
-                jobLevels[jobName] = 1;
+            if (!jobJP.ContainsKey(key))
+                jobJP[key] = 0;
+
+            if (!jobLevels.ContainsKey(key))
+                jobLevels[key] = 1;
         }
     }
 
@@ -107,8 +138,8 @@ public class JobProgressData
     {
         if (job == null)
             return false;
-        
-        return unlockedJobs.Contains(job.jobName);
+
+        return unlockedJobs.Contains(JobKey(job));
     }
 
     /// <summary>
@@ -129,6 +160,7 @@ public class JobProgressData
         }
 
         currentJob = newJob;
+        currentJobId = JobKey(newJob);
         return true;
     }
     
@@ -144,14 +176,14 @@ public class JobProgressData
         if (job == null || jp <= 0)
             return false;
 
-        string jobName = job.jobName;
-        
-        if (!jobJP.ContainsKey(jobName))
-            jobJP[jobName] = 0;
+        string key = JobKey(job);
 
-        int oldJP = jobJP[jobName];
+        if (!jobJP.ContainsKey(key))
+            jobJP[key] = 0;
+
+        int oldJP = jobJP[key];
         int newJP = oldJP + jp;
-        jobJP[jobName] = newJP;
+        jobJP[key] = newJP;
 
         // Calculate new job level
         int oldLevel = job.GetJobLevelForJP(oldJP);
@@ -176,7 +208,7 @@ public class JobProgressData
         if (job == null)
             return 0;
 
-        return jobJP.TryGetValue(job.jobName, out int jp) ? jp : 0;
+        return jobJP.TryGetValue(JobKey(job), out int jp) ? jp : 0;
     }
 
     /// <summary>
@@ -187,7 +219,7 @@ public class JobProgressData
         if (job == null)
             return;
 
-        jobJP[job.jobName] = Mathf.Max(0, jp);
+        jobJP[JobKey(job)] = Mathf.Max(0, jp);
         
         // Update level based on JP
         int level = job.GetJobLevelForJP(jp);
@@ -202,7 +234,7 @@ public class JobProgressData
         if (job == null)
             return 0;
 
-        return jobLevels.TryGetValue(job.jobName, out int level) ? level : 1;
+        return jobLevels.TryGetValue(JobKey(job), out int level) ? level : 1;
     }
 
     /// <summary>
@@ -213,7 +245,7 @@ public class JobProgressData
         if (job == null)
             return;
 
-        jobLevels[job.jobName] = Mathf.Clamp(level, 1, 8);
+        jobLevels[JobKey(job)] = Mathf.Clamp(level, 1, 8);
     }
 
     /// <summary>
@@ -228,7 +260,7 @@ public class JobProgressData
 
         foreach (var job in allJobs)
         {
-            if (job != null && jobLevels.TryGetValue(job.jobName, out int level))
+            if (job != null && jobLevels.TryGetValue(JobKey(job), out int level))
             {
                 result[job] = level;
             }

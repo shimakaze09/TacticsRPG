@@ -30,20 +30,34 @@ public static class UnitFactory
     public static GameObject Create(UnitRecipe recipe, int level)
     {
         var obj = InstantiatePrefab("Units/" + recipe.model);
+        if (obj == null)
+        {
+            Debug.LogError("Missing unit model prefab: Units/" + recipe.model);
+            return null;
+        }
+
         obj.name = recipe.name;
         obj.AddComponent<Unit>();
         AddStats(obj);
         AddLocomotion(obj, recipe.locomotion);
         obj.AddComponent<Status>();
         obj.AddComponent<Equipment>();
-        AddJob(obj, recipe.job);
+        // Rank must exist before JobManager: JobManager.Awake caches the Rank
+        // reference and its level-up JP subscription depends on it.
         AddRank(obj, level);
+        AddJob(obj, recipe.job);
         obj.AddComponent<Health>();
         obj.AddComponent<Mana>();
         AddAttack(obj, recipe.attack);
         AddAlliance(obj, recipe.alliance);
         AddAttackPattern(obj, recipe.strategy);
         AddElement(obj, recipe.element);
+
+        // Hard difficulty: enemies hit harder (HP boost happens inside
+        // JobManager's stat recalculation once the Alliance exists)
+        if (recipe.alliance == Alliances.Enemy && DifficultySettings.Current == Difficulty.Hard)
+            obj.AddComponent<HardModeDamageModifier>();
+
         return obj;
     }
 
@@ -85,7 +99,7 @@ public static class UnitFactory
         if (prefab == null)
         {
             Debug.LogError("No Prefab for name: " + name);
-            return new GameObject(name);
+            return null;
         }
 
         var instance = Object.Instantiate(prefab);
@@ -115,12 +129,12 @@ public static class UnitFactory
         // Add JobManager component for FFT-style job system
         var jobManager = obj.AddComponent<JobManager>();
         
-        // Find the JobDefinition by name
-        var jobDefinition = jobManager.FindJobByName(name);
+        // Recipes reference jobs by stable id; fall back to display name
+        // for any legacy asset still using one.
+        var jobDefinition = jobManager.FindJobById(name) ?? jobManager.FindJobByName(name);
         if (jobDefinition == null)
         {
-            Debug.LogWarning($"JobDefinition '{name}' not found. Using default Squire job.");
-            // JobManager will auto-initialize with Squire if no job found
+            Debug.LogWarning($"JobDefinition '{name}' not found. JobManager will auto-initialize with the default job.");
             return;
         }
         
@@ -130,8 +144,8 @@ public static class UnitFactory
         // Sync abilities with job progress
         jobManager.AbilityMemory.SyncLearnedAbilities(jobManager.ProgressData, jobManager.allJobs);
         
-        // Calculate initial stats
-        jobManager.RecalculateStats();
+        // Calculate initial stats and fill HP/MP for the fresh unit
+        jobManager.RecalculateStats(true);
         
         // Create ability catalog based on job's catalog name
         CreateJobAbilityCatalog(obj, jobDefinition.abilityCatalogName);
@@ -274,7 +288,8 @@ public static class UnitFactory
         {
             driver.normal = Drivers.Computer;
             var instance = InstantiatePrefab("Attack Pattern/" + name);
-            instance.transform.SetParent(obj.transform);
+            if (instance != null)
+                instance.transform.SetParent(obj.transform);
         }
     }
 

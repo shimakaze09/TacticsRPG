@@ -37,6 +37,22 @@ public class JobManager : MonoBehaviour, IDataPersistence
 {
     #region Fields / Properties
 
+    /// <summary>
+    /// Canonical stat calculation order shared by the job system:
+    /// MHP, MMP, ATK, DEF, MAT, MDF, SPD.
+    /// JobDefinition.baseStats and stat contribution arrays use this layout.
+    /// </summary>
+    public static readonly StatTypes[] statOrder =
+    {
+        StatTypes.MHP,
+        StatTypes.MMP,
+        StatTypes.ATK,
+        StatTypes.DEF,
+        StatTypes.MAT,
+        StatTypes.MDF,
+        StatTypes.SPD
+    };
+
     [Header("Job System Data")]
     [Tooltip("Character's job progress and history")]
     [SerializeField]
@@ -61,10 +77,16 @@ public class JobManager : MonoBehaviour, IDataPersistence
     private Rank rank;
     private Equipment equipment;
     private AbilityCatalog abilityCatalog;
-    private Job legacyJob; // Old Job component (for migration)
 
     // Cached values
     private int lastProcessedLevel = 1;
+
+    // Baseline MOV/JMP/EVD captured before any job bonus is applied, so
+    // recalculation can set (base + bonus) instead of accumulating drift.
+    private int baseMoveStat;
+    private int baseJumpStat;
+    private int baseEvadeStat;
+    private bool movementBaseCaptured;
 
     #endregion
 
@@ -87,7 +109,6 @@ public class JobManager : MonoBehaviour, IDataPersistence
         rank = GetComponent<Rank>();
         equipment = GetComponent<Equipment>();
         abilityCatalog = GetComponentInChildren<AbilityCatalog>();
-        legacyJob = GetComponentInChildren<Job>();
 
         // Initialize data structures if null
         if (progressData == null)
@@ -108,6 +129,8 @@ public class JobManager : MonoBehaviour, IDataPersistence
         {
             this.SubscribeToSender<StatDidChangeEvent>(OnCharacterLevelChanged, stats);
         }
+
+        DataPersistenceManager.Register(this);
     }
 
     private void OnDisable()
@@ -117,6 +140,8 @@ public class JobManager : MonoBehaviour, IDataPersistence
         {
             this.UnsubscribeFromSender<StatDidChangeEvent>(OnCharacterLevelChanged, stats);
         }
+
+        DataPersistenceManager.Unregister(this);
     }
 
     private void Start()
@@ -142,13 +167,13 @@ public class JobManager : MonoBehaviour, IDataPersistence
     /// </summary>
     private void InitializeWithDefaultJob()
     {
-        // Try to find Squire or first available job
-        JobDefinition startingJob = FindJobByName("Squire");
+        // Try to find the default starting job (Drifter) or first available job
+        JobDefinition startingJob = FindJobById("drifter");
 
         if (startingJob == null && allJobs.Count > 0)
         {
             startingJob = allJobs[0];
-            Debug.LogWarning($"Squire not found, using {startingJob.jobName} as starting job");
+            Debug.LogWarning($"Default job 'drifter' not found, using {startingJob.jobName} as starting job");
         }
 
         if (startingJob == null)
@@ -159,18 +184,18 @@ public class JobManager : MonoBehaviour, IDataPersistence
 
         progressData.InitializeWithBasicJobs(startingJob);
 
-        // Also unlock Chemist if available (FFT starts with both)
-        JobDefinition chemist = FindJobByName("Chemist");
-        if (chemist != null)
+        // Also unlock Sawbones — every recruit starts with both basic trades
+        JobDefinition sawbones = FindJobById("sawbones");
+        if (sawbones != null)
         {
-            progressData.UnlockJob(chemist);
+            progressData.UnlockJob(sawbones);
         }
 
         // Sync abilities
         abilityMemory.SyncLearnedAbilities(progressData, allJobs);
 
-        // Calculate initial stats
-        RecalculateStats();
+        // Calculate initial stats and fill HP/MP for the fresh unit
+        RecalculateStats(true);
 
         Debug.Log($"Initialized {gameObject.name} with job: {startingJob.jobName}");
     }
@@ -236,9 +261,6 @@ public class JobManager : MonoBehaviour, IDataPersistence
 
         // Recalculate stats based on new job
         RecalculateStats();
-
-        // Update legacy Job component if present
-        UpdateLegacyJobComponent();
 
         // Publish job switched event
         this.Publish(new JobSwitchedEvent(this, oldJob, newJob));
@@ -425,7 +447,7 @@ public class JobManager : MonoBehaviour, IDataPersistence
     /// 
     /// This ensures stats reflect full job history, not just current job.
     /// </summary>
-    public void RecalculateStats()
+    public void RecalculateStats(bool restoreToFull = false)
     {
         if (stats == null)
         {
@@ -452,29 +474,74 @@ public class JobManager : MonoBehaviour, IDataPersistence
         }
 
         // Apply calculated stats to Stats component
-        // Using Job.statOrder for consistency: MHP, MMP, ATK, DEF, MAT, MDF, SPD
-        for (int i = 0; i < Job.statOrder.Length && i < calculatedStats.Length; i++)
+        // Using statOrder for consistency: MHP, MMP, ATK, DEF, MAT, MDF, SPD
+        for (int i = 0; i < statOrder.Length && i < calculatedStats.Length; i++)
         {
-            StatTypes statType = Job.statOrder[i];
+            StatTypes statType = statOrder[i];
             int value = calculatedStats[i];
 
-            // Ensure positive values
+            // Ensure positive values, then enforce the global ceilings.
+            // This write bypasses the stat-exception pipeline, so the clamp
+            // must happen here — growth can never exceed StatLimits.
             value = Mathf.Max(1, value);
+
+            // Hard difficulty: enemies get more HP (survives every recalc
+            // because it's applied at the source rather than patched after)
+            if (statType == StatTypes.MHP)
+            {
+                var unitAlliance = GetComponent<Alliance>();
+                if (unitAlliance != null && unitAlliance.type == Alliances.Enemy)
+                    value = Mathf.RoundToInt(value * DifficultySettings.EnemyHpMultiplier);
+            }
+
+            value = statType switch
+            {
+                StatTypes.MHP => Mathf.Min(value, StatLimits.MaxHP),
+                StatTypes.MMP => Mathf.Min(value, StatLimits.MaxMP),
+                _ => Mathf.Min(value, StatLimits.MaxPrimaryStat)
+            };
 
             stats.SetValue(statType, value, false);
         }
 
-        // Apply current job's movement/evade bonuses if available
-        if (CurrentJob != null)
+        // Apply current job's movement/evade bonuses on top of the unit's
+        // baseline (captured once) — never on top of the previous result,
+        // which would accumulate the bonus on every recalculation.
+        if (!movementBaseCaptured)
         {
-            stats.SetValue(StatTypes.MOV, stats[StatTypes.MOV] + CurrentJob.movementBonus, false);
-            stats.SetValue(StatTypes.JMP, stats[StatTypes.JMP] + CurrentJob.jumpBonus, false);
-            stats.SetValue(StatTypes.EVD, stats[StatTypes.EVD] + CurrentJob.evadeBonus, false);
+            baseMoveStat = stats[StatTypes.MOV];
+            baseJumpStat = stats[StatTypes.JMP];
+            baseEvadeStat = stats[StatTypes.EVD];
+            movementBaseCaptured = true;
         }
 
-        // Restore current HP/MP to max
-        stats.SetValue(StatTypes.HP, stats[StatTypes.MHP], false);
-        stats.SetValue(StatTypes.MP, stats[StatTypes.MMP], false);
+        int mov = baseMoveStat;
+        int jmp = baseJumpStat;
+        int evd = baseEvadeStat;
+
+        if (CurrentJob != null)
+        {
+            mov += CurrentJob.movementBonus;
+            jmp += CurrentJob.jumpBonus;
+            evd += CurrentJob.evadeBonus;
+        }
+
+        stats.SetValue(StatTypes.MOV, mov, false);
+        stats.SetValue(StatTypes.JMP, jmp, false);
+        stats.SetValue(StatTypes.EVD, evd, false);
+
+        // Only fill HP/MP when explicitly requested (unit creation); a
+        // mid-battle recalculation (job level-up/switch) must not full-heal.
+        if (restoreToFull)
+        {
+            stats.SetValue(StatTypes.HP, stats[StatTypes.MHP], false);
+            stats.SetValue(StatTypes.MP, stats[StatTypes.MMP], false);
+        }
+        else
+        {
+            stats.SetValue(StatTypes.HP, Mathf.Min(stats[StatTypes.HP], stats[StatTypes.MHP]), false);
+            stats.SetValue(StatTypes.MP, Mathf.Min(stats[StatTypes.MP], stats[StatTypes.MMP]), false);
+        }
 
         Debug.Log($"Stats recalculated for {gameObject.name}. MHP: {stats[StatTypes.MHP]}, ATK: {stats[StatTypes.ATK]}");
     }
@@ -528,6 +595,18 @@ public class JobManager : MonoBehaviour, IDataPersistence
     }
 
     /// <summary>
+    /// Finds a job by its stable id (preferred over FindJobByName for
+    /// anything persisted or cross-referenced)
+    /// </summary>
+    public JobDefinition FindJobById(string jobId)
+    {
+        if (string.IsNullOrEmpty(jobId))
+            return null;
+
+        return allJobs.Find(j => j != null && JobProgressData.JobKey(j) == jobId);
+    }
+
+    /// <summary>
     /// Gets all unlocked jobs
     /// </summary>
     public List<JobDefinition> GetUnlockedJobs()
@@ -568,19 +647,6 @@ public class JobManager : MonoBehaviour, IDataPersistence
         return unlockable;
     }
 
-    /// <summary>
-    /// Updates the legacy Job component (if present) for backwards compatibility
-    /// </summary>
-    private void UpdateLegacyJobComponent()
-    {
-        if (legacyJob != null && CurrentJob != null)
-        {
-            // Legacy Job component may need stat syncing
-            // This maintains compatibility with old systems
-            Debug.Log($"Legacy Job component detected, consider migrating to new JobManager system");
-        }
-    }
-
     #endregion
 
     #region Data Persistence
@@ -590,22 +656,21 @@ public class JobManager : MonoBehaviour, IDataPersistence
         if (data == null || data.jobProgressData == null)
             return;
 
+        if (!IsPersistentUnit())
+            return;
+
         string unitName = gameObject.name;
 
         if (data.jobProgressData.TryGetValue(unitName, out JobProgressData loadedProgress))
         {
             progressData = loadedProgress;
 
-            // Resolve job references
-            if (!string.IsNullOrEmpty(loadedProgress.currentJob?.jobName))
-            {
-                var job = FindJobByName(loadedProgress.currentJob.jobName);
-                if (job != null)
-                    progressData.currentJob = job;
-            }
+            // Restore the current-job reference from its stable id
+            progressData.ResolveCurrentJob(allJobs);
         }
 
-        if (data.abilityMemoryData.TryGetValue(unitName, out AbilityMemory loadedMemory))
+        if (data.abilityMemoryData != null &&
+            data.abilityMemoryData.TryGetValue(unitName, out AbilityMemory loadedMemory))
         {
             abilityMemory = loadedMemory;
         }
@@ -616,9 +681,22 @@ public class JobManager : MonoBehaviour, IDataPersistence
         Debug.Log($"Loaded job data for {unitName}: {progressData}");
     }
 
+    /// <summary>
+    /// Only player (Hero) units persist job progress — enemies are spawned
+    /// per battle and would pollute the save file.
+    /// </summary>
+    private bool IsPersistentUnit()
+    {
+        var alliance = GetComponent<Alliance>();
+        return alliance != null && alliance.type == Alliances.Hero;
+    }
+
     public void SaveData(ref GameData data)
     {
         if (data == null)
+            return;
+
+        if (!IsPersistentUnit())
             return;
 
         string unitName = gameObject.name;
