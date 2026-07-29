@@ -34,8 +34,24 @@ public class TacticalComputerPlayer : ComputerPlayer
     // a plan — every plan mildly prefers safer ground when value is equal
     private const float ThreatPositionWeight = 0.15f;
 
+    // Healers weigh destination danger this many times harder than others
+    private const float HealerThreatMultiplier = 3f;
+
+    // Below this HP fraction the unit retreats unless a kill is available
+    private const float PanicHealthFraction = 0.3f;
+
+    // Panic retreat: how strongly closing distance to a healer outweighs
+    // tile danger (higher = beeline to the healer)
+    private const float HealSeekWeight = 3f;
+
+    // Idle healer positioning: pull toward the most wounded ally
+    private const float WoundedSeekWeight = 2f;
+
     // Danger estimate for the current evaluation, rebuilt each turn
     private ThreatMap threatMap;
+
+    // Threat weight for this evaluation (amplified for healers)
+    private float threatWeight = ThreatPositionWeight;
 
     private static readonly HashSet<string> BuffStatuses = new HashSet<string>
     {
@@ -66,6 +82,9 @@ public class TacticalComputerPlayer : ComputerPlayer
         public Tile fireTile;
         public Directions direction;
         public float score;
+
+        /// <summary>True when this plan's predicted damage finishes a foe.</summary>
+        public bool killsTarget;
     }
 
     /// <summary>
@@ -77,7 +96,26 @@ public class TacticalComputerPlayer : ComputerPlayer
     {
         var poa = new PlanOfAttack();
         threatMap = ThreatMap.Build(bc, actor);
+        threatWeight = IsHealer(actor) ? ThreatPositionWeight * HealerThreatMultiplier : ThreatPositionWeight;
         FindBestActions(out var best, out var bestStationary);
+
+        // Self-preservation: badly wounded and no kill on the table -> fall
+        // back toward a healer (or safety), landing a parting shot when one
+        // is available from the current tile.
+        if (IsPanicking() && (best == null || !best.killsTarget))
+        {
+            var destination = PanicDestination();
+            if (bestStationary != null && destination != actor.tile)
+            {
+                FillPlan(poa, bestStationary);
+                poa.actFirst = true;
+                poa.postActMoveLocation = destination.pos;
+                return poa;
+            }
+
+            poa.moveLocation = destination.pos;
+            return poa;
+        }
 
         var chosen = best;
         if (bestStationary != null && best != null &&
@@ -94,11 +132,14 @@ public class TacticalComputerPlayer : ComputerPlayer
 
         if (chosen != null)
         {
-            poa.ability = chosen.ability;
-            poa.target = Targets.Foe; // informational; targeting was resolved during scoring
-            poa.moveLocation = chosen.moveTile.pos;
-            poa.fireLocation = chosen.fireTile.pos;
-            poa.attackDirection = chosen.direction;
+            FillPlan(poa, chosen);
+        }
+        else if (IsHealer(actor))
+        {
+            // An idle healer stays useful and alive: drift toward the most
+            // wounded ally while avoiding dangerous ground.
+            poa.actFirst = false;
+            poa.moveLocation = HealerIdleTile().pos;
         }
         else
         {
@@ -107,6 +148,16 @@ public class TacticalComputerPlayer : ComputerPlayer
         }
 
         return poa;
+    }
+
+    // Copies a scored option into the plan
+    private static void FillPlan(PlanOfAttack poa, Option option)
+    {
+        poa.ability = option.ability;
+        poa.target = Targets.Foe; // informational; targeting was resolved during scoring
+        poa.moveLocation = option.moveTile.pos;
+        poa.fireLocation = option.fireTile.pos;
+        poa.attackDirection = option.direction;
     }
 
     /// <summary>
@@ -208,8 +259,9 @@ public class TacticalComputerPlayer : ComputerPlayer
             return;
 
         var score = 0f;
+        var kills = false;
         foreach (var tile in areaTiles)
-            score += ScoreTile(ability, tile);
+            score += ScoreTile(ability, tile, ref kills);
 
         if (score <= 0f)
             return;
@@ -218,9 +270,10 @@ public class TacticalComputerPlayer : ComputerPlayer
         if (mpCost != null)
             score -= mpCost.amount * MpCostWeight;
 
-        // Prefer safer ground when plans are otherwise equal
+        // Prefer safer ground when plans are otherwise equal (healers weigh
+        // danger several times harder — see threatWeight)
         if (threatMap != null)
-            score -= threatMap.GetThreat(moveTile) * ThreatPositionWeight;
+            score -= threatMap.GetThreat(moveTile) * threatWeight;
 
         Option candidate = null;
         if (best == null || score > best.score)
@@ -231,7 +284,8 @@ public class TacticalComputerPlayer : ComputerPlayer
                 moveTile = moveTile,
                 fireTile = fireTile,
                 direction = direction,
-                score = score
+                score = score,
+                killsTarget = kills
             };
             best = candidate;
         }
@@ -244,12 +298,13 @@ public class TacticalComputerPlayer : ComputerPlayer
                 moveTile = moveTile,
                 fireTile = fireTile,
                 direction = direction,
-                score = score
+                score = score,
+                killsTarget = kills
             };
         }
     }
 
-    private float ScoreTile(Ability ability, Tile tile)
+    private float ScoreTile(Ability ability, Tile tile, ref bool kills)
     {
         if (tile.content == null)
             return 0f;
@@ -283,13 +338,13 @@ public class TacticalComputerPlayer : ComputerPlayer
             if (chance <= 0f)
                 continue;
 
-            total += ScoreEffect(effect, tile, defender, defStats, isFoe, isDown) * chance;
+            total += ScoreEffect(effect, tile, defender, defStats, isFoe, isDown, ref kills) * chance;
         }
 
         return total;
     }
 
-    private float ScoreEffect(BaseAbilityEffect effect, Tile tile, Unit defender, Stats defStats, bool isFoe, bool isDown)
+    private float ScoreEffect(BaseAbilityEffect effect, Tile tile, Unit defender, Stats defStats, bool isFoe, bool isDown, ref bool kills)
     {
         switch (effect)
         {
@@ -303,6 +358,8 @@ public class TacticalComputerPlayer : ComputerPlayer
                     return -damage * AllyHitPenaltyFactor;
 
                 var hp = defStats[StatTypes.HP];
+                if (damage >= hp)
+                    kills = true;
                 float value = Mathf.Min(damage, hp); // overkill isn't worth extra
                 if (damage >= hp)
                     value += KillBonus;
@@ -407,6 +464,137 @@ public class TacticalComputerPlayer : ComputerPlayer
         }
 
         return closest;
+    }
+
+    /// <summary>True when the actor is wounded enough to prioritize survival.</summary>
+    private bool IsPanicking()
+    {
+        var stats = actor.GetComponent<Stats>();
+        if (stats == null)
+            return false;
+        return stats[StatTypes.HP] <= stats[StatTypes.MHP] * PanicHealthFraction;
+    }
+
+    /// <summary>True when the unit carries any heal or revive ability.</summary>
+    private static bool IsHealer(Unit unit)
+    {
+        foreach (var ability in unit.GetComponentsInChildren<Ability>())
+        {
+            if (ability.GetComponentInChildren<HealAbilityEffect>() != null ||
+                ability.GetComponentInChildren<ReviveAbilityEffect>() != null)
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// A living allied healer that could actually help: has a usable
+    /// (affordable) heal ability. Null when none exists.
+    /// </summary>
+    private Unit FindHealerAlly()
+    {
+        foreach (var other in bc.units)
+        {
+            if (other == null || other == actor || other.tile == null)
+                continue;
+
+            var otherAlliance = other.GetComponent<Alliance>();
+            if (otherAlliance == null || !alliance.IsMatch(otherAlliance, Targets.Ally))
+                continue;
+
+            var stats = other.GetComponent<Stats>();
+            if (stats == null || stats[StatTypes.HP] <= 0)
+                continue;
+
+            foreach (var ability in other.GetComponentsInChildren<Ability>())
+            {
+                if (ability.GetComponentInChildren<HealAbilityEffect>() != null && ability.CanPerform())
+                    return other;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Where a panicking unit runs: toward a helpful healer (danger-weighted)
+    /// when one exists, otherwise simply the safest reachable tile.
+    /// </summary>
+    private Tile PanicDestination()
+    {
+        var moveOptions = GetMoveOptions();
+        var healer = FindHealerAlly();
+        if (healer == null)
+            return SafestMoveTile(moveOptions);
+
+        Tile bestTile = actor.tile;
+        var bestCost = float.MaxValue;
+        foreach (var tile in moveOptions)
+        {
+            var distance = Mathf.Abs(tile.pos.x - healer.tile.pos.x) +
+                           Mathf.Abs(tile.pos.y - healer.tile.pos.y);
+            var cost = (threatMap != null ? threatMap.GetThreat(tile) : 0f) +
+                       distance * HealSeekWeight;
+            if (cost < bestCost)
+            {
+                bestCost = cost;
+                bestTile = tile;
+            }
+        }
+
+        return bestTile;
+    }
+
+    /// <summary>
+    /// Idle-healer positioning: near the most wounded living ally while
+    /// favoring low-danger tiles; safest tile when nobody is hurt.
+    /// </summary>
+    private Tile HealerIdleTile()
+    {
+        Unit wounded = null;
+        var worstFraction = 1f;
+        foreach (var other in bc.units)
+        {
+            if (other == null || other == actor || other.tile == null)
+                continue;
+
+            var otherAlliance = other.GetComponent<Alliance>();
+            if (otherAlliance == null || !alliance.IsMatch(otherAlliance, Targets.Ally))
+                continue;
+
+            var stats = other.GetComponent<Stats>();
+            if (stats == null || stats[StatTypes.HP] <= 0)
+                continue;
+
+            var fraction = stats[StatTypes.HP] / (float)Mathf.Max(1, stats[StatTypes.MHP]);
+            if (fraction < worstFraction)
+            {
+                worstFraction = fraction;
+                wounded = other;
+            }
+        }
+
+        var moveOptions = GetMoveOptions();
+        if (wounded == null)
+            return SafestMoveTile(moveOptions);
+
+        Tile bestTile = actor.tile;
+        var bestCost = float.MaxValue;
+        foreach (var tile in moveOptions)
+        {
+            var distance = Mathf.Abs(tile.pos.x - wounded.tile.pos.x) +
+                           Mathf.Abs(tile.pos.y - wounded.tile.pos.y);
+            var cost = (threatMap != null ? threatMap.GetThreat(tile) : 0f) +
+                       distance * WoundedSeekWeight;
+            if (cost < bestCost)
+            {
+                bestCost = cost;
+                bestTile = tile;
+            }
+        }
+
+        return bestTile;
     }
 
     /// <summary>

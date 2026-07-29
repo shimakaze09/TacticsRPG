@@ -28,8 +28,8 @@ difficulties with the tactical AI) · **1.5c** (hit-and-run) · **1.6**
 Remaining, in strict order:
 
 - ~~1.5d~~ AI threat map — **done** (2026-07-31)
-- **1.5e** AI self-preservation (low-HP retreat toward healer/safety) ← **next**
-- **1.5f** AI team focus fire + target value model
+- ~~1.5e~~ AI self-preservation — **done** (2026-07-31)
+- **1.5f** AI team focus fire + target value model ← **next**
 - **1.5g** AI support discipline (triage, MP reserve, buff openings, revive positioning)
 - **1.7** KO decay pickup (memory-core/salvage), corpses stop blocking pathing
 - **1.8** Real battle setup: spawn zones in LevelData, authored victory conditions
