@@ -212,7 +212,12 @@ public class BattleFlowState : BaseGameFlowState
     private void DebugForceEndBattle()
     {
         Debug.Log("[BattleFlowState] DEBUG: Force ending battle");
-        Controller.NotifyBattleEnded();
+        Controller.NotifyBattleEnded(new BattleResultsData
+        {
+            victory = true,
+            itemsGained = new string[0],
+            playerUnits = new Unit[0]
+        });
     }
 
     #endregion

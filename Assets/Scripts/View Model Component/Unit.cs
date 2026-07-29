@@ -10,6 +10,9 @@ public class Unit : MonoBehaviour, IDataPersistence
 
     public void LoadData(GameData data)
     {
+        if (!IsPersistentUnit())
+            return;
+
         stats ??= GetComponent<Stats>();
         if (stats != null && data.unitLevel.TryGetValue(_name, out var exp))
             stats.SetValue(StatTypes.EXP, exp, false);
@@ -17,6 +20,11 @@ public class Unit : MonoBehaviour, IDataPersistence
 
     public void SaveData(ref GameData data)
     {
+        // Only player (Hero) units persist — per-battle enemies would
+        // pollute the save file (and clash on duplicate names).
+        if (!IsPersistentUnit())
+            return;
+
         rank ??= GetComponent<Rank>();
         if (rank == null)
             return;
@@ -24,6 +32,12 @@ public class Unit : MonoBehaviour, IDataPersistence
         if (data.unitLevel.ContainsKey(_name))
             data.unitLevel.Remove(_name);
         data.unitLevel.Add(_name, rank.EXP);
+    }
+
+    private bool IsPersistentUnit()
+    {
+        var alliance = GetComponent<Alliance>();
+        return alliance != null && alliance.type == Alliances.Hero;
     }
 
     private void Awake()

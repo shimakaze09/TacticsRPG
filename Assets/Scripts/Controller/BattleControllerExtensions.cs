@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Battle state extension methods for GameStateManager integration
+/// Battle state extension methods for GameFlowController integration
 /// Add these methods to BattleController to support post-battle flow
 /// </summary>
 public static class BattleControllerExtensions
@@ -25,20 +25,14 @@ public static class BattleControllerExtensions
 
         Debug.Log($"[BattleController] Battle ended. Victory: {victory}, EXP: {resultsData.expGained}, JP: {resultsData.jpGained}");
 
-        // Notify GameFlowController (new system)
         if (GameFlowController.Instance != null)
         {
-            GameFlowController.Instance.NotifyBattleEnded();
-        }
-        // Fallback to GameStateManager (legacy system)
-        else if (GameStateManager.Instance != null)
-        {
-            GameStateManager.Instance.OnBattleEnded(victory, resultsData);
+            GameFlowController.Instance.NotifyBattleEnded(resultsData);
         }
         else
         {
-            Debug.LogError("[BattleController] No GameFlowController or GameStateManager found! Cannot transition to PostBattle.");
-            
+            Debug.LogError("[BattleController] No GameFlowController found! Cannot transition to PostBattle.");
+
             // Fallback: Load main menu
             UnityEngine.SceneManagement.SceneManager.LoadScene(0);
         }
@@ -103,11 +97,10 @@ public static class BattleControllerExtensions
 
     private static int CountDefeatedEnemies(BattleController battle)
     {
-        // Count defeated enemy units
+        // Count defeated enemy units. A unit is defeated when its HP has hit
+        // its floor (MinHP can be > 0 for DefeatTarget victory conditions).
         int count = 0;
-        
-        // This is a simplified version - you might need to track defeated enemies differently
-        // For now, assume all non-player units were defeated if battle was won
+
         foreach (var unit in battle.units)
         {
             if (unit != null)
@@ -116,15 +109,15 @@ public static class BattleControllerExtensions
                 if (alliance != null && alliance.type != Alliances.Hero)
                 {
                     var health = unit.GetComponent<Health>();
-                    if (health == null || health.HP <= 0)
+                    if (health == null || health.HP <= health.MinHP)
                     {
                         count++;
                     }
                 }
             }
         }
-        
-        return count > 0 ? count : 3; // Default to 3 if counting failed
+
+        return count;
     }
 
     #endregion

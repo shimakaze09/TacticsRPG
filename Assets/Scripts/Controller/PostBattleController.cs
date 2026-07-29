@@ -74,7 +74,7 @@ public class PostBattleController : MonoBehaviour
 
     /// <summary>
     /// Initialize with battle results data
-    /// Called by GameStateManager when entering PostBattle state
+    /// Called by GameFlowController when entering PostBattle state
     /// </summary>
     public void Initialize(BattleResultsData data)
     {
@@ -175,8 +175,11 @@ public class PostBattleController : MonoBehaviour
         uiManager.ShowMenu(MenuType.BattleResults);
 
         // Populate results panel with data
-        // (You'll need to create a BattleResultsPanelController to display this)
-        // var resultsPanel = uiManager.GetPanel<BattleResultsPanelController>();
+        if (uiManager.battleResultsPanel != null)
+        {
+            var resultsPanel = uiManager.battleResultsPanel.GetComponent<BattleResultsPanelController>();
+            resultsPanel?.Display(resultsData);
+        }
         // if (resultsPanel != null)
         // {
         //     resultsPanel.ShowResults(resultsData);
@@ -219,7 +222,7 @@ public class PostBattleController : MonoBehaviour
                 continue;
 
             var rank = unit.GetComponent<Rank>();
-            if (rank != null && rank.DidLevelUp())
+            if (rank != null && rank.DidLevelUp(resultsData.expGained))
             {
                 leveledUpUnits.Add(unit);
                 Debug.Log($"[PostBattleController] {unit.name} leveled up!");
@@ -376,7 +379,7 @@ public class PostBattleController : MonoBehaviour
         OnShopEntered?.Invoke();
 
         // Transition to shop state
-        GameStateManager.Instance?.OpenShop();
+        GameFlowController.Instance?.EnterShop();
     }
 
     #endregion
@@ -407,7 +410,7 @@ public class PostBattleController : MonoBehaviour
         OnPostBattleCompleted?.Invoke();
 
         // Notify game state manager that post-battle is complete
-        GameStateManager.Instance?.OnPostBattleCompleted();
+        GameFlowController.Instance?.EnterWorld();
     }
 
     #endregion

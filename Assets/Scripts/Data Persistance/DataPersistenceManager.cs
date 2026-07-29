@@ -12,6 +12,10 @@ public class DataPersistenceManager : MonoBehaviour
 
     private GameData gameData;
 
+    // True once LoadGame/NewGame has produced authoritative data; late
+    // registrants (battle-spawned units) get that data applied immediately.
+    private bool hasAuthoritativeData;
+
     public static DataPersistenceManager Instance { get; private set; }
 
     #region MonoBehaviour
@@ -26,6 +30,9 @@ public class DataPersistenceManager : MonoBehaviour
         }
 
         Instance = this;
+        // DontDestroyOnLoad only works on root objects; the scene may have
+        // this manager nested under a parent.
+        transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
     }
 
@@ -48,6 +55,13 @@ public class DataPersistenceManager : MonoBehaviour
     public void NewGame()
     {
         gameData = new GameData();
+        hasAuthoritativeData = true;
+
+        // Push the fresh data to every live object so stale in-memory state
+        // from a previous session cannot leak into the new game's first save.
+        PruneNullEntries();
+        foreach (var dataPersistenceObject in dataPersistenceObjects)
+            dataPersistenceObject.LoadData(gameData);
     }
 
     public void LoadGame()
@@ -57,13 +71,15 @@ public class DataPersistenceManager : MonoBehaviour
         // load any saved data from a file using the data handler
         gameData = dataHandler.Load();
 
-        // if no data can be loaded, initialize the a new game
-
+        // if no data can be loaded, initialize a new game
         if (gameData == null)
         {
             Debug.Log("No data was found. Initializing to defaults.");
             NewGame();
+            return; // NewGame already pushed the data
         }
+
+        hasAuthoritativeData = true;
 
         // push the loaded data to all other scripts that need it
         foreach (var dataPersistenceObject in dataPersistenceObjects)
@@ -92,14 +108,19 @@ public class DataPersistenceManager : MonoBehaviour
 
     private IEnumerable<IDataPersistence> FindAllDataPersistenceObjects()
     {
-        return FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).OfType<IDataPersistence>();
+        return FindObjectsByType<MonoBehaviour>().OfType<IDataPersistence>();
     }
 
     private void PruneNullEntries()
     {
         for (var i = dataPersistenceObjects.Count - 1; i >= 0; i--)
-            if (dataPersistenceObjects[i] == null)
+        {
+            var obj = dataPersistenceObjects[i];
+            // The interface-typed null check misses destroyed Unity objects
+            // (overloaded == is bypassed), so check both.
+            if (obj == null || (obj is Object unityObj && unityObj == null))
                 dataPersistenceObjects.RemoveAt(i);
+        }
     }
 
     private void RegisterExistingSceneObjects()
@@ -114,6 +135,11 @@ public class DataPersistenceManager : MonoBehaviour
             return;
 
         dataPersistenceObjects.Add(persistence);
+
+        // Battle units spawn long after LoadGame ran — apply the loaded data
+        // to late registrants so saved progression is actually restored.
+        if (hasAuthoritativeData && gameData != null)
+            persistence.LoadData(gameData);
     }
 
     private void UnregisterInternal(IDataPersistence persistence)

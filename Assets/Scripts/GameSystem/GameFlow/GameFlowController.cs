@@ -72,6 +72,12 @@ public class GameFlowController : StateMachine
     public LevelData PendingBattleLevel { get; set; }
 
     /// <summary>
+    /// Results of the most recently completed battle (set by NotifyBattleEnded,
+    /// consumed by the post-battle flow)
+    /// </summary>
+    public BattleResultsData LastBattleResults { get; private set; }
+
+    /// <summary>
     /// Whether we're currently in a transition
     /// </summary>
     public bool IsTransitioning => _inTransition;
@@ -427,13 +433,32 @@ public class GameFlowController : StateMachine
     #region Battle Integration
 
     /// <summary>
-    /// Called by BattleController when battle ends
+    /// Called by BattleController when battle ends. Stores the results
+    /// payload and routes to PostBattle on victory or Title on defeat.
     /// </summary>
-    public void NotifyBattleEnded()
+    public void NotifyBattleEnded(BattleResultsData results)
     {
-        Debug.Log("[GameFlow] Battle ended notification received");
+        LastBattleResults = results;
+        Debug.Log($"[GameFlow] Battle ended notification received. Victory: {results?.victory}");
+
         OnBattleEnded?.Invoke();
+
+        if (results != null && !results.victory)
+        {
+            // Defeat: back to title (game-over screen when one exists)
+            ReturnToTitle();
+            return;
+        }
+
         ReturnToPostBattle();
+
+        // Hand the results to the scene's post-battle controller, if present
+        var postBattle = FindAnyObjectByType<PostBattleController>();
+        if (postBattle != null && results != null)
+        {
+            postBattle.enabled = true;
+            postBattle.Initialize(results);
+        }
     }
 
     #endregion

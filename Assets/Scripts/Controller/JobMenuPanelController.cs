@@ -10,7 +10,7 @@ using UnityEngine;
 /// - Can be shown from PostBattleController (after battle victory)
 /// - Can be shown from World/Menu (when implemented)
 /// - Works with UIManager for proper state management
-/// - Integrates with GameStateManager for context awareness
+/// - Integrates with GameFlowController for context awareness
 /// </summary>
 public class JobMenuPanelController : MonoBehaviour
 {
@@ -363,7 +363,7 @@ public class JobMenuPanelController : MonoBehaviour
     [ContextMenu("Debug: Test Show")]
     private void DebugTestShow()
     {
-        var jobManager = FindFirstObjectByType<JobManager>();
+        var jobManager = FindAnyObjectByType<JobManager>();
         if (jobManager != null)
         {
             Show(jobManager);
@@ -385,7 +385,7 @@ public class JobMenuPanelController : MonoBehaviour
     /// </summary>
     public void OnNextUnitButton()
     {
-        var postBattleController = FindFirstObjectByType<PostBattleController>();
+        var postBattleController = FindAnyObjectByType<PostBattleController>();
         if (postBattleController != null && postBattleController.enabled)
         {
             Hide();
@@ -403,7 +403,7 @@ public class JobMenuPanelController : MonoBehaviour
     /// </summary>
     public void OnPreviousUnitButton()
     {
-        var postBattleController = FindFirstObjectByType<PostBattleController>();
+        var postBattleController = FindAnyObjectByType<PostBattleController>();
         if (postBattleController != null && postBattleController.enabled)
         {
             Hide();
@@ -420,13 +420,13 @@ public class JobMenuPanelController : MonoBehaviour
     /// </summary>
     public bool IsPostBattleContext()
     {
-        if (GameStateManager.Instance != null)
+        if (GameFlowController.Instance != null)
         {
-            return GameStateManager.Instance.IsPostBattle();
+            return GameFlowController.Instance.CurrentFlowState == GameFlowState.PostBattle;
         }
 
         // Fallback: Check if PostBattleController exists and is enabled
-        var postBattleController = FindFirstObjectByType<PostBattleController>();
+        var postBattleController = FindAnyObjectByType<PostBattleController>();
         return postBattleController != null && postBattleController.enabled;
     }
 

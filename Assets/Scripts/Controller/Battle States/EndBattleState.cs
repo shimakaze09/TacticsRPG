@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class EndBattleState : BattleState
@@ -7,33 +7,31 @@ public class EndBattleState : BattleState
     {
         base.Enter();
 
-        // Check victory condition
         bool victory = CheckVictoryCondition();
 
-        // Use new GameStateManager integration if available
-        if (GameStateManager.Instance != null)
+        if (GameFlowController.Instance != null)
         {
-            // Transition to PostBattle state with results
             owner.EndBattleWithResults(victory);
         }
         else
         {
-            // Fallback to old behavior (reload random level)
-            Debug.LogWarning("[EndBattleState] GameStateManager not found, using legacy behavior");
-            var level = Random.Range(0, 4);
-            owner.levelData = Resources.Load<LevelData>($"Levels/Level_{level}.asset");
+            // No flow controller (battle scene played directly in the editor):
+            // just return to the title scene.
+            Debug.LogWarning("[EndBattleState] GameFlowController not found, returning to title scene");
             SceneManager.LoadScene(0);
         }
     }
 
     /// <summary>
-    /// Check if player won or lost
-    /// (You can customize this based on your victory conditions)
+    /// Determines the battle outcome. Prefers the installed victory
+    /// condition's verdict; falls back to "any hero still standing".
     /// </summary>
     private bool CheckVictoryCondition()
     {
-        // Simple check: If any player units are alive, it's a victory
-        // You should customize this based on your actual victory conditions
+        var condition = owner.GetComponent<BaseVictoryCondition>();
+        if (condition != null && condition.Victor != Alliances.None)
+            return condition.Victor == Alliances.Hero;
+
         foreach (var unit in owner.units)
         {
             if (unit != null)
@@ -42,7 +40,7 @@ public class EndBattleState : BattleState
                 var health = unit.GetComponent<Health>();
 
                 if (alliance != null && alliance.type == Alliances.Hero &&
-                    health != null && health.HP > 0)
+                    health != null && health.HP > health.MinHP)
                 {
                     return true; // At least one player unit alive = victory
                 }
