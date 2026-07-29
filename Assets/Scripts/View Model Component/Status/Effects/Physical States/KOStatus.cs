@@ -77,21 +77,22 @@ public class KOStatus : StatusEffect
         }
     }
 
+    // Converts the fallen unit into collectible remains and removes it from
+    // battle entirely — it no longer occupies its tile, takes scheduler
+    // ticks, or appears in AI planning.
     private void BecomePermaKO()
     {
-        // Randomly choose crystal or treasure (50/50)
-        bool isCrystal = Random.value > 0.5f;
+        bool isCore = Random.value > 0.5f;
+        RemainsPickup.Spawn(owner, isCore);
 
-        // Remove KO status
-        var cond = GetComponentInChildren<StatusCondition>();
-        if (cond != null)
-            cond.Remove();
+        var bc = FindAnyObjectByType<BattleController>();
+        if (bc != null)
+            bc.units.Remove(owner);
 
-        // Add crystal or treasure status
-        if (isCrystal)
-            owner.gameObject.AddComponent<MemoryCoreStatus>();
-        else
-            owner.gameObject.AddComponent<SalvageStatus>();
+        if (owner.tile != null && owner.tile.content == owner.gameObject)
+            owner.tile.content = null;
+
+        Destroy(owner.gameObject);
     }
 
     public int GetDeathCounter()
