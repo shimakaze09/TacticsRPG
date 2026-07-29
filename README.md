@@ -36,5 +36,9 @@ Without this step, `JobManager` finds no jobs ("No jobs available!"),
 
 ## Project docs
 
-- `Docs/CODE_AUDIT.md` — full code audit: confirmed bugs, dead/stubbed systems,
-  data consistency issues, FFT mechanic gaps, and the phased remediation plan.
+- `Docs/ROADMAP.md` — **the master work queue** (start here); statuses mirror BATTLE_PLAN.
+- `Docs/BATTLE_PLAN.md` — battle-system queue: fixes, original pillars, polish, tuning.
+- `Docs/WORLD.md` — world bible: setting, job roster, naming conventions, combat/number law.
+- `Docs/PROJECT_REVIEW.md` — architecture review and structure audit (historical + addenda).
+- `Docs/CODE_AUDIT.md` — the 2026-07-28 line-level audit snapshot, with a current
+  status header showing what's since been fixed.

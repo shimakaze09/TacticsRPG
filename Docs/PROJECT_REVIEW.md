@@ -56,6 +56,16 @@ pipeline regenerated + verified in-editor (`Resources.Load` probes pass, 0 conso
 errors). Status identifiers in `effects[].status` are intentionally unchanged (coupled
 to C# status classes — later pass, documented in WORLD.md §4).
 
+### Update 2026-07-31 — this table is now historical
+
+Every row below has since been resolved except where noted: the unarmed NRE,
+persistence pillar, inert buff/debuffs, status parenting, job-system bugs, and
+data integrity are **fixed and verified**; `SmartComputerPlayer` was deleted in
+favor of `TacticalComputerPlayer` (Hard difficulty). Scene wiring is **partially
+open**: the post-battle results flow is wired in Battle.unity, while the
+job-menu canvas and title screen remain queued (ROADMAP §6). The live queue is
+`ROADMAP.md` / `BATTLE_PLAN.md`.
+
 ### Verified still open — highest-impact items (as of the review; see note above)
 
 | Priority | Finding | Ref |

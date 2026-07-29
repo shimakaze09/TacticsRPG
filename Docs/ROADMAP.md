@@ -1,8 +1,9 @@
 # Roadmap — the master work queue
 
-**Updated:** 2026-07-30. Ordered top-down; battle-scoped detail lives in
+**Updated:** 2026-07-31. Ordered top-down; battle-scoped detail lives in
 `BATTLE_PLAN.md`, structure/audit history in `PROJECT_REVIEW.md` + `CODE_AUDIT.md`,
-world/content rules in `WORLD.md`.
+world/content rules in `WORLD.md`. Statuses here mirror BATTLE_PLAN — when in
+doubt, BATTLE_PLAN §1 is the authority for battle items.
 
 ## 1. Documentation passes (in progress)
 
@@ -15,13 +16,28 @@ pushed commit:
 3. UI/animation/audio/items/tools
 
 Convention (see `CLAUDE.md`): file summary + method comments, nothing noisier.
+Files touched by feature work get their method comments in the same change.
 
 ## 2. Battle fixes — finish BATTLE_PLAN §1
 
-- **1.6** Line-of-sight + high-ground rules for ranged combat
+Done so far: **1.1–1.4** (status honesty, per-owner durations, condition
+parenting, control accuracy) · **1.5/1.5b** (AI patterns rebuilt, Easy/Hard
+difficulties with the tactical AI) · **1.5c** (hit-and-run) · **1.6**
+(line-of-sight + high ground).
+
+Remaining, in strict order:
+
+- **1.5d** AI threat map (per-tile expected damage — foundation for 1.5e–g) ← **next**
+- **1.5e** AI self-preservation (low-HP retreat toward healer/safety)
+- **1.5f** AI team focus fire + target value model
+- **1.5g** AI support discipline (triage, MP reserve, buff openings, revive positioning)
 - **1.7** KO decay pickup (memory-core/salvage), corpses stop blocking pathing
 - **1.8** Real battle setup: spawn zones in LevelData, authored victory conditions
-  (replace the random test spawner)
+- **1.9** Equipment actually equips (audit §6 — `Equip()` has no callers)
+- **1.10** Elements + critical hits via TweakDamage (audit §8)
+- **1.11** Behavior-control statuses seize control: Swayed/Scrambled/Redline (audit §4)
+- **1.12** Scrip moves from PlayerPrefs into GameData (audit §6)
+- **1.13** jpCost design decision: JP-buys-abilities or delete the field (audit §5)
 
 ## 3. Original pillars — BATTLE_PLAN §2 (design + build, in order)
 
