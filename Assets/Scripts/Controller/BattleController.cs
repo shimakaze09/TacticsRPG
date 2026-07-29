@@ -16,7 +16,7 @@ public class BattleController : StateMachine
     public IEnumerator round;
     public StatPanelController statPanelController;
     public Transform tileSelectionIndicator;
-    public Turn turn = new();
+    [System.NonSerialized] public Turn turn = new();
     public List<Unit> units = new();
     public Tile currentTile => board.GetTile(pos);
 

@@ -46,6 +46,13 @@ public class Health : MonoBehaviour
 
     private void OnHPWillChange(StatWillChangeEvent e)
     {
+        if (e.StatType == StatTypes.MHP)
+        {
+            // Global cap: no unit's max HP may exceed the engine ceiling
+            e.Exception.AddModifier(new ClampValueModifier(int.MaxValue, 1, StatLimits.MaxHP));
+            return;
+        }
+
         if (e.StatType != StatTypes.HP)
             return;
 

@@ -29,9 +29,10 @@ public abstract class HitRate : MonoBehaviour
 
     public virtual bool RollForHit(Tile target)
     {
-        var roll = Random.Range(0, 101);
+        // roll in [0, 99]: chance 0 never hits, chance 100 always hits
+        var roll = Random.Range(0, 100);
         var chance = Calculate(target);
-        return roll <= chance;
+        return roll < chance;
     }
 
     #endregion

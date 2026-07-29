@@ -21,17 +21,23 @@ public class WeaponAbilityPower : BaseAbilityPower
     private int PowerFromEquippedWeapon()
     {
         var eq = GetComponentInParent<Equipment>();
-        var item = eq.GetItem(EquipSlots.Primary);
-        var features = item.GetComponentsInChildren<StatModifierFeature>();
+        var item = eq != null ? eq.GetItem(EquipSlots.Primary) : null;
+        if (item == null)
+            return 0;
 
+        var features = item.GetComponentsInChildren<StatModifierFeature>();
         return features.Where(t => t.type == StatTypes.ATK).Sum(t => t.amount);
     }
 
     private int UnarmedPower()
     {
-        var job = GetComponentInParent<Job>();
-        for (var i = 0; i < Job.statOrder.Length; i++)
-            if (Job.statOrder[i] == StatTypes.ATK)
+        var jobManager = GetComponentInParent<JobManager>();
+        var job = jobManager != null ? jobManager.CurrentJob : null;
+        if (job == null)
+            return 0;
+
+        for (var i = 0; i < JobManager.statOrder.Length; i++)
+            if (JobManager.statOrder[i] == StatTypes.ATK)
                 return job.baseStats[i];
         return 0;
     }

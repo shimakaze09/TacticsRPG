@@ -108,11 +108,15 @@ public class TweakDamageEvent
     public Unit Target { get; }
     public List<ValueModifier> Modifiers { get; }
 
-    public TweakDamageEvent(Unit attacker, Unit target, List<ValueModifier> modifiers)
+    /// <summary>True when the damage source is physical (PhysicalAbilityPower); false for magical.</summary>
+    public bool IsPhysical { get; }
+
+    public TweakDamageEvent(Unit attacker, Unit target, List<ValueModifier> modifiers, bool isPhysical = true)
     {
         Attacker = attacker;
         Target = target;
         Modifiers = modifiers;
+        IsPhysical = isPhysical;
     }
 }
 

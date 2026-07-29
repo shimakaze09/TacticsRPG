@@ -17,15 +17,14 @@ public class DamageAbilityEffect : BaseAbilityEffect
         // mission items, support check, status check, and equipment, etc
         var defense = GetStat(attacker, defender, typeof(GetDefenseStatEvent), 0);
 
-        // Calculate base damage
-        var damage = attack - defense / 2;
-        damage = Mathf.Max(damage, 1);
-
         // Get the abilities power stat considering possible variations
         var power = GetStat(attacker, defender, typeof(GetPowerEvent), 0);
 
-        // Apply power bonus
-        damage = power * damage / 100;
+        // Damage scales multiplicatively with the attack stat (power 100 =
+        // one ATK's worth), so gear/buffs that raise ATK flow through every
+        // ability; defense mitigates flat. Crits/elements/multipliers belong
+        // in the TweakDamageEvent stage below.
+        var damage = attack * power / 100 - defense / 2;
         damage = Mathf.Max(damage, 1);
 
         // Tweak the damage based on a variety of other checks like

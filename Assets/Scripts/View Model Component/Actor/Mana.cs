@@ -49,10 +49,17 @@ public class Mana : MonoBehaviour
 
     private void OnMPWillChange(StatWillChangeEvent e)
     {
+        if (e.StatType == StatTypes.MMP)
+        {
+            // Global cap: no unit's max MP may exceed the engine ceiling
+            e.Exception.AddModifier(new ClampValueModifier(int.MaxValue, 0, StatLimits.MaxMP));
+            return;
+        }
+
         if (e.StatType != StatTypes.MP)
             return;
 
-        e.Exception.AddModifier(new ClampValueModifier(int.MaxValue, 0, stats[StatTypes.MHP]));
+        e.Exception.AddModifier(new ClampValueModifier(int.MaxValue, 0, stats[StatTypes.MMP]));
     }
 
     private void OnMMPDidChange(StatDidChangeEvent e)

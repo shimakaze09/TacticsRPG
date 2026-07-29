@@ -6,7 +6,7 @@ public class Board : MonoBehaviour
 {
     #region Fields / Properties
 
-    public Dictionary<Point, Tile> tiles = new();
+    [NonSerialized] public Dictionary<Point, Tile> tiles = new();
     public Point min => _min;
     public Point max => _max;
     private Point _min;

@@ -6,8 +6,8 @@ public abstract class BaseAbilityEffect : MonoBehaviour
 {
     #region Consts
 
-    protected const int minDamage = -999;
-    protected const int maxDamage = 999;
+    protected const int minDamage = StatLimits.MinDamagePerHit;
+    protected const int maxDamage = StatLimits.MaxDamagePerHit;
 
     #endregion
 
@@ -52,7 +52,8 @@ public abstract class BaseAbilityEffect : MonoBehaviour
         else if (eventType == typeof(GetPowerEvent))
             this.Publish(new GetPowerEvent(attacker, target, mods));
         else if (eventType == typeof(TweakDamageEvent))
-            this.Publish(new TweakDamageEvent(attacker, target, mods));
+            this.Publish(new TweakDamageEvent(attacker, target, mods,
+                GetComponentInParent<PhysicalAbilityPower>() != null));
 
         mods.Sort(Compare);
 
