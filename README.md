@@ -1,8 +1,11 @@
 # TacticsRPG
 
-A job-system tactics RPG built in Unity, set in an original post-collapse
-world — see `Docs/WORLD.md` for the setting bible ("The Long Autumn"),
-job roster, and naming conventions.
+A turn-based tactics RPG built in Unity 6, set in "The Long Autumn" — an
+original post-collapse world where magic is half-understood machine Protocol,
+mercenary Charters replace nations, and a map-controlling Church rewrites
+history. Grid battles with height and line-of-sight, a 23-job certification
+tree with per-job ability kits, turn-order manipulation, and two difficulty
+modes backed by distinct AI brains.
 
 ## Requirements
 
@@ -34,11 +37,3 @@ Without this step, `JobManager` finds no jobs ("No jobs available!"),
 - `Assets/Scenes/Battle.unity` — the battle scene, loaded by name.
 - `Assets/Scenes/BoardCreator.unity` — editor-only board authoring tool (disabled in build settings).
 
-## Project docs
-
-- `Docs/ROADMAP.md` — **the master work queue** (start here); statuses mirror BATTLE_PLAN.
-- `Docs/BATTLE_PLAN.md` — battle-system queue: fixes, original pillars, polish, tuning.
-- `Docs/WORLD.md` — world bible: setting, job roster, naming conventions, combat/number law.
-- `Docs/PROJECT_REVIEW.md` — architecture review and structure audit (historical + addenda).
-- `Docs/CODE_AUDIT.md` — the 2026-07-28 line-level audit snapshot, with a current
-  status header showing what's since been fixed.

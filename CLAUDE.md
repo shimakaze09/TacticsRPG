@@ -38,3 +38,9 @@ Every script must be understandable from its comments alone:
 - Verify script changes with a headless compile before handing back;
   content changes additionally need regeneration + an in-editor check
   (Unity MCP is configured via `.mcp.json`).
+- **Docs stay synced, always**: completing any queue item updates its status
+  row in ROADMAP.md *and* BATTLE_PLAN.md (and any other doc that mentions it)
+  in the same commit as the work. Docs must never disagree with reality or
+  each other.
+- **README describes the project only** — what the game is. No doc-directory
+  listings, no workflow notes (those live here and in Docs/).
