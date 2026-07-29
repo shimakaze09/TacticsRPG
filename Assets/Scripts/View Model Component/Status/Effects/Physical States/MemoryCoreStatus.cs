@@ -5,7 +5,7 @@ using UnityEngine;
 /// Allows other units to step on tile to restore HP/MP or learn abilities.
 /// Unit is permanently dead and cannot be targeted.
 /// </summary>
-public class CrystalStatus : StatusEffect
+public class MemoryCoreStatus : StatusEffect
 {
     [Tooltip("Duration before crystal disappears (turns)")]
     public int crystalDuration = 3;

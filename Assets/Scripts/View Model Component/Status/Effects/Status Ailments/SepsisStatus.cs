@@ -4,7 +4,7 @@ using UnityEngine;
 /// Poison: At the end of each turn, take damage equal to 1/8 of maximum HP.
 /// Lasts for 36 ticks (~3-4 turns). Opposed to Regen.
 /// </summary>
-public class PoisonStatus : StatusEffect
+public class SepsisStatus : StatusEffect
 {
     [Tooltip("Damage as fraction of max HP (0.125 = 1/8 = 12.5%)")]
     public float damagePercent = 0.125f;

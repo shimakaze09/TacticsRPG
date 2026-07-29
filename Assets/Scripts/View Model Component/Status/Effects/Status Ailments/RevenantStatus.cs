@@ -4,7 +4,7 @@ using UnityEngine;
 /// Undead: HP cannot be restored by normal means (healing damages instead).
 /// Raise/Arise incur HP damage. Death spell fully heals.
 /// </summary>
-public class UndeadStatus : StatusEffect
+public class RevenantStatus : StatusEffect
 {
     private Stats stats;
 

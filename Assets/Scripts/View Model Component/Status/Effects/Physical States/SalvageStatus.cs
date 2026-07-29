@@ -5,7 +5,7 @@ using UnityEngine;
 /// Grants item/weapon/equipment when another unit steps on the tile.
 /// Unit is permanently dead and cannot be targeted.
 /// </summary>
-public class TreasureStatus : StatusEffect
+public class SalvageStatus : StatusEffect
 {
     [Tooltip("Duration before treasure disappears (turns)")]
     public int treasureDuration = 5;

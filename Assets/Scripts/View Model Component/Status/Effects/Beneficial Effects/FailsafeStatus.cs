@@ -4,7 +4,7 @@ using UnityEngine;
 /// Reraise: When KO'd at 100 CT, revive with 10% max HP instead of decreasing death counter.
 /// Does not naturally wear off. Nullifies Doom if present.
 /// </summary>
-public class ReraiseStatus : StatusEffect
+public class FailsafeStatus : StatusEffect
 {
     private Unit owner;
     private Stats stats;
@@ -56,7 +56,7 @@ public class ReraiseStatus : StatusEffect
         stats.SetValue(StatTypes.HP, reviveHP, false);
 
         // Remove Reraise after use
-        var cond = GetComponent<StatusCondition>();
+        var cond = GetComponentInChildren<StatusCondition>();
         if (cond != null)
             cond.Remove();
         else

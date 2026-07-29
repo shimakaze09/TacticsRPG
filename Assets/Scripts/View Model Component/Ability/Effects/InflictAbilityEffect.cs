@@ -33,8 +33,9 @@ public class InflictAbilityEffect : BaseAbilityEffect
     }
 
     // Status data uses bare names ("Poison") while the classes are suffixed
-    // ("PoisonStatus"), so try both spellings.
-    private static Type ResolveStatusType(string name)
+    // ("SepsisStatus"), so try both spellings. Public so the AI can check
+    // whether a target already carries a status before re-applying it.
+    public static Type ResolveStatusType(string name)
     {
         if (string.IsNullOrEmpty(name))
             return null;

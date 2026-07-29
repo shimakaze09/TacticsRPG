@@ -5,7 +5,7 @@ using UnityEngine;
 /// Prevents reaction abilities and special movement abilities.
 /// Cancelled when afflicted unit takes damage.
 /// </summary>
-public class ConfuseStatus : DamageRemovableStatusEffect
+public class ScrambledStatus : DamageRemovableStatusEffect
 {
     private Unit owner;
 

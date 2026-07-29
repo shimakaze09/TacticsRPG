@@ -1,13 +1,14 @@
 using UnityEngine;
 
 /// <summary>
-/// Shell: Magical attacks against this unit have their effective magical attack reduced by 1/3.
-/// Affects damage of spells and accuracy of status spells. Lasts for 32 clock ticks (~3-4 turns).
+/// Haste: Unit gains 50% more CT each clock tick, allowing them to act more often.
+/// Does not directly affect Speed stat. Lasts for 32 clock ticks (~3-4 turns).
+/// Opposed to Slow.
 /// </summary>
-public class ShellStatus : StatusEffect
+public class OverclockStatus : StatusEffect
 {
-    [Tooltip("Magical defense multiplier (0.667 = reduce damage by 1/3)")]
-    public float resistMultiplier = 0.667f;
+    [Tooltip("CT gain multiplier (2.0 = double CT gain = 50% more)")]
+    public float ctMultiplier = 1.5f;
 
     private Stats stats;
 
@@ -29,11 +30,11 @@ public class ShellStatus : StatusEffect
 
     private void OnStatWillChange(StatWillChangeEvent e)
     {
-        // Boost magical defense/resistance
-        if (e.StatType == StatTypes.RES)
+        // Increase CT gain (if your system uses CTR or similar stat)
+        if (e.StatType == StatTypes.CTR)
         {
-            // Increase resistance by ~50% (equivalent to reducing magic attack by 1/3)
-            var modifier = new MultValueModifier(0, 1.5f);
+            // Double the CT increment
+            var modifier = new MultDeltaModifier(0, 2);
             e.Exception.AddModifier(modifier);
         }
     }

@@ -4,7 +4,7 @@ using UnityEngine;
 /// Slow: Unit's effective speed is halved (round down).
 /// Lasts for 32 ticks (~3-4 turns). Opposed to Haste.
 /// </summary>
-public class SlowStatus : StatusEffect
+public class ThrottleStatus : StatusEffect
 {
     [Tooltip("CT gain multiplier (0.5 = half CT gain)")]
     public float ctMultiplier = 0.5f;

@@ -6,7 +6,7 @@ using UnityEngine;
 /// All magic cast on unit has no effect.
 /// Lasts for 32 ticks (~3-4 turns). Cannot be protected against or healed.
 /// </summary>
-public class AtheistStatus : StatusEffect
+public class DesyncStatus : StatusEffect
 {
     private Stats stats;
 

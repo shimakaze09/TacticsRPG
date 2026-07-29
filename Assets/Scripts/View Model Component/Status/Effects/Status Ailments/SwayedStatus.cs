@@ -5,7 +5,7 @@ using UnityEngine;
 /// Put under AI control. Lasts for 32 ticks (~3-4 turns).
 /// Can only affect units of opposite gender (or any gender can affect monsters).
 /// </summary>
-public class CharmStatus : StatusEffect
+public class SwayedStatus : StatusEffect
 {
     private Unit owner;
 

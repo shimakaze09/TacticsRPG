@@ -1,11 +1,11 @@
 using UnityEngine;
 
 /// <summary>
-/// Vampire: Unit can only use Vampire attack and automatically targets enemies.
-/// All evade percentages drop to 0. Cannot use reaction/certain movement abilities.
-/// If all party members are Vampire, game over.
+/// Disable: Unit unable to act, evade, or use reaction abilities.
+/// At end of AT, CT is decremented as if they had acted.
+/// Lasts for 24 ticks (~2-3 turns).
 /// </summary>
-public class VampireStatus : StatusEffect
+public class JammedStatus : StatusEffect
 {
     private Unit owner;
     private Stats stats;
@@ -17,13 +17,13 @@ public class VampireStatus : StatusEffect
 
         if (owner)
         {
-            // Force only Vampire attack
+            // Prevent all actions
             this.Subscribe<AbilityCanPerformCheckEvent>(OnCanPerformCheck);
         }
 
         if (stats != null)
         {
-            // Set evasion to 0
+            // Disable evasion
             this.SubscribeToSender<StatWillChangeEvent>(OnStatWillChange, stats);
         }
     }
@@ -39,18 +39,13 @@ public class VampireStatus : StatusEffect
     private void OnCanPerformCheck(AbilityCanPerformCheckEvent e)
     {
         var unit = e.Ability.GetComponentInParent<Unit>();
-        if (owner != unit)
-            return;
-
-        // Only allow Vampire attack
-        // This needs integration with your ability system
-        // if (!IsVampireAttack(e.Ability) && e.Exception.defaultToggle)
-        //     e.Exception.FlipToggle();
+        if (owner == unit && e.Exception.defaultToggle)
+            e.Exception.FlipToggle();
     }
 
     private void OnStatWillChange(StatWillChangeEvent e)
     {
-        // Set all evasion to 0
+        // Disable evasion
         if (e.StatType == StatTypes.EVD)
         {
             var modifier = new MultValueModifier(0, 0f);

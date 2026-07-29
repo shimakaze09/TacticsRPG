@@ -4,7 +4,7 @@ using UnityEngine;
 /// Regen: At the end of each turn, recover 1/8 of maximum HP.
 /// Lasts for 32 clock ticks. Opposed to Poison.
 /// </summary>
-public class RegenStatus : StatusEffect
+public class KnitStatus : StatusEffect
 {
     [Tooltip("HP recovery as fraction of max HP (0.125 = 1/8 = 12.5%)")]
     public float healPercent = 0.125f;

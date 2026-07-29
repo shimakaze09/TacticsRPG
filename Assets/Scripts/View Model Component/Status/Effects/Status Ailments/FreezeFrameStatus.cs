@@ -1,11 +1,11 @@
 using UnityEngine;
 
 /// <summary>
-/// Petrify (Stone): Immobilizes target and flags them as defeated.
-/// CT does not increment, cannot take actions or damage.
-/// If all characters are petrified, game over.
+/// Stop: Unit stops moving and CT meter is frozen.
+/// Cannot evade or use reaction abilities.
+/// Wears off after 20 ticks (~2 turns).
 /// </summary>
-public class PetrifyStatus : StatusEffect
+public class FreezeFrameStatus : StatusEffect
 {
     private Unit owner;
     private Stats stats;
@@ -24,7 +24,7 @@ public class PetrifyStatus : StatusEffect
 
         if (stats != null)
         {
-            // Prevent CT gain and make invulnerable
+            // Freeze CT and disable evasion
             this.SubscribeToSender<StatWillChangeEvent>(OnStatWillChange, stats);
         }
     }
@@ -54,19 +54,17 @@ public class PetrifyStatus : StatusEffect
 
     private void OnStatWillChange(StatWillChangeEvent e)
     {
-        // Prevent CT gain
+        // Freeze CT
         if (e.StatType == StatTypes.CTR)
         {
             var modifier = new MultDeltaModifier(0, 0);
             e.Exception.AddModifier(modifier);
         }
 
-        // Make invulnerable to damage - keep HP constant
-        if (e.StatType == StatTypes.HP)
+        // Disable evasion
+        if (e.StatType == StatTypes.EVD)
         {
-            // Set minimum and maximum to current HP to prevent any change
-            var currentHP = stats[StatTypes.HP];
-            var modifier = new ClampValueModifier(currentHP, currentHP, currentHP);
+            var modifier = new MultValueModifier(0, 0f);
             e.Exception.AddModifier(modifier);
         }
     }

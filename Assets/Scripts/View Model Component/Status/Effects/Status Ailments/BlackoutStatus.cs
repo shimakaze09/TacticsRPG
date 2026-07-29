@@ -1,11 +1,11 @@
 using UnityEngine;
 
 /// <summary>
-/// Stop: Unit stops moving and CT meter is frozen.
-/// Cannot evade or use reaction abilities.
-/// Wears off after 20 ticks (~2 turns).
+/// Sleep: Unit will not gain CT, cannot evade, cannot use reaction abilities.
+/// Attackers get +50% physical attack bonus. Wakes up when taking HP damage.
+/// Lasts for 60 ticks (~6 turns) if not damaged.
 /// </summary>
-public class StopStatus : StatusEffect
+public class BlackoutStatus : DamageRemovableStatusEffect
 {
     private Unit owner;
     private Stats stats;
@@ -17,14 +17,13 @@ public class StopStatus : StatusEffect
 
         if (owner)
         {
-            // Prevent all actions
+            // Prevent actions
             this.Subscribe<AbilityCanPerformCheckEvent>(OnCanPerformCheck);
-            this.Subscribe<MovementCanMoveCheckEvent>(OnCanMoveCheck);
         }
 
         if (stats != null)
         {
-            // Freeze CT and disable evasion
+            // Prevent evasion and disable CT gain
             this.SubscribeToSender<StatWillChangeEvent>(OnStatWillChange, stats);
         }
     }
@@ -32,7 +31,6 @@ public class StopStatus : StatusEffect
     private void OnDisable()
     {
         this.Unsubscribe<AbilityCanPerformCheckEvent>(OnCanPerformCheck);
-        this.Unsubscribe<MovementCanMoveCheckEvent>(OnCanMoveCheck);
 
         if (stats != null)
             this.UnsubscribeFromSender<StatWillChangeEvent>(OnStatWillChange, stats);
@@ -41,30 +39,26 @@ public class StopStatus : StatusEffect
     private void OnCanPerformCheck(AbilityCanPerformCheckEvent e)
     {
         var unit = e.Ability.GetComponentInParent<Unit>();
-        if (owner == unit && e.Exception.defaultToggle)
-            e.Exception.FlipToggle();
-    }
-
-    private void OnCanMoveCheck(MovementCanMoveCheckEvent e)
-    {
-        var unit = e.Movement.GetComponentInParent<Unit>();
-        if (owner == unit && e.Exception.defaultToggle)
-            e.Exception.FlipToggle();
+        if (owner == unit)
+        {
+            if (e.Exception.defaultToggle)
+                e.Exception.FlipToggle(); // Prevent performing ability while asleep
+        }
     }
 
     private void OnStatWillChange(StatWillChangeEvent e)
     {
-        // Freeze CT
-        if (e.StatType == StatTypes.CTR)
-        {
-            var modifier = new MultDeltaModifier(0, 0);
-            e.Exception.AddModifier(modifier);
-        }
-
         // Disable evasion
         if (e.StatType == StatTypes.EVD)
         {
             var modifier = new MultValueModifier(0, 0f);
+            e.Exception.AddModifier(modifier);
+        }
+
+        // Prevent CT gain
+        if (e.StatType == StatTypes.CTR)
+        {
+            var modifier = new MultDeltaModifier(0, 0);
             e.Exception.AddModifier(modifier);
         }
     }

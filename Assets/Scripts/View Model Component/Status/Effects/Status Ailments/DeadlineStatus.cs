@@ -4,7 +4,7 @@ using UnityEngine;
 /// Doom: A countdown appears starting at 3. Unit is KO'd when it reaches the fourth active turn.
 /// Negated by Reraise or instant death protection. If undead, Doom is lifted at counter zero.
 /// </summary>
-public class DoomStatus : StatusEffect
+public class DeadlineStatus : StatusEffect
 {
     [Tooltip("Number of active turns before KO")]
     public int doomCounter = 3;
@@ -36,28 +36,30 @@ public class DoomStatus : StatusEffect
 
         if (turnCount >= doomCounter)
         {
-            // Check for Reraise
-            var reraise = GetComponent<ReraiseStatus>();
+            // Check for Failsafe — a sibling status effect under the same
+            // Status root, never on this effect's own GameObject
+            var statusRoot = GetComponentInParent<Status>();
+            var reraise = statusRoot != null ? statusRoot.GetComponentInChildren<FailsafeStatus>() : null;
             if (reraise != null)
             {
                 // Reraise and Doom nullify each other
-                var raiseCond = reraise.GetComponent<StatusCondition>();
+                var raiseCond = reraise.GetComponentInChildren<StatusCondition>();
                 if (raiseCond != null)
                     raiseCond.Remove();
 
-                var doomCond = GetComponent<StatusCondition>();
+                var doomCond = GetComponentInChildren<StatusCondition>();
                 if (doomCond != null)
                     doomCond.Remove();
 
                 return;
             }
 
-            // Check for undead status
-            var undead = GetComponent<UndeadStatus>();
+            // Check for Revenant — also a sibling status effect
+            var undead = statusRoot != null ? statusRoot.GetComponentInChildren<RevenantStatus>() : null;
             if (undead != null)
             {
                 // For undead, Doom is lifted instead of KO
-                var cond = GetComponent<StatusCondition>();
+                var cond = GetComponentInChildren<StatusCondition>();
                 if (cond != null)
                     cond.Remove();
                 else
@@ -72,7 +74,7 @@ public class DoomStatus : StatusEffect
             }
 
             // Remove doom status
-            var doomCondition = GetComponent<StatusCondition>();
+            var doomCondition = GetComponentInChildren<StatusCondition>();
             if (doomCondition != null)
                 doomCondition.Remove();
             else

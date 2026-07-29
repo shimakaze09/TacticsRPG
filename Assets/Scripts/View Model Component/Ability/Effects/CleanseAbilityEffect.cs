@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-public class EsunaAbilityEffect : BaseAbilityEffect
+public class CleanseAbilityEffect : BaseAbilityEffect
 {
     private static HashSet<Type> _curableTypes;
 
@@ -13,14 +13,14 @@ public class EsunaAbilityEffect : BaseAbilityEffect
                 _curableTypes = new HashSet<Type>
                 {
                     // Status Ailments (curable)
-                    typeof(PoisonStatus),
-                    typeof(BlindStatus),
-                    typeof(SilenceStatus),
-                    typeof(SlowStatus),
-                    typeof(ImmobilizeStatus),
-                    typeof(DisableStatus),
-                    typeof(SleepStatus),
-                    typeof(ConfuseStatus),
+                    typeof(SepsisStatus),
+                    typeof(StaticStatus),
+                    typeof(DeadAirStatus),
+                    typeof(ThrottleStatus),
+                    typeof(PinnedStatus),
+                    typeof(JammedStatus),
+                    typeof(BlackoutStatus),
+                    typeof(ScrambledStatus),
                     // Note: Some status effects like Petrify, KO, Undead are typically NOT curable by Esuna
                     // Add or remove types based on your game design
                 };

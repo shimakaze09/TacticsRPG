@@ -5,7 +5,7 @@ using UnityEngine;
 /// Each turn restores Bravery by 1. Removed when Bravery > 10.
 /// Attackers receive 1.5x Physical Attack bonus.
 /// </summary>
-public class ChickenStatus : StatusEffect
+public class YellowbellyStatus : StatusEffect
 {
     [Tooltip("Minimum bravery to remove chicken status")]
     public int braveryThreshold = 10;
@@ -47,7 +47,7 @@ public class ChickenStatus : StatusEffect
         // Check if bravery is above threshold
         if (currentBravery >= braveryThreshold)
         {
-            var cond = GetComponent<StatusCondition>();
+            var cond = GetComponentInChildren<StatusCondition>();
             if (cond != null)
                 cond.Remove();
             else

@@ -50,7 +50,7 @@ public class CriticalStatus : StatusEffect
         // If HP is above threshold, remove critical status
         if (hpPercent > criticalThreshold)
         {
-            var cond = GetComponent<StatusCondition>();
+            var cond = GetComponentInChildren<StatusCondition>();
             if (cond != null)
                 cond.Remove();
             else

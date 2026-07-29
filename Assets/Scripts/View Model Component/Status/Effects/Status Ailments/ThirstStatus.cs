@@ -1,11 +1,11 @@
 using UnityEngine;
 
 /// <summary>
-/// Sleep: Unit will not gain CT, cannot evade, cannot use reaction abilities.
-/// Attackers get +50% physical attack bonus. Wakes up when taking HP damage.
-/// Lasts for 60 ticks (~6 turns) if not damaged.
+/// Vampire: Unit can only use Vampire attack and automatically targets enemies.
+/// All evade percentages drop to 0. Cannot use reaction/certain movement abilities.
+/// If all party members are Vampire, game over.
 /// </summary>
-public class SleepStatus : DamageRemovableStatusEffect
+public class ThirstStatus : StatusEffect
 {
     private Unit owner;
     private Stats stats;
@@ -17,13 +17,13 @@ public class SleepStatus : DamageRemovableStatusEffect
 
         if (owner)
         {
-            // Prevent actions
+            // Force only Vampire attack
             this.Subscribe<AbilityCanPerformCheckEvent>(OnCanPerformCheck);
         }
 
         if (stats != null)
         {
-            // Prevent evasion and disable CT gain
+            // Set evasion to 0
             this.SubscribeToSender<StatWillChangeEvent>(OnStatWillChange, stats);
         }
     }
@@ -39,26 +39,21 @@ public class SleepStatus : DamageRemovableStatusEffect
     private void OnCanPerformCheck(AbilityCanPerformCheckEvent e)
     {
         var unit = e.Ability.GetComponentInParent<Unit>();
-        if (owner == unit)
-        {
-            if (e.Exception.defaultToggle)
-                e.Exception.FlipToggle(); // Prevent performing ability while asleep
-        }
+        if (owner != unit)
+            return;
+
+        // Only allow Vampire attack
+        // This needs integration with your ability system
+        // if (!IsVampireAttack(e.Ability) && e.Exception.defaultToggle)
+        //     e.Exception.FlipToggle();
     }
 
     private void OnStatWillChange(StatWillChangeEvent e)
     {
-        // Disable evasion
+        // Set all evasion to 0
         if (e.StatType == StatTypes.EVD)
         {
             var modifier = new MultValueModifier(0, 0f);
-            e.Exception.AddModifier(modifier);
-        }
-
-        // Prevent CT gain
-        if (e.StatType == StatTypes.CTR)
-        {
-            var modifier = new MultDeltaModifier(0, 0);
             e.Exception.AddModifier(modifier);
         }
     }

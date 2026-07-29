@@ -36,7 +36,7 @@ public class JumpingStatus : StatusEffect
         if (currentTurn >= jumpDuration)
         {
             // Land and execute jump attack
-            var cond = GetComponent<StatusCondition>();
+            var cond = GetComponentInChildren<StatusCondition>();
             if (cond != null)
                 cond.Remove();
             else

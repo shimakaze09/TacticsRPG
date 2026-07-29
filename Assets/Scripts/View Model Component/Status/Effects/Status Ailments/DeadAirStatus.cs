@@ -4,7 +4,7 @@ using UnityEngine;
 /// Silence: Cannot use magic abilities (White/Black/Time Magick, Summon, etc.).
 /// Lasts until cured or end of battle.
 /// </summary>
-public class SilenceStatus : StatusEffect
+public class DeadAirStatus : StatusEffect
 {
     private Unit owner;
 

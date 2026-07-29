@@ -5,7 +5,7 @@ using UnityEngine;
 /// Attack damage = PA * Bravery/100. Attackers receive 1.5x Physical Attack bonus.
 /// Does not automatically remove on KO - must be actively healed.
 /// </summary>
-public class ToadStatus : StatusEffect
+public class ScrappedStatus : StatusEffect
 {
     [Tooltip("Maximum attack value while toad (FFT uses 1)")]
     public int maxAtkWhileToad = 1;

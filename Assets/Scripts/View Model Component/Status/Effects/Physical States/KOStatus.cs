@@ -69,7 +69,7 @@ public class KOStatus : StatusEffect
         // If HP is restored above 0, remove KO status
         if (e.NewValue > 0)
         {
-            var cond = GetComponent<StatusCondition>();
+            var cond = GetComponentInChildren<StatusCondition>();
             if (cond != null)
                 cond.Remove();
             else
@@ -83,15 +83,15 @@ public class KOStatus : StatusEffect
         bool isCrystal = Random.value > 0.5f;
 
         // Remove KO status
-        var cond = GetComponent<StatusCondition>();
+        var cond = GetComponentInChildren<StatusCondition>();
         if (cond != null)
             cond.Remove();
 
         // Add crystal or treasure status
         if (isCrystal)
-            owner.gameObject.AddComponent<CrystalStatus>();
+            owner.gameObject.AddComponent<MemoryCoreStatus>();
         else
-            owner.gameObject.AddComponent<TreasureStatus>();
+            owner.gameObject.AddComponent<SalvageStatus>();
     }
 
     public int GetDeathCounter()

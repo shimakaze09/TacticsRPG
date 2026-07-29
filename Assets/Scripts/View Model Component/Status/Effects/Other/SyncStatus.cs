@@ -5,7 +5,7 @@ using UnityEngine;
 /// Raises spellcasting ability but also raises effect of spells cast on that unit.
 /// Opposite of Atheist. Lasts for 32 ticks (~3-4 turns).
 /// </summary>
-public class FaithStatus : StatusEffect
+public class SyncStatus : StatusEffect
 {
     [Tooltip("Faith value to set (100 = maximum in FFT)")]
     public int maxFaith = 100;

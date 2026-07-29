@@ -4,7 +4,7 @@ using UnityEngine;
 /// Immobilize: Unit cannot move. At end of AT, CT is decremented as if unit had moved.
 /// Lasts for 24 ticks (~2-3 turns).
 /// </summary>
-public class ImmobilizeStatus : StatusEffect
+public class PinnedStatus : StatusEffect
 {
     private Unit owner;
 
