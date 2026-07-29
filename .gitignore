@@ -43,6 +43,7 @@ ExportedObj/
 *.csproj
 *.unityproj
 *.sln
+*.slnx
 *.suo
 *.tmp
 *.user
@@ -98,9 +99,8 @@ InitTestScene*.unity*
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
 
-# User-specific files
-*.md
-!/README.md
+# User-specific notes (project docs in Docs/ are tracked)
+/notes*.md
 
 # metadata and prefabs
 /Assets/Resources/Abilities

@@ -5,7 +5,7 @@ void VertShader(inout appdata_full v, out Input data)
 
 	UNITY_INITIALIZE_OUTPUT(Input, data);
 
-	float bold = step(v.texcoord1.y, 0);
+	float bold = step(v.texcoord.w, 0);
 
 	// Generate normal for backface
 	float3 view = ObjSpaceViewDir(v.vertex);
@@ -20,20 +20,18 @@ void VertShader(inout appdata_full v, out Input data)
 
 	pixelSize /= float2(_ScaleX, _ScaleY) * mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy);
 	float scale = rsqrt(dot(pixelSize, pixelSize));
-	scale *= abs(v.texcoord1.y) * _GradientScale * (_Sharpness + 1);
-	scale = lerp(scale * (1 - _PerspectiveFilter), scale,
-	             abs(dot(UnityObjectToWorldNormal(v.normal.xyz), normalize(WorldSpaceViewDir(vert)))));
+	scale *= abs(v.texcoord.w) * _GradientScale * (_Sharpness + 1);
+	scale = lerp(scale * (1 - _PerspectiveFilter), scale, abs(dot(UnityObjectToWorldNormal(v.normal.xyz), normalize(WorldSpaceViewDir(vert)))));
 	data.param.y = scale;
 #endif
 
-	data.param.x = (lerp(_WeightNormal, _WeightBold, bold) / 4.0 + _FaceDilate) * _ScaleRatioA * 0.5; // 
-
-	v.texcoord1.xy = UnpackUV(v.texcoord1.x);
+	data.param.x = (lerp(_WeightNormal, _WeightBold, bold) / 4.0 + _FaceDilate) * _ScaleRatioA * 0.5; //
 	data.viewDirEnv = mul((float3x3)_EnvMatrix, WorldSpaceViewDir(v.vertex));
 }
 
 void PixShader(Input input, inout SurfaceOutput o)
 {
+
 #if USE_DERIVATIVE
 	float2 pixelSize = float2(ddx(input.uv_MainTex.y), ddy(input.uv_MainTex.y));
 	pixelSize *= _TextureWidth * .75;
@@ -45,18 +43,16 @@ void PixShader(Input input, inout SurfaceOutput o)
 	// Signed distance
 	float c = tex2D(_MainTex, input.uv_MainTex).a;
 	float sd = (.5 - c - input.param.x) * scale + .5;
-	float outline = _OutlineWidth * _ScaleRatioA * scale;
-	float softness = _OutlineSoftness * _ScaleRatioA * scale;
+	float outline = _OutlineWidth*_ScaleRatioA * scale;
+	float softness = _OutlineSoftness*_ScaleRatioA * scale;
 
 	// Color & Alpha
 	float4 faceColor = _FaceColor;
 	float4 outlineColor = _OutlineColor;
 	faceColor *= input.color;
 	outlineColor.a *= input.color.a;
-	faceColor *= tex2D(_FaceTex, float2(input.uv2_FaceTex.x + _FaceUVSpeedX * _Time.y,
-	                                    input.uv2_FaceTex.y + _FaceUVSpeedY * _Time.y));
-	outlineColor *= tex2D(_OutlineTex, float2(input.uv2_OutlineTex.x + _OutlineUVSpeedX * _Time.y,
-	                                          input.uv2_OutlineTex.y + _OutlineUVSpeedY * _Time.y));
+	faceColor *= tex2D(_FaceTex, float2(input.uv2_FaceTex.x + _FaceUVSpeedX * _Time.y, input.uv2_FaceTex.y + _FaceUVSpeedY * _Time.y));
+	outlineColor *= tex2D(_OutlineTex, float2(input.uv2_OutlineTex.x + _OutlineUVSpeedX * _Time.y, input.uv2_OutlineTex.y + _OutlineUVSpeedY * _Time.y));
 	faceColor = GetColor(sd, faceColor, outlineColor, outline, softness);
 	faceColor.rgb /= max(faceColor.a, 0.0001);
 
