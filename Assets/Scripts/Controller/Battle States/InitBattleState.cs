@@ -20,6 +20,8 @@ public class InitBattleState : BattleState
         var p = new Point((int)levelData.tiles[0].x, (int)levelData.tiles[0].z);
         SelectTile(p);
         ConfigureAI();
+        if (owner.GetComponent<ElevationRules>() == null)
+            owner.gameObject.AddComponent<ElevationRules>();
         SpawnTestUnits();
         AddVictoryCondition();
         owner.round = owner.gameObject.AddComponent<TurnOrderController>().Round();
