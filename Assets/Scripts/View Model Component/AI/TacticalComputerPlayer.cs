@@ -26,6 +26,10 @@ public class TacticalComputerPlayer : ComputerPlayer
     private const float MpCostWeight = 0.25f;
     private const float MinActScore = 4f;
 
+    // How close a stay-in-place attack must score to the overall best before
+    // the AI trades the move for a retreat instead (1.0 = must equal it)
+    private const float HitAndRunTolerance = 0.95f;
+
     private static readonly HashSet<string> BuffStatuses = new HashSet<string>
     {
         "Bulwark", "Firewall", "Knit", "Overclock", "Failsafe", "Nullgrav", "Ghosted"
@@ -57,32 +61,58 @@ public class TacticalComputerPlayer : ComputerPlayer
         public float score;
     }
 
+    /// <summary>
+    /// Builds this turn's plan: the highest-scoring action overall, upgraded
+    /// to a hit-and-run (act from the current tile, then retreat) whenever
+    /// staying put attacks nearly as well and a safer tile is reachable.
+    /// </summary>
     public override PlanOfAttack Evaluate()
     {
         var poa = new PlanOfAttack();
-        var best = FindBestAction();
+        FindBestActions(out var best, out var bestStationary);
 
-        if (best != null)
+        var chosen = best;
+        if (bestStationary != null && best != null &&
+            bestStationary.score >= best.score * HitAndRunTolerance)
         {
-            poa.ability = best.ability;
+            var retreat = SafestMoveTile(GetMoveOptions());
+            if (retreat != null &&
+                DistanceToNearestFoe(retreat) > DistanceToNearestFoe(actor.tile))
+            {
+                chosen = bestStationary;
+                poa.actFirst = true;
+                poa.postActMoveLocation = retreat.pos;
+            }
+        }
+
+        if (chosen != null)
+        {
+            poa.ability = chosen.ability;
             poa.target = Targets.Foe; // informational; targeting was resolved during scoring
-            poa.moveLocation = best.moveTile.pos;
-            poa.fireLocation = best.fireTile.pos;
-            poa.attackDirection = best.direction;
+            poa.moveLocation = chosen.moveTile.pos;
+            poa.fireLocation = chosen.fireTile.pos;
+            poa.attackDirection = chosen.direction;
         }
         else
         {
+            poa.actFirst = false;
             MoveTowardOpponent(poa);
         }
 
         return poa;
     }
 
-    private Option FindBestAction()
+    /// <summary>
+    /// Scores every usable (ability x move x target) combination. Returns the
+    /// best plan overall and the best plan that fires from the current tile
+    /// (the hit-and-run candidate); either may be null below MinActScore.
+    /// </summary>
+    private void FindBestActions(out Option best, out Option bestStationary)
     {
         var startTile = actor.tile;
         var startDir = actor.dir;
-        Option best = null;
+        best = null;
+        bestStationary = null;
 
         var moveOptions = GetMoveOptions();
         var abilities = CollectUsableAbilities();
@@ -101,7 +131,7 @@ public class TacticalComputerPlayer : ComputerPlayer
                 var fireTiles = range.GetTilesInRange(bc.board);
                 var safeTile = SafestMoveTile(moveOptions);
                 foreach (var fireTile in fireTiles)
-                    Consider(ability, area, safeTile, fireTile, startDir, ref best);
+                    Consider(ability, area, safeTile, fireTile, startDir, startTile, ref best, ref bestStationary);
             }
             else if (range.directionOriented)
             {
@@ -113,7 +143,7 @@ public class TacticalComputerPlayer : ComputerPlayer
                     for (var d = 0; d < 4; ++d)
                     {
                         actor.dir = (Directions)d;
-                        Consider(ability, area, moveTile, moveTile, actor.dir, ref best);
+                        Consider(ability, area, moveTile, moveTile, actor.dir, startTile, ref best, ref bestStationary);
                     }
                 }
 
@@ -127,7 +157,7 @@ public class TacticalComputerPlayer : ComputerPlayer
                     actor.Place(moveTile);
                     var fireTiles = range.GetTilesInRange(bc.board);
                     foreach (var fireTile in fireTiles)
-                        Consider(ability, area, moveTile, fireTile, actor.dir, ref best);
+                        Consider(ability, area, moveTile, fireTile, actor.dir, startTile, ref best, ref bestStationary);
                 }
 
                 actor.Place(startTile);
@@ -138,14 +168,21 @@ public class TacticalComputerPlayer : ComputerPlayer
         actor.Place(startTile);
         actor.dir = startDir;
 
-        return best != null && best.score >= MinActScore ? best : null;
+        if (best != null && best.score < MinActScore)
+            best = null;
+        if (bestStationary != null && bestStationary.score < MinActScore)
+            bestStationary = null;
     }
 
     #endregion
 
     #region Scoring
 
-    private void Consider(Ability ability, AbilityArea area, Tile moveTile, Tile fireTile, Directions direction, ref Option best)
+    // Scores one candidate (ability from moveTile at fireTile/direction) and
+    // updates the running best — plus the best that fires without moving,
+    // which is the hit-and-run candidate.
+    private void Consider(Ability ability, AbilityArea area, Tile moveTile, Tile fireTile, Directions direction,
+        Tile startTile, ref Option best, ref Option bestStationary)
     {
         var areaTiles = area.GetTilesInArea(bc.board, fireTile.pos);
 
@@ -174,9 +211,23 @@ public class TacticalComputerPlayer : ComputerPlayer
         if (mpCost != null)
             score -= mpCost.amount * MpCostWeight;
 
+        Option candidate = null;
         if (best == null || score > best.score)
         {
-            best = new Option
+            candidate = new Option
+            {
+                ability = ability,
+                moveTile = moveTile,
+                fireTile = fireTile,
+                direction = direction,
+                score = score
+            };
+            best = candidate;
+        }
+
+        if (moveTile == startTile && (bestStationary == null || score > bestStationary.score))
+        {
+            bestStationary = candidate ?? new Option
             {
                 ability = ability,
                 moveTile = moveTile,
@@ -315,18 +366,46 @@ public class TacticalComputerPlayer : ComputerPlayer
         return result;
     }
 
+    /// <summary>
+    /// Manhattan distance from a tile to the closest living foe, considering
+    /// ALL foes — retreating from one enemy must not walk into another.
+    /// (The 1.5d threat map will replace raw distance with expected damage.)
+    /// </summary>
+    private int DistanceToNearestFoe(Tile tile)
+    {
+        if (tile == null)
+            return int.MaxValue;
+
+        var closest = int.MaxValue;
+        foreach (var other in bc.units)
+        {
+            if (other == null || other.tile == null)
+                continue;
+
+            var otherAlliance = other.GetComponent<Alliance>();
+            if (otherAlliance == null || !alliance.IsMatch(otherAlliance, Targets.Foe))
+                continue;
+
+            var stats = other.GetComponent<Stats>();
+            if (stats == null || stats[StatTypes.HP] <= 0)
+                continue;
+
+            var distance = Mathf.Abs(tile.pos.x - other.tile.pos.x) +
+                           Mathf.Abs(tile.pos.y - other.tile.pos.y);
+            closest = Mathf.Min(closest, distance);
+        }
+
+        return closest;
+    }
+
+    /// <summary>Reachable tile farthest from every living foe (max-min distance).</summary>
     private Tile SafestMoveTile(List<Tile> moveOptions)
     {
-        FindNearestFoe();
-        if (nearestFoe == null)
-            return actor.tile;
-
         Tile bestTile = actor.tile;
         var bestDistance = int.MinValue;
         foreach (var tile in moveOptions)
         {
-            var distance = Mathf.Abs(tile.pos.x - nearestFoe.tile.pos.x) +
-                           Mathf.Abs(tile.pos.y - nearestFoe.tile.pos.y);
+            var distance = DistanceToNearestFoe(tile);
             if (distance > bestDistance)
             {
                 bestDistance = distance;

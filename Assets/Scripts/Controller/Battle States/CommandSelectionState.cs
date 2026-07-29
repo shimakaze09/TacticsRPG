@@ -73,6 +73,8 @@ public class CommandSelectionState : BaseAbilityMenuState
         }
     }
 
+    // Runs the AI plan across re-entries of this state: each leg (move, act)
+    // transitions out and returns here until the turn is spent.
     private IEnumerator ComputerTurn()
     {
         if (turn.plan == null)
@@ -82,6 +84,27 @@ public class CommandSelectionState : BaseAbilityMenuState
         }
 
         yield return new WaitForSeconds(1f);
+
+        if (turn.plan.actFirst)
+        {
+            // Hit-and-run: strike from the current tile, then spend the move
+            // on the retreat leg.
+            if (turn.hasUnitActed == false && turn.plan.ability != null)
+            {
+                owner.ChangeState<AbilityTargetState>();
+            }
+            else if (turn.hasUnitMoved == false && turn.plan.postActMoveLocation != turn.actor.tile.pos)
+            {
+                turn.plan.moveLocation = turn.plan.postActMoveLocation;
+                owner.ChangeState<MoveTargetState>();
+            }
+            else
+            {
+                owner.ChangeState<EndFacingState>();
+            }
+
+            yield break;
+        }
 
         if (turn.hasUnitMoved == false && turn.plan.moveLocation != turn.actor.tile.pos)
             owner.ChangeState<MoveTargetState>();
