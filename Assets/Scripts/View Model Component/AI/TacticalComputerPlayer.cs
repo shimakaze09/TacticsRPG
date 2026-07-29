@@ -71,6 +71,15 @@ public class TacticalComputerPlayer : ComputerPlayer
     // answer — coordination without shared state.
     private Unit focusTarget;
 
+    // Allies below this HP fraction count as "hurt" for the MP reserve rule
+    private const float HurtAllyFraction = 0.7f;
+
+    // Support-discipline state for this evaluation (healers only)
+    private bool isActorHealer;
+    private int actorMp;
+    private int healReserveMp;
+    private bool enforceHealReserve;
+
     private static readonly HashSet<string> BuffStatuses = new HashSet<string>
     {
         "Bulwark", "Firewall", "Knit", "Overclock", "Failsafe", "Nullgrav", "Ghosted"
@@ -117,8 +126,10 @@ public class TacticalComputerPlayer : ComputerPlayer
     {
         var poa = new PlanOfAttack();
         threatMap = ThreatMap.Build(bc, actor);
-        threatWeight = IsHealer(actor) ? ThreatPositionWeight * HealerThreatMultiplier : ThreatPositionWeight;
+        isActorHealer = IsHealer(actor);
+        threatWeight = isActorHealer ? ThreatPositionWeight * HealerThreatMultiplier : ThreatPositionWeight;
         focusTarget = NominateFocusTarget();
+        PrepareHealReserve();
         FindBestActions(out var best, out var bestStationary);
 
         // Self-preservation: badly wounded and no kill on the table -> fall
@@ -307,6 +318,13 @@ public class TacticalComputerPlayer : ComputerPlayer
         if (mpCost != null)
             score -= mpCost.amount * MpCostWeight;
 
+        // MP reserve: while allies are hurt (or down), a healer refuses any
+        // non-support cast that would leave it unable to afford the
+        // emergency heal/revive
+        if (mpCost != null && isActorHealer && enforceHealReserve && healReserveMp > 0 &&
+            !IsSupportAbility(ability) && actorMp - mpCost.amount < healReserveMp)
+            return;
+
         // Prefer safer ground when plans are otherwise equal (healers weigh
         // danger several times harder — see threatWeight)
         if (threatMap != null)
@@ -432,7 +450,13 @@ public class TacticalComputerPlayer : ComputerPlayer
             {
                 var missing = defStats[StatTypes.MHP] - defStats[StatTypes.HP];
                 var healed = Mathf.Min(effect.Predict(tile), missing);
-                return isFoe ? -healed : healed * HealWeight;
+                if (isFoe)
+                    return -healed;
+
+                // Triage: the closer an ally is to death, the more the same
+                // heal is worth — stabilize the critical before topping off
+                var urgency = 2f - defStats[StatTypes.HP] / (float)Mathf.Max(1, defStats[StatTypes.MHP]);
+                return healed * HealWeight * urgency;
             }
 
             case ReviveAbilityEffect _:
@@ -616,6 +640,74 @@ public class TacticalComputerPlayer : ComputerPlayer
         return bestTile;
     }
 
+    /// <summary>
+    /// Computes this evaluation's MP reserve: while any ally is hurt (or a
+    /// revivable ally is down), the healer must keep enough MP for its
+    /// emergency support cast.
+    /// </summary>
+    private void PrepareHealReserve()
+    {
+        healReserveMp = 0;
+        enforceHealReserve = false;
+        var stats = actor.GetComponent<Stats>();
+        actorMp = stats != null ? stats[StatTypes.MP] : 0;
+
+        if (!isActorHealer)
+            return;
+
+        var anyHurt = false;
+        var anyDown = false;
+        foreach (var other in bc.units)
+        {
+            if (other == null || other.tile == null)
+                continue;
+
+            var otherAlliance = other.GetComponent<Alliance>();
+            if (otherAlliance == null || !alliance.IsMatch(otherAlliance, Targets.Ally))
+                continue;
+
+            var otherStats = other.GetComponent<Stats>();
+            if (otherStats == null)
+                continue;
+
+            if (otherStats[StatTypes.HP] <= 0)
+                anyDown = true;
+            else if (otherStats[StatTypes.HP] < otherStats[StatTypes.MHP] * HurtAllyFraction)
+                anyHurt = true;
+        }
+
+        if (!anyHurt && !anyDown)
+            return;
+
+        // Reserve the cost of the relevant emergency: revive when someone is
+        // down, otherwise the cheapest heal
+        var reserve = int.MaxValue;
+        foreach (var ability in actor.GetComponentsInChildren<Ability>())
+        {
+            var isRevive = ability.GetComponentInChildren<ReviveAbilityEffect>() != null;
+            var isHeal = ability.GetComponentInChildren<HealAbilityEffect>() != null;
+            if (anyDown ? !isRevive : !isHeal)
+                continue;
+
+            var cost = ability.GetComponent<AbilityMagicCost>();
+            reserve = Mathf.Min(reserve, cost != null ? cost.amount : 0);
+        }
+
+        if (reserve == int.MaxValue)
+            return;
+
+        healReserveMp = reserve;
+        enforceHealReserve = true;
+    }
+
+    /// <summary>True for abilities that heal, revive, or cleanse — the casts the MP reserve protects.</summary>
+    private static bool IsSupportAbility(Ability ability)
+    {
+        return ability.GetComponentInChildren<HealAbilityEffect>() != null ||
+               ability.GetComponentInChildren<ReviveAbilityEffect>() != null ||
+               ability.GetComponentInChildren<CleanseAbilityEffect>() != null;
+    }
+
     /// <summary>True when the actor is wounded enough to prioritize survival.</summary>
     private bool IsPanicking()
     {
@@ -697,12 +789,24 @@ public class TacticalComputerPlayer : ComputerPlayer
     }
 
     /// <summary>
-    /// Idle-healer positioning: near the most wounded living ally while
-    /// favoring low-danger tiles; safest tile when nobody is hurt.
+    /// Idle-healer positioning: toward a downed ally when this healer can
+    /// revive, else near the most wounded living ally, favoring low-danger
+    /// tiles; safest tile when nobody needs help.
     /// </summary>
     private Tile HealerIdleTile()
     {
+        var canRevive = false;
+        foreach (var ability in actor.GetComponentsInChildren<Ability>())
+        {
+            if (ability.GetComponentInChildren<ReviveAbilityEffect>() != null && ability.CanPerform())
+            {
+                canRevive = true;
+                break;
+            }
+        }
+
         Unit wounded = null;
+        Unit downed = null;
         var worstFraction = 1f;
         foreach (var other in bc.units)
         {
@@ -714,8 +818,15 @@ public class TacticalComputerPlayer : ComputerPlayer
                 continue;
 
             var stats = other.GetComponent<Stats>();
-            if (stats == null || stats[StatTypes.HP] <= 0)
+            if (stats == null)
                 continue;
+
+            if (stats[StatTypes.HP] <= 0)
+            {
+                if (downed == null)
+                    downed = other;
+                continue;
+            }
 
             var fraction = stats[StatTypes.HP] / (float)Mathf.Max(1, stats[StatTypes.MHP]);
             if (fraction < worstFraction)
@@ -724,6 +835,10 @@ public class TacticalComputerPlayer : ComputerPlayer
                 wounded = other;
             }
         }
+
+        // A corpse we can bring back outranks everything else
+        if (canRevive && downed != null)
+            wounded = downed;
 
         var moveOptions = GetMoveOptions();
         if (wounded == null)
