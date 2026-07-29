@@ -296,11 +296,10 @@ public class UIManager : MonoBehaviour
     {
         SetCanvasGroupState(battleUIContainer, false);
 
-        // Also hide individual panels
-        if (abilityMenuPanel != null && abilityMenuPanel.gameObject.activeSelf)
-        {
-            abilityMenuPanel.gameObject.SetActive(false);
-        }
+        // Note: do NOT deactivate abilityMenuPanel here — it manages its own
+        // visibility by tweening off-screen, and deactivating it before its
+        // Awake runs leaves its Panel position map uninitialized (NRE on the
+        // next Hide() from the battle states).
 
         Debug.Log("[UIManager] Battle UI hidden");
     }

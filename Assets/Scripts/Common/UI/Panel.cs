@@ -45,7 +45,14 @@ public class Panel : MonoBehaviour
     public Tweener Transition { get; private set; }
     public bool InTransition => Transition != null;
 
-    public Position this[string name] => positionMap.ContainsKey(name) ? positionMap[name] : null;
+    public Position this[string name]
+    {
+        get
+        {
+            EnsureInitialized();
+            return positionMap.ContainsKey(name) ? positionMap[name] : null;
+        }
+    }
 
     #endregion
 
@@ -53,10 +60,23 @@ public class Panel : MonoBehaviour
 
     private void Awake()
     {
+        EnsureInitialized();
+    }
+
+    /// <summary>
+    /// Builds the position map on demand. Awake never runs if the object is
+    /// deactivated before its first frame, but other components may still
+    /// call into this panel — lazy init keeps that safe.
+    /// </summary>
+    private void EnsureInitialized()
+    {
+        if (positionMap != null)
+            return;
+
         anchor = GetComponent<LayoutAnchor>();
         positionMap = new Dictionary<string, Position>(positionList.Count);
         for (var i = positionList.Count - 1; i >= 0; i--)
-            AddPosition(positionList[i]);
+            positionMap[positionList[i].name] = positionList[i];
     }
 
     private void Start()
@@ -71,6 +91,7 @@ public class Panel : MonoBehaviour
 
     public void AddPosition(Position p)
     {
+        EnsureInitialized();
         positionMap[p.name] = p;
     }
 
@@ -87,6 +108,7 @@ public class Panel : MonoBehaviour
 
     public Tweener SetPosition(Position p, bool animated)
     {
+        EnsureInitialized();
         CurrentPosition = p;
         if (CurrentPosition == null)
             return null;
