@@ -6,20 +6,27 @@
 /// </summary>
 public abstract class HitRate : MonoBehaviour
 {
-    #region MonoBehaviour
-
-    protected virtual void Start()
-    {
-        attacker = GetComponentInParent<Unit>();
-    }
-
-    #endregion
-
     #region Fields
 
     public virtual bool IsAngleBased => true;
     public int accuracy = 100;
-    protected Unit attacker;
+
+    private Unit cachedAttacker;
+
+    /// <summary>
+    /// The unit performing the ability. Resolved lazily because ability
+    /// prefabs are parented to their unit after instantiation — a Start()
+    /// cache is null for anything used the frame its owner spawns.
+    /// </summary>
+    protected Unit attacker
+    {
+        get
+        {
+            if (cachedAttacker == null)
+                cachedAttacker = GetComponentInParent<Unit>();
+            return cachedAttacker;
+        }
+    }
 
     #endregion
 

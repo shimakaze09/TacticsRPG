@@ -26,10 +26,8 @@ public abstract class Movement : MonoBehaviour
     {
         unit = GetComponent<Unit>();
         jumper = transform.Find("Jumper");
-    }
-
-    protected virtual void Start()
-    {
+        // Cached here (not Start) so a unit is usable the same frame it
+        // spawns — the AI may plan for it before Start ever runs
         stats = GetComponent<Stats>();
     }
 

@@ -5,14 +5,16 @@ public class EnemyAbilityEffectTarget : AbilityEffectTarget
 {
     private Alliance alliance;
 
-    private void Start()
-    {
-        alliance = GetComponentInParent<Alliance>();
-    }
-
     public override bool IsTarget(Tile tile)
     {
         if (tile == null || tile.content == null)
+            return false;
+
+        // Resolved lazily: the ability prefab is parented to its unit after
+        // instantiation, so the owner isn't findable until first use
+        if (alliance == null)
+            alliance = GetComponentInParent<Alliance>();
+        if (alliance == null)
             return false;
 
         var other = tile.content.GetComponentInChildren<Alliance>();
