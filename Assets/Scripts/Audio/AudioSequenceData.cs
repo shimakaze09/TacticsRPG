@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Bookkeeping for one entry in an AudioSequence: the source playing a clip and
+/// the scheduled start/end times.
+/// </summary>
 public class AudioSequenceData
 {
     #region Constructor

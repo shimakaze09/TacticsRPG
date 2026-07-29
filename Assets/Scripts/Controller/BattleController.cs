@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Scene root for a battle: holds the board, camera, UI controllers, turn data,
+/// and unit list, and runs the battle state machine starting at
+/// InitBattleState.
+/// </summary>
 public class BattleController : StateMachine
 {
     public AbilityMenuPanelController abilityMenuPanelController;

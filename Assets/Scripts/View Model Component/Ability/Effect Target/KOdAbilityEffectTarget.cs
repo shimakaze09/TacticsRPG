@@ -1,3 +1,6 @@
+/// <summary>
+/// Filter matching knocked-out units (revives).
+/// </summary>
 public class KOdAbilityEffectTarget : AbilityEffectTarget
 {
     public override bool IsTarget(Tile tile)

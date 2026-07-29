@@ -1,6 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
+/// <summary>
+/// Battle state: animates the unit walking the path chosen in MoveTargetState,
+/// then returns to the command menu.
+/// </summary>
 public class MoveSequenceState : BattleState
 {
     private readonly List<Tile> tiles = new();

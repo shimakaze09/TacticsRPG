@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Charm: Unit perceives enemies as allies and allies as enemies.
+/// Swayed (charm): Unit perceives enemies as allies and allies as enemies.
 /// Put under AI control. Lasts for 32 ticks (~3-4 turns).
 /// Can only affect units of opposite gender (or any gender can affect monsters).
 /// </summary>

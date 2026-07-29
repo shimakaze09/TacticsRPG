@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// FFT-style turn scheduler: units gain CTR from SPD each tick; at the
+/// activation threshold they take a turn, paying costs for moving and acting.
+/// </summary>
 public class TurnOrderController : MonoBehaviour
 {
     #region Public

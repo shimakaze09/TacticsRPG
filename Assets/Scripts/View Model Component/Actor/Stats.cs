@@ -1,6 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// The unit's stat sheet: raw values plus the will-change/did-change event
+/// pipeline that lets observers veto or modify writes.
+/// </summary>
 public class Stats : MonoBehaviour
 {
     #region Public

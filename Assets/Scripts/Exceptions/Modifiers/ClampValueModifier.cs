@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Clamps the pending value into a min..max range (HP/MP bounds, stat
+/// ceilings).
+/// </summary>
 public class ClampValueModifier : ValueModifier
 {
     public readonly float max;

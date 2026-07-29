@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Tweener that animates a RectTransform's anchoredPosition (UI panel
+/// slide-in/out).
+/// </summary>
 public class RectTransformAnchorPositionTweener : Vector3Tweener
 {
     private RectTransform rt;

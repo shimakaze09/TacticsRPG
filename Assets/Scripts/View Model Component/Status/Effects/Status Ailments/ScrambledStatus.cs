@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Confuse: Unit takes random actions. Evasion of targets attacked by confused unit are doubled.
+/// Scrambled (confusion): Unit takes random actions. Evasion of targets attacked by confused unit are doubled.
 /// Prevents reaction abilities and special movement abilities.
 /// Cancelled when afflicted unit takes damage.
 /// </summary>

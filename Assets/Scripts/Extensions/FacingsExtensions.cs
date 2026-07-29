@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Computes the Facings angle (front/side/back) of an attacker relative to a
+/// target's facing.
+/// </summary>
 public static class FacingsExtensions
 {
     public static Facings GetFacing(this Unit attacker, Unit target)

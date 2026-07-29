@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Base for the Easy AI's ability choosers: locates an ability on the acting
+/// unit and writes it into the plan.
+/// </summary>
 public abstract class BaseAbilityPicker : MonoBehaviour
 {
     #region MonoBehaviour

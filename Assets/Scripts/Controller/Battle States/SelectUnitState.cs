@@ -1,6 +1,10 @@
 ﻿using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// Battle state: advances the round loop until a unit's turn comes up, then
+/// selects it and opens its command menu.
+/// </summary>
 public class SelectUnitState : BattleState
 {
     private Coroutine changeUnitRoutine;

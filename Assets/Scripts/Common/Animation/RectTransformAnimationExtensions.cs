@@ -1,6 +1,9 @@
 ﻿using System;
 using UnityEngine;
 
+/// <summary>
+/// Extension methods for tweening RectTransform anchored positions.
+/// </summary>
 public static class RectTransformAnimationExtensions
 {
     public static Tweener AnchorTo(this RectTransform t, Vector3 position)

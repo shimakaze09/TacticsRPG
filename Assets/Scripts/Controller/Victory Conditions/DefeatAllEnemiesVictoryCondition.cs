@@ -1,4 +1,7 @@
-﻿public class DefeatAllEnemiesVictoryCondition : BaseVictoryCondition
+﻿/// <summary>
+/// Victory when every enemy unit is defeated.
+/// </summary>
+public class DefeatAllEnemiesVictoryCondition : BaseVictoryCondition
 {
     protected override void CheckForGameOver()
     {

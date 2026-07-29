@@ -1,4 +1,7 @@
-﻿public class UndeadAbilityEffectTarget : AbilityEffectTarget
+﻿/// <summary>
+/// Filter matching Revenant-flagged units (anti-undead effects).
+/// </summary>
+public class UndeadAbilityEffectTarget : AbilityEffectTarget
 {
     /// <summary>
     ///     Indicates whether the Undead component must be present (true)

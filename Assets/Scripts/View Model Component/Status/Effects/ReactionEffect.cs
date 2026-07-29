@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// Base for reaction-style statuses (unused scaffold pending the Grit reaction
+/// system).
+/// </summary>
 public class ReactionEffect : MonoBehaviour
 {
     // This class intentionally provides no concrete behavior. It is a convenience base for subscription and cleanup.

@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Cone of tiles spreading out in the caster's facing direction.
+/// </summary>
 public class ConeAbilityRange : AbilityRange
 {
     public override bool directionOriented => true;

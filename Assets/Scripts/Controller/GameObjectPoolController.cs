@@ -1,6 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Static object pool: register a key+prefab, then dequeue/enqueue Poolable
+/// instances instead of instantiating and destroying.
+/// </summary>
 public class GameObjectPoolController : MonoBehaviour
 {
     #region MonoBehaviour

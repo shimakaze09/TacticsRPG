@@ -2,6 +2,10 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Dictionary that survives Unity/JsonUtility serialization by flattening to
+/// parallel key/value lists (used inside GameData).
+/// </summary>
 [Serializable]
 public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver
 {

@@ -1,3 +1,7 @@
+/// <summary>
+/// Battle state: free cursor movement for inspecting the board and unit stats
+/// outside any menu.
+/// </summary>
 public class ExploreState : BattleState
 {
     public override void Enter()

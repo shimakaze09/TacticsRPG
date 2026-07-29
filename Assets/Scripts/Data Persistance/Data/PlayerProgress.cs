@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// Serializable meta-progress (story flags, unlocked content) — placeholder for
+/// the future world layer.
+/// </summary>
 public class PlayerProgress : MonoBehaviour, IDataPersistence
 {
     private float playTime;

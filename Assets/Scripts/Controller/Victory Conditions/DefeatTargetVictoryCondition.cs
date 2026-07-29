@@ -1,4 +1,7 @@
-﻿public class DefeatTargetVictoryCondition : BaseVictoryCondition
+﻿/// <summary>
+/// Victory when one specific target unit is defeated.
+/// </summary>
+public class DefeatTargetVictoryCondition : BaseVictoryCondition
 {
     public Unit target;
 

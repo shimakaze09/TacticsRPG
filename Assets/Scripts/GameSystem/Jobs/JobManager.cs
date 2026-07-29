@@ -2,36 +2,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// CORE JOB SYSTEM MANAGER (FFT-Style)
-/// =====================================
-/// 
-/// This component manages all job-related functionality for a character unit.
-/// It's the central integration point between JobDefinitions, JobProgressData,
-/// AbilityMemory, and the existing Stats/Rank systems.
-/// 
-/// KEY RESPONSIBILITIES:
-/// 1. Job Switching - Validates and executes job changes
-/// 2. Stat Recalculation - FFT-style stat computation based on job level history
-/// 3. JP Management - Handles Job Point accumulation and job leveling
-/// 4. Ability Management - Syncs learned abilities with job progress
-/// 5. Prerequisite Validation - Checks if jobs can be unlocked
-/// 6. Event Publishing - Notifies other systems of job changes
-/// 
-/// STAT CALCULATION ALGORITHM (FFT-Accurate):
-/// - Character's final stats = Base + Sum(JobLevels * JobMultipliers)
-/// - Each job contributes based on levels gained IN that job
-/// - Example: 5 levels as Knight + 3 as Wizard ≠ 8 levels as Knight
-/// 
-/// INTEGRATION:
-/// - Attaches to Unit GameObject alongside Stats, Rank, Equipment
-/// - Listens to Rank level-up events to trigger JP gains
-/// - Publishes job events for UI/battle system consumption
-/// - Persists data via IDataPersistence interface
-/// 
-/// USAGE:
-/// var jobManager = unit.GetComponent<JobManager>();
-/// jobManager.SwitchJob(knightJob);
-/// jobManager.AddJobPoints(100);
+/// Per-unit brain of the job system: switches and unlocks jobs, accumulates JP
+/// into job levels, recalculates stats from the unit's whole job-level history
+/// (final stats = sum of each job's levels x its multipliers, plus the current
+/// job's movement bonuses, scaled/capped for difficulty and StatLimits), learns
+/// abilities as job levels rise, publishes job events, and persists progress
+/// for Hero units. Lives alongside Stats/Rank/Equipment on the unit.
 /// </summary>
 public class JobManager : MonoBehaviour, IDataPersistence
 {

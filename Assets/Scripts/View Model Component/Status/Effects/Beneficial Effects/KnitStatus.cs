@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Regen: At the end of each turn, recover 1/8 of maximum HP.
+/// Knit (regeneration): At the end of each turn, recover 1/8 of maximum HP.
 /// Lasts for 32 clock ticks. Opposed to Poison.
 /// </summary>
 public class KnitStatus : StatusEffect

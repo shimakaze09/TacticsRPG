@@ -1,3 +1,7 @@
+/// <summary>
+/// Removes its status when the owner takes damage (duplicate of
+/// DamageRemovalCondition; unused).
+/// </summary>
 public class AttackedStatusCondition : StatusCondition
 {
     private Stats stats;

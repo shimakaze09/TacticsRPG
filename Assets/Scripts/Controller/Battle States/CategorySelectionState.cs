@@ -1,5 +1,9 @@
 ﻿using System.Collections.Generic;
 
+/// <summary>
+/// Battle state: picks a command category (attack/abilities/items) before
+/// drilling into actions.
+/// </summary>
 public class CategorySelectionState : BaseAbilityMenuState
 {
     public override void Enter()

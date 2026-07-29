@@ -2,6 +2,10 @@
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Battle command menu UI: shows a titled list of entries, tracks
+/// selection/locks, and slides on/off screen.
+/// </summary>
 public class AbilityMenuPanelController : MonoBehaviour
 {
     #region Constants

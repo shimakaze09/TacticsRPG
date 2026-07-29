@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Base for activatable perks carried by items/abilities: Activate applies,
+/// Deactivate reverts.
+/// </summary>
 public abstract class Feature : MonoBehaviour
 {
     #region Fields / Properties

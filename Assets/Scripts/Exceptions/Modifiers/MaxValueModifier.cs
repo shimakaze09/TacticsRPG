@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Keeps the pending value at or above a floor (despite the name — see audit
+/// note).
+/// </summary>
 public class MaxValueModifier : ValueModifier
 {
     public float max;

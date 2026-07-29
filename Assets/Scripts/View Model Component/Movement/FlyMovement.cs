@@ -1,6 +1,10 @@
 ﻿using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// Movement that ignores terrain: flies in an arc to any unoccupied tile in
+/// range.
+/// </summary>
 public class FlyMovement : Movement
 {
     protected override TileTraversalFlags TraversalMask => TileTraversalFlags.Fly;

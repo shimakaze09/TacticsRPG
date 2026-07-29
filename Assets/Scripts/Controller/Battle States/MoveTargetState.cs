@@ -2,6 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Battle state: highlights reachable tiles and lets the player pick the
+/// movement destination.
+/// </summary>
 public class MoveTargetState : BattleState
 {
     private List<Tile> tiles;

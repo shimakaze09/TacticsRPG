@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Base locomotion: computes reachable tiles from MOV/JMP via board search and
+/// walks the unit along paths; statuses can veto moving.
+/// </summary>
 public abstract class Movement : MonoBehaviour
 {
     #region Properties

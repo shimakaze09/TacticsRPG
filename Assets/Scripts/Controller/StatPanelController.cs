@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Shows the primary/secondary stat panels for units under the cursor or in
+/// combat previews.
+/// </summary>
 public class StatPanelController : MonoBehaviour
 {
     #region MonoBehaviour

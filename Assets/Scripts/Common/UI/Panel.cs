@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// A UI panel with named anchor positions (e.g. 'Show'/'Hide') that can snap or
+/// tween between them via LayoutAnchor.
+/// </summary>
 [RequireComponent(typeof(LayoutAnchor))]
 public class Panel : MonoBehaviour
 {

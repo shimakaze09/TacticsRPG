@@ -4,6 +4,10 @@ using UnityEditor;
 using UnityEngine;
 
 #if UNITY_EDITOR
+/// <summary>
+/// Editor-time board authoring tool: paint/raise/lower tiles, then save or load
+/// LevelData assets.
+/// </summary>
 public class BoardCreator : MonoBehaviour
 {
     #region Fields / Properties

@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// The four-arrow widget shown when choosing a unit's end-of-turn facing.
+/// </summary>
 public class FacingIndicator : MonoBehaviour
 {
     [SerializeField] private Renderer[] directions;

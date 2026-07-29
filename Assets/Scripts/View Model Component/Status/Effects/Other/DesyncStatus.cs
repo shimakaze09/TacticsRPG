@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Atheist: Unit's Faith falls to zero, making magic ineffective.
+/// Desync (protocol rejection): Unit's Faith falls to zero, making magic ineffective.
 /// Magic attacks used by unit are ineffective.
 /// All magic cast on unit has no effect.
 /// Lasts for 32 ticks (~3-4 turns). Cannot be protected against or healed.

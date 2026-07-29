@@ -2,6 +2,11 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// Owns the save/load lifecycle: collects IDataPersistence objects (including
+/// late-spawned units), pushes loaded data to them, and writes GameData via
+/// FileDataHandler.
+/// </summary>
 public class DataPersistenceManager : MonoBehaviour
 {
     private readonly List<IDataPersistence> dataPersistenceObjects = new();

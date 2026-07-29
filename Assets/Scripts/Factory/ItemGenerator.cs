@@ -4,6 +4,9 @@ using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+/// <summary>
+/// Dev/demo generator that fabricates random shop items with stats and prices.
+/// </summary>
 public class ItemGenerator : MonoBehaviour
 {
     [SerializeField] private Sprite[] icons;

@@ -1,4 +1,8 @@
-﻿public abstract class AddStatusFeature<T> : Feature where T : StatusEffect
+﻿/// <summary>
+/// Equipment/ability feature that applies a status while active (e.g. a cursed
+/// item inflicting a permanent ailment).
+/// </summary>
+public abstract class AddStatusFeature<T> : Feature where T : StatusEffect
 {
     #region Fields
 

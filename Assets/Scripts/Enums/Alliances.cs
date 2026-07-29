@@ -1,4 +1,8 @@
-﻿public enum Alliances
+﻿/// <summary>
+/// Which side a unit fights for (None/Neutral/Hero/Enemy); flags so targeting
+/// can match multiple sides.
+/// </summary>
+public enum Alliances
 {
     None = 0,
     Neutral = 1 << 0,

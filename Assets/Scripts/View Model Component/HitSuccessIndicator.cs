@@ -2,6 +2,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// The hit-chance readout (arrow + percent label) shown while confirming an
+/// ability target.
+/// </summary>
 public class HitSuccessIndicator : MonoBehaviour
 {
     private const string ShowKey = "Show";

@@ -1,6 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Shop screen logic: lists generated items, validates funds against the Bank,
+/// completes purchases.
+/// </summary>
 public class ItemShop : MonoBehaviour
 {
     #region Consts

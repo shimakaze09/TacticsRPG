@@ -7,6 +7,10 @@ using UnityEngine;
 
 namespace Utils
 {
+    /// <summary>
+    /// Inspector-friendly IDictionary implementation (Utils namespace) serialized
+    /// as entry pairs; distinct from the save-data SerializableDictionary.
+    /// </summary>
     [Serializable]
     [DebuggerDisplay("Count = {Count}")]
     public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>

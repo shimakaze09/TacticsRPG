@@ -1,5 +1,9 @@
 ﻿using System.Collections.Generic;
 
+/// <summary>
+/// Battle state: picks an ability from the chosen command category via the menu
+/// panel.
+/// </summary>
 public class ActionSelectionState : BaseAbilityMenuState
 {
     public static int category;

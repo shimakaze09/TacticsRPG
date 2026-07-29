@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Ground movement: steps tile to tile, turning at corners and hopping height
+/// changes.
+/// </summary>
 public class WalkMovement : Movement
 {
     #region Protected

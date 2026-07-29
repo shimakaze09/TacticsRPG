@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Forced-movement helper for shoving units (not yet used by any ability).
+/// </summary>
 public class KnockBack : Movement
 {
     protected override bool ExpandSearch(Tile from, Tile to)

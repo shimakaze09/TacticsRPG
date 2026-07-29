@@ -1,6 +1,11 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// The Easy-difficulty AI: follows the unit's AttackPattern, rates firing
+/// positions by target marks and attack angle, and otherwise advances toward
+/// the nearest foe.
+/// </summary>
 public class ComputerPlayer : MonoBehaviour
 {
     #region MonoBehaviour

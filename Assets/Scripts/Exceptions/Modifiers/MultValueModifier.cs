@@ -1,4 +1,7 @@
-﻿public class MultValueModifier : ValueModifier
+﻿/// <summary>
+/// Multiplies the pending value by a factor.
+/// </summary>
+public class MultValueModifier : ValueModifier
 {
     public readonly float toMultiply;
 

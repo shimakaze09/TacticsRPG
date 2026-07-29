@@ -2,6 +2,11 @@
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// Base for ability effects: rolls hit chance, applies the effect, publishes
+/// hit/miss events, and runs the stat-event pipeline
+/// (attack/defense/power/tweak) that statuses and equipment hook.
+/// </summary>
 public abstract class BaseAbilityEffect : MonoBehaviour
 {
     #region Consts

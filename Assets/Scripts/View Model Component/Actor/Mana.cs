@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// MP guardian: clamps MP to [0, MMP], enforces the global MP ceiling, and
+/// regenerates 10% MMP at each of the unit's turns.
+/// </summary>
 public class Mana : MonoBehaviour
 {
     #region Fields

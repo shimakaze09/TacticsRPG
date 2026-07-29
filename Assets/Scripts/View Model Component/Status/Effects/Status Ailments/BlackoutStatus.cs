@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Sleep: Unit will not gain CT, cannot evade, cannot use reaction abilities.
+/// Blackout (sleep): Unit will not gain CT, cannot evade, cannot use reaction abilities.
 /// Attackers get +50% physical attack bonus. Wakes up when taking HP damage.
 /// Lasts for 60 ticks (~6 turns) if not damaged.
 /// </summary>

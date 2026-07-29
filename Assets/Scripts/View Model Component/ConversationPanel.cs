@@ -3,6 +3,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Cutscene dialog panel: speaker portrait, paged text, and next-page arrow.
+/// </summary>
 public class ConversationPanel : MonoBehaviour
 {
     public GameObject arrow;

@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Base accuracy calculator: rolls to-hit from a 0-100 chance, with hooks for
+/// auto-hit/miss and status adjustments (Static, Ghosted).
+/// </summary>
 public abstract class HitRate : MonoBehaviour
 {
     #region MonoBehaviour

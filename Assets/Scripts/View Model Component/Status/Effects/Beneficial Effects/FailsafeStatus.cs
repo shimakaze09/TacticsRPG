@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Reraise: When KO'd at 100 CT, revive with 10% max HP instead of decreasing death counter.
+/// Failsafe (auto-revive): When KO'd at 100 CT, revive with 10% max HP instead of decreasing death counter.
 /// Does not naturally wear off. Nullifies Doom if present.
 /// </summary>
 public class FailsafeStatus : StatusEffect
@@ -55,7 +55,7 @@ public class FailsafeStatus : StatusEffect
         int reviveHP = Mathf.CeilToInt(maxHP * reviveHPPercent);
         stats.SetValue(StatTypes.HP, reviveHP, false);
 
-        // Remove Reraise after use
+        // Remove Failsafe after use
         var cond = GetComponentInChildren<StatusCondition>();
         if (cond != null)
             cond.Remove();

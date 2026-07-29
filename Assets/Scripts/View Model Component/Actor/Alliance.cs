@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Which side this unit is on, with matching logic for targeting (self/ally/foe
+/// checks, confusion flips).
+/// </summary>
 public class Alliance : MonoBehaviour
 {
     public bool confused;

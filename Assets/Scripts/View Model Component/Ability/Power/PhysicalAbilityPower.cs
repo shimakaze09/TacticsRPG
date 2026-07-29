@@ -1,3 +1,6 @@
+/// <summary>
+/// Power source using ATK vs DEF (physical abilities).
+/// </summary>
 public class PhysicalAbilityPower : BaseAbilityPower
 {
     public int level;

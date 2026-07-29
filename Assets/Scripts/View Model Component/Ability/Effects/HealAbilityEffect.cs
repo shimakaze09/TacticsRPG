@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Restores HP by a flat power amount with +-10% variance (heals do not scale
+/// with stats).
+/// </summary>
 public class HealAbilityEffect : BaseAbilityEffect
 {
     public override int Predict(Tile target)

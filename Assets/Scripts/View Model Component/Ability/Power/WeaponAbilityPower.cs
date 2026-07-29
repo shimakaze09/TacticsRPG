@@ -1,5 +1,9 @@
 using System.Linq;
 
+/// <summary>
+/// Power source for basic weapon attacks: equipped weapon ATK bonuses, or the
+/// job's base ATK when unarmed.
+/// </summary>
 public class WeaponAbilityPower : BaseAbilityPower
 {
     protected override int GetBaseAttack()

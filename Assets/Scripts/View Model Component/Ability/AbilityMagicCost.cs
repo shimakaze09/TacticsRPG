@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// MP price of an ability: blocks CanPerform when unaffordable and spends MP
+/// when the ability fires.
+/// </summary>
 public class AbilityMagicCost : MonoBehaviour
 {
     #region Fields

@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// One board cell: grid position, height, occupant, and the search bookkeeping
+/// (prev/distance) used by pathfinding.
+/// </summary>
 public class Tile : MonoBehaviour
 {
     #region Const

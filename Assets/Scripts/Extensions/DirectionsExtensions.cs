@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Helpers for Directions: direction between points/tiles, converting to
+/// rotation, and turning units to face each other.
+/// </summary>
 public static class DirectionsExtensions
 {
     public static Directions GetDirection(this Tile t1, Tile t2)

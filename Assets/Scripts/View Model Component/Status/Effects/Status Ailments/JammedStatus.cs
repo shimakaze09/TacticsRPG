@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Disable: Unit unable to act, evade, or use reaction abilities.
+/// Jammed (disable): Unit unable to act, evade, or use reaction abilities.
 /// At end of AT, CT is decremented as if they had acted.
 /// Lasts for 24 ticks (~2-3 turns).
 /// </summary>

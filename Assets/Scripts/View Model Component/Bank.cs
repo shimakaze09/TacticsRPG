@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// Holds the player's money (scrip) and publishes changes; currently backed by
+/// PlayerPrefs.
+/// </summary>
 public class Bank
 {
     #region Consts

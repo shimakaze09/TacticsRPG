@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Battle state: builds the board, picks the AI per difficulty, spawns units,
+/// installs the victory condition, and starts the round loop.
+/// </summary>
 public class InitBattleState : BattleState
 {
     public override void Enter()

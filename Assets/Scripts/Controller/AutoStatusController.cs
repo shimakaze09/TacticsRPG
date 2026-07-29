@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Applies automatic statuses from stat changes — currently adds KO (with a
+/// revive-watch condition) when a unit's HP reaches zero.
+/// </summary>
 public class AutoStatusController : MonoBehaviour
 {
     private void OnEnable()

@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// HP guardian: clamps HP to [MinHP, MHP], enforces the global HP ceiling, and
+/// follows max-HP changes.
+/// </summary>
 public class Health : MonoBehaviour
 {
     #region Fields & Properties

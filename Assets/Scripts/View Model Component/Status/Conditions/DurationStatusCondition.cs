@@ -1,3 +1,6 @@
+/// <summary>
+/// Removes its status after N of the owner's turns.
+/// </summary>
 public class DurationStatusCondition : StatusCondition
 {
     public int duration = 10;

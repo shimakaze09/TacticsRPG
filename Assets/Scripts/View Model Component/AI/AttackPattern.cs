@@ -1,6 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Cycles through a list of ability pickers turn by turn — the Easy AI's
+/// scripted rotation.
+/// </summary>
 public class AttackPattern : MonoBehaviour
 {
     private int index;

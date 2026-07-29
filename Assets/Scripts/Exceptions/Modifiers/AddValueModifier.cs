@@ -1,4 +1,7 @@
-﻿public class AddValueModifier : ValueModifier
+﻿/// <summary>
+/// Adds a flat amount to the pending value.
+/// </summary>
+public class AddValueModifier : ValueModifier
 {
     public readonly float toAdd;
 

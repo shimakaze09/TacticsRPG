@@ -5,6 +5,10 @@ using UnityEditor;
 using UnityEngine;
 using UnityObject = UnityEngine.Object;
 
+/// <summary>
+/// Editor property drawer that renders Utils.SerializableDictionary fields as
+/// editable key/value rows in the inspector.
+/// </summary>
 public abstract class DictionaryDrawer<TK, TV> : PropertyDrawer
 {
     private const float kButtonWidth = 18f;

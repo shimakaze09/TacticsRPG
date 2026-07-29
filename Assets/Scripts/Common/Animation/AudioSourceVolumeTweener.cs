@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Tweener that animates an AudioSource's volume between two values.
+/// </summary>
 public class AudioSourceVolumeTweener : Tweener
 {
     protected AudioSource _source;

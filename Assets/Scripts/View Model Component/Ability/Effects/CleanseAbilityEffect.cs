@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 
+/// <summary>
+/// Removes curable negative statuses from the target (Sawbones' Antitoxin).
+/// </summary>
 public class CleanseAbilityEffect : BaseAbilityEffect
 {
     private static HashSet<Type> _curableTypes;

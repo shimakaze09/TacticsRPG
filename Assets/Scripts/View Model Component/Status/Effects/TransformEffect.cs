@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// Base for statuses that swap the unit's appearance (Scrapped-style
+/// transformations; unused scaffold).
+/// </summary>
 public class TransformEffect : MonoBehaviour
 {
     [Tooltip("Optional cap on ATK while transformed. Set <= 0 to ignore.")]

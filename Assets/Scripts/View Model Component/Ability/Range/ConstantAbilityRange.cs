@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Standard range: all tiles within horizontal/vertical distance of the caster.
+/// </summary>
 public class ConstantAbilityRange : AbilityRange
 {
     public override List<Tile> GetTilesInRange(Board board)

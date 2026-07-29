@@ -1,4 +1,7 @@
-﻿public class TransformPositionTweener : Vector3Tweener
+﻿/// <summary>
+/// Tweener that animates a Transform's world position.
+/// </summary>
+public class TransformPositionTweener : Vector3Tweener
 {
     protected override void OnUpdate()
     {

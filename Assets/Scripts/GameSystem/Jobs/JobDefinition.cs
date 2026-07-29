@@ -2,37 +2,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// DESIGN RATIONALE - FFT-Style Job System
-/// ==========================================
-/// 
-/// This ScriptableObject defines a single job class (like Squire, Knight, Ninja).
-/// 
-/// KEY DESIGN DECISIONS:
-/// 
-/// 1. STAT GROWTH SYSTEM (FFT-Accurate)
-///    - Each job has multipliers (not flat bonuses) for stat growth per level
-///    - When a character levels up IN A JOB, that job's multipliers affect permanent stats
-///    - Switching jobs recalculates stats based on job level history
-///    - Example: 10 levels as Knight + 5 as Wizard = different stats than 15 levels pure Knight
-/// 
-/// 2. ABILITY UNLOCKING
-///    - Jobs have a list of abilities unlocked at specific job levels
-///    - Once unlocked, abilities are "learned" permanently (stored in AbilityMemory)
-///    - Characters can equip abilities from other jobs in limited "support slots"
-/// 
-/// 3. JOB PREREQUISITES
-///    - Advanced jobs require specific job levels (e.g., Knight needs Squire Lv2)
-///    - Unique jobs may require multiple prerequisites (e.g., Ninja needs Archer Lv4 + Thief Lv5)
-/// 
-/// 4. JOB POINTS (JP) SYSTEM
-///    - Characters earn JP per battle (separate from EXP)
-///    - JP accumulates per job, allowing job leveling independent of character level
-///    - Max job level is 8 (like FFT), while character level can reach 99
-/// 
-/// INTEGRATION NOTES:
-/// - Works with existing Stats component for stat recalculation
-/// - Integrates with AbilityCatalog for ability management
-/// - Persists via GameData extension for save/load
+/// Defines one job (e.g. Drifter, Warden, Burner) as a generated asset: stable id,
+/// display text, prerequisites in the job tree, per-level stat growth multipliers,
+/// movement bonuses, ability unlocks by job level, and the JP thresholds.
+/// Stats derive from levels earned in each job (history matters, not just the
+/// current job); abilities unlock at job levels and are remembered permanently
+/// in AbilityMemory. Max job level is 8. See Docs/WORLD.md for the roster.
 /// </summary>
 [CreateAssetMenu(fileName = "New Job", menuName = "Tactics RPG/Jobs/Job Definition")]
 public class JobDefinition : ScriptableObject

@@ -2,6 +2,10 @@ using System;
 using System.IO;
 using UnityEngine;
 
+/// <summary>
+/// Reads/writes the GameData JSON file safely: atomic temp-then-swap saves with
+/// a .bak, and quarantine of unreadable files instead of overwriting them.
+/// </summary>
 public class FileDataHandler
 {
     private readonly string dataDirPath;

@@ -1,4 +1,7 @@
-﻿public class Info<T0>
+﻿/// <summary>
+/// Tiny generic tuples used to pass typed arguments through the event bus.
+/// </summary>
+public class Info<T0>
 {
     public T0 arg0;
 

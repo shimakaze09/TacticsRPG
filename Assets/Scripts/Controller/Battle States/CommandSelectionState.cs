@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Battle state: top-level Move/Act/Wait menu for the active unit; hands CPU
+/// units to the AI plan instead.
+/// </summary>
 public class CommandSelectionState : BaseAbilityMenuState
 {
     public override void Enter()

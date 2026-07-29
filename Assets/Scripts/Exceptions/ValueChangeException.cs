@@ -1,5 +1,9 @@
 ﻿using System.Collections.Generic;
 
+/// <summary>
+/// A vetoable stat change: carries the proposed delta and a modifier list that
+/// observers add to before the final value is computed.
+/// </summary>
 public class ValueChangeException : BaseException
 {
     #region Constructor

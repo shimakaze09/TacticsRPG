@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Scene music: plays an intro clip once, then the loop clip forever via
+/// AudioSequence.
+/// </summary>
 public class MusicPlayer : MonoBehaviour
 {
     public AudioClip introClip;

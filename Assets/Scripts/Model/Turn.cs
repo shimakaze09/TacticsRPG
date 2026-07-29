@@ -1,5 +1,9 @@
 ﻿using System.Collections.Generic;
 
+/// <summary>
+/// Mutable state of the current activation: acting unit, chosen
+/// ability/targets, movement/undo bookkeeping, and action flags.
+/// </summary>
 public class Turn
 {
     public Ability ability;

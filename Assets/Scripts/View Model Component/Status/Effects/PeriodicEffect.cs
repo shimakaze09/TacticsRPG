@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// Base for statuses that do something at each of the owner's turns (Sepsis
+/// damage, Knit healing).
+/// </summary>
 public class PeriodicEffect : MonoBehaviour
 {
     [Tooltip("Number of turns between each tick. 1 = every turn of the owner.")]

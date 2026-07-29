@@ -3,6 +3,10 @@ using System.Linq;
 using UnityEngine;
 using Party = System.Collections.Generic.List<UnityEngine.GameObject>;
 
+/// <summary>
+/// Legacy level-weighted EXP division from the tutorial era — currently unused
+/// (PostBattleController awards EXP directly).
+/// </summary>
 public static class ExperienceManager
 {
     private const float minLevelBonus = 1.5f;

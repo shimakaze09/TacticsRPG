@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Toad: Limits unit to Attack command only. No reaction abilities.
+/// Scrapped (polymorph): Limits unit to Attack command only. No reaction abilities.
 /// Attack damage = PA * Bravery/100. Attackers receive 1.5x Physical Attack bonus.
 /// Does not automatically remove on KO - must be actively healed.
 /// </summary>

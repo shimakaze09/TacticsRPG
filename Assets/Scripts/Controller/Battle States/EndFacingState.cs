@@ -1,6 +1,10 @@
 ﻿using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// Battle state: lets the unit choose its final facing direction before ending
+/// its turn (facing affects evade).
+/// </summary>
 public class EndFacingState : BattleState
 {
     private Directions startDir;

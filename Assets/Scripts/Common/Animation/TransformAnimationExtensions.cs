@@ -1,6 +1,11 @@
 ﻿using System;
 using UnityEngine;
 
+/// <summary>
+/// Extension methods for tweening Transforms:
+/// MoveTo/MoveToLocal/ScaleTo/RotateToLocal, each spawning the matching Tweener
+/// component.
+/// </summary>
 public static class TransformAnimationExtensions
 {
     public static Tweener MoveTo(this Transform t, Vector3 position)

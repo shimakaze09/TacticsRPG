@@ -1,4 +1,7 @@
-﻿public class EnemyAbilityEffectTarget : AbilityEffectTarget
+﻿/// <summary>
+/// Filter matching units hostile to the caster.
+/// </summary>
+public class EnemyAbilityEffectTarget : AbilityEffectTarget
 {
     private Alliance alliance;
 

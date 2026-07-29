@@ -2,6 +2,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// One row in the shop list UI; publishes a purchase request when confirmed.
+/// </summary>
 public class ItemCell : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI atkLabel;

@@ -2,6 +2,9 @@ using System;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// UI readout of the Bank balance, refreshed via gold-changed events.
+/// </summary>
 public class BankView : MonoBehaviour
 {
     #region Fields

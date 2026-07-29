@@ -1,6 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Root component of an ability prefab: checks usability, and performs the
+/// ability by applying every child effect to the chosen tiles.
+/// </summary>
 public class Ability : MonoBehaviour
 {
     public bool CanPerform()

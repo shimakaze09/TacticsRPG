@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Haste: Unit gains 50% more CT each clock tick, allowing them to act more often.
+/// Overclock (haste): Unit gains 50% more CT each clock tick, allowing them to act more often.
 /// Does not directly affect Speed stat. Lasts for 32 clock ticks (~3-4 turns).
 /// Opposed to Slow.
 /// </summary>

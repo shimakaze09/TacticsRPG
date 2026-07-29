@@ -1,4 +1,8 @@
-﻿public enum StatTypes
+﻿/// <summary>
+/// Every stat tracked by the Stats component; order matters for job baseStats
+/// arrays (see JobManager.statOrder).
+/// </summary>
+public enum StatTypes
 {
     LVL, // Level
     EXP, // Experience

@@ -2,6 +2,10 @@
 using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// Core animation timer: ticks a 0..1 value through an easing equation with
+/// play/pause/reverse/loop controls and events. Tweeners build on this.
+/// </summary>
 public class EasingControl : MonoBehaviour
 {
     #region Events

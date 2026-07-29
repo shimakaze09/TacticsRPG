@@ -3,6 +3,10 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Displays transient center-screen battle messages (ability names, results)
+/// with a tweened banner.
+/// </summary>
 public class BattleMessageController : MonoBehaviour
 {
     [SerializeField] private GameObject canvas;

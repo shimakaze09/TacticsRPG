@@ -2,6 +2,10 @@
 using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// Plays a ConversationData through the ConversationPanel: advances messages on
+/// input and reports completion (used for battle intro/outro cutscenes).
+/// </summary>
 public class ConversationController : MonoBehaviour
 {
     #region Events

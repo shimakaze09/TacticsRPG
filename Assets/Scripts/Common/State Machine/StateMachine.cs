@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Minimal component-based state machine: swaps State components, calling Exit
+/// on the old and Enter on the new. Drives both battle flow and game flow.
+/// </summary>
 public class StateMachine : MonoBehaviour
 {
     protected State _currentState;

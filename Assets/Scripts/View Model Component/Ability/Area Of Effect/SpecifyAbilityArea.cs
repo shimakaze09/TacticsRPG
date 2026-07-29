@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Blast area: every tile within a given radius/height of the target tile.
+/// </summary>
 public class SpecifyAbilityArea : AbilityArea
 {
     public int horizontal;

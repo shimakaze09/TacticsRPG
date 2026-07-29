@@ -1,6 +1,10 @@
 ﻿using System;
 using UnityEngine;
 
+/// <summary>
+/// Polls Unity input and raises static move/fire events consumed by the battle
+/// states (arrow repeat handled via Repeater).
+/// </summary>
 internal class Repeater
 {
     private const float threshold = 0.5f;

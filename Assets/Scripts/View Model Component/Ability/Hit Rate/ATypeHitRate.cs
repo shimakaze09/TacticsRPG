@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Angle-based accuracy: reduced by target evade, which halves/quarters when
+/// attacking from side/back.
+/// </summary>
 public class ATypeHitRate : HitRate
 {
     public override int Calculate(Tile target)

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Silence: Cannot use magic abilities (White/Black/Time Magick, Summon, etc.).
+/// Dead Air (silence): Cannot use magic abilities (White/Black/Time Magick, Summon, etc.).
 /// Lasts until cured or end of battle.
 /// </summary>
 public class DeadAirStatus : StatusEffect

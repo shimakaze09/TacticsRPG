@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Immobilize: Unit cannot move. At end of AT, CT is decremented as if unit had moved.
+/// Pinned (immobilize): Unit cannot move. At end of AT, CT is decremented as if unit had moved.
 /// Lasts for 24 ticks (~2-3 turns).
 /// </summary>
 public class PinnedStatus : StatusEffect

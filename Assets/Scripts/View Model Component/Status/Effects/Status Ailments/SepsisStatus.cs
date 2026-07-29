@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Poison: At the end of each turn, take damage equal to 1/8 of maximum HP.
+/// Sepsis (poison): At the end of each turn, take damage equal to 1/8 of maximum HP.
 /// Lasts for 36 ticks (~3-4 turns). Opposed to Regen.
 /// </summary>
 public class SepsisStatus : StatusEffect

@@ -1,3 +1,6 @@
+/// <summary>
+/// Power source using MAT vs MDF (Protocol abilities).
+/// </summary>
 public class MagicalAbilityPower : BaseAbilityPower
 {
     public int level;

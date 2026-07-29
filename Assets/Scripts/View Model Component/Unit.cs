@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// A combatant on the board: occupies a tile, faces a direction, and persists
+/// its EXP for Hero units.
+/// </summary>
 public class Unit : MonoBehaviour, IDataPersistence
 {
     private string _name;

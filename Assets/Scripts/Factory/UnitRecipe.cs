@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Asset describing a spawnable unit: model, job id, base attack, alliance, AI
+/// strategy, locomotion, and element.
+/// </summary>
 public class UnitRecipe : ScriptableObject
 {
     public string abilityCatalog;

@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Base for statuses that break when the owner takes damage (sleep-style).
+/// </summary>
 public abstract class DamageRemovableStatusEffect : StatusEffect
 {
     private Stats stats;

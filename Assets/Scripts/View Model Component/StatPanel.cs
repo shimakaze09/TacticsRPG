@@ -2,6 +2,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// The stat panel widget: binds a unit's name, HP/MP, and level values to its
+/// labels.
+/// </summary>
 public class StatPanel : MonoBehaviour
 {
     public Sprite allyBackground;

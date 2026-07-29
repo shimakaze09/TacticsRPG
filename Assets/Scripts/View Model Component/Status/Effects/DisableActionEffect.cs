@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// Base for statuses that veto the unit's turns via TurnCheckEvent (KO,
+/// Blackout, Freeze-Frame).
+/// </summary>
 public class DisableActionEffectBase : MonoBehaviour
 {
     public bool blockActions = true;     // blocks using abilities/attacks

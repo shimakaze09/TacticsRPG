@@ -2,6 +2,9 @@ using System;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Extension for tweening TextMeshProUGUI color (fade-style UI feedback).
+/// </summary>
 public static class TextMeshProAnimationExtension
 {
     public static Tweener ChangeColor(this TextMeshProUGUI t, Color32 change)

@@ -1,6 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Base for targeting ranges: which tiles can be aimed at from the caster's
+/// position (position/direction-oriented flags drive AI planning).
+/// </summary>
 public abstract class AbilityRange : MonoBehaviour
 {
     public int horizontal = 1;

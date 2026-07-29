@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Positions a RectTransform by anchoring a point on it to a point on its
+/// parent (with offset) — the math behind Panel's named positions.
+/// </summary>
 [RequireComponent(typeof(RectTransform))]
 public class LayoutAnchor : MonoBehaviour
 {

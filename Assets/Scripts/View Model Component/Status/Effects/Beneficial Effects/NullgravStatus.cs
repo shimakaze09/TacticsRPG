@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Float: Units are positioned 1h above ground, immune to earth-elemental attacks.
+/// Nullgrav (levitation): Units are positioned 1h above ground, immune to earth-elemental attacks.
 /// Unaffected by move penalties. Does not wear off naturally.
 /// </summary>
 public class NullgravStatus : StatusEffect

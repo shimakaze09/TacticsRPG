@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// Per-tile override restricting which locomotion types may pass (currently
+/// inert — see audit).
+/// </summary>
 public class TileTraversalOverride : MonoBehaviour
 {
     [SerializeField] private bool applyOnEnable;

@@ -1,8 +1,8 @@
 using UnityEngine;
 
 /// <summary>
-/// Doom: A countdown appears starting at 3. Unit is KO'd when it reaches the fourth active turn.
-/// Negated by Reraise or instant death protection. If undead, Doom is lifted at counter zero.
+/// Deadline (delayed KO): A countdown appears starting at 3. Unit is KO'd when it reaches the fourth active turn.
+/// Negated by Failsafe or instant death protection. If undead, Deadline is lifted at counter zero.
 /// </summary>
 public class DeadlineStatus : StatusEffect
 {
@@ -42,7 +42,7 @@ public class DeadlineStatus : StatusEffect
             var reraise = statusRoot != null ? statusRoot.GetComponentInChildren<FailsafeStatus>() : null;
             if (reraise != null)
             {
-                // Reraise and Doom nullify each other
+                // Failsafe and Doom nullify each other
                 var raiseCond = reraise.GetComponentInChildren<StatusCondition>();
                 if (raiseCond != null)
                     raiseCond.Remove();
@@ -58,7 +58,7 @@ public class DeadlineStatus : StatusEffect
             var undead = statusRoot != null ? statusRoot.GetComponentInChildren<RevenantStatus>() : null;
             if (undead != null)
             {
-                // For undead, Doom is lifted instead of KO
+                // For undead, Deadline is lifted instead of KO
                 var cond = GetComponentInChildren<StatusCondition>();
                 if (cond != null)
                     cond.Remove();

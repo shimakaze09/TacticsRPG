@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Plain data for a shop item: name, stats, price (demo shop inventory).
+/// </summary>
 public class Item
 {
     public int attack;

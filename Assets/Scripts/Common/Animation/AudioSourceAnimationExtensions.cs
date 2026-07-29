@@ -1,6 +1,10 @@
 ﻿using System;
 using UnityEngine;
 
+/// <summary>
+/// Extension methods for tweening an AudioSource's volume (used for music
+/// fades).
+/// </summary>
 public static class AudioSourceAnimationExtensions
 {
     public static Tweener VolumeTo(this AudioSource s, float volume)

@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Status-type accuracy: reduced by target resistance; the per-ability accuracy
+/// field tunes how reliably control lands.
+/// </summary>
 public class STypeHitRate : HitRate
 {
     public override int Calculate(Tile target)

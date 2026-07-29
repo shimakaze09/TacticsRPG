@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// Tweener that interpolates a Vector3 between start and end values; subclasses
+/// apply currentTweenValue to a target.
+/// </summary>
 public abstract class Vector3Tweener : Tweener
 {
     public Vector3 endTweenValue;

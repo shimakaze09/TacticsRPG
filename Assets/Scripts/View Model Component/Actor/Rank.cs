@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// Character level as a function of total EXP: level curve, init at a level,
+/// and post-battle level-up detection.
+/// </summary>
 public class Rank : MonoBehaviour
 {
     #region Consts

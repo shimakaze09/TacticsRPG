@@ -1,5 +1,9 @@
 ﻿using System.Collections;
 
+/// <summary>
+/// Battle state: executes the confirmed ability against its targets, marks the
+/// unit as having acted, then advances the turn.
+/// </summary>
 public class PerformAbilityState : BattleState
 {
     public override void Enter()

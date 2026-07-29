@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Crystal: Unit has been KO'd for 3 turns and crystallized.
+/// Memory-core (KO decay): Unit has been KO'd for 3 turns and crystallized.
 /// Allows other units to step on tile to restore HP/MP or learn abilities.
 /// Unit is permanently dead and cannot be targeted.
 /// </summary>

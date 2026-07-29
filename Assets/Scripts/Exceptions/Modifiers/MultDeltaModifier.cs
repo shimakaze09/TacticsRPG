@@ -1,4 +1,7 @@
-﻿public class MultDeltaModifier : ValueModifier
+﻿/// <summary>
+/// Multiplies only the delta (change amount) rather than the whole value.
+/// </summary>
+public class MultDeltaModifier : ValueModifier
 {
     public readonly float toMultiply;
 

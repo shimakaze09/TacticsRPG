@@ -1,4 +1,7 @@
-﻿public class FullTypeHitRate : HitRate
+﻿/// <summary>
+/// Always hits (buffs, self-targeted effects).
+/// </summary>
+public class FullTypeHitRate : HitRate
 {
     public override bool IsAngleBased => false;
 

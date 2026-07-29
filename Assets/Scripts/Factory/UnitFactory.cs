@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
+/// <summary>
+/// Builds a battle-ready unit from a UnitRecipe: model, stats, rank, job,
+/// health/mana, attack ability, alliance, AI pattern, and difficulty modifiers,
+/// in dependency order.
+/// </summary>
 public static class UnitFactory
 {
     #region Cached Resources

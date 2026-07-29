@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Per-unit status registry: adds effect+condition child objects (one per
+/// status) and removes them when their conditions expire.
+/// </summary>
 public class Status : MonoBehaviour
 {
     public U Add<T, U>() where T : StatusEffect where U : StatusCondition

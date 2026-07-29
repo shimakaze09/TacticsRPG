@@ -1,5 +1,9 @@
 ﻿using System;
 
+/// <summary>
+/// Base class for value tweeners: an EasingControl that optionally destroys
+/// itself when the animation completes.
+/// </summary>
 public abstract class Tweener : EasingControl
 {
     #region Event Handlers

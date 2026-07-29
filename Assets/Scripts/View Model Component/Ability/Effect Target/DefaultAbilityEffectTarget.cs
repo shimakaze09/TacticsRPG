@@ -1,3 +1,6 @@
+/// <summary>
+/// Filter matching any living unit (heals and buffs).
+/// </summary>
 public class DefaultAbilityEffectTarget : AbilityEffectTarget
 {
     public override bool IsTarget(Tile tile)

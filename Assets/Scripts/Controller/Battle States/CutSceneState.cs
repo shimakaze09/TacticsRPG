@@ -1,6 +1,10 @@
 ﻿using System;
 using UnityEngine;
 
+/// <summary>
+/// Battle state: plays the intro/outro conversation, then continues to the
+/// first turn or battle end.
+/// </summary>
 public class CutSceneState : BattleState
 {
     private ConversationController conversationController;

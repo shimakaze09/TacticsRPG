@@ -1,6 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Feeds the damage pipeline: contributes the attacker's stat, target's defense
+/// stat, and the ability's power to the stat-query events.
+/// </summary>
 public abstract class BaseAbilityPower : MonoBehaviour
 {
     protected abstract int GetBaseAttack();

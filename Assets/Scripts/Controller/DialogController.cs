@@ -2,6 +2,10 @@ using System;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Generic modal dialog with title/message and confirm/cancel buttons; invokes
+/// the supplied callbacks.
+/// </summary>
 public class DialogController : MonoBehaviour
 {
     [SerializeField] private GameObject blocker;

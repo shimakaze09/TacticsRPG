@@ -1,6 +1,10 @@
 ﻿using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// Base for battle win/lose rules: watches HP changes and records the winning
+/// alliance in Victor.
+/// </summary>
 public abstract class BaseVictoryCondition : MonoBehaviour
 {
     #region Notification Handlers

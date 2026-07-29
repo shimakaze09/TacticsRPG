@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Treasure: Unit has been KO'd for 3 turns and became a treasure chest.
+/// Salvage (KO decay): Unit has been KO'd for 3 turns and became a treasure chest.
 /// Grants item/weapon/equipment when another unit steps on the tile.
 /// Unit is permanently dead and cannot be targeted.
 /// </summary>

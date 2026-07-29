@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Chicken: Occurs when Bravery is below 10. Unit turns into chicken and runs away from all units.
+/// Yellowbelly (fear): Occurs when Bravery is below 10. Unit turns into chicken and runs away from all units.
 /// Each turn restores Bravery by 1. Removed when Bravery > 10.
 /// Attackers receive 1.5x Physical Attack bonus.
 /// </summary>

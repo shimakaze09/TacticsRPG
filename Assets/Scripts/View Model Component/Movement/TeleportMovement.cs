@@ -1,6 +1,9 @@
 ﻿using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// Movement that blinks directly to the destination tile.
+/// </summary>
 public class TeleportMovement : Movement
 {
     protected override TileTraversalFlags TraversalMask => TileTraversalFlags.Teleport;

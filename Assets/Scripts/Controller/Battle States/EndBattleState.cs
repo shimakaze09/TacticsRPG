@@ -1,6 +1,10 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Battle state: decides victory or defeat and hands results to the game flow
+/// (or returns to title when played standalone).
+/// </summary>
 public class EndBattleState : BattleState
 {
     public override void Enter()

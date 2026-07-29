@@ -1,5 +1,8 @@
 using System;
 
+/// <summary>
+/// Flags for what kinds of locomotion a tile permits.
+/// </summary>
 [Flags]
 public enum TileTraversalFlags
 {

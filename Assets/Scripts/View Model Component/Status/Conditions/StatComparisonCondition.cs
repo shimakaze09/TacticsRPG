@@ -1,5 +1,9 @@
 ﻿using System;
 
+/// <summary>
+/// Removes its status when a stat comparison stops holding (e.g. KO ends when
+/// HP rises above zero).
+/// </summary>
 public class StatComparisonCondition : StatusCondition
 {
     #region Notification Handlers

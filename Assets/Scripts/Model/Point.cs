@@ -1,6 +1,10 @@
 ﻿using System;
 using UnityEngine;
 
+/// <summary>
+/// Integer 2D board coordinate with arithmetic and equality; the universal tile
+/// address.
+/// </summary>
 [Serializable]
 public struct Point : IEquatable<Point>
 {

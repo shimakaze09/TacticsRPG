@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Marks an item as consumable and applies its features once when used.
+/// </summary>
 public class Consumable : MonoBehaviour
 {
     public void Consume(GameObject target)

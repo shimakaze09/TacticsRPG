@@ -2,6 +2,11 @@
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// One candidate firing solution for the Easy AI: a target tile/direction, the
+/// tiles it covers, and scoring of how many desired targets it hits from which
+/// approach.
+/// </summary>
 public class AttackOption
 {
     #region Classes

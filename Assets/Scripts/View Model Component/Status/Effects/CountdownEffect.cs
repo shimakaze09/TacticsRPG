@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// Base for statuses that tick down on the owner's turns and then act (KO
+/// crystal timer).
+/// </summary>
 public class CountdownEffect : MonoBehaviour
 {
     public int remainingTurns = 3;

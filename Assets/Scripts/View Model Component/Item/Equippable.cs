@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// An item that can be worn: tracks its slot(s) and activates its features
+/// while equipped.
+/// </summary>
 public class Equippable : MonoBehaviour
 {
     #region Fields

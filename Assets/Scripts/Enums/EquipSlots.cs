@@ -1,5 +1,9 @@
 ﻿using System;
 
+/// <summary>
+/// Equipment slot flags (primary/secondary/head/body/accessory); flags support
+/// dual-wield style items.
+/// </summary>
 [Flags]
 public enum EquipSlots
 {

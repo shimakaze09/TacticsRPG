@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Stop: Unit stops moving and CT meter is frozen.
+/// Freeze-Frame (stop): Unit stops moving and CT meter is frozen.
 /// Cannot evade or use reaction abilities.
 /// Wears off after 20 ticks (~2 turns).
 /// </summary>

@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Brings a KO'd unit back with a fraction of max HP.
+/// </summary>
 public class ReviveAbilityEffect : BaseAbilityEffect
 {
     public float percent;

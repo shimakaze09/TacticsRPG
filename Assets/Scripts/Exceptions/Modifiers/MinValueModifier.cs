@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Keeps the pending value at or below a ceiling (despite the name — see audit
+/// note).
+/// </summary>
 public class MinValueModifier : ValueModifier
 {
     public float min;

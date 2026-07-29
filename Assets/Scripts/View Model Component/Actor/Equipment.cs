@@ -1,6 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// The unit's worn items: equip/unequip by slot, activating item features while
+/// worn.
+/// </summary>
 public class Equipment : MonoBehaviour
 {
     #region Fields / Properties

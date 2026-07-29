@@ -1,4 +1,8 @@
-﻿public class BaseException
+﻿/// <summary>
+/// A vetoable yes/no decision: handlers may FlipToggle to override the default
+/// (e.g. 'can this unit take a turn?').
+/// </summary>
+public class BaseException
 {
     public readonly bool defaultToggle;
 

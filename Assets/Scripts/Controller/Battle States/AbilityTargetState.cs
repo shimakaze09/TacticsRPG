@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Battle state: player aims the selected ability — moves the tile cursor,
+/// shows range/area highlights, confirms a target tile.
+/// </summary>
 public class AbilityTargetState : BattleState
 {
     private AbilityRange ar;

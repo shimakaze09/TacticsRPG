@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Battle camera: follows a target transform (usually the tile selection
+/// indicator).
+/// </summary>
 public class CameraRig : MonoBehaviour
 {
     private Transform _transform;

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Slow: Unit's effective speed is halved (round down).
+/// Throttle (slow): Unit's effective speed is halved (round down).
 /// Lasts for 32 ticks (~3-4 turns). Opposed to Haste.
 /// </summary>
 public class ThrottleStatus : StatusEffect

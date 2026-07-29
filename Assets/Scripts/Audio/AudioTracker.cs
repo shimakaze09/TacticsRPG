@@ -2,6 +2,10 @@
 using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// Watches an AudioSource and raises play/pause/complete callbacks, since Unity
+/// provides no events for AudioSource state changes.
+/// </summary>
 public class AudioTracker : MonoBehaviour
 {
     #region Actions

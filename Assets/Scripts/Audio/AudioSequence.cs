@@ -1,6 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Plays a list of audio clips back to back on pooled AudioSources (e.g. music
+/// intro then loop), tracking playback so gapless transitions work.
+/// </summary>
 public class AudioSequence : MonoBehaviour
 {
     #region Enum

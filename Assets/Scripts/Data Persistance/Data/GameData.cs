@@ -1,5 +1,9 @@
 using System;
 
+/// <summary>
+/// The serializable save-file payload: play time, per-unit EXP, and job-system
+/// progress/ability memory keyed by unit.
+/// </summary>
 [Serializable]
 public class GameData
 {

@@ -1,4 +1,7 @@
-﻿public enum Directions
+﻿/// <summary>
+/// The four board-space facing/movement directions.
+/// </summary>
+public enum Directions
 {
     North,
     East,

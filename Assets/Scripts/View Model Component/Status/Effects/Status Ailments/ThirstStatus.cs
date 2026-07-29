@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Vampire: Unit can only use Vampire attack and automatically targets enemies.
+/// Thirst (vampirism): Unit can only use Vampire attack and automatically targets enemies.
 /// All evade percentages drop to 0. Cannot use reaction/certain movement abilities.
 /// If all party members are Vampire, game over.
 /// </summary>

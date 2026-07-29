@@ -1,4 +1,8 @@
-﻿public class FixedAbilityPicker : BaseAbilityPicker
+﻿/// <summary>
+/// Ability picker that always chooses one named ability, falling back to the
+/// basic attack when unusable.
+/// </summary>
+public class FixedAbilityPicker : BaseAbilityPicker
 {
     public string ability;
     public Targets target;

@@ -1,3 +1,7 @@
+/// <summary>
+/// Drain effect: heals its owner for a fraction of damage dealt by sibling
+/// effects (legacy; unused by current kits).
+/// </summary>
 public class AbsorbDamageAbilityEffect : BaseAbilityEffect
 {
     #region Private

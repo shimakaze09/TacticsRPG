@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Undead: HP cannot be restored by normal means (healing damages instead).
+/// Revenant (undead): HP cannot be restored by normal means (healing damages instead).
 /// Raise/Arise incur HP damage. Death spell fully heals.
 /// </summary>
 public class RevenantStatus : StatusEffect

@@ -1,5 +1,9 @@
 ﻿using System.Collections.Generic;
 
+/// <summary>
+/// Base for menu-driven battle states: opens the ability menu on enter, closes
+/// it on exit, and routes confirm/cancel.
+/// </summary>
 public abstract class BaseAbilityMenuState : BattleState
 {
     protected List<string> menuOptions;

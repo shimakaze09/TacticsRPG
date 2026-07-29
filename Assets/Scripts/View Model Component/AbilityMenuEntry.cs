@@ -3,6 +3,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// One row of the battle command menu: label, selection highlight, and locked
+/// state.
+/// </summary>
 public class AbilityMenuEntry : MonoBehaviour
 {
     #region Public

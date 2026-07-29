@@ -1,4 +1,8 @@
-﻿public class AbsorbDamageAbilityEffectTarget : BaseAbilityEffect
+﻿/// <summary>
+/// Filter for the drain effect's self-heal half (targets the caster; see audit
+/// — currently miswired).
+/// </summary>
+public class AbsorbDamageAbilityEffectTarget : BaseAbilityEffect
 {
     #region Private
 

@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+/// <summary>
+/// Battle state: shows hit chance (and target panel) for the aimed ability and
+/// asks for final confirmation before performing it.
+/// </summary>
 public class ConfirmAbilityTargetState : BattleState
 {
     private AbilityArea aa;

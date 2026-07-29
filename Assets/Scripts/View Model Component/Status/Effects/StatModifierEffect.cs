@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// Base for statuses that scale a stat while active (unused since statuses
+/// moved to the TweakDamage hooks).
+/// </summary>
 public abstract class StatModifierEffect : StatusEffect
 {
     public enum Mode { Add, Multiply }

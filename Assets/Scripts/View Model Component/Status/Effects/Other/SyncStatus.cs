@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Faith: Unit is treated as if they have maximum (100) Faith points.
+/// Sync (protocol attunement): Unit is treated as if they have maximum (100) Faith points.
 /// Raises spellcasting ability but also raises effect of spells cast on that unit.
 /// Opposite of Atheist. Lasts for 32 ticks (~3-4 turns).
 /// </summary>

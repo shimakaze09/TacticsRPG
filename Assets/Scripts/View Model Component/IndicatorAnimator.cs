@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Bounces/spins the tile selection indicator for visibility.
+/// </summary>
 public class IndicatorAnimator : MonoBehaviour
 {
     private void Start()

@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Straight line of tiles in the caster's facing direction.
+/// </summary>
 public class LineAbilityRange : AbilityRange
 {
     public override bool directionOriented => true;

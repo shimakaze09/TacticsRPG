@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
 
+/// <summary>
+/// Caster's own tile only (self-buffs and self-centered areas).
+/// </summary>
 public class SelfAbilityRange : AbilityRange
 {
     public override bool positionOriented => false;

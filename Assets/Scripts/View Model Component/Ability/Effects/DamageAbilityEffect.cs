@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Deals damage: max(ATK x power/100 - DEF/2, 1), tweaked by
+/// statuses/difficulty, clamped to StatLimits, with +-10% variance.
+/// </summary>
 public class DamageAbilityEffect : BaseAbilityEffect
 {
     #region Public

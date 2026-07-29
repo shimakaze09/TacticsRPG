@@ -1,6 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Base for all battle states: exposes the BattleController's board/turn/units
+/// and subscribes input events for the active state.
+/// </summary>
 public abstract class BattleState : State
 {
     protected Driver driver;

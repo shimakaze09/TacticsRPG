@@ -1,6 +1,10 @@
 ﻿using System;
 using UnityEngine;
 
+/// <summary>
+/// Applies a named status effect to the target for a duration (status names
+/// resolve to XStatus classes).
+/// </summary>
 public class InflictAbilityEffect : BaseAbilityEffect
 {
     public int duration;

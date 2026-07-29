@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Invisible: Attacks ignore target's evasion. Unit is ignored by AI.
+/// Ghosted (invisibility): Attacks ignore target's evasion. Unit is ignored by AI.
 /// Removed when unit performs an action (other than moving) or is attacked.
 /// </summary>
 public class GhostedStatus : StatusEffect

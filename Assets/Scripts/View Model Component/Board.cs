@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// The battle grid: loads tiles from LevelData, answers tile lookups, runs BFS
+/// searches for movement/range, and paints tile selection colors.
+/// </summary>
 public class Board : MonoBehaviour
 {
     #region Fields / Properties

@@ -1,5 +1,9 @@
 using System.Collections.Generic;
 
+/// <summary>
+/// Static table of elemental advantage/restraint pairs used when assigning
+/// Elements to units.
+/// </summary>
 public static class ElementRelationship
 {
     public static readonly Dictionary<ElementTypes, (ElementTypes advantaged, ElementTypes restrained)>

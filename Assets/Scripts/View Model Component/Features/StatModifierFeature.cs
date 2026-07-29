@@ -1,3 +1,6 @@
+/// <summary>
+/// Feature that adjusts a stat while active (weapon ATK bonuses, armor DEF).
+/// </summary>
 public class StatModifierFeature : Feature
 {
     #region Fields / Properties
