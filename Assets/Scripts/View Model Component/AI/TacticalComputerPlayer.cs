@@ -30,6 +30,13 @@ public class TacticalComputerPlayer : ComputerPlayer
     // the AI trades the move for a retreat instead (1.0 = must equal it)
     private const float HitAndRunTolerance = 0.95f;
 
+    // How strongly expected incoming damage on the destination tile discounts
+    // a plan — every plan mildly prefers safer ground when value is equal
+    private const float ThreatPositionWeight = 0.15f;
+
+    // Danger estimate for the current evaluation, rebuilt each turn
+    private ThreatMap threatMap;
+
     private static readonly HashSet<string> BuffStatuses = new HashSet<string>
     {
         "Bulwark", "Firewall", "Knit", "Overclock", "Failsafe", "Nullgrav", "Ghosted"
@@ -69,6 +76,7 @@ public class TacticalComputerPlayer : ComputerPlayer
     public override PlanOfAttack Evaluate()
     {
         var poa = new PlanOfAttack();
+        threatMap = ThreatMap.Build(bc, actor);
         FindBestActions(out var best, out var bestStationary);
 
         var chosen = best;
@@ -76,8 +84,7 @@ public class TacticalComputerPlayer : ComputerPlayer
             bestStationary.score >= best.score * HitAndRunTolerance)
         {
             var retreat = SafestMoveTile(GetMoveOptions());
-            if (retreat != null &&
-                DistanceToNearestFoe(retreat) > DistanceToNearestFoe(actor.tile))
+            if (retreat != null && IsSafer(retreat, actor.tile))
             {
                 chosen = bestStationary;
                 poa.actFirst = true;
@@ -210,6 +217,10 @@ public class TacticalComputerPlayer : ComputerPlayer
         var mpCost = ability.GetComponent<AbilityMagicCost>();
         if (mpCost != null)
             score -= mpCost.amount * MpCostWeight;
+
+        // Prefer safer ground when plans are otherwise equal
+        if (threatMap != null)
+            score -= threatMap.GetThreat(moveTile) * ThreatPositionWeight;
 
         Option candidate = null;
         if (best == null || score > best.score)
@@ -398,16 +409,39 @@ public class TacticalComputerPlayer : ComputerPlayer
         return closest;
     }
 
-    /// <summary>Reachable tile farthest from every living foe (max-min distance).</summary>
+    /// <summary>
+    /// True when moving to <paramref name="candidate"/> is genuinely safer
+    /// than staying on <paramref name="current"/>: lower expected damage,
+    /// or equal damage but farther from every foe.
+    /// </summary>
+    private bool IsSafer(Tile candidate, Tile current)
+    {
+        var candidateThreat = threatMap != null ? threatMap.GetThreat(candidate) : 0f;
+        var currentThreat = threatMap != null ? threatMap.GetThreat(current) : 0f;
+
+        if (candidateThreat < currentThreat)
+            return true;
+        return Mathf.Approximately(candidateThreat, currentThreat) &&
+               DistanceToNearestFoe(candidate) > DistanceToNearestFoe(current);
+    }
+
+    /// <summary>
+    /// Reachable tile with the lowest expected incoming damage; ties broken
+    /// by max-min distance to all living foes.
+    /// </summary>
     private Tile SafestMoveTile(List<Tile> moveOptions)
     {
         Tile bestTile = actor.tile;
+        var bestThreat = float.MaxValue;
         var bestDistance = int.MinValue;
         foreach (var tile in moveOptions)
         {
+            var tileThreat = threatMap != null ? threatMap.GetThreat(tile) : 0f;
             var distance = DistanceToNearestFoe(tile);
-            if (distance > bestDistance)
+            if (tileThreat < bestThreat ||
+                (Mathf.Approximately(tileThreat, bestThreat) && distance > bestDistance))
             {
+                bestThreat = tileThreat;
                 bestDistance = distance;
                 bestTile = tile;
             }

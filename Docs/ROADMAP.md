@@ -27,12 +27,13 @@ difficulties with the tactical AI) · **1.5c** (hit-and-run) · **1.6**
 
 Remaining, in strict order:
 
-- **1.5d** AI threat map (per-tile expected damage — foundation for 1.5e–g) ← **next**
-- **1.5e** AI self-preservation (low-HP retreat toward healer/safety)
+- ~~1.5d~~ AI threat map — **done** (2026-07-31)
+- **1.5e** AI self-preservation (low-HP retreat toward healer/safety) ← **next**
 - **1.5f** AI team focus fire + target value model
 - **1.5g** AI support discipline (triage, MP reserve, buff openings, revive positioning)
 - **1.7** KO decay pickup (memory-core/salvage), corpses stop blocking pathing
 - **1.8** Real battle setup: spawn zones in LevelData, authored victory conditions
+- **1.8b** Real terrain: types with gameplay meaning (water/trees/buildings/bridges), traversal + LoS integration, BoardCreator painting, visual skins
 - **1.9** Equipment actually equips (audit §6 — `Equip()` has no callers)
 - **1.10** Elements + critical hits via TweakDamage (audit §8)
 - **1.11** Behavior-control statuses seize control: Swayed/Scrambled/Redline (audit §4)
