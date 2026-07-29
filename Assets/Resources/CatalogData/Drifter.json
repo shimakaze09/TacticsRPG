@@ -1,0 +1,17 @@
+{
+  "id": "drifter",
+  "catalogName": "Drifter",
+  "description": "Drifter ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Flung Scrap",
+        "Barge",
+        "Brace",
+        "Field Dressing",
+        "Dig In"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,163 @@
+{
+  "job": "Scav",
+  "abilities": [
+    {
+      "id": "scav.quick_cut",
+      "name": "Quick Cut",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 200
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "scav.sand_toss",
+      "name": "Sand Toss",
+      "range": {
+        "type": "Constant",
+        "value": 2,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "Static",
+          "duration": 2,
+          "accuracy": 75
+        }
+      ]
+    },
+    {
+      "id": "scav.tripwire",
+      "name": "Tripwire",
+      "range": {
+        "type": "Constant",
+        "value": 2,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 4,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Pinned",
+          "duration": 2,
+          "accuracy": 75
+        }
+      ]
+    },
+    {
+      "id": "scav.scrap_bomb",
+      "name": "Scrap Bomb",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Specify",
+        "value": 1,
+        "height": 1
+      },
+      "power": {
+        "type": "Physical",
+        "value": 240
+      },
+      "mpCost": 6,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "scav.smokescreen",
+      "name": "Smokescreen",
+      "range": {
+        "type": "Self",
+        "value": 0,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 8,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Ghosted",
+          "duration": 2
+        }
+      ]
+    },
+    {
+      "id": "scav.vanish_strike",
+      "name": "Vanish Strike",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 440
+      },
+      "mpCost": 10,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    }
+  ]
+}

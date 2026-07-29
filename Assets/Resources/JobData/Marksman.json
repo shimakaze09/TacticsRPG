@@ -1,0 +1,89 @@
+{
+  "id": "marksman",
+  "jobName": "Marksman",
+  "description": "Scoped slug-thrower specialist. If it can be seen, it can be dropped.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobId": "drifter",
+      "requiredJobName": "Drifter",
+      "requiredLevel": 2
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.1,
+    "mp": 0.7,
+    "atk": 1.3,
+    "def": 0.8,
+    "mat": 0.7,
+    "mdf": 0.8,
+    "spd": 1.1
+  },
+  "baseStats": [
+    46,
+    14,
+    8,
+    4,
+    3,
+    4,
+    6
+  ],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 2,
+    "evadeBonus": 6
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "marksman.snapshot",
+      "abilityName": "Snapshot",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityId": "marksman.leg_shot",
+      "abilityName": "Leg Shot",
+      "unlockAtJobLevel": 2,
+      "jpCost": 150
+    },
+    {
+      "abilityId": "marksman.piercing_round",
+      "abilityName": "Piercing Round",
+      "unlockAtJobLevel": 3,
+      "jpCost": 200
+    },
+    {
+      "abilityId": "marksman.aim_cycle",
+      "abilityName": "Aim Cycle",
+      "unlockAtJobLevel": 5,
+      "jpCost": 300
+    },
+    {
+      "abilityId": "marksman.longshot",
+      "abilityName": "Longshot",
+      "unlockAtJobLevel": 6,
+      "jpCost": 350
+    },
+    {
+      "abilityId": "marksman.head_shot",
+      "abilityName": "Head Shot",
+      "unlockAtJobLevel": 8,
+      "jpCost": 450
+    }
+  ],
+  "abilityCatalogName": "Marksman",
+  "abilityCatalogId": "marksman",
+  "jpRequirements": [
+    100,
+    250,
+    450,
+    700,
+    1000,
+    1400,
+    1900,
+    2500
+  ]
+}

@@ -16,7 +16,7 @@ MonoBehaviour:
   alliance: 4
   attack: Common/Attack
   element: 
-  job: Squire
+  job: scav
   locomotion: 1
   model: Monster
   strategy: Rogue Attack Pattern

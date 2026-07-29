@@ -1,0 +1,164 @@
+{
+  "job": "Liturgist",
+  "abilities": [
+    {
+      "id": "liturgist.writ_of_light",
+      "name": "Writ of Light",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 2
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Magical",
+        "value": 320
+      },
+      "mpCost": 6,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "liturgist.benediction",
+      "name": "Benediction",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 8,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Blackout",
+          "duration": 2,
+          "accuracy": 65
+        }
+      ]
+    },
+    {
+      "id": "liturgist.mend_2",
+      "name": "Mend.2",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Magical",
+        "value": 22
+      },
+      "mpCost": 10,
+      "effects": [
+        {
+          "type": "Heal",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "liturgist.excommunicate",
+      "name": "Excommunicate",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 10,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "DeadAir",
+          "duration": 3,
+          "accuracy": 75
+        }
+      ]
+    },
+    {
+      "id": "liturgist.false_sermon",
+      "name": "False Sermon",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 10,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Scrambled",
+          "duration": 2,
+          "accuracy": 75
+        }
+      ]
+    },
+    {
+      "id": "liturgist.tithe",
+      "name": "Tithe",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Magical",
+        "value": 400
+      },
+      "mpCost": 12,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    }
+  ]
+}

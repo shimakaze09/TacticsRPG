@@ -1,0 +1,85 @@
+{
+  "id": "knife_of_the_church",
+  "jobName": "Knife of the Church",
+  "description": "Sister Vesper redacts people the way the Church redacts maps.",
+  "category": "Unique",
+  "isUnique": true,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [
+    "Sister Vesper"
+  ],
+  "prerequisites": [
+    {
+      "requiredJobId": "drifter",
+      "requiredJobName": "Drifter",
+      "requiredLevel": 2
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.2,
+    "mp": 1.1,
+    "atk": 1.4,
+    "def": 0.8,
+    "mat": 1.0,
+    "mdf": 1.0,
+    "spd": 1.4
+  },
+  "baseStats": [
+    48,
+    24,
+    8,
+    4,
+    5,
+    5,
+    7
+  ],
+  "movement": {
+    "movementBonus": 4,
+    "jumpBonus": 3,
+    "evadeBonus": 12
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "knife_of_the_church.redact_weapon",
+      "abilityName": "Redact Weapon",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityId": "knife_of_the_church.redact_sight",
+      "abilityName": "Redact Sight",
+      "unlockAtJobLevel": 2,
+      "jpCost": 150
+    },
+    {
+      "abilityId": "knife_of_the_church.steeple_drop",
+      "abilityName": "Steeple Drop",
+      "unlockAtJobLevel": 4,
+      "jpCost": 250
+    },
+    {
+      "abilityId": "knife_of_the_church.inquisitor_s_edge",
+      "abilityName": "Inquisitor's Edge",
+      "unlockAtJobLevel": 6,
+      "jpCost": 350
+    },
+    {
+      "abilityId": "knife_of_the_church.unperson",
+      "abilityName": "Unperson",
+      "unlockAtJobLevel": 8,
+      "jpCost": 450
+    }
+  ],
+  "abilityCatalogName": "Knife of the Church",
+  "abilityCatalogId": "knife_of_the_church",
+  "jpRequirements": [
+    100,
+    250,
+    450,
+    700,
+    1000,
+    1400,
+    1900,
+    2500
+  ]
+}

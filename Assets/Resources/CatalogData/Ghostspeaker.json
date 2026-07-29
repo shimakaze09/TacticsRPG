@@ -1,0 +1,18 @@
+{
+  "id": "ghostspeaker",
+  "catalogName": "Ghostspeaker",
+  "description": "Ghostspeaker ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Leech Signal",
+        "Static Veil",
+        "Dead Air",
+        "Lullaby Signal",
+        "Crossed Wires",
+        "Gray Cast"
+      ]
+    }
+  ]
+}

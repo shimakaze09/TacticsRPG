@@ -1,0 +1,18 @@
+{
+  "id": "liturgist",
+  "catalogName": "Liturgist",
+  "description": "Liturgist ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Writ of Light",
+        "Benediction",
+        "Mend.2",
+        "Excommunicate",
+        "False Sermon",
+        "Tithe"
+      ]
+    }
+  ]
+}

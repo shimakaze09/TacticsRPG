@@ -1,0 +1,184 @@
+{
+  "job": "Wakener",
+  "abilities": [
+    {
+      "id": "wakener.courier",
+      "name": "Courier",
+      "range": {
+        "type": "Infinite",
+        "value": 0,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Magical",
+        "value": 16
+      },
+      "mpCost": 10,
+      "effects": [
+        {
+          "type": "Heal",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "wakener.furnace",
+      "name": "Furnace",
+      "range": {
+        "type": "Infinite",
+        "value": 0,
+        "height": 0
+      },
+      "area": {
+        "type": "Specify",
+        "value": 1,
+        "height": 2
+      },
+      "power": {
+        "type": "Magical",
+        "value": 360
+      },
+      "mpCost": 16,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "wakener.glacier",
+      "name": "Glacier",
+      "range": {
+        "type": "Infinite",
+        "value": 0,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Magical",
+        "value": 240
+      },
+      "mpCost": 18,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Throttle",
+          "duration": 3,
+          "accuracy": 85
+        }
+      ]
+    },
+    {
+      "id": "wakener.dynamo",
+      "name": "Dynamo",
+      "range": {
+        "type": "Line",
+        "value": 5,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Magical",
+        "value": 400
+      },
+      "mpCost": 14,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "wakener.rampart",
+      "name": "Rampart",
+      "range": {
+        "type": "Constant",
+        "value": 2,
+        "height": 1
+      },
+      "area": {
+        "type": "Specify",
+        "value": 1,
+        "height": 1
+      },
+      "mpCost": 16,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Bulwark",
+          "duration": 3
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Firewall",
+          "duration": 3
+        }
+      ]
+    },
+    {
+      "id": "wakener.colossus",
+      "name": "Colossus",
+      "range": {
+        "type": "Infinite",
+        "value": 0,
+        "height": 0
+      },
+      "area": {
+        "type": "Specify",
+        "value": 2,
+        "height": 2
+      },
+      "power": {
+        "type": "Magical",
+        "value": 560
+      },
+      "mpCost": 30,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    }
+  ]
+}

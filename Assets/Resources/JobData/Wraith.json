@@ -1,0 +1,89 @@
+{
+  "id": "wraith",
+  "jobName": "Wraith",
+  "description": "The knife the charter doesn't put on the books.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobId": "scav",
+      "requiredJobName": "Scav",
+      "requiredLevel": 4
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.0,
+    "mp": 1.0,
+    "atk": 1.4,
+    "def": 0.7,
+    "mat": 0.8,
+    "mdf": 0.8,
+    "spd": 1.5
+  },
+  "baseStats": [
+    44,
+    20,
+    8,
+    3,
+    4,
+    4,
+    8
+  ],
+  "movement": {
+    "movementBonus": 4,
+    "jumpBonus": 3,
+    "evadeBonus": 15
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "wraith.throw_flechette",
+      "abilityName": "Throw Flechette",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityId": "wraith.shadow_pin",
+      "abilityName": "Shadow Pin",
+      "unlockAtJobLevel": 2,
+      "jpCost": 150
+    },
+    {
+      "abilityId": "wraith.cut_the_wire",
+      "abilityName": "Cut the Wire",
+      "unlockAtJobLevel": 3,
+      "jpCost": 200
+    },
+    {
+      "abilityId": "wraith.blackjack",
+      "abilityName": "Blackjack",
+      "unlockAtJobLevel": 5,
+      "jpCost": 300
+    },
+    {
+      "abilityId": "wraith.smoke_bomb",
+      "abilityName": "Smoke Bomb",
+      "unlockAtJobLevel": 6,
+      "jpCost": 350
+    },
+    {
+      "abilityId": "wraith.terminus",
+      "abilityName": "Terminus",
+      "unlockAtJobLevel": 8,
+      "jpCost": 450
+    }
+  ],
+  "abilityCatalogName": "Wraith",
+  "abilityCatalogId": "wraith",
+  "jpRequirements": [
+    100,
+    250,
+    450,
+    700,
+    1000,
+    1400,
+    1900,
+    2500
+  ]
+}

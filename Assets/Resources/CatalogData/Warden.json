@@ -1,0 +1,18 @@
+{
+  "id": "warden",
+  "catalogName": "Warden",
+  "description": "Warden ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Strip Weapon",
+        "Body Check",
+        "Strip Footing",
+        "Shield Wall",
+        "Sap Will",
+        "Hold Fast"
+      ]
+    }
+  ]
+}

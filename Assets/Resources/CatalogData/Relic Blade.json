@@ -1,0 +1,19 @@
+{
+  "id": "relic_blade",
+  "catalogName": "Relic Blade",
+  "description": "Relic Blade ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Cold Iron",
+        "Rainfall",
+        "Hunger",
+        "Quiet Hour",
+        "Gathering Storm",
+        "Scattered Light",
+        "First Forge"
+      ]
+    }
+  ]
+}

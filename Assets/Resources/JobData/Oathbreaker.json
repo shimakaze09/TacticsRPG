@@ -1,0 +1,85 @@
+{
+  "id": "oathbreaker",
+  "jobName": "Oathbreaker",
+  "description": "Captain Marrow reads a contract the way others read a wound. Then he collects.",
+  "category": "Unique",
+  "isUnique": true,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [
+    "Captain Gide Marrow"
+  ],
+  "prerequisites": [
+    {
+      "requiredJobId": "drifter",
+      "requiredJobName": "Drifter",
+      "requiredLevel": 2
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.6,
+    "mp": 1.0,
+    "atk": 1.5,
+    "def": 1.2,
+    "mat": 0.9,
+    "mdf": 0.9,
+    "spd": 0.9
+  },
+  "baseStats": [
+    60,
+    22,
+    8,
+    6,
+    5,
+    4,
+    4
+  ],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 2,
+    "evadeBonus": 5
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "oathbreaker.breach_of_faith",
+      "abilityName": "Breach of Faith",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityId": "oathbreaker.forfeit_clause",
+      "abilityName": "Forfeit Clause",
+      "unlockAtJobLevel": 3,
+      "jpCost": 200
+    },
+    {
+      "abilityId": "oathbreaker.levy_blood",
+      "abilityName": "Levy Blood",
+      "unlockAtJobLevel": 5,
+      "jpCost": 300
+    },
+    {
+      "abilityId": "oathbreaker.null_and_void",
+      "abilityName": "Null and Void",
+      "unlockAtJobLevel": 6,
+      "jpCost": 350
+    },
+    {
+      "abilityId": "oathbreaker.contract_s_end",
+      "abilityName": "Contract's End",
+      "unlockAtJobLevel": 8,
+      "jpCost": 450
+    }
+  ],
+  "abilityCatalogName": "Oathbreaker",
+  "abilityCatalogId": "oathbreaker",
+  "jpRequirements": [
+    100,
+    250,
+    450,
+    700,
+    1000,
+    1400,
+    1900,
+    2500
+  ]
+}

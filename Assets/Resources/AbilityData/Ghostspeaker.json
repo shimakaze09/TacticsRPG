@@ -1,0 +1,158 @@
+{
+  "job": "Ghostspeaker",
+  "abilities": [
+    {
+      "id": "ghostspeaker.leech_signal",
+      "name": "Leech Signal",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 2
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Magical",
+        "value": 240
+      },
+      "mpCost": 4,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "ghostspeaker.static_veil",
+      "name": "Static Veil",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 6,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Static",
+          "duration": 3,
+          "accuracy": 75
+        }
+      ]
+    },
+    {
+      "id": "ghostspeaker.dead_air",
+      "name": "Dead Air",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 6,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "DeadAir",
+          "duration": 3,
+          "accuracy": 75
+        }
+      ]
+    },
+    {
+      "id": "ghostspeaker.lullaby_signal",
+      "name": "Lullaby Signal",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 8,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Blackout",
+          "duration": 2,
+          "accuracy": 65
+        }
+      ]
+    },
+    {
+      "id": "ghostspeaker.crossed_wires",
+      "name": "Crossed Wires",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 10,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Scrambled",
+          "duration": 2,
+          "accuracy": 75
+        }
+      ]
+    },
+    {
+      "id": "ghostspeaker.gray_cast",
+      "name": "Gray Cast",
+      "range": {
+        "type": "Constant",
+        "value": 2,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 16,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Graycast",
+          "duration": 2,
+          "accuracy": 60
+        }
+      ]
+    }
+  ]
+}

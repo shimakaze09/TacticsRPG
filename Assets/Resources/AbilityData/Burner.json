@@ -1,0 +1,225 @@
+{
+  "job": "Burner",
+  "abilities": [
+    {
+      "id": "burner.ember",
+      "name": "Ember",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 2
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Magical",
+        "value": 280
+      },
+      "mpCost": 6,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "burner.arc",
+      "name": "Arc",
+      "range": {
+        "type": "Line",
+        "value": 4,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Magical",
+        "value": 240
+      },
+      "mpCost": 6,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "burner.rime",
+      "name": "Rime",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 2
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Magical",
+        "value": 200
+      },
+      "mpCost": 8,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Throttle",
+          "duration": 2,
+          "accuracy": 85
+        }
+      ]
+    },
+    {
+      "id": "burner.ember_2",
+      "name": "Ember.2",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 2
+      },
+      "area": {
+        "type": "Specify",
+        "value": 1,
+        "height": 1
+      },
+      "power": {
+        "type": "Magical",
+        "value": 400
+      },
+      "mpCost": 12,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "burner.blight",
+      "name": "Blight",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Magical",
+        "value": 160
+      },
+      "mpCost": 10,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Sepsis",
+          "duration": 3,
+          "accuracy": 85
+        }
+      ]
+    },
+    {
+      "id": "burner.arc_2",
+      "name": "Arc.2",
+      "range": {
+        "type": "Line",
+        "value": 5,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Magical",
+        "value": 360
+      },
+      "mpCost": 12,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "burner.rime_2",
+      "name": "Rime.2",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 2
+      },
+      "area": {
+        "type": "Specify",
+        "value": 1,
+        "height": 1
+      },
+      "power": {
+        "type": "Magical",
+        "value": 280
+      },
+      "mpCost": 18,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "FreezeFrame",
+          "duration": 2,
+          "accuracy": 65
+        }
+      ]
+    }
+  ]
+}

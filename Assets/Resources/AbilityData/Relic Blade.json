@@ -1,0 +1,228 @@
+{
+  "job": "Relic Blade",
+  "abilities": [
+    {
+      "id": "relic_blade.cold_iron",
+      "name": "Cold Iron",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 400
+      },
+      "mpCost": 8,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "relic_blade.rainfall",
+      "name": "Rainfall",
+      "range": {
+        "type": "Line",
+        "value": 3,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 320
+      },
+      "mpCost": 10,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "relic_blade.hunger",
+      "name": "Hunger",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 280
+      },
+      "mpCost": 12,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Thirst",
+          "duration": 3,
+          "accuracy": 85
+        }
+      ]
+    },
+    {
+      "id": "relic_blade.quiet_hour",
+      "name": "Quiet Hour",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 240
+      },
+      "mpCost": 14,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "FreezeFrame",
+          "duration": 2,
+          "accuracy": 65
+        }
+      ]
+    },
+    {
+      "id": "relic_blade.gathering_storm",
+      "name": "Gathering Storm",
+      "range": {
+        "type": "Constant",
+        "value": 2,
+        "height": 1
+      },
+      "area": {
+        "type": "Specify",
+        "value": 2,
+        "height": 1
+      },
+      "power": {
+        "type": "Physical",
+        "value": 360
+      },
+      "mpCost": 16,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "relic_blade.scattered_light",
+      "name": "Scattered Light",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 200
+      },
+      "mpCost": 10,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Static",
+          "duration": 3,
+          "accuracy": 75
+        }
+      ]
+    },
+    {
+      "id": "relic_blade.first_forge",
+      "name": "First Forge",
+      "range": {
+        "type": "Self",
+        "value": 0,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 12,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Overclock",
+          "duration": 3
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Redline",
+          "duration": 3
+        }
+      ]
+    }
+  ]
+}

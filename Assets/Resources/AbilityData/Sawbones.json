@@ -1,0 +1,159 @@
+{
+  "job": "Sawbones",
+  "abilities": [
+    {
+      "id": "sawbones.patch_up",
+      "name": "Patch Up",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Magical",
+        "value": 14
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Heal",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "sawbones.toxin_vial",
+      "name": "Toxin Vial",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Sepsis",
+          "duration": 3,
+          "accuracy": 85
+        }
+      ]
+    },
+    {
+      "id": "sawbones.antitoxin",
+      "name": "Antitoxin",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 4,
+      "effects": [
+        {
+          "type": "Cleanse",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "sawbones.tranq_dart",
+      "name": "Tranq Dart",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 6,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Blackout",
+          "duration": 2,
+          "accuracy": 65
+        }
+      ]
+    },
+    {
+      "id": "sawbones.field_surgery",
+      "name": "Field Surgery",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Magical",
+        "value": 28
+      },
+      "mpCost": 8,
+      "effects": [
+        {
+          "type": "Heal",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "sawbones.adrenaline",
+      "name": "Adrenaline",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 10,
+      "effects": [
+        {
+          "type": "Revive",
+          "hitRate": "Full",
+          "target": "KOd",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    }
+  ]
+}

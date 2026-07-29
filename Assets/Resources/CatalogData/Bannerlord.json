@@ -1,0 +1,18 @@
+{
+  "id": "bannerlord",
+  "catalogName": "Bannerlord",
+  "description": "Bannerlord ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Standard Bearer",
+        "First Muster",
+        "Colors Aloft",
+        "War Levy",
+        "Broken Vanguard",
+        "Hold the Line"
+      ]
+    }
+  ]
+}

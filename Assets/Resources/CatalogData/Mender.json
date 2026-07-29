@@ -1,0 +1,19 @@
+{
+  "id": "mender",
+  "catalogName": "Mender",
+  "description": "Mender ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Mend",
+        "Knit",
+        "Bulwark",
+        "Firewall",
+        "Mend.2",
+        "Failsafe",
+        "Mend.Prime"
+      ]
+    }
+  ]
+}

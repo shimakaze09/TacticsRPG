@@ -1,0 +1,18 @@
+{
+  "id": "wakener",
+  "catalogName": "Wakener",
+  "description": "Wakener ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Courier",
+        "Furnace",
+        "Glacier",
+        "Dynamo",
+        "Rampart",
+        "Colossus"
+      ]
+    }
+  ]
+}

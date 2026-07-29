@@ -1,0 +1,100 @@
+{
+  "id": "relic_blade",
+  "jobName": "Relic Blade",
+  "description": "Duelist bound to named old-world blades. Every art costs; every art lands hard.",
+  "category": "Special",
+  "isUnique": false,
+  "minimumCharacterLevel": 6,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobId": "brawler",
+      "requiredJobName": "Brawler",
+      "requiredLevel": 4
+    },
+    {
+      "requiredJobId": "skybreaker",
+      "requiredJobName": "Skybreaker",
+      "requiredLevel": 4
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.6,
+    "mp": 1.0,
+    "atk": 1.6,
+    "def": 1.1,
+    "mat": 0.9,
+    "mdf": 0.9,
+    "spd": 1.1
+  },
+  "baseStats": [
+    58,
+    22,
+    9,
+    6,
+    5,
+    5,
+    6
+  ],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 3,
+    "evadeBonus": 8
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "relic_blade.cold_iron",
+      "abilityName": "Cold Iron",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityId": "relic_blade.rainfall",
+      "abilityName": "Rainfall",
+      "unlockAtJobLevel": 2,
+      "jpCost": 150
+    },
+    {
+      "abilityId": "relic_blade.hunger",
+      "abilityName": "Hunger",
+      "unlockAtJobLevel": 3,
+      "jpCost": 200
+    },
+    {
+      "abilityId": "relic_blade.quiet_hour",
+      "abilityName": "Quiet Hour",
+      "unlockAtJobLevel": 5,
+      "jpCost": 300
+    },
+    {
+      "abilityId": "relic_blade.gathering_storm",
+      "abilityName": "Gathering Storm",
+      "unlockAtJobLevel": 6,
+      "jpCost": 350
+    },
+    {
+      "abilityId": "relic_blade.scattered_light",
+      "abilityName": "Scattered Light",
+      "unlockAtJobLevel": 7,
+      "jpCost": 400
+    },
+    {
+      "abilityId": "relic_blade.first_forge",
+      "abilityName": "First Forge",
+      "unlockAtJobLevel": 8,
+      "jpCost": 450
+    }
+  ],
+  "abilityCatalogName": "Relic Blade",
+  "abilityCatalogId": "relic_blade",
+  "jpRequirements": [
+    100,
+    250,
+    450,
+    700,
+    1000,
+    1400,
+    1900,
+    2500
+  ]
+}

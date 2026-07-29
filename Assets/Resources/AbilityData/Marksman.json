@@ -1,0 +1,181 @@
+{
+  "job": "Marksman",
+  "abilities": [
+    {
+      "id": "marksman.snapshot",
+      "name": "Snapshot",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 2
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 200
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "marksman.leg_shot",
+      "name": "Leg Shot",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 2
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 160
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "Pinned",
+          "duration": 2,
+          "accuracy": 75
+        }
+      ]
+    },
+    {
+      "id": "marksman.piercing_round",
+      "name": "Piercing Round",
+      "range": {
+        "type": "Line",
+        "value": 6,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 240
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "marksman.aim_cycle",
+      "name": "Aim Cycle",
+      "range": {
+        "type": "Constant",
+        "value": 5,
+        "height": 2
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 360
+      },
+      "mpCost": 6,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "marksman.longshot",
+      "name": "Longshot",
+      "range": {
+        "type": "Constant",
+        "value": 7,
+        "height": 3
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 240
+      },
+      "mpCost": 8,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "marksman.head_shot",
+      "name": "Head Shot",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 2
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 520
+      },
+      "mpCost": 12,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    }
+  ]
+}

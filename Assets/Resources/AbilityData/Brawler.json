@@ -1,0 +1,173 @@
+{
+  "job": "Brawler",
+  "abilities": [
+    {
+      "id": "brawler.nerve_jab",
+      "name": "Nerve Jab",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 200
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "Pinned",
+          "duration": 2,
+          "accuracy": 75
+        }
+      ]
+    },
+    {
+      "id": "brawler.haymaker",
+      "name": "Haymaker",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 360
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "brawler.second_wind",
+      "name": "Second Wind",
+      "range": {
+        "type": "Self",
+        "value": 0,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Magical",
+        "value": 14
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Heal",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "brawler.fault_line",
+      "name": "Fault Line",
+      "range": {
+        "type": "Line",
+        "value": 3,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 240
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "brawler.kickstart",
+      "name": "Kickstart",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Revive",
+          "hitRate": "Full",
+          "target": "KOd",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "brawler.flow_state",
+      "name": "Flow State",
+      "range": {
+        "type": "Self",
+        "value": 0,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 8,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Overclock",
+          "duration": 3
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "id": "scav",
+  "catalogName": "Scav",
+  "description": "Scav ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Quick Cut",
+        "Sand Toss",
+        "Tripwire",
+        "Scrap Bomb",
+        "Smokescreen",
+        "Vanish Strike"
+      ]
+    }
+  ]
+}

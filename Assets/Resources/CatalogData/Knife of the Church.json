@@ -1,0 +1,17 @@
+{
+  "id": "knife_of_the_church",
+  "catalogName": "Knife of the Church",
+  "description": "Knife of the Church ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Redact Weapon",
+        "Redact Sight",
+        "Steeple Drop",
+        "Inquisitor's Edge",
+        "Unperson"
+      ]
+    }
+  ]
+}

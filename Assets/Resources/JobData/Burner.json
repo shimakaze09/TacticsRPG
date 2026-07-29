@@ -1,0 +1,95 @@
+{
+  "id": "burner",
+  "jobName": "Burner",
+  "description": "Offensive protocol caster. Elemental payloads in escalating versions.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobId": "mender",
+      "requiredJobName": "Mender",
+      "requiredLevel": 2
+    }
+  ],
+  "statMultipliers": {
+    "hp": 0.9,
+    "mp": 1.6,
+    "atk": 0.6,
+    "def": 0.7,
+    "mat": 1.5,
+    "mdf": 1.1,
+    "spd": 0.9
+  },
+  "baseStats": [
+    40,
+    42,
+    3,
+    3,
+    8,
+    6,
+    4
+  ],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 2,
+    "evadeBonus": 5
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "burner.ember",
+      "abilityName": "Ember",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityId": "burner.arc",
+      "abilityName": "Arc",
+      "unlockAtJobLevel": 2,
+      "jpCost": 150
+    },
+    {
+      "abilityId": "burner.rime",
+      "abilityName": "Rime",
+      "unlockAtJobLevel": 3,
+      "jpCost": 200
+    },
+    {
+      "abilityId": "burner.ember_2",
+      "abilityName": "Ember.2",
+      "unlockAtJobLevel": 5,
+      "jpCost": 300
+    },
+    {
+      "abilityId": "burner.blight",
+      "abilityName": "Blight",
+      "unlockAtJobLevel": 6,
+      "jpCost": 350
+    },
+    {
+      "abilityId": "burner.arc_2",
+      "abilityName": "Arc.2",
+      "unlockAtJobLevel": 7,
+      "jpCost": 400
+    },
+    {
+      "abilityId": "burner.rime_2",
+      "abilityName": "Rime.2",
+      "unlockAtJobLevel": 8,
+      "jpCost": 450
+    }
+  ],
+  "abilityCatalogName": "Burner",
+  "abilityCatalogId": "burner",
+  "jpRequirements": [
+    100,
+    250,
+    450,
+    700,
+    1000,
+    1400,
+    1900,
+    2500
+  ]
+}

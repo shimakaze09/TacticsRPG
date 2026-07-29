@@ -1,0 +1,89 @@
+{
+  "id": "warden",
+  "jobName": "Warden",
+  "description": "Charter heavy infantry. Locks a line down and strips the fight out of whoever crosses it.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobId": "drifter",
+      "requiredJobName": "Drifter",
+      "requiredLevel": 2
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.8,
+    "mp": 0.6,
+    "atk": 1.3,
+    "def": 1.6,
+    "mat": 0.6,
+    "mdf": 1.0,
+    "spd": 0.8
+  },
+  "baseStats": [
+    62,
+    12,
+    7,
+    8,
+    3,
+    5,
+    4
+  ],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 2,
+    "evadeBonus": 4
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "warden.strip_weapon",
+      "abilityName": "Strip Weapon",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityId": "warden.body_check",
+      "abilityName": "Body Check",
+      "unlockAtJobLevel": 2,
+      "jpCost": 150
+    },
+    {
+      "abilityId": "warden.strip_footing",
+      "abilityName": "Strip Footing",
+      "unlockAtJobLevel": 3,
+      "jpCost": 200
+    },
+    {
+      "abilityId": "warden.shield_wall",
+      "abilityName": "Shield Wall",
+      "unlockAtJobLevel": 4,
+      "jpCost": 250
+    },
+    {
+      "abilityId": "warden.sap_will",
+      "abilityName": "Sap Will",
+      "unlockAtJobLevel": 5,
+      "jpCost": 300
+    },
+    {
+      "abilityId": "warden.hold_fast",
+      "abilityName": "Hold Fast",
+      "unlockAtJobLevel": 7,
+      "jpCost": 400
+    }
+  ],
+  "abilityCatalogName": "Warden",
+  "abilityCatalogId": "warden",
+  "jpRequirements": [
+    100,
+    250,
+    450,
+    700,
+    1000,
+    1400,
+    1900,
+    2500
+  ]
+}

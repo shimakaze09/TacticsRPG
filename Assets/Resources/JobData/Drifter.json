@@ -1,0 +1,77 @@
+{
+  "id": "drifter",
+  "jobName": "Drifter",
+  "description": "Charterless freelance. Learns a little of everything and survives on grit.",
+  "category": "Basic",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [],
+  "statMultipliers": {
+    "hp": 1.2,
+    "mp": 0.8,
+    "atk": 1.0,
+    "def": 1.0,
+    "mat": 0.8,
+    "mdf": 0.9,
+    "spd": 1.0
+  },
+  "baseStats": [
+    50,
+    20,
+    5,
+    5,
+    4,
+    4,
+    5
+  ],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 2,
+    "evadeBonus": 5
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "drifter.flung_scrap",
+      "abilityName": "Flung Scrap",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityId": "drifter.barge",
+      "abilityName": "Barge",
+      "unlockAtJobLevel": 2,
+      "jpCost": 150
+    },
+    {
+      "abilityId": "drifter.brace",
+      "abilityName": "Brace",
+      "unlockAtJobLevel": 3,
+      "jpCost": 200
+    },
+    {
+      "abilityId": "drifter.field_dressing",
+      "abilityName": "Field Dressing",
+      "unlockAtJobLevel": 4,
+      "jpCost": 250
+    },
+    {
+      "abilityId": "drifter.dig_in",
+      "abilityName": "Dig In",
+      "unlockAtJobLevel": 5,
+      "jpCost": 300
+    }
+  ],
+  "abilityCatalogName": "Drifter",
+  "abilityCatalogId": "drifter",
+  "jpRequirements": [
+    100,
+    250,
+    450,
+    700,
+    1000,
+    1400,
+    1900,
+    2500
+  ]
+}

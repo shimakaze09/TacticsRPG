@@ -1,0 +1,17 @@
+{
+  "id": "cipherguard",
+  "catalogName": "Cipherguard",
+  "description": "Cipherguard ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Sever Strength",
+        "Cipher Blade",
+        "Sever Warding",
+        "Sever Tempo",
+        "Old Codes"
+      ]
+    }
+  ]
+}

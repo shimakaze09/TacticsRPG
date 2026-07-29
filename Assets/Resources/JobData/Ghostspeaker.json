@@ -1,0 +1,89 @@
+{
+  "id": "ghostspeaker",
+  "jobName": "Ghostspeaker",
+  "description": "Speaks with what's left in the wires. The dead network answers with afflictions.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobId": "mender",
+      "requiredJobName": "Mender",
+      "requiredLevel": 3
+    }
+  ],
+  "statMultipliers": {
+    "hp": 0.9,
+    "mp": 1.4,
+    "atk": 0.6,
+    "def": 0.7,
+    "mat": 1.3,
+    "mdf": 1.3,
+    "spd": 1.0
+  },
+  "baseStats": [
+    42,
+    36,
+    3,
+    4,
+    7,
+    7,
+    5
+  ],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 2,
+    "evadeBonus": 5
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "ghostspeaker.leech_signal",
+      "abilityName": "Leech Signal",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityId": "ghostspeaker.static_veil",
+      "abilityName": "Static Veil",
+      "unlockAtJobLevel": 2,
+      "jpCost": 150
+    },
+    {
+      "abilityId": "ghostspeaker.dead_air",
+      "abilityName": "Dead Air",
+      "unlockAtJobLevel": 3,
+      "jpCost": 200
+    },
+    {
+      "abilityId": "ghostspeaker.lullaby_signal",
+      "abilityName": "Lullaby Signal",
+      "unlockAtJobLevel": 4,
+      "jpCost": 250
+    },
+    {
+      "abilityId": "ghostspeaker.crossed_wires",
+      "abilityName": "Crossed Wires",
+      "unlockAtJobLevel": 5,
+      "jpCost": 300
+    },
+    {
+      "abilityId": "ghostspeaker.gray_cast",
+      "abilityName": "Gray Cast",
+      "unlockAtJobLevel": 7,
+      "jpCost": 400
+    }
+  ],
+  "abilityCatalogName": "Ghostspeaker",
+  "abilityCatalogId": "ghostspeaker",
+  "jpRequirements": [
+    100,
+    250,
+    450,
+    700,
+    1000,
+    1400,
+    1900,
+    2500
+  ]
+}

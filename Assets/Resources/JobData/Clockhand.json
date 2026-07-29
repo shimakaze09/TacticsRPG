@@ -1,0 +1,89 @@
+{
+  "id": "clockhand",
+  "jobName": "Clockhand",
+  "description": "Manipulates the world's scheduler. Decides who acts, and when, and whether.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobId": "burner",
+      "requiredJobName": "Burner",
+      "requiredLevel": 3
+    }
+  ],
+  "statMultipliers": {
+    "hp": 0.9,
+    "mp": 1.5,
+    "atk": 0.6,
+    "def": 0.7,
+    "mat": 1.3,
+    "mdf": 1.2,
+    "spd": 1.2
+  },
+  "baseStats": [
+    40,
+    38,
+    3,
+    3,
+    7,
+    6,
+    6
+  ],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 2,
+    "evadeBonus": 6
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "clockhand.throttle",
+      "abilityName": "Throttle",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityId": "clockhand.overclock",
+      "abilityName": "Overclock",
+      "unlockAtJobLevel": 2,
+      "jpCost": 150
+    },
+    {
+      "abilityId": "clockhand.null_grav",
+      "abilityName": "Null Grav",
+      "unlockAtJobLevel": 3,
+      "jpCost": 200
+    },
+    {
+      "abilityId": "clockhand.half_life",
+      "abilityName": "Half-Life",
+      "unlockAtJobLevel": 5,
+      "jpCost": 300
+    },
+    {
+      "abilityId": "clockhand.freeze_frame",
+      "abilityName": "Freeze-Frame",
+      "unlockAtJobLevel": 6,
+      "jpCost": 350
+    },
+    {
+      "abilityId": "clockhand.deadline",
+      "abilityName": "Deadline",
+      "unlockAtJobLevel": 8,
+      "jpCost": 450
+    }
+  ],
+  "abilityCatalogName": "Clockhand",
+  "abilityCatalogId": "clockhand",
+  "jpRequirements": [
+    100,
+    250,
+    450,
+    700,
+    1000,
+    1400,
+    1900,
+    2500
+  ]
+}

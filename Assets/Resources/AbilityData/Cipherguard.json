@@ -1,0 +1,169 @@
+{
+  "job": "Cipherguard",
+  "abilities": [
+    {
+      "id": "cipherguard.sever_strength",
+      "name": "Sever Strength",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 240
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Throttle",
+          "duration": 2,
+          "accuracy": 85
+        }
+      ]
+    },
+    {
+      "id": "cipherguard.cipher_blade",
+      "name": "Cipher Blade",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Magical",
+        "value": 320
+      },
+      "mpCost": 8,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "cipherguard.sever_warding",
+      "name": "Sever Warding",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 200
+      },
+      "mpCost": 8,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Desync",
+          "duration": 3,
+          "accuracy": 85
+        }
+      ]
+    },
+    {
+      "id": "cipherguard.sever_tempo",
+      "name": "Sever Tempo",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 160
+      },
+      "mpCost": 14,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "FreezeFrame",
+          "duration": 2,
+          "accuracy": 65
+        }
+      ]
+    },
+    {
+      "id": "cipherguard.old_codes",
+      "name": "Old Codes",
+      "range": {
+        "type": "Constant",
+        "value": 2,
+        "height": 1
+      },
+      "area": {
+        "type": "Specify",
+        "value": 1,
+        "height": 1
+      },
+      "power": {
+        "type": "Magical",
+        "value": 400
+      },
+      "mpCost": 16,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    }
+  ]
+}

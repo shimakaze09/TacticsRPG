@@ -1,5 +1,7 @@
 {
+  "id": "common",
   "catalogName": "Common",
+  "description": "",
   "categories": [
     {
       "name": "Abilities",

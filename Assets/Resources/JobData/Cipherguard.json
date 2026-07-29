@@ -1,0 +1,85 @@
+{
+  "id": "cipherguard",
+  "jobName": "Cipherguard",
+  "description": "Ansel Rook fights with a blade in one hand and the old codes in the other.",
+  "category": "Unique",
+  "isUnique": true,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [
+    "Ansel Rook"
+  ],
+  "prerequisites": [
+    {
+      "requiredJobId": "drifter",
+      "requiredJobName": "Drifter",
+      "requiredLevel": 2
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.4,
+    "mp": 1.3,
+    "atk": 1.2,
+    "def": 1.1,
+    "mat": 1.2,
+    "mdf": 1.1,
+    "spd": 1.0
+  },
+  "baseStats": [
+    52,
+    30,
+    6,
+    6,
+    6,
+    6,
+    5
+  ],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 2,
+    "evadeBonus": 7
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "cipherguard.sever_strength",
+      "abilityName": "Sever Strength",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityId": "cipherguard.cipher_blade",
+      "abilityName": "Cipher Blade",
+      "unlockAtJobLevel": 3,
+      "jpCost": 200
+    },
+    {
+      "abilityId": "cipherguard.sever_warding",
+      "abilityName": "Sever Warding",
+      "unlockAtJobLevel": 5,
+      "jpCost": 300
+    },
+    {
+      "abilityId": "cipherguard.sever_tempo",
+      "abilityName": "Sever Tempo",
+      "unlockAtJobLevel": 6,
+      "jpCost": 350
+    },
+    {
+      "abilityId": "cipherguard.old_codes",
+      "abilityName": "Old Codes",
+      "unlockAtJobLevel": 8,
+      "jpCost": 450
+    }
+  ],
+  "abilityCatalogName": "Cipherguard",
+  "abilityCatalogId": "cipherguard",
+  "jpRequirements": [
+    100,
+    250,
+    450,
+    700,
+    1000,
+    1400,
+    1900,
+    2500
+  ]
+}

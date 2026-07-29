@@ -1,0 +1,18 @@
+{
+  "id": "balladeer",
+  "catalogName": "Balladeer",
+  "description": "Balladeer ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Grit Ballad",
+        "Shelter Verse",
+        "Static Refrain",
+        "Drag Tempo",
+        "Unsigned Broadcast",
+        "Finale"
+      ]
+    }
+  ]
+}

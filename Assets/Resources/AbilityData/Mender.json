@@ -1,0 +1,185 @@
+{
+  "job": "Mender",
+  "abilities": [
+    {
+      "id": "mender.mend",
+      "name": "Mend",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Magical",
+        "value": 16
+      },
+      "mpCost": 4,
+      "effects": [
+        {
+          "type": "Heal",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "mender.knit",
+      "name": "Knit",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 6,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Knit",
+          "duration": 4
+        }
+      ]
+    },
+    {
+      "id": "mender.bulwark",
+      "name": "Bulwark",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 6,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Bulwark",
+          "duration": 4
+        }
+      ]
+    },
+    {
+      "id": "mender.firewall",
+      "name": "Firewall",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 6,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Firewall",
+          "duration": 4
+        }
+      ]
+    },
+    {
+      "id": "mender.mend_2",
+      "name": "Mend.2",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Specify",
+        "value": 1,
+        "height": 1
+      },
+      "power": {
+        "type": "Magical",
+        "value": 22
+      },
+      "mpCost": 10,
+      "effects": [
+        {
+          "type": "Heal",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "mender.failsafe",
+      "name": "Failsafe",
+      "range": {
+        "type": "Constant",
+        "value": 2,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 16,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Failsafe",
+          "duration": 4
+        }
+      ]
+    },
+    {
+      "id": "mender.mend_prime",
+      "name": "Mend.Prime",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Specify",
+        "value": 2,
+        "height": 1
+      },
+      "power": {
+        "type": "Magical",
+        "value": 30
+      },
+      "mpCost": 18,
+      "effects": [
+        {
+          "type": "Heal",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    }
+  ]
+}

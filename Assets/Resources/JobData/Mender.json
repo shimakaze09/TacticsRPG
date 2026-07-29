@@ -1,0 +1,95 @@
+{
+  "id": "mender",
+  "jobName": "Mender",
+  "description": "Field-protocol medic. Weaves barriers and slow mending instead of bandages.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobId": "sawbones",
+      "requiredJobName": "Sawbones",
+      "requiredLevel": 3
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.1,
+    "mp": 1.5,
+    "atk": 0.6,
+    "def": 0.8,
+    "mat": 1.3,
+    "mdf": 1.3,
+    "spd": 0.9
+  },
+  "baseStats": [
+    44,
+    38,
+    3,
+    4,
+    7,
+    7,
+    4
+  ],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 2,
+    "evadeBonus": 5
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "mender.mend",
+      "abilityName": "Mend",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityId": "mender.knit",
+      "abilityName": "Knit",
+      "unlockAtJobLevel": 2,
+      "jpCost": 150
+    },
+    {
+      "abilityId": "mender.bulwark",
+      "abilityName": "Bulwark",
+      "unlockAtJobLevel": 3,
+      "jpCost": 200
+    },
+    {
+      "abilityId": "mender.firewall",
+      "abilityName": "Firewall",
+      "unlockAtJobLevel": 4,
+      "jpCost": 250
+    },
+    {
+      "abilityId": "mender.mend_2",
+      "abilityName": "Mend.2",
+      "unlockAtJobLevel": 5,
+      "jpCost": 300
+    },
+    {
+      "abilityId": "mender.failsafe",
+      "abilityName": "Failsafe",
+      "unlockAtJobLevel": 7,
+      "jpCost": 400
+    },
+    {
+      "abilityId": "mender.mend_prime",
+      "abilityName": "Mend.Prime",
+      "unlockAtJobLevel": 8,
+      "jpCost": 450
+    }
+  ],
+  "abilityCatalogName": "Mender",
+  "abilityCatalogId": "mender",
+  "jpRequirements": [
+    100,
+    250,
+    450,
+    700,
+    1000,
+    1400,
+    1900,
+    2500
+  ]
+}

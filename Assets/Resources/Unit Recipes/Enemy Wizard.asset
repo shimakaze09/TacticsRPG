@@ -16,7 +16,7 @@ MonoBehaviour:
   alliance: 4
   attack: Common/Attack
   element: 
-  job: Squire
+  job: ghostspeaker
   locomotion: 2
   model: Monster
   strategy: Mage Attack Pattern

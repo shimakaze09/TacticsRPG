@@ -16,7 +16,7 @@ MonoBehaviour:
   alliance: 4
   attack: Common/Attack
   element: 
-  job: Squire
+  job: marksman
   locomotion: 0
   model: Monster
   strategy: Warrior Attack Pattern

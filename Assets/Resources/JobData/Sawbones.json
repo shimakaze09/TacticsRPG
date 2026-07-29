@@ -1,0 +1,89 @@
+{
+  "id": "sawbones",
+  "jobName": "Sawbones",
+  "description": "Salvage pharmacology and triage under fire. Keeps the charter breathing.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobId": "drifter",
+      "requiredJobName": "Drifter",
+      "requiredLevel": 2
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.2,
+    "mp": 1.2,
+    "atk": 0.8,
+    "def": 0.8,
+    "mat": 1.1,
+    "mdf": 1.1,
+    "spd": 1.0
+  },
+  "baseStats": [
+    48,
+    30,
+    4,
+    4,
+    6,
+    6,
+    5
+  ],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 2,
+    "evadeBonus": 5
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "sawbones.patch_up",
+      "abilityName": "Patch Up",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityId": "sawbones.toxin_vial",
+      "abilityName": "Toxin Vial",
+      "unlockAtJobLevel": 2,
+      "jpCost": 150
+    },
+    {
+      "abilityId": "sawbones.antitoxin",
+      "abilityName": "Antitoxin",
+      "unlockAtJobLevel": 3,
+      "jpCost": 200
+    },
+    {
+      "abilityId": "sawbones.tranq_dart",
+      "abilityName": "Tranq Dart",
+      "unlockAtJobLevel": 4,
+      "jpCost": 250
+    },
+    {
+      "abilityId": "sawbones.field_surgery",
+      "abilityName": "Field Surgery",
+      "unlockAtJobLevel": 5,
+      "jpCost": 300
+    },
+    {
+      "abilityId": "sawbones.adrenaline",
+      "abilityName": "Adrenaline",
+      "unlockAtJobLevel": 6,
+      "jpCost": 350
+    }
+  ],
+  "abilityCatalogName": "Sawbones",
+  "abilityCatalogId": "sawbones",
+  "jpRequirements": [
+    100,
+    250,
+    450,
+    700,
+    1000,
+    1400,
+    1900,
+    2500
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "id": "wastewalker",
+  "catalogName": "Wastewalker",
+  "description": "Wastewalker ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Shear Wind",
+        "Rootsnare",
+        "Quicksand",
+        "Slag Burst",
+        "Marsh Light",
+        "Tremor"
+      ]
+    }
+  ]
+}

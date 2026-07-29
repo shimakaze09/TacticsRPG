@@ -1,0 +1,18 @@
+{
+  "id": "marksman",
+  "catalogName": "Marksman",
+  "description": "Marksman ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Snapshot",
+        "Leg Shot",
+        "Piercing Round",
+        "Aim Cycle",
+        "Longshot",
+        "Head Shot"
+      ]
+    }
+  ]
+}

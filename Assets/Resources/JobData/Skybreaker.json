@@ -1,0 +1,88 @@
+{
+  "id": "skybreaker",
+  "jobName": "Skybreaker",
+  "description": "Jump-rig trooper. Ignores the terrain everyone else fights over.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobId": "warden",
+      "requiredJobName": "Warden",
+      "requiredLevel": 3
+    },
+    {
+      "requiredJobId": "marksman",
+      "requiredJobName": "Marksman",
+      "requiredLevel": 3
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.5,
+    "mp": 0.7,
+    "atk": 1.4,
+    "def": 1.1,
+    "mat": 0.6,
+    "mdf": 0.8,
+    "spd": 1.1
+  },
+  "baseStats": [
+    56,
+    14,
+    8,
+    6,
+    3,
+    4,
+    6
+  ],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 5,
+    "evadeBonus": 8
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "skybreaker.jump_jet",
+      "abilityName": "Jump Jet",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityId": "skybreaker.thruster_burn",
+      "abilityName": "Thruster Burn",
+      "unlockAtJobLevel": 2,
+      "jpCost": 150
+    },
+    {
+      "abilityId": "skybreaker.crash_down",
+      "abilityName": "Crash Down",
+      "unlockAtJobLevel": 4,
+      "jpCost": 250
+    },
+    {
+      "abilityId": "skybreaker.skyline",
+      "abilityName": "Skyline",
+      "unlockAtJobLevel": 5,
+      "jpCost": 300
+    },
+    {
+      "abilityId": "skybreaker.deadfall",
+      "abilityName": "Deadfall",
+      "unlockAtJobLevel": 7,
+      "jpCost": 400
+    }
+  ],
+  "abilityCatalogName": "Skybreaker",
+  "abilityCatalogId": "skybreaker",
+  "jpRequirements": [
+    100,
+    250,
+    450,
+    700,
+    1000,
+    1400,
+    1900,
+    2500
+  ]
+}

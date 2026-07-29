@@ -1,0 +1,89 @@
+{
+  "id": "balladeer",
+  "jobName": "Balladeer",
+  "description": "Broadcasts over the dead network. The whole field hears the song.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobId": "broker",
+      "requiredJobName": "Broker",
+      "requiredLevel": 3
+    }
+  ],
+  "statMultipliers": {
+    "hp": 0.9,
+    "mp": 1.4,
+    "atk": 0.6,
+    "def": 0.7,
+    "mat": 1.2,
+    "mdf": 1.2,
+    "spd": 1.0
+  },
+  "baseStats": [
+    40,
+    36,
+    3,
+    3,
+    6,
+    6,
+    5
+  ],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 2,
+    "evadeBonus": 5
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "balladeer.grit_ballad",
+      "abilityName": "Grit Ballad",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityId": "balladeer.shelter_verse",
+      "abilityName": "Shelter Verse",
+      "unlockAtJobLevel": 2,
+      "jpCost": 150
+    },
+    {
+      "abilityId": "balladeer.static_refrain",
+      "abilityName": "Static Refrain",
+      "unlockAtJobLevel": 3,
+      "jpCost": 200
+    },
+    {
+      "abilityId": "balladeer.drag_tempo",
+      "abilityName": "Drag Tempo",
+      "unlockAtJobLevel": 5,
+      "jpCost": 300
+    },
+    {
+      "abilityId": "balladeer.unsigned_broadcast",
+      "abilityName": "Unsigned Broadcast",
+      "unlockAtJobLevel": 6,
+      "jpCost": 350
+    },
+    {
+      "abilityId": "balladeer.finale",
+      "abilityName": "Finale",
+      "unlockAtJobLevel": 8,
+      "jpCost": 450
+    }
+  ],
+  "abilityCatalogName": "Balladeer",
+  "abilityCatalogId": "balladeer",
+  "jpRequirements": [
+    100,
+    250,
+    450,
+    700,
+    1000,
+    1400,
+    1900,
+    2500
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "id": "clockhand",
+  "catalogName": "Clockhand",
+  "description": "Clockhand ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Throttle",
+        "Overclock",
+        "Null Grav",
+        "Half-Life",
+        "Freeze-Frame",
+        "Deadline"
+      ]
+    }
+  ]
+}

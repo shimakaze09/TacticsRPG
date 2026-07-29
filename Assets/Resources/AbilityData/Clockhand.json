@@ -1,0 +1,156 @@
+{
+  "job": "Clockhand",
+  "abilities": [
+    {
+      "id": "clockhand.throttle",
+      "name": "Throttle",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 2
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 6,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Throttle",
+          "duration": 3,
+          "accuracy": 85
+        }
+      ]
+    },
+    {
+      "id": "clockhand.overclock",
+      "name": "Overclock",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 8,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Overclock",
+          "duration": 3
+        }
+      ]
+    },
+    {
+      "id": "clockhand.null_grav",
+      "name": "Null Grav",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 6,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Nullgrav",
+          "duration": 3
+        }
+      ]
+    },
+    {
+      "id": "clockhand.half_life",
+      "name": "Half-Life",
+      "range": {
+        "type": "Constant",
+        "value": 4,
+        "height": 2
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Magical",
+        "value": 400
+      },
+      "mpCost": 12,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "clockhand.freeze_frame",
+      "name": "Freeze-Frame",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 14,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "FreezeFrame",
+          "duration": 2,
+          "accuracy": 65
+        }
+      ]
+    },
+    {
+      "id": "clockhand.deadline",
+      "name": "Deadline",
+      "range": {
+        "type": "Constant",
+        "value": 2,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 20,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Deadline",
+          "duration": 3,
+          "accuracy": 65
+        }
+      ]
+    }
+  ]
+}

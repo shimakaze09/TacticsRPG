@@ -1,0 +1,88 @@
+{
+  "id": "broker",
+  "jobName": "Broker",
+  "description": "Everyone has a price. The Broker finds it mid-battle.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobId": "sawbones",
+      "requiredJobName": "Sawbones",
+      "requiredLevel": 2
+    },
+    {
+      "requiredJobId": "scav",
+      "requiredJobName": "Scav",
+      "requiredLevel": 2
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.0,
+    "mp": 1.3,
+    "atk": 0.7,
+    "def": 0.8,
+    "mat": 1.2,
+    "mdf": 1.2,
+    "spd": 1.0
+  },
+  "baseStats": [
+    46,
+    32,
+    4,
+    4,
+    6,
+    6,
+    5
+  ],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 2,
+    "evadeBonus": 6
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "broker.demoralize",
+      "abilityName": "Demoralize",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityId": "broker.rally",
+      "abilityName": "Rally",
+      "unlockAtJobLevel": 2,
+      "jpCost": 150
+    },
+    {
+      "abilityId": "broker.filibuster",
+      "abilityName": "Filibuster",
+      "unlockAtJobLevel": 3,
+      "jpCost": 200
+    },
+    {
+      "abilityId": "broker.agitate",
+      "abilityName": "Agitate",
+      "unlockAtJobLevel": 5,
+      "jpCost": 300
+    },
+    {
+      "abilityId": "broker.sway",
+      "abilityName": "Sway",
+      "unlockAtJobLevel": 7,
+      "jpCost": 400
+    }
+  ],
+  "abilityCatalogName": "Broker",
+  "abilityCatalogId": "broker",
+  "jpRequirements": [
+    100,
+    250,
+    450,
+    700,
+    1000,
+    1400,
+    1900,
+    2500
+  ]
+}

@@ -1,6 +1,8 @@
 # TacticsRPG
 
-A Final Fantasy Tactics-style tactics RPG built in Unity.
+A job-system tactics RPG built in Unity, set in an original post-collapse
+world — see `Docs/WORLD.md` for the setting bible ("The Long Autumn"),
+job roster, and naming conventions.
 
 ## Requirements
 
@@ -19,9 +21,9 @@ and the output folders (`Assets/Resources/Jobs`, `Assets/Resources/Abilities`,
 After cloning, open the project in Unity and run these editor menu items **in
 this order** before entering play mode:
 
-1. `Tactics RPG → Create FFT Abilities → Generate from JSON`
-2. `Tactics RPG → Create FFT Catalogs → Generate from JSON`
-3. `Tactics RPG → Create FFT Jobs → Generate All Jobs from JSON`
+1. `Tactics RPG → Generate Content → Abilities`
+2. `Tactics RPG → Generate Content → Catalogs`
+3. `Tactics RPG → Generate Content → Jobs`
 
 Without this step, `JobManager` finds no jobs ("No jobs available!"),
 `UnitFactory` cannot load any ability prefabs, and battles will not function.

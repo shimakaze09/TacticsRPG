@@ -1,0 +1,19 @@
+{
+  "id": "burner",
+  "catalogName": "Burner",
+  "description": "Burner ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Ember",
+        "Arc",
+        "Rime",
+        "Ember.2",
+        "Blight",
+        "Arc.2",
+        "Rime.2"
+      ]
+    }
+  ]
+}

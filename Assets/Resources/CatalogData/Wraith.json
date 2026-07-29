@@ -1,0 +1,18 @@
+{
+  "id": "wraith",
+  "catalogName": "Wraith",
+  "description": "Wraith ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Throw Flechette",
+        "Shadow Pin",
+        "Cut the Wire",
+        "Blackjack",
+        "Smoke Bomb",
+        "Terminus"
+      ]
+    }
+  ]
+}

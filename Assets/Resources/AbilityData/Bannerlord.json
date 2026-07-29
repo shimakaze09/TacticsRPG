@@ -1,0 +1,164 @@
+{
+  "job": "Bannerlord",
+  "abilities": [
+    {
+      "id": "bannerlord.standard_bearer",
+      "name": "Standard Bearer",
+      "range": {
+        "type": "Self",
+        "value": 0,
+        "height": 0
+      },
+      "area": {
+        "type": "Full",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 10,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Bulwark",
+          "duration": 2
+        }
+      ]
+    },
+    {
+      "id": "bannerlord.first_muster",
+      "name": "First Muster",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 10,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Overclock",
+          "duration": 2
+        }
+      ]
+    },
+    {
+      "id": "bannerlord.colors_aloft",
+      "name": "Colors Aloft",
+      "range": {
+        "type": "Self",
+        "value": 0,
+        "height": 0
+      },
+      "area": {
+        "type": "Full",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 12,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Knit",
+          "duration": 3
+        }
+      ]
+    },
+    {
+      "id": "bannerlord.war_levy",
+      "name": "War Levy",
+      "range": {
+        "type": "Constant",
+        "value": 1,
+        "height": 1
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 320
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "bannerlord.broken_vanguard",
+      "name": "Broken Vanguard",
+      "range": {
+        "type": "Constant",
+        "value": 2,
+        "height": 1
+      },
+      "area": {
+        "type": "Specify",
+        "value": 1,
+        "height": 1
+      },
+      "power": {
+        "type": "Physical",
+        "value": 360
+      },
+      "mpCost": 12,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "bannerlord.hold_the_line",
+      "name": "Hold the Line",
+      "range": {
+        "type": "Self",
+        "value": 0,
+        "height": 0
+      },
+      "area": {
+        "type": "Specify",
+        "value": 2,
+        "height": 1
+      },
+      "mpCost": 20,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Bulwark",
+          "duration": 4
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Firewall",
+          "duration": 4
+        }
+      ]
+    }
+  ]
+}

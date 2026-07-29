@@ -1,0 +1,17 @@
+{
+  "id": "hollowed",
+  "catalogName": "Hollowed",
+  "description": "Hollowed ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Gloam Edge",
+        "Leeching Edge",
+        "Grave Cut",
+        "Hollow Cut",
+        "Last Edge"
+      ]
+    }
+  ]
+}

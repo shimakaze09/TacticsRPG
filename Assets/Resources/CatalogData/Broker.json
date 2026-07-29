@@ -1,0 +1,17 @@
+{
+  "id": "broker",
+  "catalogName": "Broker",
+  "description": "Broker ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Demoralize",
+        "Rally",
+        "Filibuster",
+        "Agitate",
+        "Sway"
+      ]
+    }
+  ]
+}

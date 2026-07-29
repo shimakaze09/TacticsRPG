@@ -1,0 +1,156 @@
+{
+  "job": "Balladeer",
+  "abilities": [
+    {
+      "id": "balladeer.grit_ballad",
+      "name": "Grit Ballad",
+      "range": {
+        "type": "Self",
+        "value": 0,
+        "height": 0
+      },
+      "area": {
+        "type": "Full",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 10,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Knit",
+          "duration": 3
+        }
+      ]
+    },
+    {
+      "id": "balladeer.shelter_verse",
+      "name": "Shelter Verse",
+      "range": {
+        "type": "Self",
+        "value": 0,
+        "height": 0
+      },
+      "area": {
+        "type": "Full",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 12,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Bulwark",
+          "duration": 2
+        }
+      ]
+    },
+    {
+      "id": "balladeer.static_refrain",
+      "name": "Static Refrain",
+      "range": {
+        "type": "Self",
+        "value": 0,
+        "height": 0
+      },
+      "area": {
+        "type": "Full",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 12,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Static",
+          "duration": 2,
+          "accuracy": 75
+        }
+      ]
+    },
+    {
+      "id": "balladeer.drag_tempo",
+      "name": "Drag Tempo",
+      "range": {
+        "type": "Self",
+        "value": 0,
+        "height": 0
+      },
+      "area": {
+        "type": "Full",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 14,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Throttle",
+          "duration": 2,
+          "accuracy": 85
+        }
+      ]
+    },
+    {
+      "id": "balladeer.unsigned_broadcast",
+      "name": "Unsigned Broadcast",
+      "range": {
+        "type": "Self",
+        "value": 0,
+        "height": 0
+      },
+      "area": {
+        "type": "Full",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 18,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "Scrambled",
+          "duration": 2,
+          "accuracy": 75
+        }
+      ]
+    },
+    {
+      "id": "balladeer.finale",
+      "name": "Finale",
+      "range": {
+        "type": "Self",
+        "value": 0,
+        "height": 0
+      },
+      "area": {
+        "type": "Full",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Magical",
+        "value": 280
+      },
+      "mpCost": 24,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    }
+  ]
+}

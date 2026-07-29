@@ -1,0 +1,94 @@
+{
+  "id": "wakener",
+  "jobName": "Wakener",
+  "description": "Boots dormant war-engines by callsign. Anywhere on the field, for a price.",
+  "category": "Special",
+  "isUnique": false,
+  "minimumCharacterLevel": 6,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobId": "burner",
+      "requiredJobName": "Burner",
+      "requiredLevel": 4
+    },
+    {
+      "requiredJobId": "ghostspeaker",
+      "requiredJobName": "Ghostspeaker",
+      "requiredLevel": 4
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.0,
+    "mp": 1.8,
+    "atk": 0.6,
+    "def": 0.8,
+    "mat": 1.6,
+    "mdf": 1.2,
+    "spd": 0.8
+  },
+  "baseStats": [
+    44,
+    48,
+    3,
+    4,
+    9,
+    6,
+    4
+  ],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 2,
+    "evadeBonus": 4
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "wakener.courier",
+      "abilityName": "Courier",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityId": "wakener.furnace",
+      "abilityName": "Furnace",
+      "unlockAtJobLevel": 2,
+      "jpCost": 150
+    },
+    {
+      "abilityId": "wakener.glacier",
+      "abilityName": "Glacier",
+      "unlockAtJobLevel": 4,
+      "jpCost": 250
+    },
+    {
+      "abilityId": "wakener.dynamo",
+      "abilityName": "Dynamo",
+      "unlockAtJobLevel": 5,
+      "jpCost": 300
+    },
+    {
+      "abilityId": "wakener.rampart",
+      "abilityName": "Rampart",
+      "unlockAtJobLevel": 6,
+      "jpCost": 350
+    },
+    {
+      "abilityId": "wakener.colossus",
+      "abilityName": "Colossus",
+      "unlockAtJobLevel": 8,
+      "jpCost": 450
+    }
+  ],
+  "abilityCatalogName": "Wakener",
+  "abilityCatalogId": "wakener",
+  "jpRequirements": [
+    100,
+    250,
+    450,
+    700,
+    1000,
+    1400,
+    1900,
+    2500
+  ]
+}

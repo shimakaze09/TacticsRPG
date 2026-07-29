@@ -1,0 +1,157 @@
+{
+  "job": "Skybreaker",
+  "abilities": [
+    {
+      "id": "skybreaker.jump_jet",
+      "name": "Jump Jet",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 3
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 280
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    },
+    {
+      "id": "skybreaker.thruster_burn",
+      "name": "Thruster Burn",
+      "range": {
+        "type": "Line",
+        "value": 2,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 200
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "Doused",
+          "duration": 2,
+          "accuracy": 85
+        }
+      ]
+    },
+    {
+      "id": "skybreaker.crash_down",
+      "name": "Crash Down",
+      "range": {
+        "type": "Constant",
+        "value": 2,
+        "height": 2
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 240
+      },
+      "mpCost": 0,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        },
+        {
+          "type": "Inflict",
+          "hitRate": "A",
+          "target": "Enemy",
+          "status": "Pinned",
+          "duration": 2,
+          "accuracy": 75
+        }
+      ]
+    },
+    {
+      "id": "skybreaker.skyline",
+      "name": "Skyline",
+      "range": {
+        "type": "Self",
+        "value": 0,
+        "height": 0
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "mpCost": 6,
+      "effects": [
+        {
+          "type": "Inflict",
+          "hitRate": "Full",
+          "target": "Default",
+          "status": "Nullgrav",
+          "duration": 4
+        }
+      ]
+    },
+    {
+      "id": "skybreaker.deadfall",
+      "name": "Deadfall",
+      "range": {
+        "type": "Constant",
+        "value": 3,
+        "height": 3
+      },
+      "area": {
+        "type": "Unit",
+        "value": 0,
+        "height": 0
+      },
+      "power": {
+        "type": "Physical",
+        "value": 480
+      },
+      "mpCost": 10,
+      "effects": [
+        {
+          "type": "Damage",
+          "hitRate": "S",
+          "target": "Enemy",
+          "status": "",
+          "duration": 0
+        }
+      ]
+    }
+  ]
+}

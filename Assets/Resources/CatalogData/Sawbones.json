@@ -1,0 +1,18 @@
+{
+  "id": "sawbones",
+  "catalogName": "Sawbones",
+  "description": "Sawbones ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Patch Up",
+        "Toxin Vial",
+        "Antitoxin",
+        "Tranq Dart",
+        "Field Surgery",
+        "Adrenaline"
+      ]
+    }
+  ]
+}

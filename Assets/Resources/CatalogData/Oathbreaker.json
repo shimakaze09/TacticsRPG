@@ -1,0 +1,17 @@
+{
+  "id": "oathbreaker",
+  "catalogName": "Oathbreaker",
+  "description": "Oathbreaker ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Breach of Faith",
+        "Forfeit Clause",
+        "Levy Blood",
+        "Null and Void",
+        "Contract's End"
+      ]
+    }
+  ]
+}

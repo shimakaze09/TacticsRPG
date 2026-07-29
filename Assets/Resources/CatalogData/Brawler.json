@@ -1,0 +1,18 @@
+{
+  "id": "brawler",
+  "catalogName": "Brawler",
+  "description": "Brawler ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Nerve Jab",
+        "Haymaker",
+        "Second Wind",
+        "Fault Line",
+        "Kickstart",
+        "Flow State"
+      ]
+    }
+  ]
+}

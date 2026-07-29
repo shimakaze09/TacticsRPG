@@ -1,0 +1,89 @@
+{
+  "id": "wastewalker",
+  "jobName": "Wastewalker",
+  "description": "Reads the land's memory. The waste itself does the fighting.",
+  "category": "Common",
+  "isUnique": false,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [],
+  "prerequisites": [
+    {
+      "requiredJobId": "ghostspeaker",
+      "requiredJobName": "Ghostspeaker",
+      "requiredLevel": 3
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.2,
+    "mp": 1.2,
+    "atk": 0.9,
+    "def": 1.0,
+    "mat": 1.2,
+    "mdf": 1.1,
+    "spd": 1.0
+  },
+  "baseStats": [
+    50,
+    30,
+    5,
+    5,
+    6,
+    6,
+    5
+  ],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 3,
+    "evadeBonus": 8
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "wastewalker.shear_wind",
+      "abilityName": "Shear Wind",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityId": "wastewalker.rootsnare",
+      "abilityName": "Rootsnare",
+      "unlockAtJobLevel": 2,
+      "jpCost": 150
+    },
+    {
+      "abilityId": "wastewalker.quicksand",
+      "abilityName": "Quicksand",
+      "unlockAtJobLevel": 3,
+      "jpCost": 200
+    },
+    {
+      "abilityId": "wastewalker.slag_burst",
+      "abilityName": "Slag Burst",
+      "unlockAtJobLevel": 5,
+      "jpCost": 300
+    },
+    {
+      "abilityId": "wastewalker.marsh_light",
+      "abilityName": "Marsh Light",
+      "unlockAtJobLevel": 6,
+      "jpCost": 350
+    },
+    {
+      "abilityId": "wastewalker.tremor",
+      "abilityName": "Tremor",
+      "unlockAtJobLevel": 8,
+      "jpCost": 450
+    }
+  ],
+  "abilityCatalogName": "Wastewalker",
+  "abilityCatalogId": "wastewalker",
+  "jpRequirements": [
+    100,
+    250,
+    450,
+    700,
+    1000,
+    1400,
+    1900,
+    2500
+  ]
+}

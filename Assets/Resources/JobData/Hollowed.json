@@ -1,0 +1,85 @@
+{
+  "id": "hollowed",
+  "jobName": "Hollowed",
+  "description": "Corvus Rell came back from the Severance zones. Not all of him.",
+  "category": "Unique",
+  "isUnique": true,
+  "minimumCharacterLevel": 1,
+  "allowedCharacterNames": [
+    "Corvus Rell"
+  ],
+  "prerequisites": [
+    {
+      "requiredJobId": "drifter",
+      "requiredJobName": "Drifter",
+      "requiredLevel": 2
+    }
+  ],
+  "statMultipliers": {
+    "hp": 1.5,
+    "mp": 1.1,
+    "atk": 1.5,
+    "def": 1.0,
+    "mat": 1.0,
+    "mdf": 0.9,
+    "spd": 1.0
+  },
+  "baseStats": [
+    56,
+    26,
+    8,
+    5,
+    5,
+    4,
+    5
+  ],
+  "movement": {
+    "movementBonus": 3,
+    "jumpBonus": 2,
+    "evadeBonus": 6
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "hollowed.gloam_edge",
+      "abilityName": "Gloam Edge",
+      "unlockAtJobLevel": 1,
+      "jpCost": 100
+    },
+    {
+      "abilityId": "hollowed.leeching_edge",
+      "abilityName": "Leeching Edge",
+      "unlockAtJobLevel": 3,
+      "jpCost": 200
+    },
+    {
+      "abilityId": "hollowed.grave_cut",
+      "abilityName": "Grave Cut",
+      "unlockAtJobLevel": 5,
+      "jpCost": 300
+    },
+    {
+      "abilityId": "hollowed.hollow_cut",
+      "abilityName": "Hollow Cut",
+      "unlockAtJobLevel": 6,
+      "jpCost": 350
+    },
+    {
+      "abilityId": "hollowed.last_edge",
+      "abilityName": "Last Edge",
+      "unlockAtJobLevel": 8,
+      "jpCost": 450
+    }
+  ],
+  "abilityCatalogName": "Hollowed",
+  "abilityCatalogId": "hollowed",
+  "jpRequirements": [
+    100,
+    250,
+    450,
+    700,
+    1000,
+    1400,
+    1900,
+    2500
+  ]
+}

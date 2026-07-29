@@ -1,0 +1,17 @@
+{
+  "id": "skybreaker",
+  "catalogName": "Skybreaker",
+  "description": "Skybreaker ability catalog",
+  "categories": [
+    {
+      "name": "Abilities",
+      "entries": [
+        "Jump Jet",
+        "Thruster Burn",
+        "Crash Down",
+        "Skyline",
+        "Deadfall"
+      ]
+    }
+  ]
+}
