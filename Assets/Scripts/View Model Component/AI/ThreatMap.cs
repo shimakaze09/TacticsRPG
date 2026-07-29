@@ -94,6 +94,20 @@ public class ThreatMap
         return positions;
     }
 
+    /// <summary>
+    /// Rough single-hit damage estimate for a unit (its strongest ability),
+    /// shared with target-value math in the tactical AI.
+    /// </summary>
+    public static float EstimateDamage(Unit unit)
+    {
+        var stats = unit != null ? unit.GetComponent<Stats>() : null;
+        if (stats == null)
+            return 0f;
+
+        EstimateOffense(unit, stats, out var damage, out _, out _);
+        return damage;
+    }
+
     // Rough "how hard can this foe hit and from how far": the max over its
     // damage abilities of stat x power/100, and the longest attack reach
     private static void EstimateOffense(Unit foe, Stats stats, out float damage, out int reach, out bool everywhere)

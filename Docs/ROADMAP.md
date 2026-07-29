@@ -29,8 +29,8 @@ Remaining, in strict order:
 
 - ~~1.5d~~ AI threat map — **done** (2026-07-31)
 - ~~1.5e~~ AI self-preservation — **done** (2026-07-31)
-- **1.5f** AI team focus fire + target value model ← **next**
-- **1.5g** AI support discipline (triage, MP reserve, buff openings, revive positioning)
+- ~~1.5f~~ AI team focus fire + target value model — **done** (2026-07-31)
+- **1.5g** AI support discipline (triage, MP reserve, buff openings, revive positioning) ← **next**
 - **1.7** KO decay pickup (memory-core/salvage), corpses stop blocking pathing
 - **1.8** Real battle setup: spawn zones in LevelData, authored victory conditions
 - **1.8b** Real terrain: types with gameplay meaning (water/trees/buildings/bridges), traversal + LoS integration, BoardCreator painting, visual skins

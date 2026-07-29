@@ -47,11 +47,29 @@ public class TacticalComputerPlayer : ComputerPlayer
     // Idle healer positioning: pull toward the most wounded ally
     private const float WoundedSeekWeight = 2f;
 
+    // Flat bonus for damaging the team's agreed focus target — makes the
+    // whole team converge on one victim instead of spreading damage
+    private const float FocusAssistBonus = 18f;
+
+    // Tiny per-tile pull toward the focus target so positioning drifts that
+    // way without distorting attack choices
+    private const float FocusConvergeWeight = 0.3f;
+
+    // Damage-value multipliers by target role: taking out support first
+    private const float HealerTargetMultiplier = 1.35f;
+    private const float CasterTargetMultiplier = 1.2f;
+    private const float TankTargetMultiplier = 0.9f;
+
     // Danger estimate for the current evaluation, rebuilt each turn
     private ThreatMap threatMap;
 
     // Threat weight for this evaluation (amplified for healers)
     private float threatWeight = ThreatPositionWeight;
+
+    // The team's agreed kill-first target for this evaluation. Nomination is
+    // deterministic from battle state, so every teammate computes the same
+    // answer — coordination without shared state.
+    private Unit focusTarget;
 
     private static readonly HashSet<string> BuffStatuses = new HashSet<string>
     {
@@ -85,6 +103,9 @@ public class TacticalComputerPlayer : ComputerPlayer
 
         /// <summary>True when this plan's predicted damage finishes a foe.</summary>
         public bool killsTarget;
+
+        /// <summary>True when this plan damages the team's focus target.</summary>
+        public bool hitsFocus;
     }
 
     /// <summary>
@@ -97,6 +118,7 @@ public class TacticalComputerPlayer : ComputerPlayer
         var poa = new PlanOfAttack();
         threatMap = ThreatMap.Build(bc, actor);
         threatWeight = IsHealer(actor) ? ThreatPositionWeight * HealerThreatMultiplier : ThreatPositionWeight;
+        focusTarget = NominateFocusTarget();
         FindBestActions(out var best, out var bestStationary);
 
         // Self-preservation: badly wounded and no kill on the table -> fall
@@ -121,12 +143,19 @@ public class TacticalComputerPlayer : ComputerPlayer
         if (bestStationary != null && best != null &&
             bestStationary.score >= best.score * HitAndRunTolerance)
         {
-            var retreat = SafestMoveTile(GetMoveOptions());
-            if (retreat != null && IsSafer(retreat, actor.tile))
+            // Post-act move: converge on an out-of-reach focus target after
+            // hitting whoever was close — otherwise kite to safety as usual.
+            var destination = !bestStationary.hitsFocus && focusTarget != null
+                ? ConvergeTile(focusTarget)
+                : SafestMoveTile(GetMoveOptions());
+
+            if (destination != null &&
+                (destination != actor.tile &&
+                 (!bestStationary.hitsFocus && focusTarget != null || IsSafer(destination, actor.tile))))
             {
                 chosen = bestStationary;
                 poa.actFirst = true;
-                poa.postActMoveLocation = retreat.pos;
+                poa.postActMoveLocation = destination.pos;
             }
         }
 
@@ -140,6 +169,13 @@ public class TacticalComputerPlayer : ComputerPlayer
             // wounded ally while avoiding dangerous ground.
             poa.actFirst = false;
             poa.moveLocation = HealerIdleTile().pos;
+        }
+        else if (focusTarget != null)
+        {
+            // Nothing in range: advance on the team's focus target
+            // (danger-weighted) instead of just the nearest foe.
+            poa.actFirst = false;
+            poa.moveLocation = ConvergeTile(focusTarget).pos;
         }
         else
         {
@@ -260,8 +296,9 @@ public class TacticalComputerPlayer : ComputerPlayer
 
         var score = 0f;
         var kills = false;
+        var focusHit = false;
         foreach (var tile in areaTiles)
-            score += ScoreTile(ability, tile, ref kills);
+            score += ScoreTile(ability, tile, ref kills, ref focusHit);
 
         if (score <= 0f)
             return;
@@ -275,6 +312,15 @@ public class TacticalComputerPlayer : ComputerPlayer
         if (threatMap != null)
             score -= threatMap.GetThreat(moveTile) * threatWeight;
 
+        // Gentle pull toward the focus target: among near-equal firing
+        // positions, end up closer to the team's kill-first pick
+        if (focusTarget != null && focusTarget.tile != null)
+        {
+            var focusDistance = Mathf.Abs(moveTile.pos.x - focusTarget.tile.pos.x) +
+                                Mathf.Abs(moveTile.pos.y - focusTarget.tile.pos.y);
+            score -= focusDistance * FocusConvergeWeight;
+        }
+
         Option candidate = null;
         if (best == null || score > best.score)
         {
@@ -285,7 +331,8 @@ public class TacticalComputerPlayer : ComputerPlayer
                 fireTile = fireTile,
                 direction = direction,
                 score = score,
-                killsTarget = kills
+                killsTarget = kills,
+                hitsFocus = focusHit
             };
             best = candidate;
         }
@@ -299,12 +346,13 @@ public class TacticalComputerPlayer : ComputerPlayer
                 fireTile = fireTile,
                 direction = direction,
                 score = score,
-                killsTarget = kills
+                killsTarget = kills,
+                hitsFocus = focusHit
             };
         }
     }
 
-    private float ScoreTile(Ability ability, Tile tile, ref bool kills)
+    private float ScoreTile(Ability ability, Tile tile, ref bool kills, ref bool focusHit)
     {
         if (tile.content == null)
             return 0f;
@@ -338,13 +386,13 @@ public class TacticalComputerPlayer : ComputerPlayer
             if (chance <= 0f)
                 continue;
 
-            total += ScoreEffect(effect, tile, defender, defStats, isFoe, isDown, ref kills) * chance;
+            total += ScoreEffect(effect, tile, defender, defStats, isFoe, isDown, ref kills, ref focusHit) * chance;
         }
 
         return total;
     }
 
-    private float ScoreEffect(BaseAbilityEffect effect, Tile tile, Unit defender, Stats defStats, bool isFoe, bool isDown, ref bool kills)
+    private float ScoreEffect(BaseAbilityEffect effect, Tile tile, Unit defender, Stats defStats, bool isFoe, bool isDown, ref bool kills, ref bool focusHit)
     {
         switch (effect)
         {
@@ -364,6 +412,16 @@ public class TacticalComputerPlayer : ComputerPlayer
                 if (damage >= hp)
                     value += KillBonus;
                 value += (1f - hp / (float)Mathf.Max(1, defStats[StatTypes.MHP])) * LowHealthFocusWeight;
+
+                // Support dies first; damage on the team's focus target earns
+                // the assist bonus that makes the team converge
+                value *= RoleMultiplier(defender);
+                if (defender == focusTarget)
+                {
+                    value += FocusAssistBonus;
+                    focusHit = true;
+                }
+
                 return value;
             }
 
@@ -464,6 +522,98 @@ public class TacticalComputerPlayer : ComputerPlayer
         }
 
         return closest;
+    }
+
+    /// <summary>
+    /// The team's kill-first pick: highest target value among living foes,
+    /// where value = role weight (healer > caster > striker > tank) scaled by
+    /// wounded-ness and by whether this team can realistically finish them.
+    /// Deterministic from battle state, so every teammate agrees. Never
+    /// forces reach — units out of range simply attack who they can and
+    /// converge with their movement instead.
+    /// </summary>
+    private Unit NominateFocusTarget()
+    {
+        Unit best = null;
+        var bestValue = 0f;
+
+        var teamHit = Mathf.Max(1f, ThreatMap.EstimateDamage(actor));
+        foreach (var mate in bc.units)
+        {
+            if (mate == null || mate == actor)
+                continue;
+            var mateAlliance = mate.GetComponent<Alliance>();
+            if (mateAlliance == null || !alliance.IsMatch(mateAlliance, Targets.Ally))
+                continue;
+            teamHit = Mathf.Max(teamHit, ThreatMap.EstimateDamage(mate));
+        }
+
+        foreach (var foe in bc.units)
+        {
+            if (foe == null || foe.tile == null)
+                continue;
+
+            var foeAlliance = foe.GetComponent<Alliance>();
+            if (foeAlliance == null || !alliance.IsMatch(foeAlliance, Targets.Foe))
+                continue;
+
+            var stats = foe.GetComponent<Stats>();
+            if (stats == null || stats[StatTypes.HP] <= 0)
+                continue;
+
+            var woundedness = 1f - stats[StatTypes.HP] / (float)Mathf.Max(1, stats[StatTypes.MHP]);
+            var feasibility = Mathf.Clamp(teamHit * 2f / Mathf.Max(1, stats[StatTypes.HP]), 0.3f, 1.5f);
+            var value = RoleMultiplier(foe) * (0.6f + woundedness) * feasibility;
+
+            if (value > bestValue)
+            {
+                bestValue = value;
+                best = foe;
+            }
+        }
+
+        return best;
+    }
+
+    /// <summary>Target priority by role: support first, armor last.</summary>
+    private static float RoleMultiplier(Unit unit)
+    {
+        if (IsHealer(unit))
+            return HealerTargetMultiplier;
+
+        var stats = unit.GetComponent<Stats>();
+        if (stats == null)
+            return 1f;
+        if (stats[StatTypes.MAT] > stats[StatTypes.ATK])
+            return CasterTargetMultiplier;
+        if (stats[StatTypes.DEF] >= stats[StatTypes.ATK])
+            return TankTargetMultiplier;
+        return 1f;
+    }
+
+    /// <summary>
+    /// Reachable tile that closes distance on a target while respecting
+    /// danger — how units drift toward an out-of-reach focus target.
+    /// </summary>
+    private Tile ConvergeTile(Unit target)
+    {
+        var moveOptions = GetMoveOptions();
+        Tile bestTile = actor.tile;
+        var bestCost = float.MaxValue;
+        foreach (var tile in moveOptions)
+        {
+            var distance = Mathf.Abs(tile.pos.x - target.tile.pos.x) +
+                           Mathf.Abs(tile.pos.y - target.tile.pos.y);
+            var cost = (threatMap != null ? threatMap.GetThreat(tile) * 0.5f : 0f) +
+                       distance * WoundedSeekWeight;
+            if (cost < bestCost)
+            {
+                bestCost = cost;
+                bestTile = tile;
+            }
+        }
+
+        return bestTile;
     }
 
     /// <summary>True when the actor is wounded enough to prioritize survival.</summary>
