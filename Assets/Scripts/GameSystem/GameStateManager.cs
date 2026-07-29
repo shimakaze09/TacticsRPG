@@ -102,7 +102,7 @@ public class GameStateManager : MonoBehaviour
 
         if (persistenceManager == null)
         {
-            persistenceManager = FindObjectOfType<DataPersistenceManager>();
+            persistenceManager = FindFirstObjectByType<DataPersistenceManager>();
         }
 
         // Subscribe to battle events

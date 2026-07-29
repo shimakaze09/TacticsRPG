@@ -2,6 +2,13 @@
 
 A Final Fantasy Tactics-style tactics RPG built in Unity.
 
+## Requirements
+
+- **Unity 6.5 (6000.5.5f1)** or newer. The project was migrated from
+  2022.3 LTS: URP 17.5, TextMeshPro via the built-in uGUI 2.0 package.
+  On first open, Unity will re-serialize assets and regenerate
+  `Packages/packages-lock.json` — commit those changes when prompted.
+
 ## Getting started (required after a fresh clone)
 
 The job, ability, and catalog **prefab assets are not committed** — they are

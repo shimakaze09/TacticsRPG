@@ -363,7 +363,7 @@ public class JobMenuPanelController : MonoBehaviour
     [ContextMenu("Debug: Test Show")]
     private void DebugTestShow()
     {
-        var jobManager = FindObjectOfType<JobManager>();
+        var jobManager = FindFirstObjectByType<JobManager>();
         if (jobManager != null)
         {
             Show(jobManager);
@@ -385,7 +385,7 @@ public class JobMenuPanelController : MonoBehaviour
     /// </summary>
     public void OnNextUnitButton()
     {
-        var postBattleController = FindObjectOfType<PostBattleController>();
+        var postBattleController = FindFirstObjectByType<PostBattleController>();
         if (postBattleController != null && postBattleController.enabled)
         {
             Hide();
@@ -403,7 +403,7 @@ public class JobMenuPanelController : MonoBehaviour
     /// </summary>
     public void OnPreviousUnitButton()
     {
-        var postBattleController = FindObjectOfType<PostBattleController>();
+        var postBattleController = FindFirstObjectByType<PostBattleController>();
         if (postBattleController != null && postBattleController.enabled)
         {
             Hide();
@@ -426,7 +426,7 @@ public class JobMenuPanelController : MonoBehaviour
         }
 
         // Fallback: Check if PostBattleController exists and is enabled
-        var postBattleController = FindObjectOfType<PostBattleController>();
+        var postBattleController = FindFirstObjectByType<PostBattleController>();
         return postBattleController != null && postBattleController.enabled;
     }
 

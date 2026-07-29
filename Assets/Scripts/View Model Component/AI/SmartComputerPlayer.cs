@@ -521,7 +521,7 @@ public class SmartComputerPlayer : MonoBehaviour
         Unit nearestEnemy = null;
         float nearestDistance = float.MaxValue;
         
-        var allUnits = FindObjectsOfType<Unit>();
+        var allUnits = FindObjectsByType<Unit>(FindObjectsSortMode.None);
         foreach (var unit in allUnits)
         {
             var unitAlliance = unit.GetComponent<Alliance>();
