@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: 3
-  ability: Water
+  ability: Leech Signal
 --- !u!1 &4184189587400391416
 GameObject:
   m_ObjectHideFlags: 0
@@ -137,8 +137,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6c2e9f030840ac4fbae1bbe2ebb18b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: 2
-  ability: Cure
+  target: 3
+  ability: Static Veil
 --- !u!1 &8149603454067822645
 GameObject:
   m_ObjectHideFlags: 0
@@ -236,4 +236,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: 3
-  ability: Prominence
+  ability: Dead Air

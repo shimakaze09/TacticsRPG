@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: 3
-  ability: Attack
+  ability: Quick Cut
 --- !u!1 &4184189587400391416
 GameObject:
   m_ObjectHideFlags: 0
@@ -138,7 +138,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: 3
-  ability: Air Blast
+  ability: Sand Toss
 --- !u!1 &6504027948125373052
 GameObject:
   m_ObjectHideFlags: 0
@@ -184,7 +184,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: 3
-  ability: Drain
+  ability: Scrap Bomb
 --- !u!1 &8149603454067822645
 GameObject:
   m_ObjectHideFlags: 0
@@ -283,4 +283,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: 3
-  ability: Blind
+  ability: Tripwire

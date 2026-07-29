@@ -14,7 +14,7 @@ public class ComputerPlayer : MonoBehaviour
 
     #region Public
 
-    public PlanOfAttack Evaluate()
+    public virtual PlanOfAttack Evaluate()
     {
         var poa = new PlanOfAttack();
         var pattern = actor.GetComponentInChildren<AttackPattern>();
@@ -40,10 +40,10 @@ public class ComputerPlayer : MonoBehaviour
 
     #region Fields
 
-    private BattleController bc;
-    private Unit actor => bc.turn.actor;
-    private Alliance alliance => actor.GetComponent<Alliance>();
-    private Unit nearestFoe;
+    protected BattleController bc;
+    protected Unit actor => bc.turn.actor;
+    protected Alliance alliance => actor.GetComponent<Alliance>();
+    protected Unit nearestFoe;
 
     #endregion
 
@@ -159,13 +159,14 @@ public class ComputerPlayer : MonoBehaviour
         return isMatch;
     }
 
-    private List<Tile> GetMoveOptions()
+    protected List<Tile> GetMoveOptions()
     {
-        var status = actor.GetComponent<Status>();
-        if (status != null && !GetComponentInChildren<Movement>().CanMove())
+        // Check movement on the acting unit, not on this controller object
+        var movement = actor.GetComponent<Movement>();
+        if (movement == null || !movement.CanMove())
             return new List<Tile> { actor.tile };
 
-        var options = actor.GetComponent<Movement>().GetTilesInRange(bc.board);
+        var options = movement.GetTilesInRange(bc.board);
         options.Add(actor.tile);
         return options;
     }
@@ -235,7 +236,7 @@ public class ComputerPlayer : MonoBehaviour
         poa.moveLocation = choice.bestMoveTile.pos;
     }
 
-    private void FindNearestFoe()
+    protected void FindNearestFoe()
     {
         nearestFoe = null;
         bc.board.Search(actor.tile, delegate(Tile arg1, Tile arg2)
@@ -259,7 +260,7 @@ public class ComputerPlayer : MonoBehaviour
         });
     }
 
-    private void MoveTowardOpponent(PlanOfAttack poa)
+    protected void MoveTowardOpponent(PlanOfAttack poa)
     {
         var moveOptions = GetMoveOptions();
         FindNearestFoe();
@@ -281,7 +282,7 @@ public class ComputerPlayer : MonoBehaviour
         poa.moveLocation = actor.tile.pos;
     }
 
-    public Directions DetermineEndFacingDirection()
+    public virtual Directions DetermineEndFacingDirection()
     {
         var dir = (Directions)Random.Range(0, 4);
         FindNearestFoe();
