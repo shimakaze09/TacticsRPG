@@ -416,6 +416,14 @@ public class BattleProbeRunner : MonoBehaviour
         Check("walker never stops on water", !reachesWater);
         Check("walker never stops in obstacles", !reachesBlocked);
 
+        // Occupant rule: allies are passable, standing foes are walls.
+        // Wall off Alaois in a plus-shape with one gap, put a unit in the
+        // gap, and see whether he can escape the pocket.
+        var rogue = Find(bc, "Enemy Rogue");
+        var hania = Find(bc, "Hania");
+        ProbePassThrough(bc, alaois, hania, true, "ally is passable");
+        ProbePassThrough(bc, alaois, rogue, false, "standing foe blocks");
+
         // LoS: sight-blocking terrain stops shots, open water doesn't
         Tile obstacle = null;
         foreach (var tile in board.tiles.Values)
@@ -432,6 +440,60 @@ public class BattleProbeRunner : MonoBehaviour
             if (west != null && east != null)
                 Check("trees block sight", !LineOfSight.Clear(board, west, east));
         }
+    }
+
+    // Checks whether mover can path past `occupant` standing directly in the
+    // way: mover at the west end of the road, occupant one tile east, and
+    // the destination beyond — reachable only by passing through
+    private void ProbePassThrough(BattleController bc, Unit mover, Unit occupant, bool expectPassable, string label)
+    {
+        var board = bc.board;
+        var moverHome = mover.tile;
+        var occupantHome = occupant.tile;
+
+        // A clear 3-in-a-row strip of standable ground
+        Tile a = null, b = null, c = null;
+        foreach (var tile in board.tiles.Values)
+        {
+            var t2 = board.GetTile(new Point(tile.pos.x + 1, tile.pos.y));
+            var t3 = board.GetTile(new Point(tile.pos.x + 2, tile.pos.y));
+            if (t2 == null || t3 == null)
+                continue;
+            if (tile.content != null || t2.content != null || t3.content != null)
+                continue;
+            if (!tile.CanStop(TileTraversalFlags.Ground) || !t2.CanStop(TileTraversalFlags.Ground) ||
+                !t3.CanStop(TileTraversalFlags.Ground))
+                continue;
+            if (tile.height != t2.height || t2.height != t3.height)
+                continue;
+
+            a = tile;
+            b = t2;
+            c = t3;
+            break;
+        }
+
+        if (a == null)
+            return;
+
+        mover.Place(a);
+        mover.Match();
+        occupant.Place(b);
+        occupant.Match();
+
+        var stats = mover.GetComponent<Stats>();
+        var oldMov = stats[StatTypes.MOV];
+        stats.SetValue(StatTypes.MOV, 2, false);
+        var reach = mover.GetComponent<Movement>().GetTilesInRange(board);
+        stats.SetValue(StatTypes.MOV, oldMov, false);
+
+        // With MOV 2 the only route to tile c runs straight through b
+        Check(label, reach.Contains(c) == expectPassable);
+
+        mover.Place(moverHome);
+        mover.Match();
+        occupant.Place(occupantHome);
+        occupant.Match();
     }
 
     // ---- 1.8: clock + reinforcements (mutates state — runs last) -----------

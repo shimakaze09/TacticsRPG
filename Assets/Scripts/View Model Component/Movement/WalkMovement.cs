@@ -16,18 +16,25 @@ public class WalkMovement : Movement
         if (Mathf.Abs(from.height - to.height) > jumpHeight)
             return false;
 
-        // Occupied tiles block movement — except downed units, which can be
-        // stepped over (though never ended on; Filter removes occupied tiles)
-        if (to.content != null && !IsDownedOccupant(to))
+        // Occupants: allies are passed through and downed units stepped
+        // over (neither can be ended on; Filter removes occupied tiles) —
+        // only a standing foe blocks the way
+        if (to.content != null && !CanPassOccupant(to))
             return false;
 
         return base.ExpandSearch(from, to);
     }
 
-    // True when the tile's occupant is KO'd and therefore passable
-    private static bool IsDownedOccupant(Tile tile)
+    // True when the tile's occupant doesn't bar this unit's path: a downed
+    // body, or a unit on the same side
+    private bool CanPassOccupant(Tile tile)
     {
-        return tile.content.GetComponentInChildren<KOStatus>() != null;
+        if (tile.content.GetComponentInChildren<KOStatus>() != null)
+            return true;
+
+        var mine = unit.GetComponent<Alliance>();
+        var theirs = tile.content.GetComponentInChildren<Alliance>();
+        return mine != null && theirs != null && mine.type == theirs.type;
     }
 
     public override IEnumerator Traverse(Tile tile)
