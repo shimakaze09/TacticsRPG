@@ -31,6 +31,8 @@ public class BattleProbeRunner : MonoBehaviour
 
     private void Start()
     {
+        // The suite must finish even when the editor window loses focus
+        Application.runInBackground = true;
         StartCoroutine(Run());
     }
 
@@ -76,6 +78,8 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeWeaponBehavior(bc);
             ProbeTraits(bc);
             ProbeElementsAndCrits(bc);
+            // Status removal destroys deferred, so this block yields frames
+            yield return StartCoroutine(ProbeControlStatuses(bc));
             ProbeTerrain(bc);
             ProbeClockAndWaves(bc); // mutates turn count — keep last
         }
@@ -376,6 +380,101 @@ public class BattleProbeRunner : MonoBehaviour
             if (CriticalHit.Roll(alaois))
                 crits++;
         Check("crit roll near 15%", crits > 20 && crits < 110, crits + "/400");
+    }
+
+    // ---- 1.11: behavior-control statuses ------------------------------------
+
+    private IEnumerator ProbeControlStatuses(BattleController bc)
+    {
+        var alaois = Find(bc, "Alaois");
+        var rogue = Find(bc, "Enemy Rogue");
+        var driver = alaois.GetComponent<Driver>();
+        var alliance = alaois.GetComponent<Alliance>();
+        var status = alaois.GetComponent<Status>();
+
+        // Swayed: control seized, alliance checks inverted
+        var swayed = status.Add<SwayedStatus, DurationStatusCondition>();
+        swayed.duration = 9;
+        Check("swayed seizes control", driver.Current == Drivers.Computer);
+        Check("swayed flips targeting",
+            alliance.IsMatch(rogue.GetComponent<Alliance>(), Targets.Ally));
+        swayed.Remove();
+        yield return null;
+        Check("control returns after swayed", driver.Current == Drivers.Human);
+        Check("targeting restored",
+            alliance.IsMatch(rogue.GetComponent<Alliance>(), Targets.Foe));
+
+        // Redline: seized, and the plan charges the nearest unit
+        var redline = status.Add<RedlineStatus, DurationStatusCondition>();
+        redline.duration = 9;
+        Check("redline seizes control", driver.Current == Drivers.Computer);
+        var dictator = alaois.GetComponentInChildren<ITurnPlanOverride>();
+        Check("redline dictates the turn", dictator != null);
+        if (dictator != null)
+        {
+            var plan = dictator.BuildPlan(bc, alaois);
+            Unit nearest = null;
+            var best = int.MaxValue;
+            foreach (var u in bc.units)
+            {
+                if (u == alaois || u.tile == null)
+                    continue;
+                var d = Mathf.Abs(u.tile.pos.x - alaois.tile.pos.x) + Mathf.Abs(u.tile.pos.y - alaois.tile.pos.y);
+                if (d < best)
+                {
+                    best = d;
+                    nearest = u;
+                }
+            }
+
+            if (nearest != null)
+            {
+                var before = Mathf.Abs(nearest.tile.pos.x - alaois.tile.pos.x) +
+                             Mathf.Abs(nearest.tile.pos.y - alaois.tile.pos.y);
+                var after = Mathf.Abs(nearest.tile.pos.x - plan.moveLocation.x) +
+                            Mathf.Abs(nearest.tile.pos.y - plan.moveLocation.y);
+                Check("redline charges the nearest", after <= before, $"{before} -> {after}");
+            }
+        }
+
+        redline.Remove();
+        yield return null;
+
+        // Scrambled: seized, and the plan stays within legal ground
+        var scrambled = status.Add<ScrambledStatus, DurationStatusCondition>();
+        scrambled.duration = 9;
+        var scrambledDictator = alaois.GetComponentInChildren<ITurnPlanOverride>();
+        Check("scrambled dictates the turn", scrambledDictator != null);
+        if (scrambledDictator != null)
+        {
+            var plan = scrambledDictator.BuildPlan(bc, alaois);
+            var destination = bc.board.GetTile(plan.moveLocation);
+            Check("scrambled wanders on real ground",
+                destination != null && destination.CanStop(TileTraversalFlags.Ground));
+        }
+
+        scrambled.Remove();
+        yield return null;
+        Check("control returns after all statuses", driver.Current == Drivers.Human);
+
+        // Resource attacks: MP burn and the Shredded payload
+        EquipWeapon(alaois, "cipher_rod");
+        var rogueStats = rogue.GetComponent<Stats>();
+        rogueStats.SetValue(StatTypes.MP, 10, false);
+        var effect = AttackOf(alaois).GetComponentInChildren<DamageAbilityEffect>();
+        effect.Publish(new AbilityHitEvent(alaois, rogue, -10));
+        Check("mp burn drains reserve", rogueStats[StatTypes.MP] == 4, "MP " + rogueStats[StatTypes.MP]);
+
+        var shredded = StatusRegistry.Inflict(rogue, "Shredded", 3);
+        Check("shredded inflictable", shredded != null);
+        if (shredded != null)
+        {
+            var torn = -effect.Predict(rogue.tile);
+            shredded.Remove();
+            yield return null;
+            var whole = -effect.Predict(rogue.tile);
+            Check("shredded raises physical damage", torn > whole, $"{whole} -> {torn}");
+        }
     }
 
     // ---- 1.8b: terrain ------------------------------------------------------
