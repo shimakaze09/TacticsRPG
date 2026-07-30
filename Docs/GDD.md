@@ -82,7 +82,9 @@ rounds via BattleClock, reinforcement waves, objective types defeat-all /
 defeat-target / survive-N-rounds / reach-zone); real terrain (1.8b:
 Field/Road/Water/Obstacle/Building/Bridge with per-type pass/stop/sight
 law — rivers split maps, bridges reconnect them, trees and buildings block
-line of sight); equipment (1.9: per-job starting loadouts from GearCatalog,
+line of sight; units pass through allies but a standing foe is a wall, so
+holding a chokepoint is a real tactic); equipment (1.9: per-job starting
+loadouts from GearCatalog,
 gear bonuses that survive stat recalculation, shop purchases into
 PartyInventory); the gear behavior model (1.9b: weapon reach / fire arc /
 attack shape / damage profile plus composable traits on any item — §3.3);
