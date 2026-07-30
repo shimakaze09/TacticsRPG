@@ -8,6 +8,8 @@ using UnityEngine;
 /// </summary>
 public class WeaponPowerScale : MonoBehaviour
 {
+    private readonly EventSubscriptions subscriptions = new();
+
     private void OnEnable()
     {
         var ability = GetComponentInParent<Ability>();
@@ -15,17 +17,12 @@ public class WeaponPowerScale : MonoBehaviour
             return;
 
         foreach (var effect in ability.GetComponentsInChildren<BaseAbilityEffect>())
-            this.SubscribeToSender<GetPowerEvent>(OnGetPower, effect);
+            subscriptions.SubscribeToSender<GetPowerEvent>(OnGetPower, effect);
     }
 
     private void OnDisable()
     {
-        var ability = GetComponentInParent<Ability>();
-        if (ability == null)
-            return;
-
-        foreach (var effect in ability.GetComponentsInChildren<BaseAbilityEffect>())
-            this.UnsubscribeFromSender<GetPowerEvent>(OnGetPower, effect);
+        subscriptions.Clear();
     }
 
     private void OnGetPower(GetPowerEvent e)

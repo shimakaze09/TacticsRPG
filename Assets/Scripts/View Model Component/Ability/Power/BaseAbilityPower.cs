@@ -11,6 +11,8 @@ public abstract class BaseAbilityPower : MonoBehaviour
     protected abstract int GetBaseDefense(Unit target);
     protected abstract int GetPower();
 
+    private readonly EventSubscriptions subscriptions = new();
+
     private void OnEnable()
     {
         // Subscribe to events from any BaseAbilityEffect within our same Ability
@@ -22,26 +24,16 @@ public abstract class BaseAbilityPower : MonoBehaviour
             var effects = myAbility.GetComponentsInChildren<BaseAbilityEffect>();
             foreach (var effect in effects)
             {
-                this.SubscribeToSender<GetAttackStatEvent>(OnGetBaseAttack, effect);
-                this.SubscribeToSender<GetDefenseStatEvent>(OnGetBaseDefense, effect);
-                this.SubscribeToSender<GetPowerEvent>(OnGetPower, effect);
+                subscriptions.SubscribeToSender<GetAttackStatEvent>(OnGetBaseAttack, effect);
+                subscriptions.SubscribeToSender<GetDefenseStatEvent>(OnGetBaseDefense, effect);
+                subscriptions.SubscribeToSender<GetPowerEvent>(OnGetPower, effect);
             }
         }
     }
 
     private void OnDisable()
     {
-        var myAbility = GetComponentInParent<Ability>();
-        if (myAbility != null)
-        {
-            var effects = myAbility.GetComponentsInChildren<BaseAbilityEffect>();
-            foreach (var effect in effects)
-            {
-                this.UnsubscribeFromSender<GetAttackStatEvent>(OnGetBaseAttack, effect);
-                this.UnsubscribeFromSender<GetDefenseStatEvent>(OnGetBaseDefense, effect);
-                this.UnsubscribeFromSender<GetPowerEvent>(OnGetPower, effect);
-            }
-        }
+        subscriptions.Clear();
     }
 
     private void OnGetBaseAttack(GetAttackStatEvent e)

@@ -9,6 +9,8 @@ using UnityEngine;
 /// </summary>
 public class WeaponTraitRunner : MonoBehaviour
 {
+    private readonly EventSubscriptions subscriptions = new();
+
     private void OnEnable()
     {
         var ability = GetComponentInParent<Ability>();
@@ -17,22 +19,14 @@ public class WeaponTraitRunner : MonoBehaviour
 
         foreach (var effect in ability.GetComponentsInChildren<BaseAbilityEffect>())
         {
-            this.SubscribeToSender<AbilityHitEvent>(OnHit, effect);
-            this.SubscribeToSender<TweakDamageEvent>(OnTweakDamage, effect);
+            subscriptions.SubscribeToSender<AbilityHitEvent>(OnHit, effect);
+            subscriptions.SubscribeToSender<TweakDamageEvent>(OnTweakDamage, effect);
         }
     }
 
     private void OnDisable()
     {
-        var ability = GetComponentInParent<Ability>();
-        if (ability == null)
-            return;
-
-        foreach (var effect in ability.GetComponentsInChildren<BaseAbilityEffect>())
-        {
-            this.UnsubscribeFromSender<AbilityHitEvent>(OnHit, effect);
-            this.UnsubscribeFromSender<TweakDamageEvent>(OnTweakDamage, effect);
-        }
+        subscriptions.Clear();
     }
 
     // Conditional damage tweaks resolved during the damage calculation
@@ -132,26 +126,17 @@ public class WeaponTraitRunner : MonoBehaviour
         }
     }
 
-    // Chance roll, then the same reflection-infliction the Inflict effect uses
+    // Chance roll, then a typed infliction through the registry
     private static void RollStatusOnHit(Unit target, GearTraitData trait)
     {
         if (target == null || Random.Range(0, 100) >= trait.value)
             return;
 
-        var statusType = InflictAbilityEffect.ResolveStatusType(trait.tag);
-        if (statusType == null)
-        {
-            Debug.LogError($"[WeaponTraitRunner] Unknown status '{trait.tag}'");
-            return;
-        }
-
         // Don't stack a second copy of something the target already carries
-        if (target.GetComponentInChildren(statusType) != null)
+        var statusType = StatusRegistry.Resolve(trait.tag);
+        if (statusType != null && target.GetComponentInChildren(statusType) != null)
             return;
 
-        var add = typeof(Status).GetMethod("Add");
-        var constructed = add.MakeGenericMethod(statusType, typeof(DurationStatusCondition));
-        var condition = constructed.Invoke(target.GetComponent<Status>(), null) as DurationStatusCondition;
-        condition.duration = trait.duration;
+        StatusRegistry.Inflict(target, trait.tag, trait.duration);
     }
 }
