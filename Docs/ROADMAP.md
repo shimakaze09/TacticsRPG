@@ -1,9 +1,17 @@
 # Roadmap — the master work queue
 
-**Updated:** 2026-07-31. Ordered top-down; battle-scoped detail lives in
-`BATTLE_PLAN.md`, structure/audit history in `PROJECT_REVIEW.md` + `CODE_AUDIT.md`,
-world/content rules in `WORLD.md`. Statuses here mirror BATTLE_PLAN — when in
-doubt, BATTLE_PLAN §1 is the authority for battle items.
+**Updated:** 2026-07-31. Ordered top-down; **design authority is `GDD.md`** —
+this file is the execution order for its production plan (§11). Battle-scoped
+detail lives in `BATTLE_PLAN.md`, structure/audit history in
+`PROJECT_REVIEW.md` + `CODE_AUDIT.md`, world/content rules in `WORLD.md`.
+Statuses here mirror BATTLE_PLAN — when in doubt, BATTLE_PLAN §1 is the
+authority for battle items.
+
+**Milestone mapping (GDD §11):** §1–§2 below = **M0** (systems hardening).
+**M1** (playable loop) = meta UI minimal + initiative bar + forecast/popups +
+first two authored battles. **M2** (slice content) = 6 battles, story scenes,
+shop, Cert-buys-abilities, art/audio first pass. **M3** (polish) = controls
+rework, mix, tuning, save slots. Pillars and remaining sections slot per GDD.
 
 ## 1. Documentation passes (in progress)
 
@@ -31,8 +39,8 @@ Remaining, in strict order:
 - ~~1.5e~~ AI self-preservation — **done** (2026-07-31)
 - ~~1.5f~~ AI team focus fire + target value model — **done** (2026-07-31)
 - ~~1.5g~~ AI support discipline — **done** (2026-07-31)
-- **1.7** KO decay pickup (memory-core/salvage), corpses stop blocking pathing ← **next**
-- **1.8** Real battle setup: spawn zones in LevelData, authored victory conditions
+- ~~1.7~~ KO decay & salvage pickup — **done** (2026-07-31)
+- **1.8** Real battle setup: spawn zones in LevelData, authored victory conditions ← **next**
 - **1.8b** Real terrain: types with gameplay meaning (water/trees/buildings/bridges), traversal + LoS integration, BoardCreator painting, visual skins
 - **1.9** Equipment actually equips (audit §6 — `Equip()` has no callers)
 - **1.10** Elements + critical hits via TweakDamage (audit §8)

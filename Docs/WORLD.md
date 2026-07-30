@@ -1,7 +1,8 @@
 # The Long Autumn — World Bible & Naming Conventions
 
 **Status:** v1 (2026-07-29) — established by the re-theme content sweep. This document is
-the authority for names and flavor. Mechanics are unchanged from the FFT-style systems;
+the authority for names and flavor; the game's overall design (loop, story arc, slice,
+UI/art/audio direction) lives in `GDD.md`. Mechanics are unchanged from the FFT-style systems;
 only expression (names, fiction, terminology) is original.
 
 ---
@@ -79,9 +80,11 @@ Drifter (root)
 | `cipherguard` | Cipherguard | Unique — **Ansel Rook**: blade + protocol hybrid |
 | `liturgist` | Liturgist | Unique — **Deacon Wray**: sermons that mend and unmake |
 
-Character names on unique jobs are **placeholders** until the story cast is finalized.
-Cut jobs (`echo`, `actuary`, `fireband`, `silencer`) may return later only with
-mechanics of their own (mimicry, formula targeting, etc. need engine support first).
+Character names on unique jobs are **placeholders** until the story cast is finalized
+(full cast sheet: GDD.md §4.2). Cut jobs (`echo`, `actuary`, `fireband`, `silencer`)
+may return later only with mechanics of their own (mimicry, formula targeting, etc.
+need engine support first). **Widow Faye** — once the Silencer's owner — survives the
+cut as an NPC: Coldwater's information broker.
 
 ## 3. Naming conventions (use these for all new content)
 
