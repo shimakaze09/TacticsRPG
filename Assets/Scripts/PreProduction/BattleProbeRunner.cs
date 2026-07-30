@@ -1,0 +1,461 @@
+#if UNITY_EDITOR
+using System.Collections;
+using System.Collections.Generic;
+using UnityEditor;
+using UnityEngine;
+
+/// <summary>
+/// The committed regression suite: every battle-system invariant proven
+/// during development, runnable in one pass. Trigger via
+/// Tactics RPG → Run Battle Probes (enters play mode on the Battle scene,
+/// waits for init, asserts, prints a PASS/FAIL summary, exits play).
+/// Every new system must add its probes here (ARCHITECTURE.md
+/// "Verification workflow").
+/// </summary>
+public class BattleProbeRunner : MonoBehaviour
+{
+    public const string TriggerFlag = "TacticsRPG.RunBattleProbes";
+
+    private readonly List<string> failures = new List<string>();
+    private int checksRun;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    private static void SpawnIfRequested()
+    {
+        if (!SessionState.GetBool(TriggerFlag, false))
+            return;
+
+        SessionState.SetBool(TriggerFlag, false);
+        new GameObject("BattleProbeRunner").AddComponent<BattleProbeRunner>();
+    }
+
+    private void Start()
+    {
+        StartCoroutine(Run());
+    }
+
+    private void Check(string name, bool condition, string details = "")
+    {
+        checksRun++;
+        if (!condition)
+            failures.Add(name + (string.IsNullOrEmpty(details) ? "" : " — " + details));
+    }
+
+    // Roughly-equal helper for damage math that crosses float/floor chains
+    private static bool Near(int actual, float expected, int tolerance = 1)
+    {
+        return Mathf.Abs(actual - expected) <= tolerance;
+    }
+
+    private IEnumerator Run()
+    {
+        // Wait for the battle to finish initializing
+        BattleController bc = null;
+        var deadline = Time.realtimeSinceStartup + 30f;
+        while (Time.realtimeSinceStartup < deadline)
+        {
+            bc = FindAnyObjectByType<BattleController>();
+            if (bc != null && bc.units.Count > 0 && bc.GetComponent<BattleClock>() != null)
+                break;
+            yield return null;
+        }
+
+        if (bc == null || bc.units.Count == 0)
+        {
+            Debug.LogError("[Probes] Battle never initialized — aborting");
+            Finish(false);
+            yield break;
+        }
+
+        yield return null; // one settle frame
+
+        try
+        {
+            ProbeBattleSetup(bc);
+            ProbeGearAndStats(bc);
+            ProbeWeaponBehavior(bc);
+            ProbeTraits(bc);
+            ProbeElementsAndCrits(bc);
+            ProbeTerrain(bc);
+            ProbeClockAndWaves(bc); // mutates turn count — keep last
+        }
+        finally
+        {
+            if (failures.Count == 0)
+            {
+                Debug.Log($"[Probes] PASSED {checksRun}/{checksRun}");
+            }
+            else
+            {
+                foreach (var failure in failures)
+                    Debug.LogError("[Probes] FAIL: " + failure);
+                Debug.LogError($"[Probes] {checksRun - failures.Count}/{checksRun} passed, {failures.Count} FAILED");
+            }
+        }
+
+        yield return null;
+        Finish(failures.Count == 0);
+    }
+
+    // Interactive runs drop back to edit mode; headless runs exit with a
+    // CI-friendly code (0 = all passed)
+    private static void Finish(bool passed)
+    {
+        if (Application.isBatchMode)
+            EditorApplication.Exit(passed ? 0 : 1);
+        else
+            EditorApplication.isPlaying = false;
+    }
+
+    private static Unit Find(BattleController bc, string name)
+    {
+        foreach (var u in bc.units)
+            if (u.name == name)
+                return u;
+        return null;
+    }
+
+    private static Ability AttackOf(Unit unit)
+    {
+        foreach (var a in unit.GetComponentsInChildren<Ability>())
+            if (a.name == "Attack")
+                return a;
+        return null;
+    }
+
+    // Swaps the unit's weapon to a catalog id (play-mode only, not restored)
+    private static void EquipWeapon(Unit unit, string gearId)
+    {
+        var item = ItemFactory.Create(gearId);
+        item.transform.SetParent(unit.transform);
+        var equippable = item.GetComponent<Equippable>();
+        unit.GetComponent<Equipment>().Equip(equippable, equippable.defaultSlots);
+    }
+
+    // ---- 1.8: authored battles ------------------------------------------
+
+    private void ProbeBattleSetup(BattleController bc)
+    {
+        var def = bc.testBattle;
+        Check("battle definition wired", def != null);
+        if (def == null)
+            return;
+
+        Check("authored unit count", bc.units.Count == def.heroes.Count + def.enemies.Count,
+            $"{bc.units.Count} vs {def.heroes.Count + def.enemies.Count}");
+        Check("battle clock present", bc.GetComponent<BattleClock>() != null);
+        Check("element rules present", bc.GetComponent<ElementRules>() != null);
+        Check("elevation rules present", bc.GetComponent<ElevationRules>() != null);
+        Check("victory condition present", bc.GetComponent<BaseVictoryCondition>() != null);
+        Check("wave hook when waves authored",
+            def.waves.Count == 0 || bc.GetComponent<BattleEvents>() != null);
+
+        foreach (var u in bc.units)
+            Check("unit tile link " + u.name, u.tile != null && u.tile.content == u.gameObject);
+    }
+
+    // ---- 1.9: equipment --------------------------------------------------
+
+    private void ProbeGearAndStats(BattleController bc)
+    {
+        foreach (var u in bc.units)
+        {
+            var job = u.GetComponent<JobManager>().CurrentJob;
+            var expected = GearCatalog.StartingGear(job.id);
+            Check("loadout " + u.name, u.GetComponent<Equipment>().items.Count == expected.Length,
+                $"{u.GetComponent<Equipment>().items.Count} items vs {expected.Length}");
+        }
+
+        var alaois = Find(bc, "Alaois");
+        if (alaois == null)
+        {
+            Check("Alaois present", false);
+            return;
+        }
+
+        var stats = alaois.GetComponent<Stats>();
+        var equipment = alaois.GetComponent<Equipment>();
+        var weapon = equipment.GetItem(EquipSlots.Primary);
+        var feature = weapon.GetComponent<StatModifierFeature>();
+
+        var before = stats[feature.type];
+        equipment.UnEquip(weapon);
+        Check("unequip drops stat", stats[feature.type] == before - feature.amount);
+        equipment.Equip(weapon, weapon.defaultSlots);
+        Check("re-equip restores stat", stats[feature.type] == before);
+
+        var atk = stats[StatTypes.ATK];
+        var def = stats[StatTypes.DEF];
+        alaois.GetComponent<JobManager>().RecalculateStats();
+        Check("recalc preserves gear ATK", stats[StatTypes.ATK] == atk, $"{atk} -> {stats[StatTypes.ATK]}");
+        Check("recalc preserves gear DEF", stats[StatTypes.DEF] == def, $"{def} -> {stats[StatTypes.DEF]}");
+    }
+
+    // ---- 1.9b/1.9c: weapon behavior --------------------------------------
+
+    private void ProbeWeaponBehavior(BattleController bc)
+    {
+        var board = bc.board;
+        var alaois = Find(bc, "Alaois");
+        var attack = AttackOf(alaois);
+        var range = attack.GetComponent<AbilityRange>();
+        var area = attack.GetComponent<AbilityArea>();
+        Check("weapon range component", range is WeaponAbilityRange);
+        Check("weapon area component", area is WeaponAbilityArea);
+
+        // Reach + dead zone (rifle)
+        EquipWeapon(alaois, "slug_thrower");
+        var tiles = range.GetTilesInRange(board);
+        var adjacentTargetable = false;
+        var maxDist = 0;
+        foreach (var t in tiles)
+        {
+            var d = Mathf.Abs(t.pos.x - alaois.tile.pos.x) + Mathf.Abs(t.pos.y - alaois.tile.pos.y);
+            if (d == 1) adjacentTargetable = true;
+            if (d > maxDist) maxDist = d;
+        }
+
+        Check("rifle reach 5", maxDist == 5, "max " + maxDist);
+        Check("rifle dead zone", !adjacentTargetable);
+
+        // Direct vs arcing fire past a standing unit
+        var blocker = Find(bc, "Hania");
+        var mPos = alaois.tile.pos;
+        var blockTile = board.GetTile(new Point(mPos.x + 2, mPos.y));
+        var farTile = board.GetTile(new Point(mPos.x + 4, mPos.y));
+        if (blockTile != null && farTile != null && blockTile.content == null && farTile.content == null)
+        {
+            var home = blocker.tile;
+            blocker.Place(blockTile);
+            blocker.Match();
+            Check("direct fire blocked by unit", !LineOfSight.Clear(board, alaois.tile, farTile, true));
+            Check("arcing fire clears unit", LineOfSight.Clear(board, alaois.tile, farTile, false));
+            blocker.Place(home);
+            blocker.Match();
+        }
+
+        // Sweep and line footprints
+        var east = new Point(alaois.tile.pos.x + 1, alaois.tile.pos.y);
+        EquipWeapon(alaois, "grief_edge");
+        Check("sweep hits 3", area.GetTilesInArea(board, east).Count == 3);
+        EquipWeapon(alaois, "drip_torch");
+        var ray = area.GetTilesInArea(board, east);
+        Check("line sprays full reach", ray.Count == 3 && ray[2].pos.x == alaois.tile.pos.x + 3);
+
+        // Damage profile: exact engine math mace (100%) vs two-head (120%)
+        var rogue = Find(bc, "Enemy Rogue");
+        var effect = attack.GetComponentInChildren<DamageAbilityEffect>();
+        EquipWeapon(alaois, "linebreaker_mace");
+        var predictMace = -effect.Predict(rogue.tile);
+        EquipWeapon(alaois, "twohead_blade");
+        var predictTwohead = -effect.Predict(rogue.tile);
+        Check("damage profile scales power", predictTwohead > predictMace,
+            $"{predictMace} vs {predictTwohead}");
+    }
+
+    // ---- 1.9b/1.9c: gear traits -------------------------------------------
+
+    private void ProbeTraits(BattleController bc)
+    {
+        var alaois = Find(bc, "Alaois");
+        var rogue = Find(bc, "Enemy Rogue");
+        var stats = alaois.GetComponent<Stats>();
+        var effect = AttackOf(alaois).GetComponentInChildren<DamageAbilityEffect>();
+
+        // Recoil: half of a 40-damage hit comes back
+        EquipWeapon(alaois, "twohead_blade");
+        var hp = stats[StatTypes.HP];
+        effect.Publish(new AbilityHitEvent(alaois, rogue, -40));
+        Check("recoil feeds back half", stats[StatTypes.HP] == hp - 20, $"{hp} -> {stats[StatTypes.HP]}");
+
+        // Winded: the cleaver Throttles its wielder once
+        EquipWeapon(alaois, "pit_cleaver");
+        effect.Publish(new AbilityHitEvent(alaois, rogue, -30));
+        var throttle = alaois.GetComponentInChildren<ThrottleStatus>();
+        Check("cleaver winds the attacker", throttle != null);
+        if (throttle != null)
+        {
+            var condition = throttle.GetComponentInChildren<DurationStatusCondition>();
+            Check("winded duration", condition != null && condition.duration == 2);
+        }
+
+        // Lifesteal: grief-edge heals 25% of the wound
+        EquipWeapon(alaois, "grief_edge");
+        stats.SetValue(StatTypes.HP, 50, false);
+        effect.Publish(new AbilityHitEvent(alaois, rogue, -40));
+        Check("lifesteal heals", stats[StatTypes.HP] == 60, "HP " + stats[StatTypes.HP]);
+
+        // StatusOnHit at forced 100%
+        EquipWeapon(alaois, "static_knife");
+        var gear = GearCatalog.Get("static_knife");
+        GearTraitData statusTrait = null;
+        foreach (var t in gear.traits)
+            if (t.type == GearTraitType.StatusOnHit)
+                statusTrait = t;
+        var oldChance = statusTrait.value;
+        statusTrait.value = 100;
+        effect.Publish(new AbilityHitEvent(alaois, rogue, -10));
+        statusTrait.value = oldChance;
+        Check("status on hit inflicts", rogue.GetComponentInChildren<StaticStatus>() != null);
+
+        // Flank: the Absolution Point from front vs back
+        EquipWeapon(alaois, "absolution_point");
+        var board = bc.board;
+        var rPos = rogue.tile.pos;
+        rogue.dir = Directions.East;
+        var frontTile = board.GetTile(new Point(rPos.x + 1, rPos.y));
+        var backTile = board.GetTile(new Point(rPos.x - 1, rPos.y));
+        if (frontTile != null && backTile != null && frontTile.content == null && backTile.content == null)
+        {
+            var home = alaois.tile;
+            alaois.Place(frontTile);
+            alaois.Match();
+            var front = -effect.Predict(rogue.tile);
+            alaois.Place(backTile);
+            alaois.Match();
+            var back = -effect.Predict(rogue.tile);
+            alaois.Place(home);
+            alaois.Match();
+            Check("flank bonus from behind", Near(back, front * 1.4f, 2), $"{front} front vs {back} back");
+        }
+
+        // Opener/Execute thresholds
+        var rogueStats = rogue.GetComponent<Stats>();
+        EquipWeapon(alaois, "wrapped_knuckles");
+        rogueStats.SetValue(StatTypes.HP, rogueStats[StatTypes.MHP], false);
+        var vsFull = -effect.Predict(rogue.tile);
+        rogueStats.SetValue(StatTypes.HP, rogueStats[StatTypes.MHP] - 5, false);
+        var vsTouched = -effect.Predict(rogue.tile);
+        Check("opener rewards first blood", vsFull > vsTouched, $"{vsFull} vs {vsTouched}");
+
+        EquipWeapon(alaois, "pit_cleaver");
+        var vsHealthy = -effect.Predict(rogue.tile);
+        rogueStats.SetValue(StatTypes.HP, Mathf.Max(1, rogueStats[StatTypes.MHP] / 5), false);
+        var vsDying = -effect.Predict(rogue.tile);
+        rogueStats.SetValue(StatTypes.HP, rogueStats[StatTypes.MHP], false);
+        Check("execute rewards finishing", vsDying > vsHealthy, $"{vsHealthy} vs {vsDying}");
+    }
+
+    // ---- 1.10: elements + crits -------------------------------------------
+
+    private void ProbeElementsAndCrits(BattleController bc)
+    {
+        var alaois = Find(bc, "Alaois");
+        var rogue = Find(bc, "Enemy Rogue");
+        var effect = AttackOf(alaois).GetComponentInChildren<DamageAbilityEffect>();
+
+        var atkEl = alaois.GetComponent<Elements>();
+        var defEl = rogue.GetComponent<Elements>();
+        Check("units carry affinities", atkEl != null && defEl != null);
+        if (atkEl == null || defEl == null)
+            return;
+
+        EquipWeapon(alaois, "linebreaker_mace");
+        var atkType = atkEl.types;
+        var defType = defEl.types;
+        atkEl.types = ElementTypes.Fire;
+        defEl.types = ElementTypes.Earth;
+        var neutral = -effect.Predict(rogue.tile);
+        defEl.types = ElementTypes.Ice;
+        var advantage = -effect.Predict(rogue.tile);
+        defEl.types = ElementTypes.Water;
+        var restrained = -effect.Predict(rogue.tile);
+        atkEl.types = atkType;
+        defEl.types = defType;
+
+        Check("element advantage +25%", Near(advantage, neutral * 1.25f), $"{neutral} -> {advantage}");
+        Check("element restraint -25%", Near(restrained, neutral * 0.75f), $"{neutral} -> {restrained}");
+
+        // Crit chance: base and geared
+        Check("crit base 5%", CriticalHit.Chance(rogue) == 5, "got " + CriticalHit.Chance(rogue));
+        EquipWeapon(alaois, "absolution_point");
+        Check("crit gear bonus", CriticalHit.Chance(alaois) == 15, "got " + CriticalHit.Chance(alaois));
+
+        var crits = 0;
+        for (var i = 0; i < 400; i++)
+            if (CriticalHit.Roll(alaois))
+                crits++;
+        Check("crit roll near 15%", crits > 20 && crits < 110, crits + "/400");
+    }
+
+    // ---- 1.8b: terrain ------------------------------------------------------
+
+    private void ProbeTerrain(BattleController bc)
+    {
+        var board = bc.board;
+
+        var water = 0;
+        var bridges = 0;
+        foreach (var tile in board.tiles.Values)
+        {
+            if (tile.terrain == TerrainType.Water) water++;
+            if (tile.terrain == TerrainType.Bridge) bridges++;
+        }
+
+        // These only run on maps that actually have a river
+        if (water == 0)
+            return;
+
+        Check("bridge exists", bridges > 0);
+
+        var alaois = Find(bc, "Alaois");
+        var stats = alaois.GetComponent<Stats>();
+        var oldMov = stats[StatTypes.MOV];
+        stats.SetValue(StatTypes.MOV, 12, false);
+        var reach = alaois.GetComponent<Movement>().GetTilesInRange(board);
+        stats.SetValue(StatTypes.MOV, oldMov, false);
+
+        var reachesWater = false;
+        var reachesBlocked = false;
+        foreach (var t in reach)
+        {
+            if (t.terrain == TerrainType.Water) reachesWater = true;
+            if (t.terrain == TerrainType.Obstacle || t.terrain == TerrainType.Building) reachesBlocked = true;
+        }
+
+        Check("walker never stops on water", !reachesWater);
+        Check("walker never stops in obstacles", !reachesBlocked);
+
+        // LoS: sight-blocking terrain stops shots, open water doesn't
+        Tile obstacle = null;
+        foreach (var tile in board.tiles.Values)
+            if (tile.terrain == TerrainType.Obstacle)
+            {
+                obstacle = tile;
+                break;
+            }
+
+        if (obstacle != null)
+        {
+            var west = board.GetTile(new Point(obstacle.pos.x - 1, obstacle.pos.y));
+            var east = board.GetTile(new Point(obstacle.pos.x + 1, obstacle.pos.y));
+            if (west != null && east != null)
+                Check("trees block sight", !LineOfSight.Clear(board, west, east));
+        }
+    }
+
+    // ---- 1.8: clock + reinforcements (mutates state — runs last) -----------
+
+    private void ProbeClockAndWaves(BattleController bc)
+    {
+        var def = bc.testBattle;
+        var clock = bc.GetComponent<BattleClock>();
+        if (def == null || clock == null || def.waves.Count == 0)
+            return;
+
+        var wave = def.waves[0];
+        if (clock.CurrentRound >= wave.round)
+            return;
+
+        var before = bc.units.Count;
+        var turnsPerRound = before;
+        for (var i = 0; i < turnsPerRound * (wave.round - clock.CurrentRound); i++)
+            bc.units[0].Publish(new TurnCompletedEvent(bc.units[0]));
+
+        Check("clock reached wave round", clock.CurrentRound >= wave.round,
+            "round " + clock.CurrentRound);
+        Check("reinforcements arrived", bc.units.Count == before + wave.spawns.Count,
+            $"{before} -> {bc.units.Count}");
+    }
+}
+#endif
