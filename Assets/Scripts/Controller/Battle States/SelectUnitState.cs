@@ -27,8 +27,17 @@ public class SelectUnitState : BattleState
         statPanelController.HidePrimary();
     }
 
+    // Advances the scheduler to the next unit — or ends the battle when a
+    // non-damage victory (e.g. survive-N-rounds) has been reached
     private IEnumerator ChangeCurrentUnit()
     {
+        if (IsBattleOver())
+        {
+            owner.ChangeState<CutSceneState>();
+            changeUnitRoutine = null;
+            yield break;
+        }
+
         owner.round.MoveNext();
         SelectTile(turn.actor.tile.pos);
         RefreshPrimaryStatPanel(pos);

@@ -12,6 +12,13 @@ public class BattleController : StateMachine
     public AbilityMenuPanelController abilityMenuPanelController;
     public BattleMessageController battleMessageController;
     public Board board;
+
+    /// <summary>
+    /// Dev/test override: play this authored battle when the game flow has
+    /// no pending battle (e.g. when the Battle scene is played directly).
+    /// Null = writ-style random generation.
+    /// </summary>
+    public BattleDefinition testBattle;
     public CameraRig cameraRig;
     public ComputerPlayer cpu;
     public FacingIndicator facingIndicator;

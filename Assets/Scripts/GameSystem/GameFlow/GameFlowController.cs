@@ -72,6 +72,12 @@ public class GameFlowController : StateMachine
     public LevelData PendingBattleLevel { get; set; }
 
     /// <summary>
+    /// The authored battle to run next (set by the contract board);
+    /// null lets the battle scene fall back to its own test/writ setup.
+    /// </summary>
+    public BattleDefinition PendingBattle { get; set; }
+
+    /// <summary>
     /// Results of the most recently completed battle (set by NotifyBattleEnded,
     /// consumed by the post-battle flow)
     /// </summary>

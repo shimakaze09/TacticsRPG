@@ -1,10 +1,12 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Battle state: builds the board, picks the AI per difficulty, spawns units,
-/// installs the victory condition, and starts the round loop.
+/// Battle state: builds the board, picks the AI per difficulty, spawns units
+/// (from an authored BattleDefinition when one is pending, else writ-style
+/// random generation), installs the victory condition and event hooks, and
+/// starts the round loop.
 /// </summary>
 public class InitBattleState : BattleState
 {
@@ -14,16 +16,53 @@ public class InitBattleState : BattleState
         StartCoroutine(Init());
     }
 
+    /// <summary>
+    /// The battle to run: the game flow's pending contract first, the scene's
+    /// dev/test override second, writ-style random generation when neither.
+    /// </summary>
+    private BattleDefinition Definition
+    {
+        get
+        {
+            if (GameFlowController.Instance != null && GameFlowController.Instance.PendingBattle != null)
+                return GameFlowController.Instance.PendingBattle;
+            return owner.testBattle;
+        }
+    }
+
+    // Builds the battle in dependency order, then hands off to the cutscene
     private IEnumerator Init()
     {
-        board.Load(levelData);
-        var p = new Point((int)levelData.tiles[0].x, (int)levelData.tiles[0].z);
+        var definition = Definition;
+        var level = definition != null && definition.level != null ? definition.level : levelData;
+
+        board.Load(level);
+        var p = new Point((int)level.tiles[0].x, (int)level.tiles[0].z);
         SelectTile(p);
+
         ConfigureAI();
         if (owner.GetComponent<ElevationRules>() == null)
             owner.gameObject.AddComponent<ElevationRules>();
-        SpawnTestUnits();
-        AddVictoryCondition();
+
+        var clock = owner.gameObject.AddComponent<BattleClock>();
+
+        var unitContainer = new GameObject("Units");
+        unitContainer.transform.SetParent(owner.transform);
+
+        if (definition != null)
+            SpawnFromDefinition(definition, unitContainer.transform);
+        else
+            SpawnWritUnits(unitContainer.transform);
+
+        clock.Configure(units.Count);
+        AddVictoryCondition(definition);
+
+        if (definition != null && definition.waves != null && definition.waves.Count > 0)
+        {
+            var events = owner.gameObject.AddComponent<BattleEvents>();
+            events.Configure(owner, definition, unitContainer.transform);
+        }
+
         owner.round = owner.gameObject.AddComponent<TurnOrderController>().Round();
         yield return null;
         owner.ChangeState<CutSceneState>();
@@ -60,7 +99,28 @@ public class InitBattleState : BattleState
         Debug.Log($"[InitBattleState] Difficulty: {DifficultySettings.Current}, AI: {owner.cpu.GetType().Name}");
     }
 
-    private void SpawnTestUnits()
+    // Spawns every authored unit at its designed position (BattleSpawner
+    // registers each unit in owner.units itself)
+    private void SpawnFromDefinition(BattleDefinition definition, Transform container)
+    {
+        foreach (var entry in definition.heroes)
+            BattleSpawner.Spawn(owner, entry, container);
+
+        foreach (var entry in definition.enemies)
+            BattleSpawner.Spawn(owner, entry, container);
+
+        if (units.Count > 0)
+            SelectTile(units[0].tile.pos);
+
+        Debug.Log($"[InitBattleState] Authored battle '{definition.battleName}': {units.Count} units");
+    }
+
+    /// <summary>
+    /// Writ-style fallback: the repeatable-contract generator (GDD §4.5.3) —
+    /// random placements, randomized levels. Also the dev path when the
+    /// Battle scene is played directly with no definition assigned.
+    /// </summary>
+    private void SpawnWritUnits(Transform container)
     {
         var recipes = new[]
         {
@@ -72,15 +132,12 @@ public class InitBattleState : BattleState
             "Enemy Wizard"
         };
 
-        var unitContainer = new GameObject("Units");
-        unitContainer.transform.SetParent(owner.transform);
-
         var locations = new List<Tile>(board.tiles.Values);
         foreach (var recipe in recipes)
         {
             var level = Random.Range(9, 12);
             var instance = UnitFactory.Create(recipe, level);
-            instance.transform.SetParent(unitContainer.transform);
+            instance.transform.SetParent(container);
 
             var random = Random.Range(0, locations.Count);
             var randomTile = locations[random];
@@ -97,12 +154,44 @@ public class InitBattleState : BattleState
         SelectTile(units[0].tile.pos);
     }
 
-    private void AddVictoryCondition()
+    // Installs the definition's victory rule (writ battles keep the classic
+    // defeat-the-leader rule)
+    private void AddVictoryCondition(BattleDefinition definition)
     {
-        var vc = owner.gameObject.AddComponent<DefeatTargetVictoryCondition>();
-        var enemy = units[units.Count - 1];
-        vc.target = enemy;
-        var health = enemy.GetComponent<Health>();
-        health.MinHP = 10;
+        if (definition == null)
+        {
+            var writCondition = owner.gameObject.AddComponent<DefeatTargetVictoryCondition>();
+            var enemy = units[units.Count - 1];
+            writCondition.target = enemy;
+            var health = enemy.GetComponent<Health>();
+            health.MinHP = 10;
+            return;
+        }
+
+        switch (definition.victoryType)
+        {
+            case VictoryType.DefeatTarget:
+            {
+                var condition = owner.gameObject.AddComponent<DefeatTargetVictoryCondition>();
+                var index = definition.heroes.Count + Mathf.Clamp(definition.targetEnemyIndex, 0, definition.enemies.Count - 1);
+                condition.target = units[Mathf.Clamp(index, 0, units.Count - 1)];
+                break;
+            }
+            case VictoryType.SurviveRounds:
+            {
+                var condition = owner.gameObject.AddComponent<SurviveRoundsVictoryCondition>();
+                condition.rounds = definition.surviveRounds;
+                break;
+            }
+            case VictoryType.ReachZone:
+            {
+                var condition = owner.gameObject.AddComponent<ReachZoneVictoryCondition>();
+                condition.zone.AddRange(definition.zone);
+                break;
+            }
+            default:
+                owner.gameObject.AddComponent<DefeatAllEnemiesVictoryCondition>();
+                break;
+        }
     }
 }
