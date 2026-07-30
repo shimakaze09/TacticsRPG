@@ -79,7 +79,10 @@ public class CommandSelectionState : BaseAbilityMenuState
     {
         if (turn.plan == null)
         {
-            turn.plan = owner.cpu.Evaluate();
+            // A behavior status (Scrambled/Redline) dictates the turn
+            // instead of the battle brain
+            var dictator = turn.actor.GetComponentInChildren<ITurnPlanOverride>();
+            turn.plan = dictator != null ? dictator.BuildPlan(owner, turn.actor) : owner.cpu.Evaluate();
             turn.ability = turn.plan.ability;
         }
 

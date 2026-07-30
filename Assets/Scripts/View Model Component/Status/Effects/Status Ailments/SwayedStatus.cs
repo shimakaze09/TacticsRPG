@@ -1,30 +1,33 @@
 using UnityEngine;
 
 /// <summary>
-/// Swayed (charm): Unit perceives enemies as allies and allies as enemies.
-/// Put under AI control. Lasts for 32 ticks (~3-4 turns).
-/// Can only affect units of opposite gender (or any gender can affect monsters).
+/// Swayed (charm): the unit fights for the other side — its alliance checks
+/// invert (allies read as foes and vice versa) and the AI takes the wheel,
+/// so the regular battle brain earnestly attacks the unit's own team and
+/// helps its captors.
 /// </summary>
 public class SwayedStatus : StatusEffect
 {
+    private Alliance alliance;
+    private Driver driver;
     private Unit owner;
 
     private void OnEnable()
     {
+        alliance = GetComponentInParent<Alliance>();
+        driver = GetComponentInParent<Driver>();
         owner = GetComponentInParent<Unit>();
+        if (alliance != null)
+            alliance.confused = true;
+
+        ControlSeizure.Seize(driver);
     }
 
     private void OnDisable()
     {
-        // Restore original alliance if needed
-    }
+        if (alliance != null)
+            alliance.confused = false;
 
-    // Method to check if target can be charmed based on gender
-    public static bool CanCharm(Unit caster, Unit target)
-    {
-        // In FFT, charm can only affect units of opposite gender
-        // or any gender can affect monsters
-        // This is a simplified implementation
-        return true;
+        ControlSeizure.Release(driver, owner, this);
     }
 }
