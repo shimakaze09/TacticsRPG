@@ -92,7 +92,13 @@ elements and crits (1.10: battle-wide affinity advantage, unit affinities
 on the cast, gear element traits live, Doused ignites under fire, and
 critical hits that roll only at application so forecasts stay honest).
 
-Planned (queue order): control-seizing statuses (1.11), then the pillars. The
+Control-seizing statuses shipped with 1.11: Swayed units genuinely fight
+for the other side (alliance inversion + AI control), Scrambled units
+wander and swing at random, Redlined units charge whoever is nearest at
++33% damage; resource attacks joined the gear table (MP burn, the
+Shredded armor-tear status).
+
+Planned (queue order): the pillars. The
 **escort** objective (civilian unit with Guest alliance) lands with the
 market-rescue battle in M2 — it needs guest-unit control rules, not just a
 victory check.
@@ -155,7 +161,7 @@ target when acting, so facing rules and visuals always agree.
 |---|---|---|
 | Conditional damage | execute (Pit Cleaver), opener (Wrapped Knuckles), terrain-conditional (Dowsing Staff on water), crit bonuses (Absolution Point); anti-armor/anti-caster still open | **1.10 shipped** (anti-* with 1.11's resource attacks) |
 | Element interaction | affinity advantage law battle-wide, element resist/weak armor (rattan burns), Doused ignites under fire | **1.10 shipped** (branded weapons = content) |
-| On-hit statuses, resource attack | more StatusOnHit gear, MP burn, armor shred (stacking DEF-down) | **1.11** (behavior statuses expand the status roster) |
+| On-hit statuses, resource attack | MpBurn trait (Cipher Rod), Shredded armor-tear (Pry Hook payload) | **1.11 shipped** (more payloads = content) |
 | Timeline gear | CT-push weapons (knock the target's turn later), CT-cost or recharge modifiers, initiative trinkets | **Pillar 1** (timeline warfare) |
 | Reaction gear | counter weapons, thorns armor, Grit-gain trinkets, reach weapons that deny counters | **Pillar 2** (Grit reactions) |
 | Forced movement | knockback mauls, the Pry Hook PULLING its target a tile, repositioning shields | battle polish (#28 — needs push/pull resolution + AoE previews) |
