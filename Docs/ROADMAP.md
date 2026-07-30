@@ -10,8 +10,11 @@ authority for battle items.
 **Milestone mapping (GDD §11):** §1–§2 below = **M0** (systems hardening).
 **M1** (playable loop) = meta UI minimal + initiative bar + forecast/popups +
 first two authored battles. **M2** (slice content) = 6 battles, story scenes,
-shop, Cert-buys-abilities, art/audio first pass. **M3** (polish) = controls
-rework, mix, tuning, save slots. Pillars and remaining sections slot per GDD.
+shop, Cert-buys-abilities, **quest board + story flags + writ generator +
+Choice A + first side story**, art/audio first pass. **M3** (polish) =
+controls rework, mix, tuning, save slots. Post-slice: branching Acts 2–3 and
+the four endings, side/hidden/character quests, relic hunts, pillars —
+full taxonomy in GDD §4.3/§4.5.
 
 ## 1. Documentation passes (in progress)
 

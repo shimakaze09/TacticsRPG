@@ -59,7 +59,10 @@ Title ─► Charter Hub ─► Contract Briefing ─► Battle ─► Results &
 
 - **Charter Hub** is the meta-home: a single screen styled as the charter's
   ledger table. No world-map walking in the slice; contracts are chosen from a
-  board (post-slice: a region map with branch contracts).
+  **board carrying every quest type** — main contracts, short/long side
+  stories, repeatable writs, character quests, relic hunts (hidden quests
+  never appear until discovered) — see §4.5. Post-slice: a region map with
+  branch contracts.
 - **Campaign shape:** 3 acts across 5 chapters, ~24–30 battles total. The
   vertical slice is **Chapter 1 complete** (6 battles + its story scenes).
 - **Session shape:** a battle is 15–25 minutes; a chapter is an evening.
@@ -100,9 +103,13 @@ a meaningful post-battle decision beyond job switching.
   StatModifierFeature). Weapon examples: Warden mace, Marksman slug-thrower,
   Burner focus-coil.
 - **Shop tiers:** slice has one shop with 2 tiers (chapter-start, mid-chapter
-  restock). Scrip sources: contract pay (battle results), salvage pickups.
+  restock). Scrip sources: contract pay (battle results), salvage pickups,
+  and **writs** (§4.5) — the repeatable valve for players who want to farm
+  scrip/Cert/levels instead of pushing forward underleveled.
 - **No random drops** in the slice; loot is deterministic (salvage + fixed
-  battle rewards).
+  battle rewards). **Legendary tier** gear exists only as relic-hunt rewards
+  (§4.5.6): one copy ever, unique passive via the Feature system, above shop
+  gear but not outside the stat caps.
 
 ### 3.4 Difficulty (shipped)
 
@@ -135,23 +142,47 @@ archive.
 | Widow Faye | (NPC) | Coldwater information broker; recurring neutral |
 | Salome & Imre Voss | (NPCs) | The heirs; each holds half the fabricator boot-key |
 
-### 4.3 Arc
+### 4.3 Arc — branching structure and endings
+
+The spine is fixed (succession war → redaction → Severance lie), but three
+**choice points** branch the path and combine into **four endings**. Choices
+are recorded as story flags in the save (PlayerProgress) from Chapter 1 on.
 
 - **Act 1 — The Ledger of Coldwater Crossing (Ch. 1, the slice):** Foundry-Lord
   Voss dies; heirs Salome and Imre each hold half the boot-key to Coldwater's
   fabricator. The hungry Kestrel Charter signs with Salome; Ironquill (Marrow,
   with Vane in its colors) serves Imre. Skirmishes escalate to the fabricator
   hall, where Church observer Rook intervenes to seize the ledger "for
-  neutrality" — the first visible hand of the Church steering both sides.
+  neutrality."
+  **Choice A (chapter close, in the slice):** hand the recovered ledger to
+  **Salome**, to **Imre**, or **keep it**. Determines Act 2's employer, maps,
+  and which heir survives; "keep it" starts Act 2 charterless and hunted —
+  hard mode narratively, extra pay mechanically.
 - **Act 2 — The Redaction (Ch. 2–3):** the war spreads; Marrow voids contract
-  law at Vesper's quiet direction; Kestrel reads an un-redacted map and is
-  branded heretic; Vane confrontation ends Act 2 (duel battle).
+  law at Vesper's direction; Kestrel obtains an un-redacted map.
+  **Choice B (mid-Act 2): read the map or burn it.**
+  *Read* = branded heretic, the truth-seeking path (Rell joins early, Vesper
+  hunts you). *Burn* = stay legal, the company-man path (Church contracts,
+  better pay, Vane's respect — and complicity). Both paths converge on the
+  Vane confrontation duel that ends Act 2, but who stands beside you differs.
 - **Act 3 — The Severance Lie (Ch. 4–5):** Rell's testimony + Rook's defection
-  prove the Church's founding order *caused* the Severance to end a war it was
-  losing. Wray moves to bury everyone who knows. Finale at the First Archive;
-  ending choice: **publish** (the world burns a little, but true) or
-  **suppress** (peace bought with the lie — the official record the player has
-  been reading all game).
+  prove the Church's founding order *caused* the Severance. Wray moves to bury
+  everyone who knows. Finale at the First Archive.
+  **Choice C (finale):** what happens to the proof —
+  **publish · suppress · seize** (use it as leverage to raise Kestrel into a
+  great charter — the Delita option).
+
+**Endings matrix (4):**
+
+| Ending | Requires | Tone |
+|---|---|---|
+| **The True Archive** | read the map (B) + publish (C) | The world convulses on the truth; the archive entry the player has been reading is finally corrected. Costly, honest. |
+| **The Quiet Autumn** | any path + suppress (C) | Peace bought with the lie; the game's opening chapter cards *were* this ending's world. Melancholy loop-closer. |
+| **Charter Ascendant** | any path + seize (C) | Kestrel becomes a great power holding the Church by the throat; Rhen becomes what Marrow was. Dark mirror. |
+| **The Good Servant** | burn the map (B) — Act 3 plays as Church retainers; C is offered by Wray as a *test* | Refuse or fail it and the record stands exactly as written; the player realizes they played the official version. Bleakest, and the shortest Act 3. |
+
+Choice A colors all endings via epilogue cards (which heir rules Coldwater,
+or neither) rather than forking whole ending scenes — branch cost stays sane.
 
 ### 4.4 Delivery
 
@@ -159,6 +190,64 @@ Chapter cards (new UI) · pre/post-battle conversations (ConversationController
 exists) · 2–3 scripted mid-battle events per chapter (reinforcement + dialogue
 triggers — needs a small battle-event hook in 1.8) · the Archive screen for
 rereading records with truth/record toggles (post-slice).
+
+### 4.5 Side content — quest taxonomy
+
+Everything below appears on the Charter Hub's **contract board**, each type
+with its own stamp/icon. All quest state lives in save-file story flags.
+
+1. **Side stories — short (6–8 across the campaign):** one battle plus scenes;
+   self-contained vignettes that flesh out the world (e.g. *The Last
+   Ferryman* — an old man defends a crossing the Church already erased from
+   the maps; *A Wager of Rust* — two Foundry gangs duel over a machine that
+   turns out to be someone's grandmother's memory-core). Rewards: scrip, a
+   rare item, sometimes a recruit.
+2. **Side stories — long (2):** multi-battle chains with their own mini-arc:
+   - ***The Hollow Road*** (3 battles): following Corvus Rell's back-trail
+     into a Severance zone; horror-tinged; explains the Hollowed and seeds
+     Act 3 evidence. Unlocks after Rell joins.
+   - ***Faye's Ledger*** (4 battles): Widow Faye's information war — every
+     job pays in secrets, and the finale reveals she has been selling to
+     Vesper all along; the player chooses to cut her off or turn her double.
+     Feeds an epilogue card.
+3. **Writs — repeatable farming contracts:** parameterized skirmishes
+   ("Clear the toll road", "Escort the grain convoy") that reuse the battle
+   generator with randomized spawns; enemies scale to average party level;
+   standard pay in scrip + Cert. Always available, deliberately unglamorous —
+   the grind valve for players who want to out-level rather than out-think.
+   (The old random test spawner literally becomes this system in 1.8.)
+4. **Hidden quests (4–6):** never listed on the board; discovered by play —
+   ending a battle on a rumor tile, keeping a "doomed" guest alive, revisiting
+   a map after a story flag, reading the right archive entry. Rewards skew
+   weird and lore-heavy (a dead charter's banner, a corrupted memory-core that
+   whispers, the game's one joke quest).
+5. **Character quests (6, one per unique cast member):** 1–2 battles each,
+   unlocked by story progress + having the character deployed; deepens them
+   and unlocks their **signature ability or gear** (e.g. Vane's quest ends
+   with *Hold the Line* gaining its banner aura; Rook's post-defection quest
+   unlocks *Old Codes*). Vesper's exists only on the read-the-map path;
+   Marrow gets a posthumous one — you play his last clean contract as a
+   flashback.
+6. **Relic hunts — one-time legendary gear quests (6):** hard, condition-laden
+   battles, each awarding a **named relic** — and the names are already
+   canon: the Relic Blade job "draws power from named old-world blades," and
+   these are those blades and their peers made real equipment:
+   - *Vigil* (blade) — hunt: a vault that only opens during an enemy turn
+     (timeline-warfare puzzle)
+   - *Hunger* (blade) — hunt: win without healing
+   - *The Surveyor* (slug-thrower) — hunt: kill the target from maximum range
+   - *First Lantern* (focus-coil) — hunt: a dead-zone battle where Protocol
+     costs double
+   - *Doorwarden's Plate* (armor) — hunt: hold a gate for 8 rounds
+   - *Faraday Shroud* (armor) — hunt: survive a Wakener bombardment map
+   Legendary tier sits above shop gear with a unique passive each (via the
+   Feature system); one copy ever, marked in the archive when found.
+
+**Slice scope for side content (M2):** one short side story (*The Last
+Ferryman*), writs unlocked after battle 2 (proving the repeatable system),
+one hidden quest seed (rumor tile in battle 4's rooftops), and Choice A at
+chapter close writing its story flag. Everything else is post-slice content
+on proven systems.
 
 ## 5. Vertical slice — Chapter 1 definition
 
@@ -280,6 +369,11 @@ then the existing keyboard flow remains the dev-testing path.
 | Forecast panel / damage popups | Predict(), HitRate.Calculate() | Battle polish (M1) |
 | Charter Hub / Title / Settings | GameFlow states (stubs), no canvases | Meta UI (M1 minimal, M2 full) |
 | Chapter cards / mid-battle events | ConversationController | small battle-event hook (**1.8**), card UI (M2) |
+| Quest board & story flags | PlayerProgress.cs (empty placeholder), GameData | QuestDefinition data + flag store + board UI (M2) |
+| Repeatable writs | InitBattleState's random spawner | becomes the writ generator with level scaling (**1.8**/M2) |
+| Branching story / endings | — | flag-gated contract availability + ending resolver (M2 flags, post-slice content) |
+| Hidden quest triggers | battle-event hook (1.8) | rumor tiles + condition checks (M2 seed, post-slice full) |
+| Legendary gear | Feature system (1.9) | legendary tier + unique passives (post-slice, quests one-time-flagged) |
 | Scrip in save | Bank in PlayerPrefs | **1.12** |
 | Save slots | single-file DataPersistenceManager | M3 |
 | Controls table | keyboard-axis InputController | M3 rework (Input System) |
@@ -296,15 +390,18 @@ then the existing keyboard flow remains the dev-testing path.
   playable end-to-end from Title. Exit: "new game → two battles → growth →
   save/continue" without the editor.
 - **M2 — Slice content**: all 6 battles, all story scenes + chapter cards,
-  shop, Cert-buys-abilities, first art batches (sprites/portraits/tiles for
-  the three biomes), music/SFX first pass. Exit: Chapter 1 complete with
-  proxy-free core cast.
+  shop, Cert-buys-abilities, **quest board + story flags + Choice A**, the
+  writ generator, one short side story, one hidden-quest seed, first art
+  batches (sprites/portraits/tiles for the three biomes), music/SFX first
+  pass. Exit: Chapter 1 complete with proxy-free core cast.
 - **M3 — Slice polish**: Input System controls rework, audio mix, difficulty
   tuning pass (BATTLE_PLAN §4), save slots, performance/UX pass, external
   playtest. Exit: shippable demo build.
-- **Post-slice:** Acts 2–3 content · Grit reactions (Pillar 2) · Sync terrain
-  (Pillar 3) · in-battle salvage play (Pillar 4) · Archive screen · controller
-  support · region-map hub.
+- **Post-slice:** Acts 2–3 branching content and the four endings · remaining
+  side stories (short set + *The Hollow Road* + *Faye's Ledger*) · hidden and
+  character quests · relic hunts + legendary gear · Grit reactions (Pillar 2)
+  · Sync terrain (Pillar 3) · in-battle salvage play (Pillar 4) · Archive
+  screen · controller support · region-map hub.
 
 **Top risks:** sprite production volume (mitigation: placeholder-first, 4
 facings via mirroring, palette swaps) · scope creep from pillars (mitigation:
