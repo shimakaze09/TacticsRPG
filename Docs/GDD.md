@@ -82,9 +82,11 @@ rounds via BattleClock, reinforcement waves, objective types defeat-all /
 defeat-target / survive-N-rounds / reach-zone); real terrain (1.8b:
 Field/Road/Water/Obstacle/Building/Bridge with per-type pass/stop/sight
 law — rivers split maps, bridges reconnect them, trees and buildings block
-line of sight).
+line of sight); equipment (1.9: per-job starting loadouts from GearCatalog,
+gear bonuses that survive stat recalculation, shop purchases into
+PartyInventory).
 
-Planned (queue order): equipment (1.9), elements +
+Planned (queue order): elements +
 crits (1.10), control-seizing statuses (1.11), then the pillars. The
 **escort** objective (civilian unit with Guest alliance) lands with the
 market-rescue battle in M2 — it needs guest-unit control rules, not just a
@@ -369,7 +371,7 @@ then the existing keyboard flow remains the dev-testing path.
 |---|---|---|
 | Authored battles, objectives | BattleDefinition + BattleSpawner + BattleClock + 4 victory types (**1.8 shipped**) | escort objective (M2, with market rescue) |
 | Terrain types, bridges, water | TerrainType + TerrainRules; terrain-aware movement/LoS/spawning; BoardCreator painting (**1.8b shipped**) | biome art passes per map (M2) |
-| Equipment | Equipment/Features code, zero callers | **1.9** starting gear + shop wiring |
+| Equipment | GearCatalog + per-job loadouts + PartyInventory, recalc-safe bonuses (**1.9 shipped**) | equip/compare UI in job menu (M2); gear art |
 | Cert buys abilities | jpCost in data, AbilityMemory | **1.13** (per §3.2 call) |
 | Initiative bar | TurnOrderController (no UI) | Pillar 1 seed (M1) |
 | Forecast panel / damage popups | Predict(), HitRate.Calculate() | Battle polish (M1) |
