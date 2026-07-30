@@ -132,9 +132,6 @@ public class ThreatMap
                 case MagicalAbilityPower magical:
                     estimate = stats[StatTypes.MAT] * magical.level / 100f;
                     break;
-                case WeaponAbilityPower _:
-                    estimate = stats[StatTypes.ATK];
-                    break;
             }
 
             estimate = Mathf.Min(estimate, StatLimits.MaxDamagePerHit);

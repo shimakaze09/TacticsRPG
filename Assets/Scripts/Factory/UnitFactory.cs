@@ -51,6 +51,7 @@ public static class UnitFactory
         // reference and its level-up JP subscription depends on it.
         AddRank(obj, level);
         AddJob(obj, recipe.job);
+        EquipStartingGear(obj);
         obj.AddComponent<Health>();
         obj.AddComponent<Mana>();
         AddAttack(obj, recipe.attack);
@@ -200,6 +201,29 @@ public static class UnitFactory
         }
 
         Debug.Log($"Created ability catalog '{catalogName}' for {obj.name}");
+    }
+
+    // Every job spawns wearing its default loadout (GDD §3.3); the feature
+    // activation raises stats and RecalculateStats preserves the bonuses.
+    // Keyed off the resolved job's stable id, not the recipe string, so
+    // legacy display-name references still get their gear.
+    private static void EquipStartingGear(GameObject obj)
+    {
+        var equipment = obj.GetComponent<Equipment>();
+        var jobManager = obj.GetComponent<JobManager>();
+        if (equipment == null || jobManager == null || jobManager.CurrentJob == null)
+            return;
+
+        foreach (var gearId in GearCatalog.StartingGear(jobManager.CurrentJob.id))
+        {
+            var item = ItemFactory.Create(gearId);
+            if (item == null)
+                continue;
+
+            item.transform.SetParent(obj.transform);
+            var equippable = item.GetComponent<Equippable>();
+            equipment.Equip(equippable, equippable.defaultSlots);
+        }
     }
 
     private static void AddLocomotion(GameObject obj, Locomotions type)

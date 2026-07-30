@@ -418,7 +418,8 @@ public class JobManager : MonoBehaviour, IDataPersistence
     /// 1. Start with base stats (level 1, no job)
     /// 2. For each job the character has leveled:
     ///    - Add (JobLevels * JobMultipliers) to stats
-    /// 3. Apply current job's equipment bonuses
+    /// 3. Add worn gear bonuses (agrees with StatModifierFeature's live
+    ///    adjustments on Equip/UnEquip — both paths produce the same totals)
     /// 4. Apply current job's movement bonuses
     /// 
     /// This ensures stats reflect full job history, not just current job.
@@ -449,12 +450,28 @@ public class JobManager : MonoBehaviour, IDataPersistence
             }
         }
 
+        // Worn gear bonuses must be part of this write: the loop below
+        // overwrites each stat, so anything equipment added at equip time
+        // would otherwise vanish on the next level up or job switch.
+        int[] gearBonus = new int[calculatedStats.Length];
+        var equipment = GetComponent<Equipment>();
+        if (equipment != null)
+        {
+            foreach (var item in equipment.items)
+            foreach (var feature in item.GetComponentsInChildren<StatModifierFeature>())
+            {
+                for (int i = 0; i < statOrder.Length; i++)
+                    if (statOrder[i] == feature.type)
+                        gearBonus[i] += feature.amount;
+            }
+        }
+
         // Apply calculated stats to Stats component
         // Using statOrder for consistency: MHP, MMP, ATK, DEF, MAT, MDF, SPD
         for (int i = 0; i < statOrder.Length && i < calculatedStats.Length; i++)
         {
             StatTypes statType = statOrder[i];
-            int value = calculatedStats[i];
+            int value = calculatedStats[i] + gearBonus[i];
 
             // Ensure positive values, then enforce the global ceilings.
             // This write bypasses the stat-exception pipeline, so the clamp
