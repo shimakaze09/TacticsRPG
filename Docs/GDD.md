@@ -84,7 +84,8 @@ Field/Road/Water/Obstacle/Building/Bridge with per-type pass/stop/sight
 law — rivers split maps, bridges reconnect them, trees and buildings block
 line of sight); equipment (1.9: per-job starting loadouts from GearCatalog,
 gear bonuses that survive stat recalculation, shop purchases into
-PartyInventory).
+PartyInventory); the gear behavior model (1.9b: weapon reach / fire arc /
+attack shape / damage profile plus composable traits on any item — §3.3).
 
 Planned (queue order): elements +
 crits (1.10), control-seizing statuses (1.11), then the pillars. The
@@ -118,6 +119,28 @@ a meaningful post-battle decision beyond job switching.
   battle rewards). **Legendary tier** gear exists only as relic-hunt rewards
   (§4.5.6): one copy ever, unique passive via the Feature system, above shop
   gear but not outside the stat caps.
+
+**Gear behavior model** (shipped with 1.9): every item is defined along
+composable axes, so new gear is data, not new systems —
+
+| Axis | What it does | Examples |
+|---|---|---|
+| Stats | flat bonuses via StatModifierFeature | +7 ATK mace, +5 DEF plate |
+| Reach | basic-attack range (weapons) | dagger 1, pry hook 2, slug-thrower 5 |
+| Fire arc | Direct is blocked by standing units and cover; Arcing lobs over both | slug-thrower vs recurve lath |
+| Shape | attack footprint: Target (one tile), Line (spray to full reach), Sweep (target + both flanking tiles) | drip-torch line, grief-edge sweep |
+| Damage profile | power scale vs coverage: precision >100%, wide <100% | dagger 110%, sweep blades 85%, drip-torch 75% |
+| Traits | composable behaviors on ANY gear slot | see below |
+
+Current traits: **Recoil** (attacker takes X% of each hit it deals —
+Two-Head Blade), **WindedAfterStrike** (swinging Throttles the attacker —
+Pit Cleaver), **PhysicalResist/Weakness** (armor shapes incoming physical
+damage — Rattan Jacket). Data-ready, wired later: **ElementResist/Weakness**
+(rattan's fire weakness goes live with 1.10's element tagging). Planned
+trait families: element/ability-specific amplifiers (1.10), on-hit status
+infliction (with 1.11), lifesteal / armor pierce / knockback (backlog).
+Weapon on-hit traits run from the Attack ability; defensive traits ride the
+item as Features and hook the same TweakDamage stage statuses use.
 
 ### 3.4 Difficulty (shipped)
 
