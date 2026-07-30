@@ -15,7 +15,7 @@ MonoBehaviour:
   abilityCatalog: DemoCatalog
   alliance: 2
   attack: Common/Attack
-  element: 
+  element: Earth
   job: warden
   locomotion: 0
   model: Hero

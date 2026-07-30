@@ -15,7 +15,7 @@ MonoBehaviour:
   abilityCatalog: DemoCatalog
   alliance: 2
   attack: Common/Attack
-  element: 
+  element: Fire
   job: burner
   locomotion: 0
   model: Hero

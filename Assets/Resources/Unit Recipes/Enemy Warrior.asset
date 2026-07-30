@@ -15,7 +15,7 @@ MonoBehaviour:
   abilityCatalog: Enemy Warrior
   alliance: 4
   attack: Common/Attack
-  element: 
+  element: Earth
   job: marksman
   locomotion: 0
   model: Monster

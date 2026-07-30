@@ -119,6 +119,7 @@ public static class GearCatalog
         Weapon("pit_cleaver", "Pit Cleaver", StatTypes.ATK, 11, 850, 0,
                 WeaponArc.Direct, WeaponShape.Sweep, 90)
             .AddTrait(GearTraitType.WindedAfterStrike, 2) // too heavy to swing and stay quick
+            .AddTrait(GearTraitType.Execute, 30) // built for finishing downed pit fights
             .tier = 2;
         Armor("rattan_jacket", "Rattan Jacket", StatTypes.DEF, 2, StatTypes.MDF, 2, 550)
             .AddTrait(GearTraitType.PhysicalResist, 15) // woven cane sheds blades and slugs
@@ -134,7 +135,8 @@ public static class GearCatalog
         Weapon("trail_knife", "Trail Knife", StatTypes.ATK, 5, 200, 0, WeaponArc.Direct, WeaponShape.Target, 110)
             .AddTrait(GearTraitType.FlankBonus, 25); // knives are for backs
         Weapon("linebreaker_mace", "Line-Breaker Mace", StatTypes.ATK, 7, 400);
-        Weapon("wrapped_knuckles", "Wrapped Knuckles", StatTypes.ATK, 7, 350);
+        Weapon("wrapped_knuckles", "Wrapped Knuckles", StatTypes.ATK, 7, 350)
+            .AddTrait(GearTraitType.Opener, 25); // the first punch lands hardest
         var rifle = Weapon("slug_thrower", "Slug-Thrower", StatTypes.ATK, 7, 450, 5);
         rifle.minRange = 2; // useless jammed against ribs — get inside the gun
         Weapon("recurve_lath", "Recurve Lath", StatTypes.ATK, 5, 350, 4, WeaponArc.Arcing);
@@ -151,7 +153,8 @@ public static class GearCatalog
         Weapon("broken_oath_blade", "Broken-Oath Blade", StatTypes.ATK, 8, 550, 0, WeaponArc.Direct, WeaponShape.Sweep, 85);
         Weapon("sanctified_edge", "Sanctified Edge", StatTypes.ATK, 9, 700, 0, WeaponArc.Direct, WeaponShape.Sweep, 90);
         Weapon("absolution_point", "Absolution Point", StatTypes.ATK, 8, 600, 0, WeaponArc.Direct, WeaponShape.Target, 115)
-            .AddTrait(GearTraitType.FlankBonus, 40); // the Church absolves from behind
+            .AddTrait(GearTraitType.FlankBonus, 40) // the Church absolves from behind
+            .AddTrait(GearTraitType.CritBonus, 10);
 
         // Per-job weapons — caster lines. Foci are for channeling, not
         // shooting: their basic strike is a close-quarters jab, except the
@@ -166,7 +169,8 @@ public static class GearCatalog
         Weapon("wirestring_guitar", "Wire-String Guitar", StatTypes.MAT, 5, 250);
         Weapon("ledger_seal", "Ledger Seal", StatTypes.MAT, 5, 250);
         Weapon("engine_key", "Engine Key", StatTypes.MAT, 8, 550);
-        Weapon("dowsing_staff", "Dowsing Staff", StatTypes.MAT, 6, 300);
+        Weapon("dowsing_staff", "Dowsing Staff", StatTypes.MAT, 6, 300)
+            .AddTrait(GearTraitType.TerrainBonus, 30, "Water"); // it sings near water
 
         // Hybrid
         Add(new GearData

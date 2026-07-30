@@ -15,7 +15,7 @@ MonoBehaviour:
   abilityCatalog: DemoCatalog
   alliance: 2
   attack: Common/Attack
-  element: 
+  element: Water
   job: sawbones
   locomotion: 0
   model: Hero

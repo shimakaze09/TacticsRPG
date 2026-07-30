@@ -31,5 +31,17 @@ public enum GearTraitType
     StatusOnHit,
 
     /// <summary>Weapon: attacker heals value% of the damage it deals.</summary>
-    Lifesteal
+    Lifesteal,
+
+    /// <summary>Any gear: +value% critical hit chance while worn.</summary>
+    CritBonus,
+
+    /// <summary>Weapon: +value% damage against targets below 30% HP.</summary>
+    Execute,
+
+    /// <summary>Weapon: +value% damage against targets at full HP.</summary>
+    Opener,
+
+    /// <summary>Weapon: +value% damage while standing on terrain `tag`.</summary>
+    TerrainBonus
 }

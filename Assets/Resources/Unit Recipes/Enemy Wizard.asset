@@ -15,7 +15,7 @@ MonoBehaviour:
   abilityCatalog: Enemy Wizard
   alliance: 4
   attack: Common/Attack
-  element: 
+  element: Lightning
   job: ghostspeaker
   locomotion: 2
   model: Monster

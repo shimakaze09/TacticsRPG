@@ -48,10 +48,36 @@ public class WeaponTraitRunner : MonoBehaviour
 
         foreach (var trait in gear.traits)
         {
-            if (trait.type == GearTraitType.FlankBonus &&
-                attacker.GetFacing(e.Target) == Facings.Back)
-                e.Modifiers.Add(new MultValueModifier(90, 1f + trait.value / 100f));
+            switch (trait.type)
+            {
+                case GearTraitType.FlankBonus when attacker.GetFacing(e.Target) == Facings.Back:
+                    e.Modifiers.Add(new MultValueModifier(90, 1f + trait.value / 100f));
+                    break;
+
+                // Finisher: the target is already staggering (below 30% HP)
+                case GearTraitType.Execute when TargetHpFraction(e.Target) < 0.3f:
+                    e.Modifiers.Add(new MultValueModifier(90, 1f + trait.value / 100f));
+                    break;
+
+                // First blood: the target hasn't been touched yet
+                case GearTraitType.Opener when TargetHpFraction(e.Target) >= 1f:
+                    e.Modifiers.Add(new MultValueModifier(90, 1f + trait.value / 100f));
+                    break;
+
+                case GearTraitType.TerrainBonus when attacker.tile != null &&
+                                                     attacker.tile.terrain.ToString() == trait.tag:
+                    e.Modifiers.Add(new MultValueModifier(90, 1f + trait.value / 100f));
+                    break;
+            }
         }
+    }
+
+    private static float TargetHpFraction(Unit target)
+    {
+        var stats = target.GetComponent<Stats>();
+        if (stats == null || stats[StatTypes.MHP] <= 0)
+            return 1f;
+        return (float)stats[StatTypes.HP] / stats[StatTypes.MHP];
     }
 
     private void OnHit(AbilityHitEvent e)
