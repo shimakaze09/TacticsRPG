@@ -44,8 +44,8 @@ Remaining, in strict order:
 - ~~1.5g~~ AI support discipline — **done** (2026-07-31)
 - ~~1.7~~ KO decay & salvage pickup — **done** (2026-07-31)
 - ~~1.8~~ Authored battle setup: BattleDefinition assets, BattleClock rounds, reinforcement waves, SurviveRounds victory — **done** (2026-07-30)
-- **1.8b** Real terrain: types with gameplay meaning (water/trees/buildings/bridges), traversal + LoS integration, BoardCreator painting, visual skins ← **next**
-- **1.9** Equipment actually equips (audit §6 — `Equip()` has no callers)
+- ~~1.8b~~ Real terrain: TerrainType/TerrainRules, terrain-aware movement/LoS/spawning, BoardCreator painting, Coldwater Crossing map — **done** (2026-07-30)
+- **1.9** Equipment actually equips (audit §6 — `Equip()` has no callers) ← **next**
 - **1.10** Elements + critical hits via TweakDamage (audit §8)
 - **1.11** Behavior-control statuses seize control: Swayed/Scrambled/Redline (audit §4)
 - **1.12** Scrip moves from PlayerPrefs into GameData (audit §6)
