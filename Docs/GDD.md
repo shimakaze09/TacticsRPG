@@ -132,15 +132,36 @@ composable axes, so new gear is data, not new systems —
 | Damage profile | power scale vs coverage: precision >100%, wide <100% | dagger 110%, sweep blades 85%, drip-torch 75% |
 | Traits | composable behaviors on ANY gear slot | see below |
 
-Current traits: **Recoil** (attacker takes X% of each hit it deals —
+**Shipped traits:** **Recoil** (attacker takes X% of each hit it deals —
 Two-Head Blade), **WindedAfterStrike** (swinging Throttles the attacker —
 Pit Cleaver), **PhysicalResist/Weakness** (armor shapes incoming physical
-damage — Rattan Jacket). Data-ready, wired later: **ElementResist/Weakness**
-(rattan's fire weakness goes live with 1.10's element tagging). Planned
-trait families: element/ability-specific amplifiers (1.10), on-hit status
-infliction (with 1.11), lifesteal / armor pierce / knockback (backlog).
-Weapon on-hit traits run from the Attack ability; defensive traits ride the
-item as Features and hook the same TweakDamage stage statuses use.
+damage — Rattan Jacket), **FlankBonus** (+X% striking from behind — every
+knife), **StatusOnHit** (X% chance to inflict a status — Static Knife
+statics, Drip-Torch douses), **Lifesteal** (Grief-Edge feeds its bearer),
+plus **minimum range** as a weapon property (the Slug-Thrower can't fire
+inside 2 — get inside the gun). Weapon on-hit and conditional traits run
+from the Attack ability; defensive traits ride the item as Features and
+hook the same TweakDamage stage statuses use. Attackers turn to face their
+target when acting, so facing rules and visuals always agree.
+
+**The full design space** — gear behavior families and when they land
+(each is data + one hook, never a new system):
+
+| Family | Examples | Lands with |
+|---|---|---|
+| Conditional damage | execute (bonus vs low HP), opener (bonus vs full HP), anti-armor / anti-caster (the "target type" axis), height-advantage bonuses, terrain-conditional (dowsing staff on water) | **1.10** (rides crits' TweakDamage work) |
+| Element interaction | element resist/weak armor (rattan burns), element-branded weapons, element amplifiers | **1.10** (needs damage to carry an element) |
+| On-hit statuses, resource attack | more StatusOnHit gear, MP burn, armor shred (stacking DEF-down) | **1.11** (behavior statuses expand the status roster) |
+| Timeline gear | CT-push weapons (knock the target's turn later), CT-cost or recharge modifiers, initiative trinkets | **Pillar 1** (timeline warfare) |
+| Reaction gear | counter weapons, thorns armor, Grit-gain trinkets, reach weapons that deny counters | **Pillar 2** (Grit reactions) |
+| Forced movement | knockback mauls, the Pry Hook PULLING its target a tile, repositioning shields | battle polish (#28 — needs push/pull resolution + AoE previews) |
+| Mobility gear | +MOV boots, water-walking waders, nullgrav harness (fly traversal), jump kits | with terrain art pass / M2 shop tiers |
+| Auras & wearer passives | the Charter Standard buffing adjacent allies (it IS a banner), regen mesh, status-immunity trinkets, one-time death protection (Failsafe exists) | M2 (needs aura recompute + trinket slot content) |
+| Meta/economy | set bonuses (maker's marks), shop upgrade paths, cursed/bound relic gear (can't unequip, big drawback) | M2 shop rebuild + relic hunts |
+
+**Anti-goals:** no durability/weapon breaking (friction without decisions),
+no random affixes (loot stays deterministic, §above), nothing that breaks
+the WORLD §4b caps.
 
 ### 3.4 Difficulty (shipped)
 
