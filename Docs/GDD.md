@@ -77,12 +77,15 @@ statuses (per-owner durations, real combat effects, tuned accuracy); damage
 (±15% dmg, ±10 hit at ≥2 height); KO decay into memory-cores/salvage with
 pass-over corpses; two difficulties — Easy (pattern AI) and Hard (tactical AI
 with threat map, hit-and-run, self-preservation, team focus fire, support
-discipline).
+discipline); authored battle setup (1.8: BattleDefinition assets, battle
+rounds via BattleClock, reinforcement waves, objective types defeat-all /
+defeat-target / survive-N-rounds / reach-zone).
 
-Planned (queue order): authored battle setup (1.8), terrain types (1.8b),
-equipment (1.9), elements + crits (1.10), control-seizing statuses (1.11),
-then the pillars. **Objective types** land with 1.8: defeat-all, defeat-target,
-survive-N-rounds, reach-zone, escort (civilian unit with Guest alliance).
+Planned (queue order): terrain types (1.8b), equipment (1.9), elements +
+crits (1.10), control-seizing statuses (1.11), then the pillars. The
+**escort** objective (civilian unit with Guest alliance) lands with the
+market-rescue battle in M2 — it needs guest-unit control rules, not just a
+victory check.
 
 ### 3.2 Jobs & growth (shipped, design ratified here)
 
@@ -361,16 +364,16 @@ then the existing keyboard flow remains the dev-testing path.
 
 | GDD feature | Existing system | Gap (queue item) |
 |---|---|---|
-| Authored battles, objectives, escorts | InitBattleState (random test spawns), victory conditions | BattleDefinition data + spawn zones + objective types (**1.8**) |
+| Authored battles, objectives | BattleDefinition + BattleSpawner + BattleClock + 4 victory types (**1.8 shipped**) | escort objective (M2, with market rescue) |
 | Terrain types, bridges, water | Tile height only; dormant TileTraversalFlags | **1.8b** |
 | Equipment | Equipment/Features code, zero callers | **1.9** starting gear + shop wiring |
 | Cert buys abilities | jpCost in data, AbilityMemory | **1.13** (per §3.2 call) |
 | Initiative bar | TurnOrderController (no UI) | Pillar 1 seed (M1) |
 | Forecast panel / damage popups | Predict(), HitRate.Calculate() | Battle polish (M1) |
 | Charter Hub / Title / Settings | GameFlow states (stubs), no canvases | Meta UI (M1 minimal, M2 full) |
-| Chapter cards / mid-battle events | ConversationController | small battle-event hook (**1.8**), card UI (M2) |
+| Chapter cards / mid-battle events | ConversationController; BattleEvents hook (**1.8 shipped**, runs reinforcement waves) | story triggers on the hook + card UI (M2) |
 | Quest board & story flags | PlayerProgress.cs (empty placeholder), GameData | QuestDefinition data + flag store + board UI (M2) |
-| Repeatable writs | InitBattleState's random spawner | becomes the writ generator with level scaling (**1.8**/M2) |
+| Repeatable writs | InitBattleState's writ spawner (**1.8**: the no-definition fallback path, documented as GDD §4.5.3) | level scaling + reward hookup (M2) |
 | Branching story / endings | — | flag-gated contract availability + ending resolver (M2 flags, post-slice content) |
 | Hidden quest triggers | battle-event hook (1.8) | rumor tiles + condition checks (M2 seed, post-slice full) |
 | Legendary gear | Feature system (1.9) | legendary tier + unique passives (post-slice, quests one-time-flagged) |

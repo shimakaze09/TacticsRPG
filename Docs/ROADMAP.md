@@ -1,6 +1,6 @@
 # Roadmap — the master work queue
 
-**Updated:** 2026-07-31. Ordered top-down; **design authority is `GDD.md`** —
+**Updated:** 2026-07-30. Ordered top-down; **design authority is `GDD.md`** —
 this file is the execution order for its production plan (§11). Battle-scoped
 detail lives in `BATTLE_PLAN.md`, structure/audit history in
 `PROJECT_REVIEW.md` + `CODE_AUDIT.md`, world/content rules in `WORLD.md`.
@@ -43,8 +43,8 @@ Remaining, in strict order:
 - ~~1.5f~~ AI team focus fire + target value model — **done** (2026-07-31)
 - ~~1.5g~~ AI support discipline — **done** (2026-07-31)
 - ~~1.7~~ KO decay & salvage pickup — **done** (2026-07-31)
-- **1.8** Real battle setup: spawn zones in LevelData, authored victory conditions ← **next**
-- **1.8b** Real terrain: types with gameplay meaning (water/trees/buildings/bridges), traversal + LoS integration, BoardCreator painting, visual skins
+- ~~1.8~~ Authored battle setup: BattleDefinition assets, BattleClock rounds, reinforcement waves, SurviveRounds victory — **done** (2026-07-30)
+- **1.8b** Real terrain: types with gameplay meaning (water/trees/buildings/bridges), traversal + LoS integration, BoardCreator painting, visual skins ← **next**
 - **1.9** Equipment actually equips (audit §6 — `Equip()` has no callers)
 - **1.10** Elements + critical hits via TweakDamage (audit §8)
 - **1.11** Behavior-control statuses seize control: Swayed/Scrambled/Redline (audit §4)
