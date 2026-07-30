@@ -22,6 +22,15 @@ public static class LineOfSight
     /// </summary>
     public static bool Clear(Board board, Tile from, Tile to)
     {
+        return Clear(board, from, to, false);
+    }
+
+    /// <summary>
+    /// As above; with unitsBlock (direct fire — guns) any standing unit in
+    /// the path also stops the shot. Arcing fire passes false and lobs over.
+    /// </summary>
+    public static bool Clear(Board board, Tile from, Tile to, bool unitsBlock)
+    {
         if (board == null || from == null || to == null || from == to)
             return true;
 
@@ -45,6 +54,12 @@ public static class LineOfSight
                 continue;
 
             if (tile.BlocksSight)
+                return false;
+
+            // Direct fire: a unit still on its feet is in the way (downed
+            // bodies lie low enough to shoot over)
+            if (unitsBlock && tile.content != null &&
+                tile.content.GetComponentInChildren<KOStatus>() == null)
                 return false;
 
             float lineHeight = Mathf.Lerp(from.height, to.height, t) + StandingHeight;

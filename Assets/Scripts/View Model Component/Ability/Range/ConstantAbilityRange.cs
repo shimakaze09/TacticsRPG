@@ -18,9 +18,15 @@ public class ConstantAbilityRange : AbilityRange
 
         // Melee (range 1) has no intermediate tiles to block it
         if (requiresLineOfSight && horizontal > 1)
-            tiles.RemoveAll(t => !LineOfSight.Clear(board, unit.tile, t));
+            tiles.RemoveAll(t => !HasLineOfSight(board, t));
 
         return tiles;
+    }
+
+    // Subclasses may tighten the sight rule (e.g. direct fire blocked by units)
+    protected virtual bool HasLineOfSight(Board board, Tile target)
+    {
+        return LineOfSight.Clear(board, unit.tile, target);
     }
 
     // Search filter: within horizontal steps and vertical height difference

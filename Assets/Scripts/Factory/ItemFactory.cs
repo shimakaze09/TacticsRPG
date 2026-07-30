@@ -26,7 +26,32 @@ public static class ItemFactory
         if (data.amount2 != 0)
             AddFeature(obj, data.stat2, data.amount2);
 
+        // Defensive traits activate with the item like any other feature;
+        // weapon on-hit traits are run by the Attack ability instead
+        if (HasDefensiveTrait(data))
+            obj.AddComponent<GearDefenseFeature>();
+
         return obj;
+    }
+
+    private static bool HasDefensiveTrait(GearData data)
+    {
+        if (data.traits == null)
+            return false;
+
+        foreach (var trait in data.traits)
+        {
+            switch (trait.type)
+            {
+                case GearTraitType.PhysicalResist:
+                case GearTraitType.PhysicalWeakness:
+                case GearTraitType.ElementResist:
+                case GearTraitType.ElementWeakness:
+                    return true;
+            }
+        }
+
+        return false;
     }
 
     private static void AddFeature(GameObject obj, StatTypes stat, int amount)

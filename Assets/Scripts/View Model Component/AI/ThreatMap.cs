@@ -134,6 +134,14 @@ public class ThreatMap
                     break;
             }
 
+            // Basic weapon strikes scale by the weapon's damage profile
+            if (ability.GetComponent<WeaponPowerScale>() != null)
+            {
+                var gear = GearCatalog.EquippedWeapon(ability);
+                if (gear != null)
+                    estimate = estimate * gear.damagePercent / 100f;
+            }
+
             estimate = Mathf.Min(estimate, StatLimits.MaxDamagePerHit);
             if (estimate > damage)
                 damage = estimate;
@@ -146,6 +154,11 @@ public class ThreatMap
                     everywhere = true;
                     continue;
                 }
+
+                // Weapon reach lives on the equipped item — sync the field
+                // before reading it
+                if (range is WeaponAbilityRange weaponRange)
+                    weaponRange.Refresh();
 
                 var abilityReach = range.horizontal;
                 var area = ability.GetComponent<SpecifyAbilityArea>();

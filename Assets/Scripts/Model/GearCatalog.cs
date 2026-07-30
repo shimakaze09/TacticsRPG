@@ -16,6 +16,40 @@ public class GearData
     public int amount2;
     public int price;
     public int tier;
+
+    /// <summary>Weapon reach in tiles for the basic attack; 0 = melee (1).</summary>
+    public int range;
+
+    /// <summary>Direct shots are blocked by units/cover; arcing shots lob over.</summary>
+    public WeaponArc arc;
+
+    /// <summary>Basic attack footprint: one tile, a sprayed line, or a sweep.</summary>
+    public WeaponShape shape;
+
+    /// <summary>
+    /// Basic-attack power scale: precision weapons hit above 100, wide
+    /// footprints below it (coverage costs per-target damage).
+    /// </summary>
+    public int damagePercent = 100;
+
+    /// <summary>Composable behaviors (recoil, resists, …); null = none.</summary>
+    public List<GearTraitData> traits;
+
+    /// <summary>Builder: attach a trait; tag names an element/ability where relevant.</summary>
+    public GearData AddTrait(GearTraitType type, int value, string tag = null)
+    {
+        traits ??= new List<GearTraitData>();
+        traits.Add(new GearTraitData { type = type, value = value, tag = tag });
+        return this;
+    }
+}
+
+/// <summary>One gear trait: what it does, how strongly, and to what.</summary>
+public class GearTraitData
+{
+    public GearTraitType type;
+    public int value;
+    public string tag;
 }
 
 /// <summary>
@@ -67,25 +101,50 @@ public static class GearCatalog
         Armor("warded_vestment", "Warded Vestment", StatTypes.DEF, 2, StatTypes.MDF, 4, 300);
         Armor("charter_harness", "Charter Harness", StatTypes.DEF, 4, StatTypes.MDF, 2, 400);
 
-        // Per-job weapons — physical lines
-        Weapon("trail_knife", "Trail Knife", StatTypes.ATK, 5, 200);
+        // Specialist gear (tier 2, mid-chapter restock) — the trait showcase:
+        // behaviors beyond stats, each with a real cost baked into the fiction
+        Weapon("twohead_blade", "Two-Head Blade", StatTypes.ATK, 10, 800, 0,
+                WeaponArc.Direct, WeaponShape.Target, 120)
+            .AddTrait(GearTraitType.Recoil, 50) // both edges cut: half of every hit comes back
+            .tier = 2;
+        Weapon("pit_cleaver", "Pit Cleaver", StatTypes.ATK, 11, 850, 0,
+                WeaponArc.Direct, WeaponShape.Sweep, 90)
+            .AddTrait(GearTraitType.WindedAfterStrike, 2) // too heavy to swing and stay quick
+            .tier = 2;
+        Armor("rattan_jacket", "Rattan Jacket", StatTypes.DEF, 2, StatTypes.MDF, 2, 550)
+            .AddTrait(GearTraitType.PhysicalResist, 15) // woven cane sheds blades and slugs
+            .AddTrait(GearTraitType.ElementWeakness, 25, "Fire") // and burns like kindling (live with 1.10)
+            .tier = 2;
+
+        // Per-job weapons — physical lines. Every behavior follows the
+        // fiction: daggers stab one target hard (110%+), blades sweep
+        // through three at reduced power (85%), maces crush one square,
+        // hooks and polearms reach to 2, the Marksman's slug-thrower is a
+        // true rifle (direct, 5), the scrap bow lobs over cover, and the
+        // drip-torch hoses a burning line.
+        Weapon("trail_knife", "Trail Knife", StatTypes.ATK, 5, 200, 0, WeaponArc.Direct, WeaponShape.Target, 110);
         Weapon("linebreaker_mace", "Line-Breaker Mace", StatTypes.ATK, 7, 400);
         Weapon("wrapped_knuckles", "Wrapped Knuckles", StatTypes.ATK, 7, 350);
-        Weapon("slug_thrower", "Slug-Thrower", StatTypes.ATK, 7, 450);
-        Weapon("pry_hook", "Pry Hook", StatTypes.ATK, 5, 200);
-        Weapon("charter_standard", "Charter Standard", StatTypes.ATK, 6, 400);
-        Weapon("jumpjet_lance", "Jump-Jet Lance", StatTypes.ATK, 7, 450);
-        Weapon("static_knife", "Static Knife", StatTypes.ATK, 7, 400);
-        Weapon("grief_edge", "Grief-Edge", StatTypes.ATK, 8, 550);
-        Weapon("broken_oath_blade", "Broken-Oath Blade", StatTypes.ATK, 8, 550);
-        Weapon("sanctified_edge", "Sanctified Edge", StatTypes.ATK, 9, 700);
-        Weapon("absolution_point", "Absolution Point", StatTypes.ATK, 8, 600);
+        Weapon("slug_thrower", "Slug-Thrower", StatTypes.ATK, 7, 450, 5);
+        Weapon("recurve_lath", "Recurve Lath", StatTypes.ATK, 5, 350, 4, WeaponArc.Arcing);
+        Weapon("drip_torch", "Drip-Torch", StatTypes.ATK, 6, 500, 3, WeaponArc.Direct, WeaponShape.Line, 75);
+        Weapon("pry_hook", "Pry Hook", StatTypes.ATK, 5, 200, 2);
+        Weapon("charter_standard", "Charter Standard", StatTypes.ATK, 6, 400, 2);
+        Weapon("jumpjet_lance", "Jump-Jet Lance", StatTypes.ATK, 7, 450, 2);
+        Weapon("static_knife", "Static Knife", StatTypes.ATK, 7, 400, 0, WeaponArc.Direct, WeaponShape.Target, 110);
+        Weapon("grief_edge", "Grief-Edge", StatTypes.ATK, 8, 550, 0, WeaponArc.Direct, WeaponShape.Sweep, 85);
+        Weapon("broken_oath_blade", "Broken-Oath Blade", StatTypes.ATK, 8, 550, 0, WeaponArc.Direct, WeaponShape.Sweep, 85);
+        Weapon("sanctified_edge", "Sanctified Edge", StatTypes.ATK, 9, 700, 0, WeaponArc.Direct, WeaponShape.Sweep, 90);
+        Weapon("absolution_point", "Absolution Point", StatTypes.ATK, 8, 600, 0, WeaponArc.Direct, WeaponShape.Target, 115);
 
-        // Per-job weapons — caster lines
-        Weapon("focus_coil", "Focus-Coil", StatTypes.MAT, 7, 400);
+        // Per-job weapons — caster lines. Foci are for channeling, not
+        // shooting: their basic strike is a close-quarters jab, except the
+        // Burner's focus-coil, which hoses a short line of flame, and the
+        // chained litany censer swung at reach (2).
+        Weapon("focus_coil", "Focus-Coil", StatTypes.MAT, 7, 400, 2, WeaponArc.Direct, WeaponShape.Line, 80);
         Weapon("field_wand", "Field-Kit Wand", StatTypes.MAT, 6, 300);
         Weapon("sawbones_lantern", "Sawbones' Lantern", StatTypes.MAT, 5, 250);
-        Weapon("litany_censer", "Litany Censer", StatTypes.MAT, 7, 400);
+        Weapon("litany_censer", "Litany Censer", StatTypes.MAT, 7, 400, 2);
         Weapon("escapement_rod", "Escapement Rod", StatTypes.MAT, 6, 350);
         Weapon("speaker_totem", "Speaker Totem", StatTypes.MAT, 7, 400);
         Weapon("wirestring_guitar", "Wire-String Guitar", StatTypes.MAT, 5, 250);
@@ -127,24 +186,39 @@ public static class GearCatalog
         Loadout("wakener", "engine_key", "warded_vestment");
     }
 
-    private static void Weapon(string id, string name, StatTypes stat, int amount, int price)
+    private static GearData Weapon(string id, string name, StatTypes stat, int amount, int price, int range = 0,
+        WeaponArc arc = WeaponArc.Direct, WeaponShape shape = WeaponShape.Target, int damagePercent = 100)
     {
-        Add(new GearData
+        var data = new GearData
         {
             id = id, name = name, slot = EquipSlots.Primary,
-            stat1 = stat, amount1 = amount, price = price, tier = 1
-        });
+            stat1 = stat, amount1 = amount, price = price, tier = 1,
+            range = range, arc = arc, shape = shape, damagePercent = damagePercent
+        };
+        Add(data);
+        return data;
     }
 
-    private static void Armor(string id, string name, StatTypes stat1, int amount1, StatTypes stat2, int amount2,
+    /// <summary>The GearData worn in the caller's unit's weapon slot, if any.</summary>
+    public static GearData EquippedWeapon(UnityEngine.Component context)
+    {
+        var equipment = context.GetComponentInParent<Equipment>();
+        var weapon = equipment != null ? equipment.GetItem(EquipSlots.Primary) : null;
+        var tag = weapon != null ? weapon.GetComponent<GearTag>() : null;
+        return tag != null ? Get(tag.gearId) : null;
+    }
+
+    private static GearData Armor(string id, string name, StatTypes stat1, int amount1, StatTypes stat2, int amount2,
         int price)
     {
-        Add(new GearData
+        var data = new GearData
         {
             id = id, name = name, slot = EquipSlots.Body,
             stat1 = stat1, amount1 = amount1, stat2 = stat2, amount2 = amount2,
             price = price, tier = 1
-        });
+        };
+        Add(data);
+        return data;
     }
 
     private static void Add(GearData data)

@@ -4,12 +4,10 @@
     {
       "name": "Attack",
       "range": {
-        "type": "Constant",
-        "value": 1,
-        "height": 0
+        "type": "Weapon"
       },
       "area": {
-        "type": "Unit"
+        "type": "Weapon"
       },
       "power": {
         "type": "Physical",

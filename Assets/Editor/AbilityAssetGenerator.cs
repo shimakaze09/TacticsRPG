@@ -277,6 +277,14 @@ public static class AbilityAssetGenerator
                 constantRange.horizontal = rangeData.value;
                 constantRange.vertical = rangeData.height;
                 break;
+            case "Weapon":
+                // Reach is read live from the equipped weapon at query time;
+                // the Weapon range marks this as the basic weapon strike, so
+                // the weapon's damage profile and on-hit traits ride along
+                AddComponent<WeaponAbilityRange>(go);
+                AddComponent<WeaponPowerScale>(go);
+                AddComponent<WeaponTraitRunner>(go);
+                break;
             case "Line":
                 var lineRange = AddComponent<LineAbilityRange>(go);
                 lineRange.horizontal = rangeData.value;
@@ -299,6 +307,10 @@ public static class AbilityAssetGenerator
         {
             case "Unit":
                 AddComponent<UnitAbilityArea>(go);
+                break;
+            case "Weapon":
+                // Footprint follows the equipped weapon (single tile or ray)
+                AddComponent<WeaponAbilityArea>(go);
                 break;
             case "Full":
                 AddComponent<FullAbilityArea>(go);
