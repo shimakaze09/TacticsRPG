@@ -1,0 +1,123 @@
+# Architecture & Extension Guidelines
+
+**Updated:** 2026-07-30. The rules for adding anything to this codebase.
+Design authority for *what* to build is `GDD.md`; this document is the
+authority for *how*. The verdict that produced it: keep the event-composed
+architecture, harden the conventions around it — no DI-framework migration.
+
+## 1. The shape of the codebase
+
+- **Content pipeline:** JSON under `Resources/*Data` → editor generators
+  (`Tactics RPG → Generate Content`, order: Abilities → Catalogs → Jobs) →
+  generated prefabs/assets (gitignored). Stable `id` slugs never change
+  once shipped; display names rename freely.
+- **Battle runtime:** units are MonoBehaviour compositions assembled by
+  `UnitFactory` in dependency order; abilities are prefab trees (root
+  `Ability` + power/range/area components, effect children); battle flow is
+  the `BattleController` state machine; systems talk through the typed
+  event bus (`GameEventBus` via `this.Publish` / `Subscribe`).
+- **Code-defined law tables:** `TerrainRules`, `GearCatalog`, `StatLimits`,
+  `CriticalHit`, `StatusRegistry`, `ElementRelationship` — design constants
+  live in code until a dedicated data pass (shop rebuild, M2).
+- **Meta/persistence:** `GameFlowController` states + `GameData` save file.
+
+## 2. Event bus rules
+
+1. Events are **typed classes** in `EventArgs/`. Never stringly-typed.
+2. **Prefer sender-scoped** (`SubscribeToSender`) over global `Subscribe`.
+   Global subscriptions fan out to every listener in the scene.
+3. Every handler of a globally-subscribed event **must open with an
+   identity guard** (`if (e.Target != owner) return;`). A missing guard is
+   a double-apply bug waiting to happen.
+4. **Battle-wide laws live as single components on the BattleController**
+   (`ElevationRules`, `ElementRules` pattern) — never once-per-unit, so a
+   rule applies exactly once per calculation.
+5. **Subscription lifetime:** hold one `EventSubscriptions` bag, subscribe
+   through it in `OnEnable`, call `Clear()` in `OnDisable`. No
+   hand-maintained mirror lists. Required for all new code.
+
+## 3. Lifecycle rules (spawn-frame safety)
+
+- Units must be fully usable **the same frame they spawn** (reinforcements,
+  AI planning before `Start`). Therefore: components may cache their *own*
+  GameObject's parts in `Awake`, but **cross-object and parent-chain
+  lookups must be lazy** (resolve at first use, `??=` pattern).
+- **Ability prefabs are parented after instantiation** — inside ability
+  components, `GetComponentInParent` in `Awake`/`OnEnable` sees the wrong
+  hierarchy. Resolve at query time (see `WeaponAbilityRange.Refresh`).
+- `UnitFactory.Create` order is load-bearing (comment in the factory says
+  why for each constraint). New unit parts get added there, not ad hoc.
+
+## 4. Stats law
+
+- `JobManager.RecalculateStats` is the **single authority** for derived
+  stats. It rebuilds from job history + worn gear. Any new persistent
+  bonus source must be folded into that computation **and** any live
+  adjustment path (like `StatModifierFeature` on equip) must produce the
+  identical totals — the two paths converging is what keeps gear from
+  being wiped by a level-up (the 1.9 root-cause bug).
+- `StatLimits` caps (WORLD.md §4b) are enforced at the write points.
+  Nothing may bypass them.
+
+## 5. Damage pipeline placement
+
+Stages: attack/defense/power stat events → formula
+`max(ATK×power/100 − DEF/2, 1)` → `TweakDamageEvent` → clamp.
+
+- **Power scaling** (weapon damage profile) → `GetPowerEvent` modifiers.
+- **Deterministic conditional rules** (elements, flank, execute, resists,
+  elevation, statuses) → `TweakDamageEvent`. These SHOW in forecasts.
+- **Randomness** (variance, crits) → `OnApply` only. `Predict` must stay
+  deterministic — the AI and the forecast UI depend on it. Never put a
+  random modifier in the Tweak stage.
+
+## 6. Extension recipes
+
+Each addition is data + one hook + one probe + one doc row. If a new idea
+doesn't fit an existing hook, add the *hook* as its own reviewed piece
+first — don't special-case content into engine code.
+
+- **Gear:** a `GearCatalog` entry (stats, reach/arc/shape/profile, traits).
+  No code for new items.
+- **Gear trait:** add the enum value with a doc comment; implement in the
+  right hook — `WeaponTraitRunner` (on-hit / conditional attacker-side),
+  `GearDefenseFeature` (incoming damage), or a new Feature for wearer
+  passives; add a `BattleProbeRunner` probe; add the GDD §3.3 row.
+- **Status:** the `XStatus` class + one `StatusRegistry.Register<T>()`
+  line (unknown names fail loudly at first use — no reflection).
+- **Terrain:** `TerrainType` value + `TerrainRules` row + block prefab
+  named after the skin + probe.
+- **Victory objective:** `VictoryType` value + condition class +
+  `InitBattleState.AddVictoryCondition` case + probe.
+- **Battle-wide combat rule:** one component on the BattleController,
+  added in `InitBattleState.Init`, subscribed via `EventSubscriptions`.
+
+## 7. Persistence
+
+Everything player-persistent goes in `GameData` through
+`DataPersistenceManager`. **No new PlayerPrefs.** (`Bank` and
+`PartyInventory` are grandfathered and migrate together in
+BATTLE_PLAN 1.12.)
+
+## 8. Verification workflow (the law of the land)
+
+1. **Headless compile** of the sync worktree — zero `error CS`, no new
+   warnings.
+2. **Battle probes** — `Tactics RPG → Run Battle Probes` in-editor, or
+   headless/CI:
+   `Unity -batchmode -nographics -projectPath . -executeMethod BattleProbeMenu.RunHeadless`
+   (exit code 0 = all passed). **Every new system lands with probes in
+   `BattleProbeRunner`** — the suite is the accumulated proof of every
+   invariant, and it must stay green.
+3. Zero new console errors in a play session.
+4. Docs sync (BATTLE_PLAN / ROADMAP / GDD / this file) in the same commit
+   batch as the change. Split commits by logical unit; push to
+   `origin/main`.
+
+## 9. Known debt (deferred by decision, tracked in ROADMAP §4/task list)
+
+- Namespaces + assembly definitions (mechanical pass; enables Unity Test
+  Framework migration of the probe suite).
+- `SerializableDictionary` duplication; tweener/pool lifecycle bugs.
+- DI container consideration is **post-slice, meta-layer only** — the
+  battle layer stays event-composed.

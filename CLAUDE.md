@@ -2,6 +2,8 @@
 
 Unity 6 (6000.5.5f1) tactics RPG set in an original world ("The Long Autumn").
 Key docs: `Docs/GDD.md` (**design authority — what the game is**),
+`Docs/ARCHITECTURE.md` (**how to build — extension recipes, event-bus and
+lifecycle rules, verification law; read before adding any system**),
 `Docs/ROADMAP.md` (**the master work queue — start here for what's next**),
 `Docs/WORLD.md` (setting, roster, naming), `Docs/BATTLE_PLAN.md` (battle
 work queue), `Docs/PROJECT_REVIEW.md` + `Docs/CODE_AUDIT.md` (history).
@@ -39,6 +41,9 @@ Every script must be understandable from its comments alone:
 - Verify script changes with a headless compile before handing back;
   content changes additionally need regeneration + an in-editor check
   (Unity MCP is configured via `.mcp.json`).
+- Battle-affecting changes must keep the regression suite green:
+  `Tactics RPG → Run Battle Probes` (details + headless form:
+  ARCHITECTURE.md §8). New systems add their probes in the same change.
 - **Docs stay synced, always**: completing any queue item updates its status
   row in ROADMAP.md *and* BATTLE_PLAN.md (and any other doc that mentions it)
   in the same commit as the work. Docs must never disagree with reality or

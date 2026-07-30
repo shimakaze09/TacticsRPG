@@ -49,6 +49,7 @@ Remaining, in strict order:
 - ~~1.9b~~ Gear behavior model: weapon reach/arc/shape/damage profile + composable GearTraits (recoil, self-slow, resists) — **done** (2026-07-30)
 - ~~1.9c~~ Gear traits wave 2: flank bonus, status-on-hit, lifesteal, rifle dead zone; attack-facing fix; full family map in GDD §3.3 — **done** (2026-07-30)
 - ~~1.10~~ Elements + crits: battle-wide affinity law, element gear traits live, deterministic-forecast crits, conditional damage traits — **done** (2026-07-30)
+- ~~HRD~~ Architecture hardening (user-approved detour): `EventSubscriptions` symmetric-cleanup bag on the risky subscribers, typed `StatusRegistry` (reflection infliction gone), the 50-check `BattleProbeRunner` regression suite (menu + headless/CI entry), and `ARCHITECTURE.md` as the how-to-build authority — **done** (2026-07-30; suite green 50/50). Remaining debt stays in §"tech debt": namespaces/asmdefs → UTF migration, SerializableDictionary dedup, tweener/pool lifecycle.
 - **1.11** Behavior-control statuses seize control: Swayed/Scrambled/Redline (audit §4) ← **next**
 - **1.12** Scrip moves from PlayerPrefs into GameData (audit §6)
 - **1.13** jpCost design decision: JP-buys-abilities or delete the field (audit §5)
