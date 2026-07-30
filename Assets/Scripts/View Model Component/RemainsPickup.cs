@@ -55,7 +55,7 @@ public class RemainsPickup : MonoBehaviour
         if (tile == null)
             return null;
 
-        foreach (var pickup in FindObjectsByType<RemainsPickup>(FindObjectsSortMode.None))
+        foreach (var pickup in FindObjectsByType<RemainsPickup>())
         {
             if (pickup.tile == tile)
                 return pickup;
