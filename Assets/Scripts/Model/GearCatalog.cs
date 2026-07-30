@@ -20,6 +20,12 @@ public class GearData
     /// <summary>Weapon reach in tiles for the basic attack; 0 = melee (1).</summary>
     public int range;
 
+    /// <summary>
+    /// Dead zone: tiles closer than this can't be shot (long guns are
+    /// useless jammed against ribs). 0/1 = none.
+    /// </summary>
+    public int minRange;
+
     /// <summary>Direct shots are blocked by units/cover; arcing shots lob over.</summary>
     public WeaponArc arc;
 
@@ -35,11 +41,11 @@ public class GearData
     /// <summary>Composable behaviors (recoil, resists, …); null = none.</summary>
     public List<GearTraitData> traits;
 
-    /// <summary>Builder: attach a trait; tag names an element/ability where relevant.</summary>
-    public GearData AddTrait(GearTraitType type, int value, string tag = null)
+    /// <summary>Builder: attach a trait; tag names an element/status/ability where relevant.</summary>
+    public GearData AddTrait(GearTraitType type, int value, string tag = null, int duration = 2)
     {
         traits ??= new List<GearTraitData>();
-        traits.Add(new GearTraitData { type = type, value = value, tag = tag });
+        traits.Add(new GearTraitData { type = type, value = value, tag = tag, duration = duration });
         return this;
     }
 }
@@ -50,6 +56,9 @@ public class GearTraitData
     public GearTraitType type;
     public int value;
     public string tag;
+
+    /// <summary>Turns an inflicted status lasts (status traits only).</summary>
+    public int duration = 2;
 }
 
 /// <summary>
@@ -122,20 +131,27 @@ public static class GearCatalog
         // hooks and polearms reach to 2, the Marksman's slug-thrower is a
         // true rifle (direct, 5), the scrap bow lobs over cover, and the
         // drip-torch hoses a burning line.
-        Weapon("trail_knife", "Trail Knife", StatTypes.ATK, 5, 200, 0, WeaponArc.Direct, WeaponShape.Target, 110);
+        Weapon("trail_knife", "Trail Knife", StatTypes.ATK, 5, 200, 0, WeaponArc.Direct, WeaponShape.Target, 110)
+            .AddTrait(GearTraitType.FlankBonus, 25); // knives are for backs
         Weapon("linebreaker_mace", "Line-Breaker Mace", StatTypes.ATK, 7, 400);
         Weapon("wrapped_knuckles", "Wrapped Knuckles", StatTypes.ATK, 7, 350);
-        Weapon("slug_thrower", "Slug-Thrower", StatTypes.ATK, 7, 450, 5);
+        var rifle = Weapon("slug_thrower", "Slug-Thrower", StatTypes.ATK, 7, 450, 5);
+        rifle.minRange = 2; // useless jammed against ribs — get inside the gun
         Weapon("recurve_lath", "Recurve Lath", StatTypes.ATK, 5, 350, 4, WeaponArc.Arcing);
-        Weapon("drip_torch", "Drip-Torch", StatTypes.ATK, 6, 500, 3, WeaponArc.Direct, WeaponShape.Line, 75);
+        Weapon("drip_torch", "Drip-Torch", StatTypes.ATK, 6, 500, 3, WeaponArc.Direct, WeaponShape.Line, 75)
+            .AddTrait(GearTraitType.StatusOnHit, 35, "Doused"); // soaked in burning fuel
         Weapon("pry_hook", "Pry Hook", StatTypes.ATK, 5, 200, 2);
         Weapon("charter_standard", "Charter Standard", StatTypes.ATK, 6, 400, 2);
         Weapon("jumpjet_lance", "Jump-Jet Lance", StatTypes.ATK, 7, 450, 2);
-        Weapon("static_knife", "Static Knife", StatTypes.ATK, 7, 400, 0, WeaponArc.Direct, WeaponShape.Target, 110);
-        Weapon("grief_edge", "Grief-Edge", StatTypes.ATK, 8, 550, 0, WeaponArc.Direct, WeaponShape.Sweep, 85);
+        Weapon("static_knife", "Static Knife", StatTypes.ATK, 7, 400, 0, WeaponArc.Direct, WeaponShape.Target, 110)
+            .AddTrait(GearTraitType.FlankBonus, 25)
+            .AddTrait(GearTraitType.StatusOnHit, 25, "Static"); // lives up to its name
+        Weapon("grief_edge", "Grief-Edge", StatTypes.ATK, 8, 550, 0, WeaponArc.Direct, WeaponShape.Sweep, 85)
+            .AddTrait(GearTraitType.Lifesteal, 25); // the grief-eater feeds its bearer
         Weapon("broken_oath_blade", "Broken-Oath Blade", StatTypes.ATK, 8, 550, 0, WeaponArc.Direct, WeaponShape.Sweep, 85);
         Weapon("sanctified_edge", "Sanctified Edge", StatTypes.ATK, 9, 700, 0, WeaponArc.Direct, WeaponShape.Sweep, 90);
-        Weapon("absolution_point", "Absolution Point", StatTypes.ATK, 8, 600, 0, WeaponArc.Direct, WeaponShape.Target, 115);
+        Weapon("absolution_point", "Absolution Point", StatTypes.ATK, 8, 600, 0, WeaponArc.Direct, WeaponShape.Target, 115)
+            .AddTrait(GearTraitType.FlankBonus, 40); // the Church absolves from behind
 
         // Per-job weapons — caster lines. Foci are for channeling, not
         // shooting: their basic strike is a close-quarters jab, except the

@@ -15,10 +15,16 @@ public class WeaponAbilityRange : ConstantAbilityRange
     {
         Refresh();
 
-        if (gear != null && gear.shape == WeaponShape.Line)
-            return RayTiles(board);
+        var tiles = gear != null && gear.shape == WeaponShape.Line
+            ? RayTiles(board)
+            : base.GetTilesInRange(board);
 
-        return base.GetTilesInRange(board);
+        // Dead zone: long guns can't fire at point blank
+        if (gear != null && gear.minRange > 1)
+            tiles.RemoveAll(t =>
+                Mathf.Abs(t.pos.x - unit.tile.pos.x) + Mathf.Abs(t.pos.y - unit.tile.pos.y) < gear.minRange);
+
+        return tiles;
     }
 
     /// <summary>

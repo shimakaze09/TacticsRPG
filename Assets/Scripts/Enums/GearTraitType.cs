@@ -22,5 +22,14 @@ public enum GearTraitType
     ElementResist,
 
     /// <summary>Armor: incoming damage of element `tag` increased value% (1.10).</summary>
-    ElementWeakness
+    ElementWeakness,
+
+    /// <summary>Weapon: +value% damage when striking from behind.</summary>
+    FlankBonus,
+
+    /// <summary>Weapon: value% chance per hit to inflict status `tag` (duration turns).</summary>
+    StatusOnHit,
+
+    /// <summary>Weapon: attacker heals value% of the damage it deals.</summary>
+    Lifesteal
 }
