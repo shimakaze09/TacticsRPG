@@ -1,7 +1,8 @@
 using UnityEngine;
 
 /// <summary>
-/// KO (Knocked Out): Unit's HP reached 0. 
+/// KO (Knocked Out): Unit's HP reached 0. The body drops visibly (squashed
+/// flat and ash-gray until the art pass brings real death animation).
 /// CT still increases; when it reaches 100, death counter drops by 1 (from 3).
 /// If counter reaches 0 on next active turn, becomes Crystal or Treasure.
 /// </summary>
@@ -10,9 +11,17 @@ public class KOStatus : StatusEffect
     [Tooltip("Number of turns KO'd before becoming crystal/treasure")]
     public int deathCounter = 3;
 
+    [Tooltip("How flat the body squashes while down (Y scale factor)")]
+    public float downedSquash = 0.25f;
+
+    private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+    private static readonly Color DeadTint = new Color(0.35f, 0.33f, 0.3f);
+
     private Unit owner;
     private Stats stats;
     private int currentCounter;
+    private Transform body;
+    private Vector3 bodyScale;
 
     private void OnEnable()
     {
@@ -30,6 +39,8 @@ public class KOStatus : StatusEffect
             // Subscribe to HP changes in case of revival
             this.SubscribeToSender<StatDidChangeEvent>(OnStatChanged, stats);
         }
+
+        ApplyDeathPose();
     }
 
     private void OnDisable()
@@ -39,6 +50,42 @@ public class KOStatus : StatusEffect
 
         if (stats != null)
             this.UnsubscribeFromSender<StatDidChangeEvent>(OnStatChanged, stats);
+
+        RestoreDeathPose();
+    }
+
+    // The fallen unit must READ as fallen: body squashed to the ground and
+    // tinted dead — walkers already step over it, so the visual has to agree
+    private void ApplyDeathPose()
+    {
+        if (owner == null)
+            return;
+
+        body = owner.transform.Find("Jumper");
+        if (body == null)
+            return;
+
+        bodyScale = body.localScale;
+        body.localScale = new Vector3(bodyScale.x, bodyScale.y * downedSquash, bodyScale.z);
+
+        foreach (var renderer in body.GetComponentsInChildren<Renderer>())
+        {
+            var block = new MaterialPropertyBlock();
+            block.SetColor(BaseColorId, DeadTint);
+            renderer.SetPropertyBlock(block);
+        }
+    }
+
+    // Revival stands the body back up in its original colors
+    private void RestoreDeathPose()
+    {
+        if (body == null)
+            return;
+
+        body.localScale = bodyScale;
+        foreach (var renderer in body.GetComponentsInChildren<Renderer>())
+            renderer.SetPropertyBlock(null);
+        body = null;
     }
 
     private void OnTurnCheck(TurnCheckEvent e)

@@ -457,6 +457,23 @@ public class BattleProbeRunner : MonoBehaviour
         yield return null;
         Check("control returns after all statuses", driver.Current == Drivers.Human);
 
+        // KO visuals: a downed body squashes flat (and is passable), then
+        // stands back up on revival
+        var hania = Find(bc, "Hania");
+        var body = hania.transform.Find("Jumper");
+        var standingScale = body.localScale.y;
+        var haniaStats = hania.GetComponent<Stats>();
+        haniaStats[StatTypes.HP] -= haniaStats[StatTypes.HP];
+        yield return null;
+        Check("zero HP applies KO", hania.GetComponentInChildren<KOStatus>() != null);
+        Check("downed body drops flat", body.localScale.y < standingScale * 0.5f,
+            $"{standingScale} -> {body.localScale.y}");
+        haniaStats[StatTypes.HP] += haniaStats[StatTypes.MHP] / 2;
+        yield return null;
+        Check("revival removes KO", hania.GetComponentInChildren<KOStatus>() == null);
+        Check("revived body stands back up", Mathf.Approximately(body.localScale.y, standingScale),
+            $"{body.localScale.y}");
+
         // Resource attacks: MP burn and the Shredded payload
         EquipWeapon(alaois, "cipher_rod");
         var rogueStats = rogue.GetComponent<Stats>();
