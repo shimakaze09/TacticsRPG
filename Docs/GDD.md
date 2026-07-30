@@ -85,10 +85,12 @@ law — rivers split maps, bridges reconnect them, trees and buildings block
 line of sight); equipment (1.9: per-job starting loadouts from GearCatalog,
 gear bonuses that survive stat recalculation, shop purchases into
 PartyInventory); the gear behavior model (1.9b: weapon reach / fire arc /
-attack shape / damage profile plus composable traits on any item — §3.3).
+attack shape / damage profile plus composable traits on any item — §3.3);
+elements and crits (1.10: battle-wide affinity advantage, unit affinities
+on the cast, gear element traits live, Doused ignites under fire, and
+critical hits that roll only at application so forecasts stay honest).
 
-Planned (queue order): elements +
-crits (1.10), control-seizing statuses (1.11), then the pillars. The
+Planned (queue order): control-seizing statuses (1.11), then the pillars. The
 **escort** objective (civilian unit with Guest alliance) lands with the
 market-rescue battle in M2 — it needs guest-unit control rules, not just a
 victory check.
@@ -149,8 +151,8 @@ target when acting, so facing rules and visuals always agree.
 
 | Family | Examples | Lands with |
 |---|---|---|
-| Conditional damage | execute (bonus vs low HP), opener (bonus vs full HP), anti-armor / anti-caster (the "target type" axis), height-advantage bonuses, terrain-conditional (dowsing staff on water) | **1.10** (rides crits' TweakDamage work) |
-| Element interaction | element resist/weak armor (rattan burns), element-branded weapons, element amplifiers | **1.10** (needs damage to carry an element) |
+| Conditional damage | execute (Pit Cleaver), opener (Wrapped Knuckles), terrain-conditional (Dowsing Staff on water), crit bonuses (Absolution Point); anti-armor/anti-caster still open | **1.10 shipped** (anti-* with 1.11's resource attacks) |
+| Element interaction | affinity advantage law battle-wide, element resist/weak armor (rattan burns), Doused ignites under fire | **1.10 shipped** (branded weapons = content) |
 | On-hit statuses, resource attack | more StatusOnHit gear, MP burn, armor shred (stacking DEF-down) | **1.11** (behavior statuses expand the status roster) |
 | Timeline gear | CT-push weapons (knock the target's turn later), CT-cost or recharge modifiers, initiative trinkets | **Pillar 1** (timeline warfare) |
 | Reaction gear | counter weapons, thorns armor, Grit-gain trinkets, reach weapons that deny counters | **Pillar 2** (Grit reactions) |
