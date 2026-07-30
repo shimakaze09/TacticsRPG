@@ -122,6 +122,17 @@ public class WeaponTraitRunner : MonoBehaviour
                 case GearTraitType.StatusOnHit:
                     RollStatusOnHit(e.Target, trait);
                     break;
+
+                case GearTraitType.MpBurn:
+                    // Burn the target's casting reserve alongside the wound
+                    if (e.Damage < 0 && e.Target != null)
+                    {
+                        var targetStats = e.Target.GetComponent<Stats>();
+                        if (targetStats != null)
+                            targetStats[StatTypes.MP] -= Mathf.Min(trait.value, targetStats[StatTypes.MP]);
+                    }
+
+                    break;
             }
         }
     }

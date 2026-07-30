@@ -43,5 +43,8 @@ public enum GearTraitType
     Opener,
 
     /// <summary>Weapon: +value% damage while standing on terrain `tag`.</summary>
-    TerrainBonus
+    TerrainBonus,
+
+    /// <summary>Weapon: each hit burns `value` MP from the target.</summary>
+    MpBurn
 }

@@ -34,6 +34,7 @@ public static class StatusRegistry
         Register<ScrambledStatus>();
         Register<ScrappedStatus>();
         Register<SepsisStatus>();
+        Register<ShreddedStatus>();
         Register<StaticStatus>();
         Register<SwayedStatus>();
         Register<ThirstStatus>();

@@ -142,7 +142,8 @@ public static class GearCatalog
         Weapon("recurve_lath", "Recurve Lath", StatTypes.ATK, 5, 350, 4, WeaponArc.Arcing);
         Weapon("drip_torch", "Drip-Torch", StatTypes.ATK, 6, 500, 3, WeaponArc.Direct, WeaponShape.Line, 75)
             .AddTrait(GearTraitType.StatusOnHit, 35, "Doused"); // soaked in burning fuel
-        Weapon("pry_hook", "Pry Hook", StatTypes.ATK, 5, 200, 2);
+        Weapon("pry_hook", "Pry Hook", StatTypes.ATK, 5, 200, 2)
+            .AddTrait(GearTraitType.StatusOnHit, 30, "Shredded"); // tears plating open
         Weapon("charter_standard", "Charter Standard", StatTypes.ATK, 6, 400, 2);
         Weapon("jumpjet_lance", "Jump-Jet Lance", StatTypes.ATK, 7, 450, 2);
         Weapon("static_knife", "Static Knife", StatTypes.ATK, 7, 400, 0, WeaponArc.Direct, WeaponShape.Target, 110)
@@ -179,6 +180,7 @@ public static class GearCatalog
             stat1 = StatTypes.ATK, amount1 = 4, stat2 = StatTypes.MAT, amount2 = 4,
             price = 450, tier = 1
         });
+        Get("cipher_rod").AddTrait(GearTraitType.MpBurn, 6); // counter-caster: burns the target's reserve
 
         // Starting loadouts (weapon, body) per job id
         Loadout("drifter", "trail_knife", "roadcoat");
