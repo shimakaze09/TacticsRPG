@@ -468,11 +468,16 @@ public class BattleProbeRunner : MonoBehaviour
         Check("zero HP applies KO", hania.GetComponentInChildren<KOStatus>() != null);
         Check("downed body drops flat", body.localScale.y < standingScale * 0.5f,
             $"{standingScale} -> {body.localScale.y}");
+
+        // A corpse is not a combatant: hostile attacks can't target it
+        var rogueAttackTarget = AttackOf(rogue).GetComponentInChildren<AbilityEffectTarget>();
+        Check("downed body not attackable", !rogueAttackTarget.IsTarget(hania.tile));
         haniaStats[StatTypes.HP] += haniaStats[StatTypes.MHP] / 2;
         yield return null;
         Check("revival removes KO", hania.GetComponentInChildren<KOStatus>() == null);
         Check("revived body stands back up", Mathf.Approximately(body.localScale.y, standingScale),
             $"{body.localScale.y}");
+        Check("revived unit attackable again", rogueAttackTarget.IsTarget(hania.tile));
 
         // Resource attacks: MP burn and the Shredded payload
         EquipWeapon(alaois, "cipher_rod");

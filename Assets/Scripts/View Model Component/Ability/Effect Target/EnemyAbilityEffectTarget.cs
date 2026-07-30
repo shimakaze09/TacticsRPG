@@ -1,5 +1,6 @@
 ﻿/// <summary>
-/// Filter matching units hostile to the caster.
+/// Filter matching LIVING units hostile to the caster — downed bodies are
+/// no longer combatants (revives use the KOd filter instead).
 /// </summary>
 public class EnemyAbilityEffectTarget : AbilityEffectTarget
 {
@@ -8,6 +9,10 @@ public class EnemyAbilityEffectTarget : AbilityEffectTarget
     public override bool IsTarget(Tile tile)
     {
         if (tile == null || tile.content == null)
+            return false;
+
+        var stats = tile.content.GetComponent<Stats>();
+        if (stats == null || stats[StatTypes.HP] <= 0)
             return false;
 
         // Resolved lazily: the ability prefab is parented to its unit after
