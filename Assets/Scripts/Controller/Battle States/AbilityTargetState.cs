@@ -41,6 +41,7 @@ public class AbilityTargetState : BattleState
         else
         {
             SelectTile(e.info + pos);
+            FaceCursor();
             RefreshSecondaryStatPanel(pos);
         }
     }
@@ -70,6 +71,21 @@ public class AbilityTargetState : BattleState
         }
     }
 
+    // The attacker watches the cursor while aiming, so facing is settled
+    // during targeting — not snapped after the attack resolves
+    private void FaceCursor()
+    {
+        if (pos == turn.actor.tile.pos)
+            return;
+
+        var dir = (pos - turn.actor.tile.pos).GetDirection();
+        if (turn.actor.dir != dir)
+        {
+            turn.actor.dir = dir;
+            turn.actor.Match();
+        }
+    }
+
     private void SelectTiles()
     {
         tiles = ar.GetTilesInRange(board);
@@ -93,6 +109,7 @@ public class AbilityTargetState : BattleState
                 if (cursorPos.y < turn.plan.fireLocation.y) cursorPos.y++;
                 if (cursorPos.y > turn.plan.fireLocation.y) cursorPos.y--;
                 SelectTile(cursorPos);
+                FaceCursor();
                 yield return new WaitForSeconds(0.25f);
             }
         }
