@@ -58,7 +58,8 @@ public abstract class BaseAbilityEffect : MonoBehaviour
             this.Publish(new GetPowerEvent(attacker, target, mods));
         else if (eventType == typeof(TweakDamageEvent))
             this.Publish(new TweakDamageEvent(attacker, target, mods,
-                GetComponentInParent<PhysicalAbilityPower>() != null));
+                GetComponentInParent<PhysicalAbilityPower>() != null,
+                ResolveElement(attacker)));
 
         mods.Sort(Compare);
 
@@ -67,6 +68,19 @@ public abstract class BaseAbilityEffect : MonoBehaviour
         var retValue = Mathf.FloorToInt(value);
         retValue = Mathf.Clamp(retValue, minDamage, maxDamage);
         return retValue;
+    }
+
+    // The damage's element: the ability's own Elements component when one
+    // exists, else the attacker's affinity; null = unaligned damage
+    private ElementTypes? ResolveElement(Unit attacker)
+    {
+        var ability = GetComponentInParent<Ability>();
+        var abilityElement = ability != null ? ability.GetComponent<Elements>() : null;
+        if (abilityElement != null)
+            return abilityElement.types;
+
+        var affinity = attacker != null ? attacker.GetComponent<Elements>() : null;
+        return affinity != null ? affinity.types : (ElementTypes?)null;
     }
 
     private int Compare(ValueModifier x, ValueModifier y)

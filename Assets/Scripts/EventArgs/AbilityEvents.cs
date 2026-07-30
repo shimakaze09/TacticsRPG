@@ -111,12 +111,36 @@ public class TweakDamageEvent
     /// <summary>True when the damage source is physical (PhysicalAbilityPower); false for magical.</summary>
     public bool IsPhysical { get; }
 
-    public TweakDamageEvent(Unit attacker, Unit target, List<ValueModifier> modifiers, bool isPhysical = true)
+    /// <summary>The damage's element (ability's own, else attacker affinity); check HasElement first.</summary>
+    public ElementTypes Element { get; }
+
+    /// <summary>False for unaligned damage — Element is meaningless then.</summary>
+    public bool HasElement { get; }
+
+    public TweakDamageEvent(Unit attacker, Unit target, List<ValueModifier> modifiers, bool isPhysical = true,
+        ElementTypes? element = null)
     {
         Attacker = attacker;
         Target = target;
         Modifiers = modifiers;
         IsPhysical = isPhysical;
+        HasElement = element.HasValue;
+        Element = element ?? default;
+    }
+}
+
+/// <summary>
+/// Raised when a damage application rolls a critical hit (UI/popup hook).
+/// </summary>
+public class CriticalHitEvent
+{
+    public Unit Attacker { get; }
+    public Unit Target { get; }
+
+    public CriticalHitEvent(Unit attacker, Unit target)
+    {
+        Attacker = attacker;
+        Target = target;
     }
 }
 

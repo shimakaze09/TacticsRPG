@@ -43,6 +43,8 @@ public class InitBattleState : BattleState
         ConfigureAI();
         if (owner.GetComponent<ElevationRules>() == null)
             owner.gameObject.AddComponent<ElevationRules>();
+        if (owner.GetComponent<ElementRules>() == null)
+            owner.gameObject.AddComponent<ElementRules>();
 
         var clock = owner.gameObject.AddComponent<BattleClock>();
 

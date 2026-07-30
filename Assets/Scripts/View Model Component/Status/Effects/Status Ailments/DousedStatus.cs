@@ -1,13 +1,16 @@
 using UnityEngine;
 
 /// <summary>
-/// Doused: soaked in flammable slag — all incoming damage +25%.
-/// (Becomes a fire-specific vulnerability when the element system lands.)
+/// Doused: soaked in flammable slag — all incoming damage +25%, and fire
+/// damage +50% instead (the slag ignites).
 /// </summary>
 public class DousedStatus : StatusEffect
 {
     [Tooltip("Multiplier applied to incoming damage")]
     public float damageMultiplier = 1.25f;
+
+    [Tooltip("Multiplier applied to incoming FIRE damage instead")]
+    public float fireDamageMultiplier = 1.5f;
 
     private Unit owner;
 
@@ -27,17 +30,11 @@ public class DousedStatus : StatusEffect
         if (e.Target != owner)
             return;
 
-        // High sortOrder so the multiplier applies after additive tweaks
-        e.Modifiers.Add(new MultValueModifier(100, damageMultiplier));
-    }
+        var multiplier = e.HasElement && e.Element == ElementTypes.Fire
+            ? fireDamageMultiplier
+            : damageMultiplier;
 
-    // Called by the (future) element system when a fire attack connects
-    public void OnHitByFireAttack()
-    {
-        var cond = GetComponentInChildren<StatusCondition>();
-        if (cond != null)
-            cond.Remove();
-        else
-            Destroy(this);
+        // High sortOrder so the multiplier applies after additive tweaks
+        e.Modifiers.Add(new MultValueModifier(100, multiplier));
     }
 }

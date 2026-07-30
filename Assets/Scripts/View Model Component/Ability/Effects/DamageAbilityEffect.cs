@@ -50,6 +50,15 @@ public class DamageAbilityEffect : BaseAbilityEffect
         // Add some random variance
         value = Mathf.FloorToInt(value * Random.Range(0.9f, 1.1f));
 
+        // Critical hits roll here — at application, never in Predict, so
+        // forecasts stay deterministic
+        var attacker = GetComponentInParent<Unit>();
+        if (CriticalHit.Roll(attacker))
+        {
+            value = Mathf.FloorToInt(value * CriticalHit.DamageMultiplier);
+            this.Publish(new CriticalHitEvent(attacker, defender));
+        }
+
         // Clamp the damage to a range
         value = Mathf.Clamp(value, minDamage, maxDamage);
 

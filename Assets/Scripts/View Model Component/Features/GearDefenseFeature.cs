@@ -43,9 +43,21 @@ public class GearDefenseFeature : Feature
                 case GearTraitType.PhysicalWeakness when e.IsPhysical:
                     e.Modifiers.Add(new MultValueModifier(100, 1f + trait.value / 100f));
                     break;
-                // ElementResist/ElementWeakness hook here once TweakDamage
-                // carries the element (1.10)
+                case GearTraitType.ElementResist when MatchesElement(e, trait):
+                    e.Modifiers.Add(new MultValueModifier(100, 1f - trait.value / 100f));
+                    break;
+                case GearTraitType.ElementWeakness when MatchesElement(e, trait):
+                    e.Modifiers.Add(new MultValueModifier(100, 1f + trait.value / 100f));
+                    break;
             }
         }
+    }
+
+    // Does the incoming damage carry the element this trait names?
+    private static bool MatchesElement(TweakDamageEvent e, GearTraitData trait)
+    {
+        return e.HasElement &&
+               System.Enum.TryParse(trait.tag, out ElementTypes element) &&
+               e.Element == element;
     }
 }
