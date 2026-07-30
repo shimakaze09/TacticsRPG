@@ -1,42 +1,34 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 /// <summary>
-/// Dev/demo generator that fabricates random shop items with stats and prices.
+/// Fills the shop with GearCatalog stock (tier 1 for the slice); icons cycle
+/// through the serialized sprite set until gear gets real art.
 /// </summary>
 public class ItemGenerator : MonoBehaviour
 {
     [SerializeField] private Sprite[] icons;
-    private string[] lines;
-    [SerializeField] private TextAsset weaponNames;
 
     private void Start()
     {
-        lines = weaponNames.text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
-        var items = new List<Item>(icons.Length);
-        items.AddRange(icons.Select(Create));
+        var items = new List<Item>();
+        var iconIndex = 0;
+        foreach (var gear in GearCatalog.All)
+        {
+            if (gear.tier != 1)
+                continue;
+
+            items.Add(new Item
+            {
+                gearId = gear.id,
+                name = gear.name,
+                attack = gear.amount1,
+                level = gear.tier,
+                price = gear.price,
+                sprite = icons != null && icons.Length > 0 ? icons[iconIndex++ % icons.Length] : null
+            });
+        }
 
         GetComponent<ItemShop>().Load(items);
-    }
-
-    private Item Create(Sprite icon)
-    {
-        var retValue = new Item();
-        retValue.sprite = icon;
-        retValue.name = RandomName();
-        retValue.attack = Random.Range(0, 100);
-        retValue.level = retValue.attack / 10;
-        retValue.price = 50 * (retValue.level + Random.Range(0, 5)) + 100;
-        return retValue;
-    }
-
-    private string RandomName()
-    {
-        var s1 = lines[Random.Range(0, lines.Length)];
-        var s2 = lines[Random.Range(0, lines.Length)];
-        return Random.Range(0, 2) == 0 ? $"{s1} of {s2}" : $"{s1} {s2}";
     }
 }

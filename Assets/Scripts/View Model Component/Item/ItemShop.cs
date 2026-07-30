@@ -102,9 +102,12 @@ public class ItemShop : MonoBehaviour
         Bank.Instance.gold += 5000;
     }
 
+    // Deducts the scrip and delivers the gear into the party's inventory
     private void Purchase(Item item)
     {
         Bank.Instance.gold -= item.price;
+        if (!string.IsNullOrEmpty(item.gearId))
+            PartyInventory.Instance.Add(item.gearId);
         this.Publish(new ItemPurchasedEvent(item));
     }
 
