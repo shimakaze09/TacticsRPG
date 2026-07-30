@@ -24,7 +24,7 @@ public static class BattleSpawner
             instance.transform.SetParent(container);
 
         var unit = instance.GetComponent<Unit>();
-        var tile = FindPlacementTile(bc.board, entry.position);
+        var tile = FindPlacementTile(bc.board, entry.position, PlacementMask(instance));
         if (tile == null)
         {
             Debug.LogError($"[BattleSpawner] No free tile near {entry.position.x},{entry.position.y} for '{entry.recipe}'");
@@ -39,18 +39,26 @@ public static class BattleSpawner
         return unit;
     }
 
-    // The authored tile if free, else the closest free tile to it
-    private static Tile FindPlacementTile(Board board, Point position)
+    /// <summary>Terrain the unit's locomotion may stand on, for placement.</summary>
+    public static TileTraversalFlags PlacementMask(GameObject instance)
+    {
+        var movement = instance.GetComponent<Movement>();
+        return movement != null ? movement.TraversalCapability : TileTraversalFlags.Ground;
+    }
+
+    // The authored tile if the unit can stand there, else the closest tile
+    // it can
+    private static Tile FindPlacementTile(Board board, Point position, TileTraversalFlags mask)
     {
         var tile = board.GetTile(position);
-        if (tile != null && tile.content == null)
+        if (tile != null && tile.content == null && tile.CanStop(mask))
             return tile;
 
         Tile best = null;
         var bestDistance = int.MaxValue;
         foreach (var candidate in board.tiles.Values)
         {
-            if (candidate.content != null)
+            if (candidate.content != null || !candidate.CanStop(mask))
                 continue;
 
             var distance = Mathf.Abs(candidate.pos.x - position.x) +

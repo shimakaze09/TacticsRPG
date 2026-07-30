@@ -2,9 +2,10 @@ using UnityEngine;
 
 /// <summary>
 /// Terrain line-of-sight for ranged targeting: a shot travels a straight line
-/// between tile centers at standing height, and any intermediate tile whose
-/// terrain rises above that line blocks it. Units do not block shots (v1 —
-/// only the ground does). Infinite ranges (Wakener engine strikes) bypass
+/// between tile centers at standing height; any intermediate tile whose
+/// terrain rises above that line blocks it, and sight-blocking terrain
+/// (trees, buildings) blocks regardless of height. Units do not block shots
+/// (v1 — only terrain does). Infinite ranges (Wakener engine strikes) bypass
 /// this entirely by design.
 /// </summary>
 public static class LineOfSight
@@ -42,6 +43,9 @@ public static class LineOfSight
             var tile = board.GetTile(sample);
             if (tile == null)
                 continue;
+
+            if (tile.BlocksSight)
+                return false;
 
             float lineHeight = Mathf.Lerp(from.height, to.height, t) + StandingHeight;
             if (tile.height > lineHeight + Tolerance)

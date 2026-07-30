@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// One board cell: grid position, height, occupant, and the search bookkeeping
-/// (prev/distance) used by pathfinding.
+/// One board cell: grid position, height, terrain type, occupant, and the
+/// search bookkeeping (prev/distance) used by pathfinding. Terrain gameplay
+/// (pass/stop/sight) is answered here via TerrainRules.
 /// </summary>
 public class Tile : MonoBehaviour
 {
@@ -20,6 +21,12 @@ public class Tile : MonoBehaviour
         if (cachedRenderer == null)
             cachedRenderer = GetComponentInChildren<Renderer>();
         propertyBlock = new MaterialPropertyBlock();
+
+        // Remember the skin's own color so selection tinting can blend with
+        // it instead of erasing what terrain this is
+        if (cachedRenderer != null && cachedRenderer.sharedMaterial != null &&
+            cachedRenderer.sharedMaterial.HasProperty(BaseColorId))
+            baseColor = cachedRenderer.sharedMaterial.GetColor(BaseColorId);
     }
 
     #endregion
@@ -38,13 +45,14 @@ public class Tile : MonoBehaviour
 
     public Point pos;
     public int height;
+    public TerrainType terrain = TerrainType.Field;
     public Vector3 center => new(pos.x, height * stepHeight, pos.y);
     public GameObject content;
     [HideInInspector] public Tile prev;
     [HideInInspector] public int distance;
-    [SerializeField] private TileTraversalFlags allowedTraversals = TileTraversalFlags.Ground | TileTraversalFlags.Fly | TileTraversalFlags.Teleport;
     private Renderer cachedRenderer;
     private MaterialPropertyBlock propertyBlock;
+    private Color baseColor = Color.white;
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
 
     #endregion
@@ -75,16 +83,22 @@ public class Tile : MonoBehaviour
         Load(new Point((int)v.x, (int)v.z), (int)v.y);
     }
 
-    public bool AllowsTraversal(TileTraversalFlags flags)
+    /// <summary>May this locomotion type path through the tile?</summary>
+    public bool CanPass(TileTraversalFlags flags)
     {
-        return (allowedTraversals & flags) != 0;
+        return (TerrainRules.Pass(terrain) & flags) != 0;
     }
 
-    public void SetAllowedTraversals(TileTraversalFlags flags)
+    /// <summary>May this locomotion type end a move on the tile?</summary>
+    public bool CanStop(TileTraversalFlags flags)
     {
-        allowedTraversals = flags;
+        return (TerrainRules.Stop(terrain) & flags) != 0;
     }
 
+    /// <summary>Does the terrain hide what's behind it from ranged attacks?</summary>
+    public bool BlocksSight => TerrainRules.BlocksSight(terrain);
+
+    // Selection tint: blends with the skin's own color, so white = normal
     public void SetColor(Color color)
     {
         if (cachedRenderer == null)
@@ -95,7 +109,7 @@ public class Tile : MonoBehaviour
         }
 
         propertyBlock ??= new MaterialPropertyBlock();
-        propertyBlock.SetColor(BaseColorId, color);
+        propertyBlock.SetColor(BaseColorId, color * baseColor);
         cachedRenderer.SetPropertyBlock(propertyBlock);
     }
 

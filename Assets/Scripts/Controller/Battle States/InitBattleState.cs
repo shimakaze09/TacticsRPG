@@ -139,7 +139,14 @@ public class InitBattleState : BattleState
             var instance = UnitFactory.Create(recipe, level);
             instance.transform.SetParent(container);
 
-            var random = Random.Range(0, locations.Count);
+            // Only tiles this unit's locomotion can stand on
+            var mask = BattleSpawner.PlacementMask(instance);
+            var standable = new List<int>();
+            for (var i = 0; i < locations.Count; i++)
+                if (locations[i].CanStop(mask))
+                    standable.Add(i);
+
+            var random = standable[Random.Range(0, standable.Count)];
             var randomTile = locations[random];
             locations.RemoveAt(random);
 

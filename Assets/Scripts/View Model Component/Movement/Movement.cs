@@ -18,6 +18,9 @@ public abstract class Movement : MonoBehaviour
 
     protected virtual TileTraversalFlags TraversalMask => TileTraversalFlags.Ground;
 
+    /// <summary>The locomotion category, exposed for spawn placement checks.</summary>
+    public TileTraversalFlags TraversalCapability => TraversalMask;
+
     #endregion
 
     #region MonoBehaviour
@@ -54,18 +57,21 @@ public abstract class Movement : MonoBehaviour
 
     #region Protected
 
+    // Terrain gates pathing here (CanPass); destinations are pruned in Filter
     protected virtual bool ExpandSearch(Tile from, Tile to)
     {
-        if (to != null && !to.AllowsTraversal(TraversalMask))
+        if (to != null && !to.CanPass(TraversalMask))
             return false;
 
         return from.distance + 1 <= range;
     }
 
+    // A reachable tile is only a destination if this locomotion may stop
+    // there and nobody occupies it
     protected virtual void Filter(List<Tile> tiles)
     {
         for (var i = tiles.Count - 1; i >= 0; i--)
-            if (tiles[i].content != null || !tiles[i].AllowsTraversal(TraversalMask))
+            if (tiles[i].content != null || !tiles[i].CanStop(TraversalMask))
                 tiles.RemoveAt(i);
     }
 

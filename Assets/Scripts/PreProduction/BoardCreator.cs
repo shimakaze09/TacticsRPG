@@ -18,6 +18,7 @@ public class BoardCreator : MonoBehaviour
     [SerializeField] private readonly int depth = 10;
     [SerializeField] private readonly int height = 8;
     [SerializeField] private Point _pos;
+    [SerializeField] private TerrainType paintTerrain = TerrainType.Field;
     [SerializeField] private LevelData levelData;
     [SerializeField] private string levelName;
     private readonly Dictionary<Point, Tile> tiles = new();
@@ -77,6 +78,28 @@ public class BoardCreator : MonoBehaviour
         marker.localPosition = t != null ? t.center : new Vector3(pos.x, 0, pos.y);
     }
 
+    /// <summary>
+    /// Repaints the tile under the marker as the selected terrain: swaps in
+    /// the terrain's block prefab, keeping position and height.
+    /// </summary>
+    public void Paint()
+    {
+        if (!tiles.ContainsKey(pos))
+            return;
+
+        var old = tiles[pos];
+        var replacement = SpawnTile(TerrainRules.Skin(paintTerrain));
+        if (replacement == null)
+            return;
+
+        replacement.Load(pos, old.height);
+        replacement.terrain = paintTerrain;
+
+        tiles.Remove(pos);
+        DestroyImmediate(old.gameObject);
+        tiles.Add(pos, replacement);
+    }
+
     public void Clear()
     {
         while (transform.childCount > 0) DestroyImmediate(transform.GetChild(0).gameObject);
@@ -92,6 +115,7 @@ public class BoardCreator : MonoBehaviour
         var board = ScriptableObject.CreateInstance<LevelData>();
         board.tiles = new List<Vector3>(tiles.Count);
         board.tileSkins = new Utils.SerializableDictionary<Vector3, string>();
+        board.tileTerrains = new List<int>(tiles.Count);
 
         foreach (var t in tiles.Values)
         {
@@ -101,6 +125,7 @@ public class BoardCreator : MonoBehaviour
             var prefabName = t.name;
             prefabName = prefabName[..^7];
             board.tileSkins.Add(pos, prefabName);
+            board.tileTerrains.Add((int)t.terrain);
         }
 
         var fileName = $"Assets/Resources/Levels/{levelName}.asset";
@@ -115,15 +140,19 @@ public class BoardCreator : MonoBehaviour
 
         levelName = levelData.name;
 
-        foreach (var key in levelData.tiles)
+        for (var i = 0; i < levelData.tiles.Count; i++)
         {
+            var key = levelData.tiles[i];
             levelData.tileSkins.TryGetValue(key, out var prefabName);
             prefabName ??= _defaultSkin;
-            var variableForPrefab = (GameObject)Resources.Load("Prefabs/Blocks/" + prefabName, typeof(GameObject));
-            var instance = Instantiate(variableForPrefab);
-            instance.transform.SetParent(gameObject.transform);
-            var t = instance.GetComponent<Tile>();
+
+            var t = SpawnTile(prefabName);
             t.Load(key);
+            // Same legacy fallback as Board.Load: infer terrain from the
+            // skin when the asset predates terrain data
+            t.terrain = levelData.tileTerrains != null && i < levelData.tileTerrains.Count
+                ? (TerrainType)levelData.tileTerrains[i]
+                : TerrainRules.FromSkin(prefabName);
             tiles.Add(t.pos, t);
         }
     }
@@ -174,6 +203,21 @@ public class BoardCreator : MonoBehaviour
     {
         var instance = Instantiate(tileViewPrefab);
         instance.transform.parent = transform;
+        return instance.GetComponent<Tile>();
+    }
+
+    // Instantiates a block prefab by name, parented to the creator
+    private Tile SpawnTile(string prefabName)
+    {
+        var prefab = (GameObject)Resources.Load("Prefabs/Blocks/" + prefabName, typeof(GameObject));
+        if (prefab == null)
+        {
+            Debug.LogError($"No block prefab found for '{prefabName}'.");
+            return null;
+        }
+
+        var instance = Instantiate(prefab);
+        instance.transform.SetParent(transform);
         return instance.GetComponent<Tile>();
     }
 

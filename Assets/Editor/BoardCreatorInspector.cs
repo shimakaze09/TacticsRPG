@@ -20,6 +20,8 @@ public class BoardCreatorInspector : Editor
             Current.GrowArea();
         if (GUILayout.Button("Shrink Area"))
             Current.ShrinkArea();
+        if (GUILayout.Button("Paint Terrain"))
+            Current.Paint();
         if (GUILayout.Button("Save"))
             Current.Save();
         if (GUILayout.Button("Load"))
@@ -55,6 +57,9 @@ public class BoardCreatorInspector : Editor
                         break;
                     case KeyCode.K:
                         Current.Shrink();
+                        break;
+                    case KeyCode.P:
+                        Current.Paint();
                         break;
                 }
 

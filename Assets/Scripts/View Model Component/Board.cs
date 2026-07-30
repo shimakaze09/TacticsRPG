@@ -39,9 +39,19 @@ public class Board : MonoBehaviour
         _min = new Point(int.MaxValue, int.MaxValue);
         _max = new Point(int.MinValue, int.MinValue);
 
-        foreach (var key in data.tiles)
+        for (var i = 0; i < data.tiles.Count; i++)
         {
+            var key = data.tiles[i];
             data.tileSkins.TryGetValue(key, out var prefabName);
+
+            // Terrain from saved data when present, else inferred from the
+            // skin (levels saved before terrain types existed)
+            var terrain = data.tileTerrains != null && i < data.tileTerrains.Count
+                ? (TerrainType)data.tileTerrains[i]
+                : TerrainRules.FromSkin(prefabName);
+            if (string.IsNullOrEmpty(prefabName))
+                prefabName = TerrainRules.Skin(terrain);
+
             var variableForPrefab = (GameObject)Resources.Load("Prefabs/Blocks/" + prefabName, typeof(GameObject));
             if (variableForPrefab == null)
             {
@@ -53,6 +63,7 @@ public class Board : MonoBehaviour
             instance.transform.SetParent(transform);
             var t = instance.GetComponent<Tile>();
             t.Load(key);
+            t.terrain = terrain;
             t.SetColor(defaultTileColor);
 
             if (tiles.ContainsKey(t.pos))
