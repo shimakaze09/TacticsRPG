@@ -149,6 +149,25 @@ equipment migration are tracked in issues
    branch and open a reviewable pull request; do not push feature work directly
    to `main`.
 
+### Content generation and CI (issue #7)
+
+- **One-shot generation**: `Tactics RPG → Generate Content → All (Validated)`
+  cross-validates the content JSON (`ContentValidator` — ids, catalog and
+  unlock references, unlock levels, JP curves), then runs Abilities →
+  Catalogs → Jobs in order. Headless form:
+  `Unity -batchmode -nographics -projectPath . -executeMethod ContentGenerationMenu.RunHeadless`
+  (exit 0 only when validation and all three generators succeed). The
+  individual generator menu items remain for targeted regeneration.
+- **CI** (`.github/workflows/ci.yml`): every PR and push to main starts from
+  a clean checkout (no generated content), regenerates via the validated
+  entry, runs the battle probes, and enforces the balance report's hard
+  invariants (`BalanceReportGenerator.RunHeadless`); logs and the balance
+  report upload as artifacts. Pushes to main additionally produce a Windows
+  build artifact via `CIBuild.Build`, which regenerates content before
+  building. Requires the `UNITY_LICENSE` (and for builds `UNITY_EMAIL` /
+  `UNITY_PASSWORD`) repository secrets; the Library folder is cached keyed on
+  `packages-lock.json` + editor version.
+
 ## 9. Known debt tracking
 
 Architecture and tooling debt is tracked in the

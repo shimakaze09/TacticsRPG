@@ -1,0 +1,123 @@
+# CI for TacticsRPG (issue #7): from a clean checkout with no pre-generated
+# content, validate + regenerate content, compile, run the battle probe
+# suite, and enforce the balance report's hard invariants. A Windows build
+# artifact is produced on pushes to main.
+#
+# Requires repository secrets (Settings → Secrets and variables → Actions):
+#   UNITY_LICENSE — the contents of a Unity .ulf license file
+#   UNITY_EMAIL / UNITY_PASSWORD — the Unity account for that license
+# See Docs/ARCHITECTURE.md §8 for the local forms of these commands.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+env:
+  UNITY_VERSION: 6000.5.5f1
+
+jobs:
+  validate:
+    name: Generate, compile, and probe
+    runs-on: ubuntu-latest
+    container:
+      # game-ci editor image matching ProjectSettings/ProjectVersion.txt
+      image: unityci/editor:ubuntu-6000.5.5f1-base-3
+    steps:
+      - name: Check license secret
+        run: |
+          if [ -z "${{ secrets.UNITY_LICENSE }}" ]; then
+            echo "::error::UNITY_LICENSE secret is not configured — see the header of this workflow."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: library-${{ env.UNITY_VERSION }}-${{ hashFiles('Packages/packages-lock.json', 'ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: |
+            library-${{ env.UNITY_VERSION }}-
+
+      - name: Activate Unity license
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          mkdir -p logs
+          echo "$UNITY_LICENSE" > /tmp/Unity_lic.ulf
+          unity-editor -batchmode -nographics -quit \
+            -manualLicenseFile /tmp/Unity_lic.ulf \
+            -logFile logs/activation.log || true
+
+      # A clean checkout has no generated Jobs/Abilities/Catalog assets —
+      # this validates the JSON cross-references and generates all three in
+      # order, exiting non-zero on any validation or generation error.
+      # Script compilation happens on editor startup: compile errors mean the
+      # entry method never runs and the step fails.
+      - name: Validate and generate content
+        run: |
+          unity-editor -batchmode -nographics -projectPath . \
+            -executeMethod ContentGenerationMenu.RunHeadless \
+            -logFile logs/generate.log
+
+      - name: Run battle probes
+        run: |
+          unity-editor -batchmode -nographics -projectPath . \
+            -executeMethod BattleProbeMenu.RunHeadless \
+            -logFile logs/probes.log
+
+      - name: Balance report (hard invariants)
+        run: |
+          unity-editor -batchmode -nographics -projectPath . \
+            -executeMethod BalanceReportGenerator.RunHeadless \
+            -logFile logs/balance.log
+
+      - name: Upload logs and balance report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-logs-and-reports
+          path: |
+            logs/
+            BalanceReport/
+          if-no-files-found: warn
+
+  build:
+    name: Windows build artifact
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: library-build-${{ env.UNITY_VERSION }}-${{ hashFiles('Packages/packages-lock.json', 'ProjectSettings/ProjectVersion.txt') }}
+          restore-keys: |
+            library-build-${{ env.UNITY_VERSION }}-
+
+      # CIBuild.Build regenerates content via the validated pipeline before
+      # building, so the artifact never ships without generated assets
+      - name: Build
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: 6000.5.5f1
+          targetPlatform: StandaloneWindows64
+          buildName: TacticsRPG
+          buildMethod: CIBuild.Build
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: TacticsRPG-StandaloneWindows64
+          path: build/StandaloneWindows64
