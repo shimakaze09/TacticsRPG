@@ -84,6 +84,7 @@ public class BattleProbeRunner : MonoBehaviour
             yield return StartCoroutine(ProbeControlStatuses(bc));
             ProbeTerrain(bc);
             ProbeLevelScaling();
+            ProbeGrowthModel();
             ProbeClockAndWaves(bc); // mutates turn count — keep last
         }
         finally
@@ -898,6 +899,97 @@ public class BattleProbeRunner : MonoBehaviour
             }
         }
 
+        DifficultySettings.Current = savedDifficulty;
+    }
+
+    // ---- issue #54: growth model v2 -----------------------------------------
+
+    // Golden checks for the bounded growth model, delta-based so gear cancels
+    // out: unlocking a job grants nothing, cross-job carryover is the exact
+    // bounded kit-fraction at partial training and mastery, and the current
+    // job's earned grades add the exact trained step. Difficulty is pinned to
+    // Easy so enemy-HP scaling doesn't skew the MHP deltas.
+    private void ProbeGrowthModel()
+    {
+        var savedDifficulty = DifficultySettings.Current;
+        DifficultySettings.Current = Difficulty.Easy;
+
+        var unit = UnitFactory.Create("Enemy Warrior", 1);
+        if (unit == null)
+        {
+            Check("growth model unit spawns", false);
+            DifficultySettings.Current = savedDifficulty;
+            return;
+        }
+
+        var jm = unit.GetComponent<JobManager>();
+        var stats = unit.GetComponent<Stats>();
+        var current = jm.CurrentJob;
+
+        JobDefinition other = null;
+        foreach (var job in jm.allJobs)
+        {
+            if (job != null && job != current && !job.isUnique)
+            {
+                other = job;
+                break;
+            }
+        }
+
+        if (current == null || other == null)
+        {
+            Check("growth model jobs available", false);
+            Destroy(unit);
+            DifficultySettings.Current = savedDifficulty;
+            return;
+        }
+
+        var order = JobManager.statOrder;
+        var baseline = new int[order.Length];
+        for (var i = 0; i < order.Length; i++)
+            baseline[i] = stats[order[i]];
+
+        // Unlocking without training must change nothing
+        jm.ProgressData.UnlockJob(other);
+        jm.RecalculateStats();
+        for (var i = 0; i < order.Length; i++)
+            Check("unlock grants nothing " + order[i], stats[order[i]] == baseline[i],
+                $"{baseline[i]} -> {stats[order[i]]}");
+
+        // Partial training carries over the exact bounded fraction
+        jm.ProgressData.SetJobLevel(other, 4);
+        jm.RecalculateStats();
+        for (var i = 0; i < order.Length; i++)
+        {
+            var expected = baseline[i] + ProgressionModel.CrossJobContribution(other, i, 4);
+            Check("grade-4 carryover " + order[i], stats[order[i]] == expected,
+                $"expected {expected}, got {stats[order[i]]}");
+        }
+
+        // Mastery carries over the full (still small) node
+        jm.ProgressData.SetJobLevel(other, 8);
+        jm.RecalculateStats();
+        for (var i = 0; i < order.Length; i++)
+        {
+            var expected = baseline[i] + ProgressionModel.CrossJobContribution(other, i, 8);
+            Check("mastery carryover " + order[i], stats[order[i]] == expected,
+                $"expected {expected}, got {stats[order[i]]}");
+        }
+
+        // Mastering the current job adds the exact trained steps on top
+        jm.ProgressData.SetJobLevel(current, 8);
+        jm.RecalculateStats();
+        for (var i = 0; i < order.Length; i++)
+        {
+            var expected = baseline[i]
+                           - ProgressionModel.CurrentJobContribution(current, i, 1)
+                           + ProgressionModel.CurrentJobContribution(current, i, 8)
+                           + ProgressionModel.CrossJobContribution(other, i, 8);
+            Check("current-job mastery " + order[i], stats[order[i]] == expected,
+                $"expected {expected}, got {stats[order[i]]}");
+        }
+
+        Destroy(unit);
         DifficultySettings.Current = savedDifficulty;
     }
 
