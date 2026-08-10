@@ -1,9 +1,9 @@
 # TacticsRPG project review
 
-**Reviewed:** 2026-08-10  
-**Revision:** `main` at `6f7fb14`  
+**Reviewed:** 2026-08-10
+**Revision:** `main` at `3857aa4`
 **Scope:** repository structure, runtime code, serialized scenes, data content,
-architecture, and player-facing functionality.
+architecture, player-facing functionality, and a static balance audit.
 
 ## Executive assessment
 
@@ -50,18 +50,15 @@ target filtering, hit rate, power, and effects are assembled as components,
 which makes new content and cross-cutting rules much cheaper than subclass-heavy
 designs.
 
-## Current player-flow blockers
+## Live implementation status
 
-| Priority | Finding | Tracking |
-|---|---|---|
-| Blocker | Build starts on a title scene with no interactive UI | [#2](https://github.com/shimakaze09/TacticsRPG/issues/2) |
-| Blocker | World state has no real scene or hub surface | [#4](https://github.com/shimakaze09/TacticsRPG/issues/4) |
-| Blocker | Persistent `UIManager` owns battle-scene references | [#8](https://github.com/shimakaze09/TacticsRPG/issues/8) |
-| High | Post-battle state/controller duplicate reward ownership | [#5](https://github.com/shimakaze09/TacticsRPG/issues/5) |
-| High | Results flow lacks a wired continuation path | [#9](https://github.com/shimakaze09/TacticsRPG/issues/9) |
-| High | Displayed scrip/items are not committed | [#3](https://github.com/shimakaze09/TacticsRPG/issues/3) |
-| High | Shop APIs report success without real transactions | [#6](https://github.com/shimakaze09/TacticsRPG/issues/6) |
-| High | Clean-clone generation, compile, and probes are not automated | [#7](https://github.com/shimakaze09/TacticsRPG/issues/7) |
+The classified [GitHub issue tracker](https://github.com/shimakaze09/TacticsRPG/issues)
+owns every active defect and implementation task. Start with
+[phase 0](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen+label%3A%22phase%3A+0-stabilize%22),
+then the [core-loop group](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen+label%3A%22group%3A+core-flow%22).
+Each issue is labelled by importance, primary feature group, delivery phase,
+and relative weight so the tracker can be worked without recreating a queue in
+this snapshot.
 
 ## Architecture assessment
 
@@ -83,7 +80,8 @@ designs.
   implementations.
 - Several coordinators combine orchestration, state, query logic, and policy;
   `JobManager`, `UIManager`, `GameFlowController`, `PostBattleController`, and
-  `TacticalComputerPlayer` need careful extraction as they evolve.
+  `TacticalComputerPlayer` are extraction-sensitive as they evolve. Classified
+  architecture work owns the concrete changes.
 - Persistent singletons and scene-local dependencies are mixed, creating
   repeated-load hazards.
 - Generated content is required but absent from clean clones until manual editor
@@ -95,33 +93,48 @@ problem is ownership and integration, not the event-composed battle core.
 ## Gameplay assessment
 
 The current battle vocabulary is broad, but much of the ability roster remains
-concentrated around direct damage and status infliction. The next useful depth
-increase should be new interaction shapes:
+concentrated around direct damage and status infliction. Setting-native job,
+gear, story-objective, and post-slice job proposals are captured in
+[#64](https://github.com/shimakaze09/TacticsRPG/issues/64),
+[#65](https://github.com/shimakaze09/TacticsRPG/issues/65),
+[#66](https://github.com/shimakaze09/TacticsRPG/issues/66),
+[#67](https://github.com/shimakaze09/TacticsRPG/issues/67), and
+[#68](https://github.com/shimakaze09/TacticsRPG/issues/68). Their aim is to
+preserve the tactics fundamentals while making the decisions, setting, jobs,
+equipment, and story unmistakably this game's own.
 
-- forced movement and displacement
-- persistent hazards and terrain manipulation
-- reactions, intercepts, and overwatch
-- delayed/charged actions
-- deployables or summoned objects
-- objective interaction and ally coordination
+Presentation remains a gameplay requirement. Its concrete work and acceptance
+criteria live in the classified UI/UX and accessibility issues.
 
-Presentation is also a gameplay requirement. Strong rules will still feel like
-a prototype without turn-order visibility, threat and AoE previews, forecast
-explanations, status tooltips, action feedback, and clear cancel boundaries.
+## Balance assessment
 
-## Recommended order
+The static audit found structural problems that make per-ability tuning
+premature:
 
-1. Complete one vertical slice: Title → Hub → one Battle → Results → Hub.
-2. Make persistence, UI, and scene ownership explicit.
-3. Collapse post-battle logic to one idempotent reward transaction.
-4. Prove the loop twice in one session and across save/load.
-5. Automate clean-checkout content generation, compilation, and probes.
-6. Build real shop/roster/job surfaces.
-7. Expand tactical depth only after the existing systems are player-reachable.
+- encounter `SpawnEntry.level` changes Rank/EXP but not combat stats
+- every initialized job contributes its Grade-1 stat block, including jobs the
+  unit does not actively use
+- mastering the 17 non-unique jobs would push most primary stats toward the
+  999 cap and erase job identity
+- 25 of 76 damaging abilities cost zero MP; free power reaches 360 while the
+  basic attack uses 150
+- healing stays flat at 12–30 while HP grows cumulatively, while 10% MMP
+  regeneration can exceed the highest current ability cost
+- RES affects hostile status accuracy but has no job or gear growth path
+
+Root fixes and an automated budget report are specified in
+[#52](https://github.com/shimakaze09/TacticsRPG/issues/52),
+[#54](https://github.com/shimakaze09/TacticsRPG/issues/54),
+[#55](https://github.com/shimakaze09/TacticsRPG/issues/55),
+[#56](https://github.com/shimakaze09/TacticsRPG/issues/56),
+[#57](https://github.com/shimakaze09/TacticsRPG/issues/57), and
+[#58](https://github.com/shimakaze09/TacticsRPG/issues/58). Work order is
+defined only by the phase and label rules in [ROADMAP.md](ROADMAP.md).
 
 ## Verification limits
 
-This review inspected source, data, and serialized project configuration. Unity
-was not available in the review environment, so compilation and battle probes
-were not rerun. Claims marked implemented are repository observations; the CI
-work in issue #7 should turn them into continuously verified claims.
+This review inspected source, data, serialized project configuration, and
+scripted extracts from job and ability definitions. Unity was not available in
+the review environment, so compilation and battle probes were not rerun.
+Claims marked implemented are repository observations; the CI work in issue #7
+should turn them into continuously verified claims.

@@ -1,77 +1,93 @@
-# Roadmap
+# Delivery roadmap
 
 **Updated:** 2026-08-10  
-**Goal:** turn the existing battle framework into one complete, repeatable
-player journey before expanding content.
+**Goal:** finish one coherent phase and feature group at a time instead of
+pulling unrelated work from a flat backlog.
 
-Design intent belongs in [GDD.md](GDD.md). Battle-specific detail belongs in
-[BATTLE_PLAN.md](BATTLE_PLAN.md). Current assessment and evidence belong in
-[PROJECT_REVIEW.md](PROJECT_REVIEW.md).
+GitHub Issues is the only operational backlog. This document defines delivery
+gates and how to read the labels; it does not duplicate implementable task
+lists. Product intent belongs in [GDD.md](GDD.md), current observations in
+[PROJECT_REVIEW.md](PROJECT_REVIEW.md), and engineering rules in
+[ARCHITECTURE.md](ARCHITECTURE.md).
 
-## M1 — Playable vertical slice spine
+## Work-selection rule
 
-Exit condition: a fresh player build can complete
-**Title → Hub → Battle → Results → Hub**, repeat the loop for a second battle,
-then save, quit, and continue without losing rewards.
+1. Select the lowest numbered phase that has unfinished blockers or critical
+   work.
+2. Within that phase, finish one `group:*` cluster before changing groups.
+3. Within the group, take `priority: blocker` / `critical` / `high` first.
+4. Use `weight:*` to keep a pull request reviewable; split 13-point epics into
+   child issues before implementation.
+5. Do not implement an issue that is missing any classification label.
 
-Work in this order:
+[View all open issues](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen)
 
-1. [#2 — Build starts on a non-interactive title scene](https://github.com/shimakaze09/TacticsRPG/issues/2)
-2. [#4 — World state does not load or present a hub scene](https://github.com/shimakaze09/TacticsRPG/issues/4)
-3. [#8 — Make UIManager ownership safe across repeated battle loads](https://github.com/shimakaze09/TacticsRPG/issues/8)
-4. [#5 — Consolidate post-battle orchestration and reward ownership](https://github.com/shimakaze09/TacticsRPG/issues/5)
-5. [#3 — Persist scrip and item rewards](https://github.com/shimakaze09/TacticsRPG/issues/3)
-6. [#9 — Add a usable continuation path after battle results](https://github.com/shimakaze09/TacticsRPG/issues/9)
+## Phase gates
 
-Do not add another meta-flow singleton or a second reward pipeline. Keep
-`GameFlowController` as the orchestration authority and use one save-backed
-reward transaction.
+### Phase 0 — Stabilize
 
-## M1.1 — Reliability and collaboration
+[Open phase-0 issues](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen+label%3A%22phase%3A+0-stabilize%22)
 
-- [#7 — Automate generated content, compile checks, and battle probes](https://github.com/shimakaze09/TacticsRPG/issues/7)
-- Add runtime/editor/test assembly definitions after the vertical-slice branch
-  is stable.
-- Add focused tests around persistence, rewards, stat derivation, and repeated
-  scene transitions.
+Exit when combat/progression invariants are trustworthy, critical data and
+lifecycle defects are resolved, generated content can be validated from a
+clean checkout, and the balance report has stable input formulas.
 
-## M2 — Usable meta game
+### Phase 1 — Core loop
 
-- [#6 — Replace placeholder ShopState transactions](https://github.com/shimakaze09/TacticsRPG/issues/6)
-- Contract briefing and party/deployment selection
-- Job menu canvas with Cert spending and job switching
-- Settings UI, including difficulty
-- First two authored battles connected to the normal flow
-- Turn-order bar, forecast explanations, status tooltips, and damage feedback
+[Open phase-1 issues](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen+label%3A%22phase%3A+1-core-loop%22)
 
-Exit condition: two authored contracts are playable from the hub with real
-growth, inventory, and shop state.
+Exit when a fresh build completes Title → Hub → Battle → Results → Hub twice,
+then saves, quits, and continues with the same roster, rewards, jobs, and
+equipment. Scene/UI/persistence ownership must survive the second loop.
 
-## M3 — Chapter 1 content
+### Phase 2 — Vertical slice
 
-- Six authored battles and story scenes from `GDD.md` §5
-- Quest board and story flags, including Choice A
-- Repeatable writs and one short side story
-- First production art/audio batches
-- Input System controls and save slots
-- External playtest and balance pass
+[Open phase-2 issues](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen+label%3A%22phase%3A+2-vertical-slice%22)
 
-## Post-slice
+Exit when Chapter 1's six battles, story delivery, side-content seed, meta
+screens, input, art/audio first pass, save slots, and quantitative balance gate
+form a shippable demo. The slice should establish the revised story identity
+before later campaign content is authored.
 
-- Acts 2–3 and ending branches
-- Remaining side, hidden, character, and relic quests
-- Timeline warfare expansion, Grit reactions, Sync terrain, and deeper salvage
-- Archive screen, controller support, and region-map presentation
+### Phase 3 — Tactical identity
 
-## Technical debt to interleave carefully
+[Open phase-3 issues](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen+label%3A%22phase%3A+3-tactical-identity%22)
 
-- Namespaces and assembly definitions
-- Consolidate duplicate `SerializableDictionary` implementations
-- Split oversized coordinators such as `JobManager`, `UIManager`, and
-  `TacticalComputerPlayer`
-- Repair Tweener/EasingControl and pooled-object scene lifecycles
-- Replace static input-event lifetime assumptions during the Input System pass
+Exit when the existing jobs and gear have setting-native decision loops and
+the battle layer supports the selected shared mechanics—timeline, reactions,
+terrain/coverage, deployables, evidence, and contract clauses—without
+content-specific engine branches.
 
-Completed historical work is preserved in Git history and
-[CODE_AUDIT.md](CODE_AUDIT.md); it is intentionally not duplicated in this
-queue.
+### Phase 4 — Campaign
+
+[Open phase-4 issues](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen+label%3A%22phase%3A+4-campaign%22)
+
+Exit when Acts 2–3, endings, remaining quests/relics, post-slice presentation,
+and any approved new jobs are implemented on proven systems.
+
+## Label contract
+
+Every unfinished issue carries:
+
+| Dimension | Meaning |
+|---|---|
+| `priority:*` | Player/project importance: blocker, critical, high, medium, or low |
+| `group:*` | Primary feature family; stay in this cluster until its phase goal is coherent |
+| `phase:*` | Earliest delivery gate in which the work should land |
+| `weight:*` | Relative review/implementation size: 1, 2, 3, 5, 8, or 13 |
+| `bug` / `enhancement` | Issue type; this does not replace the four planning labels |
+
+Weights are estimates, not time promises. A 13 means “epic: split before
+coding,” not “more important.” Dependencies written in an issue override a
+tempting label sort.
+
+## Primary groups
+
+The current tracker uses `core-flow`, `combat-rules`, `status`, `balance`,
+`jobs`, `progression`, `equipment-economy`, `persistence`, `ai`, `ui-ux`,
+`content-chapter1`, `story-world`, `art-audio`, `input-accessibility`, and
+`tooling-architecture`.
+
+When work genuinely spans several groups, choose the group that owns the
+acceptance result and link dependencies. Do not add multiple group labels just
+to make an issue appear in every view.

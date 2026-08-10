@@ -1,6 +1,7 @@
 name: Development task
 description: Define a bounded engineering, content, documentation, or test task.
 title: "[Task] "
+labels: ["enhancement"]
 body:
   - type: textarea
     id: context
@@ -43,6 +44,73 @@ body:
     id: dependencies
     attributes:
       label: Dependencies and related issues
+  - type: markdown
+    attributes:
+      value: |
+        ## Classification
+        Choose the requested planning labels below. A maintainer must apply the
+        matching `priority:*`, `group:*`, `phase:*`, and `weight:*` labels before
+        implementation starts.
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Importance
+      options:
+        - "priority: blocker"
+        - "priority: critical"
+        - "priority: high"
+        - "priority: medium"
+        - "priority: low"
+    validations:
+      required: true
+  - type: dropdown
+    id: group
+    attributes:
+      label: Primary feature group
+      options:
+        - "group: core-flow"
+        - "group: combat-rules"
+        - "group: status"
+        - "group: balance"
+        - "group: jobs"
+        - "group: progression"
+        - "group: equipment-economy"
+        - "group: persistence"
+        - "group: ai"
+        - "group: ui-ux"
+        - "group: content-chapter1"
+        - "group: story-world"
+        - "group: art-audio"
+        - "group: input-accessibility"
+        - "group: tooling-architecture"
+    validations:
+      required: true
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Earliest delivery phase
+      options:
+        - "phase: 0-stabilize"
+        - "phase: 1-core-loop"
+        - "phase: 2-vertical-slice"
+        - "phase: 3-tactical-identity"
+        - "phase: 4-campaign"
+    validations:
+      required: true
+  - type: dropdown
+    id: weight
+    attributes:
+      label: Relative weight
+      description: Use 13 only for an epic that must be split before implementation.
+      options:
+        - "weight: 1"
+        - "weight: 2"
+        - "weight: 3"
+        - "weight: 5"
+        - "weight: 8"
+        - "weight: 13"
+    validations:
+      required: true
   - type: checkboxes
     id: checks
     attributes:
@@ -51,4 +119,6 @@ body:
         - label: This task is bounded enough for one reviewable pull request.
           required: true
         - label: I searched open and closed issues for duplicates.
+          required: true
+        - label: I understand implementation waits until the four matching tracker labels are applied.
           required: true

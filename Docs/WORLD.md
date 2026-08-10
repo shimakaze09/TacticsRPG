@@ -2,7 +2,8 @@
 
 **Status:** v1.1 (2026-08-10). This document is the authority for setting,
 names, and flavor. The game's overall design lives in `GDD.md`; implementation
-status belongs in `PROJECT_REVIEW.md`, `ROADMAP.md`, and `BATTLE_PLAN.md`.
+status belongs in `PROJECT_REVIEW.md` and `BATTLE_PLAN.md`; delivery rules live
+in `ROADMAP.md` and executable work lives in GitHub Issues.
 Lore entries do not imply that the corresponding feature is player-reachable.
 
 ---
@@ -34,10 +35,11 @@ contradicts it.
 
 ## 2. Job roster (23) — redesigned 2026-07-29
 
-Not a renamed FFT roster: the tree is a **single root with three certification tracks**
-and dual-prerequisite capstones, kits were designed per job from scratch, and the pure
-FFT analogs (Mime, Arithmetician, Dancer, Assassin) were **cut**. IDs are frozen —
-display names may change, ids may not.
+This is not a renamed legacy tactics roster: the tree is a **single root with
+three certification tracks** and dual-prerequisite capstones. Kits are designed
+around The Long Autumn's institutions and battlefield language. Jobs without a
+setting-native decision loop were cut. IDs are frozen—display names may change,
+ids may not.
 
 ### The tree
 
@@ -106,15 +108,19 @@ cut as an NPC: Coldwater's information broker.
 ## 4. What was deliberately NOT renamed (and why)
 
 - **`effects[].status` identifiers in AbilityData** (Poison, Protect, Haste, …) — these
-  resolve to C# classes (`PoisonStatus` etc.) at runtime. Renaming them is a *code*
-  change (class renames + display-name layer), scheduled as its own pass. Until then,
-  status names are mechanical ids, not display text.
+  resolve to C# classes (`PoisonStatus` etc.) at runtime. They are stable
+  mechanical ids rather than display text; any player-facing terminology may
+  be layered over them without changing saved/data identity.
 - **`Common/Attack`** — generic term, referenced by unit-recipe attack paths.
 - **Code identifiers** (`jpCost`, `AddJobPoints`, `StatTypes`) — internal API, no
   player exposure. UI strings should say Cert/Grade/scrip when panels get built.
 - **Legacy formula-targeting names** (Level Prime, HP Multiple 4, …) may remain
   in historical or unused data. Actuary is not part of the active 23-job roster;
-  formula targeting must earn a new implementation slot before returning.
+  formula targeting must earn a new implementation slot before returning. Any
+  return is proposed and classified through the current-job review
+  [#64](https://github.com/shimakaze09/TacticsRPG/issues/64) or the post-slice
+  job exploration
+  [#68](https://github.com/shimakaze09/TacticsRPG/issues/68) first.
 
 ## 4b. Damage & healing conventions (2026-07-29)
 
@@ -141,5 +147,5 @@ cut as an NPC: Coldwater's information broker.
 3. `AbilityData.job == CatalogData.catalogName == JobData.abilityCatalogName`
    (this string is also the generated prefab folder name).
 4. Ids are derived from display names **once at creation** and never changed after —
-   renames touch display fields only. The 2026-07-29 re-slug (FFT names → Long Autumn
+   renames touch display fields only. The 2026-07-29 re-slug (legacy names → Long Autumn
    names) was the final free id change, done before any shipped save existed.
