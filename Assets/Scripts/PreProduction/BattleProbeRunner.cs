@@ -89,6 +89,8 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeControlBudget(bc);
             // Tempo statuses add/remove effects, which destroy deferred
             yield return StartCoroutine(ProbeTempoStatuses(bc));
+            // Drives real tween ticks and pool teardown across frames
+            yield return StartCoroutine(ProbePoolAndTweenLifecycles(bc));
             ProbeClockAndWaves(bc); // mutates turn count
             // Publishes whole rounds of turn events — keep dead last
             yield return StartCoroutine(ProbeControlExpiry(bc));
@@ -1305,6 +1307,116 @@ public class BattleProbeRunner : MonoBehaviour
         stats[StatTypes.CTR] += 100;
         Check("tempo statuses detach", stats[StatTypes.CTR] == 100, "CTR " + stats[StatTypes.CTR]);
         stats.SetValue(StatTypes.CTR, savedCT, false);
+    }
+
+    // ---- issue #23: pool + tween lifecycles --------------------------------
+
+    // The pool registry is static but its objects are not: dead queued
+    // entries must be pruned on dequeue, key collisions with a different
+    // prefab rejected, and cleared keys re-registrable. Easing controls must
+    // survive disable/re-enable with their in-flight state intact and reach
+    // Stopped state before completion handlers (including destroy-on-complete)
+    // run.
+    private IEnumerator ProbePoolAndTweenLifecycles(BattleController bc)
+    {
+        // -- pool registry contract --
+        const string key = "probe.pool";
+        var prefab = new GameObject("Probe Pool Prefab");
+        prefab.SetActive(false);
+        var rival = new GameObject("Probe Pool Rival");
+        rival.SetActive(false);
+
+        Check("pool registers", GameObjectPoolController.AddEntry(key, prefab, 2, 8));
+        Check("same key re-register is a no-op", !GameObjectPoolController.AddEntry(key, prefab, 2, 8));
+        Check("conflicting prefab rejected", !GameObjectPoolController.AddEntry(key, rival, 1, 1));
+
+        var first = GameObjectPoolController.Dequeue(key);
+        var second = GameObjectPoolController.Dequeue(key);
+        Check("dequeue returns live instances",
+            first != null && second != null && first != second && !first.isPooled);
+
+        // Simulate a scene unload killing a queued instance: the pool must
+        // prune the corpse instead of handing it out
+        GameObjectPoolController.Enqueue(first);
+        GameObjectPoolController.Enqueue(second);
+        DestroyImmediate(first.gameObject);
+        var revived = GameObjectPoolController.Dequeue(key);
+        Check("dead entries pruned on dequeue", revived == second, revived == null ? "null" : revived.name);
+
+        GameObjectPoolController.Enqueue(revived);
+        GameObjectPoolController.ClearEntry(key);
+        Check("cleared key re-registers", GameObjectPoolController.AddEntry(key, prefab, 0, 8));
+        GameObjectPoolController.ClearEntry(key);
+        Destroy(prefab);
+        Destroy(rival);
+
+        // -- easing lifecycle contract --
+        var mover = new GameObject("Probe Tween Target");
+        var tween = mover.AddComponent<TransformLocalPositionTweener>();
+        tween.destroyOnComplete = false;
+        // Fixed time ticks in headless runs too (WaitForEndOfFrame does not)
+        tween.timeType = EasingControl.TimeType.Fixed;
+        tween.startTweenValue = Vector3.zero;
+        tween.endTweenValue = Vector3.right;
+        tween.duration = 0.2f;
+        tween.Play();
+        Check("tween plays", tween.IsPlaying);
+
+        // Disable mid-flight: paused, and the in-flight state survives
+        mover.SetActive(false);
+        Check("disable pauses", tween.playState == EasingControl.PlayState.Paused);
+        Check("disable keeps resume target",
+            tween.previousPlayState == EasingControl.PlayState.Playing,
+            tween.previousPlayState.ToString());
+        mover.SetActive(true);
+        Check("re-enable resumes", tween.IsPlaying);
+
+        // Completion: Stopped before handlers observe it, at the end value
+        var stateAtComplete = EasingControl.PlayState.Playing;
+        var completed = false;
+        tween.completedEvent += delegate
+        {
+            stateAtComplete = tween.playState;
+            completed = true;
+        };
+        var deadline = Time.realtimeSinceStartup + 5f;
+        while (!completed && Time.realtimeSinceStartup < deadline)
+            yield return null;
+        Check("tween completes", completed);
+        Check("stopped before completion handlers",
+            stateAtComplete == EasingControl.PlayState.Stopped, stateAtComplete.ToString());
+        Check("completes at end value",
+            Vector3.Distance(mover.transform.localPosition, Vector3.right) < 0.001f,
+            mover.transform.localPosition.ToString());
+
+        // Reverse from the end: finishes back at the start value
+        completed = false;
+        tween.Reverse();
+        deadline = Time.realtimeSinceStartup + 5f;
+        while (!completed && Time.realtimeSinceStartup < deadline)
+            yield return null;
+        Check("reverse completes at start value",
+            completed && Vector3.Distance(mover.transform.localPosition, Vector3.zero) < 0.001f,
+            mover.transform.localPosition.ToString());
+
+        // Play while disabled: defers, then starts on the next enable
+        mover.SetActive(false);
+        tween.Play();
+        Check("play while disabled defers", tween.playState == EasingControl.PlayState.Paused);
+        mover.SetActive(true);
+        Check("deferred play starts on enable", tween.IsPlaying);
+        tween.Stop();
+        Check("stop lands stopped", tween.playState == EasingControl.PlayState.Stopped);
+
+        // Destroy-on-complete tears down the component after it finished
+        tween.destroyOnComplete = true;
+        tween.duration = 0.05f;
+        tween.Play();
+        deadline = Time.realtimeSinceStartup + 5f;
+        while (tween != null && Time.realtimeSinceStartup < deadline)
+            yield return null;
+        Check("destroy-on-complete removes the tweener", tween == null);
+        Destroy(mover);
     }
 
     // A CT-frozen victim never begins a turn, so its control (and Steeled)
