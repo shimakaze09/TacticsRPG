@@ -85,6 +85,7 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeTerrain(bc);
             ProbeLevelScaling();
             ProbeGrowthModel();
+            ProbeJobThresholds();
             ProbeControlBudget(bc);
             ProbeClockAndWaves(bc); // mutates turn count
             // Publishes whole rounds of turn events — keep dead last
@@ -995,6 +996,63 @@ public class BattleProbeRunner : MonoBehaviour
 
         Destroy(unit);
         DifficultySettings.Current = savedDifficulty;
+    }
+
+    // ---- issue #20: JP thresholds ------------------------------------------
+
+    // Every job carries exactly seven strictly-increasing cumulative JP
+    // thresholds (levels 2-8) with in-range unlock levels and no dead master
+    // gate, and the level lookup agrees with the data at every boundary.
+    private void ProbeJobThresholds()
+    {
+        var jobs = Resources.LoadAll<JobDefinition>("Jobs");
+        Check("jobs loaded for threshold probe", jobs.Length > 0);
+
+        JobDefinition drifter = null;
+        foreach (var job in jobs)
+        {
+            if (job.id == "drifter")
+                drifter = job;
+
+            Check("seven thresholds " + job.id,
+                job.jpRequirements.Length == JobDefinition.JPThresholdCount,
+                "count " + job.jpRequirements.Length);
+
+            var increasing = job.jpRequirements[0] > 0;
+            for (var i = 1; i < job.jpRequirements.Length; i++)
+                increasing &= job.jpRequirements[i] > job.jpRequirements[i - 1];
+            Check("thresholds strictly increase " + job.id, increasing);
+
+            var unlocksInRange = true;
+            foreach (var unlock in job.abilityUnlocks)
+                unlocksInRange &= unlock.unlockAtJobLevel >= 1 && unlock.unlockAtJobLevel <= 8;
+            Check("unlock levels in range " + job.id, unlocksInRange);
+        }
+
+        // Boundary behavior on the shared curve: one JP below each gate stays
+        // at the previous level, the gate itself advances, and past the top
+        // gate the job is simply level 8 — no phantom master gate beyond it
+        Check("drifter present for boundaries", drifter != null);
+        if (drifter != null)
+        {
+            Check("zero JP is grade 1", drifter.GetJobLevelForJP(0) == 1);
+            for (var i = 0; i < drifter.jpRequirements.Length; i++)
+            {
+                var gate = drifter.jpRequirements[i];
+                Check($"jp {gate - 1} holds level {i + 1}",
+                    drifter.GetJobLevelForJP(gate - 1) == i + 1,
+                    "got " + drifter.GetJobLevelForJP(gate - 1));
+                Check($"jp {gate} reaches level {i + 2}",
+                    drifter.GetJobLevelForJP(gate) == i + 2,
+                    "got " + drifter.GetJobLevelForJP(gate));
+            }
+
+            var top = drifter.jpRequirements[drifter.jpRequirements.Length - 1];
+            Check("huge JP stays level 8", drifter.GetJobLevelForJP(99999) == 8);
+            Check("maxed next-gate reports the real top",
+                drifter.GetJPForNextLevel(top) == top,
+                "got " + drifter.GetJPForNextLevel(top));
+        }
     }
 
     // ---- issue #57: RES growth + control budget -----------------------------
