@@ -4,10 +4,11 @@ using UnityEngine;
 /// <summary>
 /// Per-unit brain of the job system: switches and unlocks jobs, accumulates JP
 /// into job levels, recalculates stats from the unit's whole job-level history
-/// (final stats = sum of each job's levels x its multipliers, plus the current
-/// job's movement bonuses, scaled/capped for difficulty and StatLimits), learns
-/// abilities as job levels rise, publishes job events, and persists progress
-/// for Hero units. Lives alongside Stats/Rank/Equipment on the unit.
+/// (final stats = sum of each job's levels x its multipliers, plus character-
+/// level growth per ProgressionModel, plus the current job's movement bonuses,
+/// scaled/capped for difficulty and StatLimits), learns abilities as job levels
+/// rise, publishes job events, and persists progress for Hero units. Lives
+/// alongside Stats/Rank/Equipment on the unit.
 /// </summary>
 public class JobManager : MonoBehaviour, IDataPersistence
 {
@@ -418,10 +419,12 @@ public class JobManager : MonoBehaviour, IDataPersistence
     /// 1. Start with base stats (level 1, no job)
     /// 2. For each job the character has leveled:
     ///    - Add (JobLevels * JobMultipliers) to stats
-    /// 3. Add worn gear bonuses (agrees with StatModifierFeature's live
+    /// 3. Add character-level growth from the current job's profile
+    ///    (ProgressionModel — makes spawn/writ levels matter, issue #52)
+    /// 4. Add worn gear bonuses (agrees with StatModifierFeature's live
     ///    adjustments on Equip/UnEquip — both paths produce the same totals)
-    /// 4. Apply current job's movement bonuses
-    /// 
+    /// 5. Apply current job's movement bonuses
+    ///
     /// This ensures stats reflect full job history, not just current job.
     /// </summary>
     public void RecalculateStats(bool restoreToFull = false)
@@ -448,6 +451,16 @@ public class JobManager : MonoBehaviour, IDataPersistence
             {
                 job.CalculateStatContribution(jobLevels, ref calculatedStats);
             }
+        }
+
+        // Character-level growth: spawn/writ/earned levels must materially
+        // change combat stats without fabricating job history (issue #52;
+        // model documented in ProgressionModel).
+        int characterLevel = rank != null ? rank.LVL : stats[StatTypes.LVL];
+        if (CurrentJob != null)
+        {
+            for (int i = 0; i < calculatedStats.Length; i++)
+                calculatedStats[i] += ProgressionModel.LevelGrowthBonus(CurrentJob, i, characterLevel);
         }
 
         // Worn gear bonuses must be part of this write: the loop below
@@ -561,13 +574,20 @@ public class JobManager : MonoBehaviour, IDataPersistence
         // Award JP for each level gained
         int levelsGained = newLevel - Mathf.Max(oldLevel, lastProcessedLevel);
 
+        bool statsAlreadyRecalculated = false;
         if (levelsGained > 0 && CurrentJob != null)
         {
             int jpToAward = levelsGained * jpPerLevel;
-            AddJobPoints(jpToAward);
+            // A grade-up recalculates inside OnJobLevelUp — don't do it twice
+            statsAlreadyRecalculated = AddJobPoints(jpToAward);
 
             Debug.Log($"{gameObject.name} gained {levelsGained} levels, awarded {jpToAward} JP to {CurrentJob.jobName}");
         }
+
+        // The character-level growth term (ProgressionModel) moved even when
+        // no job grade did — stats must always follow an accepted level gain.
+        if (levelsGained > 0 && !statsAlreadyRecalculated)
+            RecalculateStats();
 
         lastProcessedLevel = newLevel;
     }

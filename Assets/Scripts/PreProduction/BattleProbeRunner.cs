@@ -83,6 +83,7 @@ public class BattleProbeRunner : MonoBehaviour
             // Status removal destroys deferred, so this block yields frames
             yield return StartCoroutine(ProbeControlStatuses(bc));
             ProbeTerrain(bc);
+            ProbeLevelScaling();
             ProbeClockAndWaves(bc); // mutates turn count — keep last
         }
         finally
@@ -815,6 +816,89 @@ public class BattleProbeRunner : MonoBehaviour
         mover.Match();
         occupant.Place(occupantHome);
         occupant.Match();
+    }
+
+    // ---- issue #52: spawn level drives combat stats -------------------------
+
+    // Golden checks for the progression model: units of the same recipe
+    // spawned at levels 1/10/30/99 must differ by exactly the documented
+    // level-growth term (ProgressionModel), across striker/skirmisher/caster
+    // archetypes — MHP included. Difficulty is pinned to Easy for the exact
+    // block, then a Hard spawn must show the enemy-HP multiplier applied at
+    // creation time (the factory adds Alliance before the first stat calc).
+    private void ProbeLevelScaling()
+    {
+        var savedDifficulty = DifficultySettings.Current;
+        DifficultySettings.Current = Difficulty.Easy;
+
+        string[] recipes = { "Enemy Warrior", "Enemy Rogue", "Enemy Wizard" };
+        int[] levels = { 1, 10, 30, 99 };
+        var exactStats = new[] { StatTypes.MHP, StatTypes.MMP, StatTypes.ATK, StatTypes.MAT, StatTypes.SPD };
+        var easyWarrior10MHP = 0;
+
+        foreach (var recipe in recipes)
+        {
+            var spawned = new GameObject[levels.Length];
+            for (var i = 0; i < levels.Length; i++)
+                spawned[i] = UnitFactory.Create(recipe, levels[i]);
+
+            if (spawned[0] == null)
+            {
+                Check("level scaling recipe " + recipe, false, "recipe failed to spawn");
+                continue;
+            }
+
+            var baseStats = spawned[0].GetComponent<Stats>();
+            var job = spawned[0].GetComponent<JobManager>().CurrentJob;
+
+            for (var i = 1; i < levels.Length; i++)
+            {
+                var s = spawned[i].GetComponent<Stats>();
+
+                for (var k = 0; k < exactStats.Length; k++)
+                {
+                    var statIndex = System.Array.IndexOf(JobManager.statOrder, exactStats[k]);
+                    var expected = baseStats[exactStats[k]] +
+                                   ProgressionModel.LevelGrowthBonus(job, statIndex, levels[i]);
+                    expected = exactStats[k] switch
+                    {
+                        StatTypes.MHP => Mathf.Min(expected, StatLimits.MaxHP),
+                        StatTypes.MMP => Mathf.Min(expected, StatLimits.MaxMP),
+                        _ => Mathf.Min(expected, StatLimits.MaxPrimaryStat)
+                    };
+                    Check($"{recipe} L{levels[i]} {exactStats[k]} golden",
+                        s[exactStats[k]] == expected,
+                        $"expected {expected}, got {s[exactStats[k]]}");
+                }
+
+                if (recipe == "Enemy Warrior" && levels[i] == 10)
+                    easyWarrior10MHP = s[StatTypes.MHP];
+            }
+
+            foreach (var go in spawned)
+                if (go != null)
+                    Destroy(go);
+        }
+
+        // Hard difficulty must scale enemy MHP at creation, not only on the
+        // next recalculation
+        if (easyWarrior10MHP > 0)
+        {
+            DifficultySettings.Current = Difficulty.Hard;
+            var hardWarrior = UnitFactory.Create("Enemy Warrior", 10);
+            if (hardWarrior != null)
+            {
+                var expected = Mathf.Min(
+                    Mathf.RoundToInt(easyWarrior10MHP * DifficultySettings.EnemyHpMultiplier),
+                    StatLimits.MaxHP);
+                var actual = hardWarrior.GetComponent<Stats>()[StatTypes.MHP];
+                Check("hard mode scales enemy MHP at spawn", actual == expected,
+                    $"expected {expected}, got {actual}");
+                Destroy(hardWarrior);
+            }
+        }
+
+        DifficultySettings.Current = savedDifficulty;
     }
 
     // ---- 1.8: clock + reinforcements (mutates state — runs last) -----------
