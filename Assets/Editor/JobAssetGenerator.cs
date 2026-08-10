@@ -174,8 +174,10 @@ public static class JobAssetGenerator
         // Set ability catalog name
         job.abilityCatalogName = jobData.abilityCatalogName;
         
-        // Set JP requirements
-        if (jobData.jpRequirements != null && jobData.jpRequirements.Length == 8)
+        // Set JP requirements — the data contract is exactly seven strictly
+        // increasing cumulative thresholds for levels 2-8 (issue #20); bad
+        // data fails loudly and the asset keeps the validated default curve
+        if (ValidateJPRequirements(jobData))
         {
             job.jpRequirements = jobData.jpRequirements;
         }
@@ -183,6 +185,49 @@ public static class JobAssetGenerator
         // Create the asset
         AssetDatabase.CreateAsset(job, assetPath);
         EditorUtility.SetDirty(job);
+    }
+
+    // Guards the JP threshold contract (exactly 7 entries, strictly
+    // increasing) and unlock levels (1-8); logs a specific error per violation
+    private static bool ValidateJPRequirements(JobDataFile jobData)
+    {
+        var valid = true;
+
+        if (jobData.jpRequirements == null ||
+            jobData.jpRequirements.Length != JobDefinition.JPThresholdCount)
+        {
+            Debug.LogError($"{jobData.jobName}: jpRequirements must have exactly " +
+                           $"{JobDefinition.JPThresholdCount} entries (levels 2-8), found " +
+                           $"{jobData.jpRequirements?.Length ?? 0}");
+            valid = false;
+        }
+        else
+        {
+            for (int i = 0; i < jobData.jpRequirements.Length; i++)
+            {
+                if (jobData.jpRequirements[i] > 0 &&
+                    (i == 0 || jobData.jpRequirements[i] > jobData.jpRequirements[i - 1]))
+                    continue;
+                Debug.LogError($"{jobData.jobName}: jpRequirements[{i}] = " +
+                               $"{jobData.jpRequirements[i]} must be positive and strictly " +
+                               "greater than the previous threshold");
+                valid = false;
+            }
+        }
+
+        if (jobData.abilityUnlocks != null)
+        {
+            foreach (var unlock in jobData.abilityUnlocks)
+            {
+                if (unlock.unlockAtJobLevel >= 1 && unlock.unlockAtJobLevel <= 8)
+                    continue;
+                Debug.LogError($"{jobData.jobName}: ability '{unlock.abilityName}' unlocks at " +
+                               $"job level {unlock.unlockAtJobLevel}, outside the 1-8 range");
+                valid = false;
+            }
+        }
+
+        return valid;
     }
 
     private static void SetJobPrerequisites(JobDataFile jobData)

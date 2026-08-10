@@ -124,20 +124,25 @@ public class JobDefinition : ScriptableObject
 
     #region JP System
     
+    /// <summary>
+    /// Levels above 1 that JP can buy: exactly seven cumulative thresholds
+    /// carry a job from level 2 through the level-8 cap (issue #20).
+    /// </summary>
+    public const int JPThresholdCount = 7;
+
     [Header("Job Points (JP) System")]
-    [Tooltip("JP required to reach each job level (cumulative)")]
-    public int[] jpRequirements = new int[8] 
-    { 
+    [Tooltip("JP required to reach each job level (cumulative; exactly 7 entries for levels 2-8)")]
+    public int[] jpRequirements = new int[JPThresholdCount]
+    {
         100,   // Level 2
         250,   // Level 3
         450,   // Level 4
         700,   // Level 5
         1000,  // Level 6
         1400,  // Level 7
-        1900,  // Level 8
-        2500   // Level 8 (Master)
+        1900   // Level 8
     };
-    
+
     #endregion
 
     #region Public Methods
@@ -188,8 +193,10 @@ public class JobDefinition : ScriptableObject
 
         for (int i = jpRequirements.Length - 1; i >= 0; i--)
         {
+            // +2 because index 0 is the level-2 gate; the clamp only guards
+            // against oversized legacy arrays (the contract is 7 entries)
             if (jp >= jpRequirements[i])
-                return Mathf.Min(i + 2, 8); // +2 because array starts at level 2 requirements; max job level is 8
+                return Mathf.Min(i + 2, 8);
         }
 
         return 1;
@@ -260,7 +267,19 @@ public class JobDefinition : ScriptableObject
             baseStats = new int[7] { 50, 20, 5, 5, 5, 5, 5 };
         }
 
-        // Ensure JP requirements are increasing
+        // Enforce the threshold contract: exactly 7 entries (levels 2-8),
+        // padding a short array so every level keeps a reachable gate
+        if (jpRequirements == null || jpRequirements.Length != JPThresholdCount)
+        {
+            var resized = new int[JPThresholdCount];
+            for (int i = 0; i < JPThresholdCount; i++)
+                resized[i] = jpRequirements != null && i < jpRequirements.Length
+                    ? jpRequirements[i]
+                    : (i > 0 ? resized[i - 1] + 100 : 100);
+            jpRequirements = resized;
+        }
+
+        // Ensure JP requirements are strictly increasing
         for (int i = 1; i < jpRequirements.Length; i++)
         {
             if (jpRequirements[i] <= jpRequirements[i - 1])

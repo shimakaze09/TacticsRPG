@@ -100,13 +100,21 @@ public class JobMenuEntry : MonoBehaviour
             jobIcon.enabled = false;
         }
 
-        // Update progress bar
+        // Update progress bar; a maxed job shows a full bar — there is no
+        // further gate beyond level 8 to measure against (issue #20)
         if (progressBar != null && jobDef != null)
         {
-            int jpForNext = jobDef.GetJPForNextLevel(currentJP);
-            int jpForCurrent = jobLevel > 1 ? jobDef.jpRequirements[jobLevel - 2] : 0;
-            float progress = JobSystemHelper.GetProgressFill(currentJP - jpForCurrent, jpForNext - jpForCurrent);
-            progressBar.fillAmount = progress;
+            if (jobLevel >= 8)
+            {
+                progressBar.fillAmount = 1f;
+            }
+            else
+            {
+                int jpForNext = jobDef.GetJPForNextLevel(currentJP);
+                int jpForCurrent = jobLevel > 1 ? jobDef.jpRequirements[jobLevel - 2] : 0;
+                float progress = JobSystemHelper.GetProgressFill(currentJP - jpForCurrent, jpForNext - jpForCurrent);
+                progressBar.fillAmount = progress;
+            }
         }
 
         UpdateLockState();
