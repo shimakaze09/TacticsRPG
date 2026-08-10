@@ -5,7 +5,7 @@ using UnityEngine;
 /// Attackers get +50% physical attack bonus. Wakes up when taking HP damage.
 /// Lasts for 60 ticks (~6 turns) if not damaged.
 /// </summary>
-public class BlackoutStatus : DamageRemovableStatusEffect
+public class BlackoutStatus : DamageRemovableStatusEffect, ICtFreezingStatus
 {
     private Unit owner;
     private Stats stats;

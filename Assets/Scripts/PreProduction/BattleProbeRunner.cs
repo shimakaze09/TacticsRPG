@@ -1102,12 +1102,15 @@ public class BattleProbeRunner : MonoBehaviour
         // Graycast is stasis — full action/CT denial belongs to the budget
         Check("graycast classified as control", ControlBudget.IsControl("Graycast"));
 
-        // RES gear golden at the cap: equip clamps, recalculation converges
-        // on the same total, unequip restores the derived value exactly
+        // RES gear golden at the cap: equip clamps, recalculation converges,
+        // a baseline change while equipped stays exact, and unequip restores
+        // the (new) derived value — equip and unequip both route through the
+        // same deterministic recomputation
         var wizard = UnitFactory.Create("Enemy Wizard", 99);
         if (wizard != null)
         {
             var wizardStats = wizard.GetComponent<Stats>();
+            var wizardJm = wizard.GetComponent<JobManager>();
             var derived = wizardStats[StatTypes.RES];
             var expected = Mathf.Min(derived + 10, StatLimits.MaxRES);
 
@@ -1121,12 +1124,39 @@ public class BattleProbeRunner : MonoBehaviour
             wizard.GetComponent<Equipment>().Equip(equippable, EquipSlots.Accessory);
             Check("res gear equips cap-safe", wizardStats[StatTypes.RES] == expected,
                 $"derived {derived}, got {wizardStats[StatTypes.RES]}");
-            wizard.GetComponent<JobManager>().RecalculateStats();
+            wizardJm.RecalculateStats();
             Check("res gear recalc converges", wizardStats[StatTypes.RES] == expected,
                 $"expected {expected}, got {wizardStats[StatTypes.RES]}");
-            wizard.GetComponent<Equipment>().UnEquip(equippable);
-            Check("res gear unequip restores", wizardStats[StatTypes.RES] == derived,
-                $"expected {derived}, got {wizardStats[StatTypes.RES]}");
+
+            // Baseline change while equipped: switch to another job (different
+            // MDF kit → different derived RES) and the totals must stay exact
+            JobDefinition otherJob = null;
+            foreach (var job in wizardJm.allJobs)
+            {
+                if (job != null && job != wizardJm.CurrentJob && !job.isUnique)
+                {
+                    otherJob = job;
+                    break;
+                }
+            }
+
+            if (otherJob != null)
+            {
+                wizardJm.ProgressData.UnlockJob(otherJob);
+                wizardJm.SwitchJob(otherJob);
+                var switchedDerived = ProgressionModel.ResistanceFor(otherJob, 99);
+                var switchedExpected = Mathf.Min(switchedDerived + 10, StatLimits.MaxRES);
+                Check("res gear exact after job switch", wizardStats[StatTypes.RES] == switchedExpected,
+                    $"expected {switchedExpected}, got {wizardStats[StatTypes.RES]}");
+                wizard.GetComponent<Equipment>().UnEquip(equippable);
+                Check("res gear unequip restores new baseline", wizardStats[StatTypes.RES] == switchedDerived,
+                    $"expected {switchedDerived}, got {wizardStats[StatTypes.RES]}");
+            }
+            else
+            {
+                Check("res gear switch job available", false);
+            }
+
             Destroy(wizard);
         }
         else
@@ -1136,32 +1166,40 @@ public class BattleProbeRunner : MonoBehaviour
     }
 
     // A CT-frozen victim never begins a turn, so its control (and Steeled)
-    // conditions must expire through the battle-round fallback instead —
-    // the #12 failure this contract exists to close. Publishes whole rounds
-    // of TurnCompletedEvents, so it runs after every other probe.
+    // conditions must expire through the frozen-window fallback — the #12
+    // failure this contract exists to close — while an unfrozen bystander's
+    // statuses must never fallback-tick, and a fresh inflict must survive a
+    // partial window. Publishes whole rounds of TurnCompletedEvents, so it
+    // runs after every other probe.
     private IEnumerator ProbeControlExpiry(BattleController bc)
     {
         var rogue = Find(bc, "Enemy Rogue");
-        if (rogue == null)
+        var hania = Find(bc, "Hania");
+        var clock = bc.GetComponent<BattleClock>();
+        if (rogue == null || hania == null || clock == null)
         {
-            Check("expiry target present", false);
+            Check("expiry cast present", false);
             yield break;
         }
 
         var frozen = StatusRegistry.Inflict(rogue, "FreezeFrame", 2);
-        Check("freezeframe inflicted", frozen != null);
-        if (frozen == null)
+        // Unfrozen bystander: same battle time passes, nothing may tick
+        var bystander = StatusRegistry.Inflict(hania, "Shredded", 2);
+        Check("freezeframe inflicted", frozen != null && bystander != null);
+        if (frozen == null || bystander == null)
             yield break;
 
         Check("steeled accompanies control", rogue.GetComponentInChildren<SteeledStatus>() != null);
 
-        // Four full round rollovers without the rogue ever activating —
-        // enough for the control (2) and its Steeled (3) to run out
+        // Late-inflict guard: a partial window (one activation) must not tick
         var reporter = bc.units[0];
-        var roundLength = bc.units.Count + 2;
-        for (var round = 0; round < 4; round++)
-            for (var i = 0; i < roundLength; i++)
-                reporter.Publish(new TurnCompletedEvent(reporter));
+        reporter.Publish(new TurnCompletedEvent(reporter));
+        Check("partial window does not tick", frozen.duration == 2, "duration " + frozen.duration);
+
+        // Roll four full frozen windows — enough for the control (2) and its
+        // Steeled (3) to run out even though the rogue never activates
+        for (var i = 0; i < clock.RoundLength * 4; i++)
+            reporter.Publish(new TurnCompletedEvent(reporter));
 
         // Status removal destroys deferred
         yield return null;
@@ -1169,6 +1207,9 @@ public class BattleProbeRunner : MonoBehaviour
 
         Check("frozen control expired", rogue.GetComponentInChildren<FreezeFrameStatus>() == null);
         Check("steeled expired with it", rogue.GetComponentInChildren<SteeledStatus>() == null);
+        Check("unfrozen bystander never fallback-ticks", bystander != null && bystander.duration == 2,
+            bystander != null ? "duration " + bystander.duration : "condition gone");
+        bystander.Remove();
     }
 
     // ---- 1.8: clock + reinforcements (mutates state — runs last) -----------

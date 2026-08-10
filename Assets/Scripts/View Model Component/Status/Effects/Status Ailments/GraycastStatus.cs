@@ -5,7 +5,7 @@ using UnityEngine;
 /// CT does not increment, cannot take actions or damage.
 /// If all characters are petrified, game over.
 /// </summary>
-public class GraycastStatus : StatusEffect
+public class GraycastStatus : StatusEffect, ICtFreezingStatus
 {
     private Unit owner;
     private Stats stats;

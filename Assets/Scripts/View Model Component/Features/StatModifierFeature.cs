@@ -2,11 +2,13 @@ using UnityEngine;
 
 /// <summary>
 /// Feature that adjusts a stat while active (weapon ATK bonuses, armor DEF).
-/// Applies cap-aware: the write clamps to the stat's StatLimits ceiling and
-/// remembers the delta that actually landed, so removing the item restores
-/// exactly the prior value — a bonus clipped at a cap must never underflow
-/// the base stat on unequip (issue #57 review). This keeps the live
-/// equip/unequip path convergent with JobManager.RecalculateStats.
+/// On units with a JobManager, apply and remove both defer to
+/// JobManager.RecalculateStats — Equipment updates its item list before the
+/// features run, so one deterministic recomputation lands or removes the
+/// bonus with caps applied and nothing stored to go stale (a recorded delta
+/// would drift whenever the derived baseline changed while equipped —
+/// issue #57 review). Targets without a job system fall back to a cap-aware,
+/// exactly-reversible direct write.
 /// </summary>
 public class StatModifierFeature : Feature
 {
@@ -15,8 +17,8 @@ public class StatModifierFeature : Feature
     public StatTypes type;
     public int amount;
 
-    // The clamped change OnApply actually made; OnRemove reverses this, not
-    // the nominal amount
+    // Fallback-path memory: the clamped change OnApply actually made, so
+    // OnRemove reverses exactly that rather than the nominal amount
     private int appliedDelta;
 
     private Stats stats => _target.GetComponentInParent<Stats>();
@@ -27,6 +29,13 @@ public class StatModifierFeature : Feature
 
     protected override void OnApply()
     {
+        var jobManager = _target.GetComponentInParent<JobManager>();
+        if (jobManager != null)
+        {
+            jobManager.RecalculateStats();
+            return;
+        }
+
         int before = stats[type];
         int after = Mathf.Clamp(before + amount, 0, CapFor(type));
         appliedDelta = after - before;
@@ -35,6 +44,13 @@ public class StatModifierFeature : Feature
 
     protected override void OnRemove()
     {
+        var jobManager = _target.GetComponentInParent<JobManager>();
+        if (jobManager != null)
+        {
+            jobManager.RecalculateStats();
+            return;
+        }
+
         stats[type] -= appliedDelta;
         appliedDelta = 0;
     }

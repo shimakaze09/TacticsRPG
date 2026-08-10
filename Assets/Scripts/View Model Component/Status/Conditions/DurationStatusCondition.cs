@@ -1,12 +1,15 @@
 using UnityEngine;
 
 /// <summary>
-/// Removes its status after N of the owner's turns. Units denied their turns
-/// (CT frozen by Blackout/FreezeFrame/Graycast) would otherwise never tick,
-/// making "3 turns" mean forever — the #12 failure — so a battle-round
-/// fallback also decrements once for every full round in which the owner
-/// never activated. Statuses therefore expire in N turns' worth of battle
-/// time whether or not the victim ever gets to act (issue #57).
+/// Removes its status after N of the owner's turns. Owners denied all turns
+/// (CT frozen by a status implementing ICtFreezingStatus) would never tick,
+/// making "3 turns" mean forever — the #12 failure — so while the owner is
+/// frozen the condition also counts battle-wide activations and ticks once
+/// per full round-length window measured from its last tick. Scoping the
+/// fallback to actual CT freeze keeps naturally slow units' statuses at full
+/// duration, and measuring the window from the last tick (not from round
+/// boundaries) means a late-round inflict still gets its full first window
+/// (issue #57).
 /// </summary>
 public class DurationStatusCondition : StatusCondition
 {
@@ -14,8 +17,7 @@ public class DurationStatusCondition : StatusCondition
 
     private Unit owner;
     private BattleClock clock;
-    private int lastRound;
-    private bool ownerTickedThisRound;
+    private int activationsSinceTick;
 
     private void OnEnable()
     {
@@ -27,10 +29,9 @@ public class DurationStatusCondition : StatusCondition
         else
             this.Subscribe<TurnBeganEvent>(OnNewTurn);
 
-        // Round fallback for owners who never reach a turn
+        // Fallback clock for owners whose CT is frozen
         this.Subscribe<TurnCompletedEvent>(OnAnyTurnCompleted);
         clock = FindAnyObjectByType<BattleClock>();
-        lastRound = clock != null ? clock.CurrentRound : 0;
     }
 
     private void OnDisable()
@@ -45,23 +46,30 @@ public class DurationStatusCondition : StatusCondition
 
     private void OnNewTurn(TurnBeganEvent e)
     {
-        ownerTickedThisRound = true;
+        activationsSinceTick = 0;
         Tick();
     }
 
-    // When a battle round rolls over without the owner having activated, the
-    // owner was denied its turn — decrement anyway so frozen units' statuses
-    // (and their Steeled protection) still expire
+    // While the owner is CT-frozen, count every battle activation; one full
+    // round-length window without an owner turn equals one denied turn.
+    // Unfrozen owners never fallback-tick — their own turns are the clock.
     private void OnAnyTurnCompleted(TurnCompletedEvent e)
     {
-        if (clock == null || clock.CurrentRound == lastRound)
+        if (clock == null || owner == null)
             return;
 
-        lastRound = clock.CurrentRound;
-        bool ticked = ownerTickedThisRound;
-        ownerTickedThisRound = false;
-        if (!ticked)
+        if (owner.GetComponentInChildren<ICtFreezingStatus>() == null)
+        {
+            activationsSinceTick = 0;
+            return;
+        }
+
+        activationsSinceTick++;
+        if (activationsSinceTick >= clock.RoundLength)
+        {
+            activationsSinceTick = 0;
             Tick();
+        }
     }
 
     // Shared decrement-and-expire step for both tick sources

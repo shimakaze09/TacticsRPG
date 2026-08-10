@@ -30,10 +30,13 @@ public class Equipment : MonoBehaviour
 
     public void UnEquip(Equippable item)
     {
+        // Out of the gear list before features revert: StatModifierFeature
+        // recomputes stats through JobManager, and that recomputation must
+        // no longer see the departing item (issue #57).
+        _items.Remove(item);
         item.OnUnEquip();
         item.slots = EquipSlots.None;
         item.transform.SetParent(transform);
-        _items.Remove(item);
 
         this.Publish(new ItemUnequippedEvent(item.gameObject));
     }
