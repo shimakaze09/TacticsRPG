@@ -87,6 +87,19 @@ public class BalanceContent
         content.LoadAbilities();
         content.LoadCatalogs();
         content.LoadEncounters();
+
+        // An absent or empty source directory must fail the run, never
+        // produce a clean report — a renamed JobData folder yielding zero
+        // jobs is exactly the checkout drift this audit exists to catch.
+        if (content.jobs.Count == 0)
+            content.loadErrors.Add("No JobData files loaded — Assets/Resources/JobData is missing or empty.");
+        if (content.abilityFiles.Count == 0)
+            content.loadErrors.Add("No AbilityData files loaded — Assets/Resources/AbilityData is missing or empty.");
+        if (content.catalogFiles.Count == 0)
+            content.loadErrors.Add("No CatalogData files loaded — Assets/Resources/CatalogData is missing or empty.");
+        if (content.encounters.Count == 0)
+            content.loadErrors.Add("No battle definitions loaded — Assets/Resources/Battles is missing or empty.");
+
         return content;
     }
 

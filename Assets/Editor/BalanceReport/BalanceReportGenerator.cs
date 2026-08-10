@@ -734,8 +734,19 @@ public static class BalanceReportGenerator
 
             if (!content.catalogFiles.ContainsKey(catalogName))
                 doc.errors.Add($"{jobId}: abilityCatalogName '{catalogName}' has no CatalogData file.");
-            if (!content.abilityFiles.ContainsKey(catalogName))
+            if (!content.abilityFiles.TryGetValue(catalogName, out AbilityAssetGenerator.AbilityDataFile abilityFile))
                 doc.errors.Add($"{jobId}: abilityCatalogName '{catalogName}' has no AbilityData file.");
+
+            // Unlock ids must belong to THIS job's own AbilityData file — an
+            // id that merely exists in some other job's pool is a cross-job
+            // ownership error, not a pass.
+            var ownAbilityNames = new Dictionary<string, string>();
+            if (abilityFile != null && abilityFile.abilities != null)
+            {
+                foreach (AbilityAssetGenerator.AbilityData ability in abilityFile.abilities)
+                    if (!string.IsNullOrEmpty(ability.id) && !ownAbilityNames.ContainsKey(ability.id))
+                        ownAbilityNames.Add(ability.id, ability.name);
+            }
 
             var referenced = new HashSet<string>();
             foreach (JobAbilityUnlockData unlock in entry.data.abilityUnlocks ?? new JobAbilityUnlockData[0])
@@ -747,13 +758,15 @@ public static class BalanceReportGenerator
                 }
 
                 referenced.Add(unlock.abilityId);
-                if (!abilityNamesById.TryGetValue(unlock.abilityId, out string realName))
-                    doc.errors.Add($"{jobId}: abilityUnlocks references missing ability id '{unlock.abilityId}'.");
+                if (!ownAbilityNames.TryGetValue(unlock.abilityId, out string realName))
+                    doc.errors.Add(abilityNamesById.ContainsKey(unlock.abilityId)
+                        ? $"{jobId}: unlock '{unlock.abilityId}' belongs to another job's AbilityData, not '{catalogName}'."
+                        : $"{jobId}: abilityUnlocks references missing ability id '{unlock.abilityId}'.");
                 else if (realName != unlock.abilityName)
                     doc.errors.Add($"{jobId}: unlock '{unlock.abilityId}' names it '{unlock.abilityName}' but AbilityData says '{realName}'.");
             }
 
-            if (content.abilityFiles.TryGetValue(catalogName, out AbilityAssetGenerator.AbilityDataFile abilityFile) &&
+            if (abilityFile != null &&
                 content.catalogFiles.TryGetValue(catalogName, out CatalogAssetGenerator.CatalogDataFile catalog))
             {
                 var abilityNames = new HashSet<string>();
