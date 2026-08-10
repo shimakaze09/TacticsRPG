@@ -4,9 +4,12 @@
 # artifact is produced on pushes to main.
 #
 # Requires repository secrets (Settings → Secrets and variables → Actions):
-#   UNITY_EMAIL / UNITY_PASSWORD — a Unity account holding a Personal
-#   (free) license; the run activates it on start and returns the seat when
-#   done. See Docs/ARCHITECTURE.md §8 for the local forms of these commands.
+#   UNITY_EMAIL / UNITY_PASSWORD — a Unity account holding a Personal (free)
+#   license. Headless login cannot answer a two-factor prompt: use a
+#   dedicated CI account with 2FA disabled, or additionally provide
+#   UNITY_LICENSE (the contents of a Personal .ulf file — still free tier),
+#   which takes precedence when present.
+# See Docs/ARCHITECTURE.md §8 for the local forms of these commands.
 
 name: CI
 
@@ -25,11 +28,15 @@ jobs:
     container:
       # game-ci editor image matching ProjectSettings/ProjectVersion.txt
       image: unityci/editor:ubuntu-6000.5.5f1-base-3
+    env:
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
     steps:
       - name: Check license secrets
         run: |
-          if [ -z "${{ secrets.UNITY_EMAIL }}" ] || [ -z "${{ secrets.UNITY_PASSWORD }}" ]; then
-            echo "::error::UNITY_EMAIL / UNITY_PASSWORD secrets are not configured — see the header of this workflow."
+          if [ -z "$UNITY_LICENSE" ] && { [ -z "$UNITY_EMAIL" ] || [ -z "$UNITY_PASSWORD" ]; }; then
+            echo "::error::Configure UNITY_EMAIL + UNITY_PASSWORD (2FA-free account) or UNITY_LICENSE — see the header of this workflow."
             exit 1
           fi
 
@@ -43,45 +50,57 @@ jobs:
           restore-keys: |
             library-${{ env.UNITY_VERSION }}-
 
-      - name: Activate Unity license (Personal, email/password)
-        env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+      # Activation must verifiably succeed before anything else runs — a
+      # swallowed failure here just resurfaces as an opaque exit 198 later
+      - name: Activate Unity license
         run: |
           mkdir -p logs
-          unity-editor -batchmode -nographics -quit \
-            -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD" \
-            -logFile logs/activation.log || true
+          if [ -n "$UNITY_LICENSE" ]; then
+            echo "$UNITY_LICENSE" > /tmp/Unity_lic.ulf
+            unity-editor -batchmode -nographics -quit \
+              -manualLicenseFile /tmp/Unity_lic.ulf \
+              -logFile logs/activation.log || true
+          else
+            unity-editor -batchmode -nographics -quit \
+              -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD" \
+              -logFile logs/activation.log || true
+          fi
+          if grep -q "No valid Unity Editor license" logs/activation.log; then
+            echo "::error::Unity license activation failed. If using email/password, the account must not have 2FA enabled (headless login cannot answer a code prompt); alternatively provide the UNITY_LICENSE secret (Personal .ulf — still free tier). See logs artifact: activation.log."
+            exit 1
+          fi
+          echo "License activation verified."
 
       # A clean checkout has no generated Jobs/Abilities/Catalog assets —
       # this validates the JSON cross-references and generates all three in
       # order, exiting non-zero on any validation or generation error.
       # Script compilation happens on editor startup: compile errors mean the
-      # entry method never runs and the step fails.
+      # entry method never runs and the step fails. Credentials ride along on
+      # every invocation so each session can hold the entitlement.
       - name: Validate and generate content
         run: |
           unity-editor -batchmode -nographics -projectPath . \
+            -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD" \
             -executeMethod ContentGenerationMenu.RunHeadless \
             -logFile logs/generate.log
 
       - name: Run battle probes
         run: |
           unity-editor -batchmode -nographics -projectPath . \
+            -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD" \
             -executeMethod BattleProbeMenu.RunHeadless \
             -logFile logs/probes.log
 
       - name: Balance report (hard invariants)
         run: |
           unity-editor -batchmode -nographics -projectPath . \
+            -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD" \
             -executeMethod BalanceReportGenerator.RunHeadless \
             -logFile logs/balance.log
 
       # A Personal license holds a seat on this runner — always give it back
       - name: Return Unity license
         if: always()
-        env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         run: |
           unity-editor -batchmode -nographics -quit -returnlicense \
             -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD" \
@@ -120,6 +139,7 @@ jobs:
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           unityVersion: 6000.5.5f1
           targetPlatform: StandaloneWindows64
