@@ -86,6 +86,8 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeLevelScaling();
             ProbeGrowthModel();
             ProbeControlBudget(bc);
+            // Tempo statuses add/remove effects, which destroy deferred
+            yield return StartCoroutine(ProbeTempoStatuses(bc));
             ProbeClockAndWaves(bc); // mutates turn count
             // Publishes whole rounds of turn events — keep dead last
             yield return StartCoroutine(ProbeControlExpiry(bc));
@@ -1164,6 +1166,77 @@ public class BattleProbeRunner : MonoBehaviour
         {
             Check("res gear golden unit spawns", false);
         }
+    }
+
+    // ---- 1.12: tempo statuses (issue #19) ----------------------------------
+
+    // Overclock and Throttle must apply their configured CT multipliers —
+    // 1.5x and 0.5x — to every CTR gain, and compose multiplicatively when
+    // stacked, so the scheduler, tooltips, and any future initiative preview
+    // all read the same value.
+    private IEnumerator ProbeTempoStatuses(BattleController bc)
+    {
+        var alaois = Find(bc, "Alaois");
+        if (alaois == null)
+        {
+            Check("tempo cast present", false);
+            yield break;
+        }
+
+        var status = alaois.GetComponent<Status>();
+        var stats = alaois.GetComponent<Stats>();
+        var savedCT = stats[StatTypes.CTR];
+
+        // Earlier probes leave tempo statuses behind (the pit-cleaver's Winded
+        // Throttle) — clear the sheet so the baseline is genuinely unmodified
+        foreach (var stale in alaois.GetComponentsInChildren<StatusEffect>())
+        {
+            if (!(stale is ThrottleStatus) && !(stale is OverclockStatus))
+                continue;
+            var staleCondition = stale.GetComponentInChildren<StatusCondition>();
+            if (staleCondition != null)
+                staleCondition.Remove();
+        }
+
+        yield return null;
+
+        // Baseline: an unmodified gain lands whole
+        stats.SetValue(StatTypes.CTR, 0, false);
+        stats[StatTypes.CTR] += 100;
+        Check("plain CT gain unmodified", stats[StatTypes.CTR] == 100, "CTR " + stats[StatTypes.CTR]);
+
+        // Overclock: the configured 1.5x, not the old hard-coded 2x
+        var overclock = status.Add<OverclockStatus, DurationStatusCondition>();
+        overclock.duration = 9;
+        stats.SetValue(StatTypes.CTR, 0, false);
+        stats[StatTypes.CTR] += 100;
+        Check("overclock applies 1.5x CT", stats[StatTypes.CTR] == 150, "CTR " + stats[StatTypes.CTR]);
+        overclock.Remove();
+        yield return null;
+
+        // Throttle: half CT gain
+        var throttle = status.Add<ThrottleStatus, DurationStatusCondition>();
+        throttle.duration = 9;
+        stats.SetValue(StatTypes.CTR, 0, false);
+        stats[StatTypes.CTR] += 100;
+        Check("throttle applies 0.5x CT", stats[StatTypes.CTR] == 50, "CTR " + stats[StatTypes.CTR]);
+
+        // Both at once: delta multipliers compose to 0.75x in either order
+        var combined = status.Add<OverclockStatus, DurationStatusCondition>();
+        combined.duration = 9;
+        stats.SetValue(StatTypes.CTR, 0, false);
+        stats[StatTypes.CTR] += 100;
+        Check("overclock + throttle compose", stats[StatTypes.CTR] == 75, "CTR " + stats[StatTypes.CTR]);
+
+        combined.Remove();
+        throttle.Remove();
+        yield return null;
+
+        // Clean exit: gains return to normal and the sheet is restored
+        stats.SetValue(StatTypes.CTR, 0, false);
+        stats[StatTypes.CTR] += 100;
+        Check("tempo statuses detach", stats[StatTypes.CTR] == 100, "CTR " + stats[StatTypes.CTR]);
+        stats.SetValue(StatTypes.CTR, savedCT, false);
     }
 
     // A CT-frozen victim never begins a turn, so its control (and Steeled)
