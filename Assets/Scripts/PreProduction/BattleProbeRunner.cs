@@ -85,6 +85,8 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeTerrain(bc);
             ProbeLevelScaling();
             ProbeGrowthModel();
+            ProbeGrowthBands();
+            ProbeGrowthGoldenBuilds();
             ProbeJobThresholds();
             ProbeControlBudget(bc);
             // Tempo statuses add/remove effects, which destroy deferred
@@ -1100,6 +1102,203 @@ public class BattleProbeRunner : MonoBehaviour
             Check("current-job mastery " + order[i], stats[order[i]] == expected,
                 $"expected {expected}, got {stats[order[i]]}");
         }
+
+        Destroy(unit);
+        DifficultySettings.Current = savedDifficulty;
+    }
+
+    // ---- issue #54: band preservation + golden build tables -----------------
+
+    // The four archetype trades must keep their identity bands through the
+    // whole expected campaign (L1..L50), one-job and completionist alike, and
+    // never converge on the global caps. Values come straight from the pure
+    // model, so the result is independent of gear and difficulty.
+    private void ProbeGrowthBands()
+    {
+        var jobs = Resources.LoadAll<JobDefinition>("Jobs");
+        JobDefinition tank = null, striker = null, caster = null, support = null;
+        var commons = new List<JobDefinition>();
+        foreach (var j in jobs)
+        {
+            if (!j.isUnique)
+                commons.Add(j);
+            switch (j.id)
+            {
+                case "warden": tank = j; break;
+                case "brawler": striker = j; break;
+                case "burner": caster = j; break;
+                case "mender": support = j; break;
+            }
+        }
+
+        Check("archetype jobs present",
+            tank != null && striker != null && caster != null && support != null);
+        if (tank == null || striker == null || caster == null || support == null)
+            return;
+
+        // Completionist carryover: every other common job mastered
+        int Carryover(JobDefinition currentJob, int statIndex)
+        {
+            var sum = 0;
+            foreach (var j in commons)
+                if (j != currentJob)
+                    sum += ProgressionModel.CrossJobContribution(j, statIndex, ProgressionModel.MaxGrade);
+            return sum;
+        }
+
+        // A mastered current job at the given level, optionally with the full
+        // completionist spread on top
+        int Total(JobDefinition job, int statIndex, int level, bool completionist)
+        {
+            return ProgressionModel.CurrentJobContribution(job, statIndex, ProgressionModel.MaxGrade)
+                   + ProgressionModel.LevelGrowthBonus(job, statIndex, level)
+                   + (completionist ? Carryover(job, statIndex) : 0);
+        }
+
+        // statOrder slots: 0 MHP, 1 MMP, 2 ATK, 3 DEF, 4 MAT, 5 MDF, 6 SPD
+        int[] levels = { 1, 15, 30, 50 };
+        foreach (var completionist in new[] { false, true })
+            foreach (var level in levels)
+            {
+                var label = (completionist ? "completionist" : "one-job") + " L" + level;
+
+                Check("tank owns the MHP band " + label,
+                    Total(tank, 0, level, completionist) > Total(striker, 0, level, completionist) &&
+                    Total(striker, 0, level, completionist) > Total(support, 0, level, completionist) &&
+                    Total(support, 0, level, completionist) > Total(caster, 0, level, completionist));
+                Check("tank owns DEF " + label,
+                    Total(tank, 3, level, completionist) > Total(striker, 3, level, completionist) &&
+                    Total(tank, 3, level, completionist) > Total(caster, 3, level, completionist) &&
+                    Total(tank, 3, level, completionist) > Total(support, 3, level, completionist));
+                Check("striker owns ATK " + label,
+                    Total(striker, 2, level, completionist) > Total(tank, 2, level, completionist) &&
+                    Total(striker, 2, level, completionist) > Total(caster, 2, level, completionist) &&
+                    Total(striker, 2, level, completionist) > Total(support, 2, level, completionist));
+                Check("striker owns SPD " + label,
+                    Total(striker, 6, level, completionist) > Total(tank, 6, level, completionist) &&
+                    Total(striker, 6, level, completionist) > Total(caster, 6, level, completionist) &&
+                    Total(striker, 6, level, completionist) > Total(support, 6, level, completionist));
+                Check("caster owns MAT " + label,
+                    Total(caster, 4, level, completionist) > Total(tank, 4, level, completionist) &&
+                    Total(caster, 4, level, completionist) > Total(striker, 4, level, completionist) &&
+                    Total(caster, 4, level, completionist) > Total(support, 4, level, completionist));
+                Check("caster owns MMP " + label,
+                    Total(caster, 1, level, completionist) > Total(tank, 1, level, completionist) &&
+                    Total(caster, 1, level, completionist) > Total(striker, 1, level, completionist) &&
+                    Total(caster, 1, level, completionist) > Total(support, 1, level, completionist));
+                Check("support owns MDF " + label,
+                    Total(support, 5, level, completionist) > Total(tank, 5, level, completionist) &&
+                    Total(support, 5, level, completionist) > Total(striker, 5, level, completionist) &&
+                    Total(support, 5, level, completionist) > Total(caster, 5, level, completionist));
+            }
+
+        // Caps stay walls, not targets: even a completionist at campaign end
+        // keeps real headroom, and no hero build reaches the authored boss
+        // HP band (3,000-5,000 comes from boss levels/gear, not job history)
+        foreach (var job in new[] { tank, striker, caster, support })
+        {
+            for (var i = 2; i < 7; i++)
+                Check($"no primary cap saturation {job.id} {JobManager.statOrder[i]}",
+                    Total(job, i, 50, true) < StatLimits.MaxPrimaryStat,
+                    "got " + Total(job, i, 50, true));
+            Check("hero MHP below the boss band " + job.id,
+                Total(job, 0, 50, true) < 3000, "got " + Total(job, 0, 50, true));
+        }
+    }
+
+    // Reviewed golden rows for the named issue #54 builds. The fixture is an
+    // Enemy Warrior recipe at character level 1 on Easy: Marksman as the
+    // current job (the recipe's authored trade) with its recipe gear worn. statOrder layout:
+    // MHP, MMP, ATK, DEF, MAT, MDF, SPD. These are deliberately hard
+    // constants — NOT recomputed through ProgressionModel — so formula or
+    // job-data drift fails loudly; update them only alongside a conscious,
+    // reviewed balance change.
+    private static readonly int[] GoldenOneJobMarksman = { 228, 44, 54, 17, 9, 15, 30 };
+
+    // Marksman mastered + Brawler and Burner mastered as cross-jobs
+    private static readonly int[] GoldenThreeJob = { 258, 63, 57, 19, 12, 18, 33 };
+
+    // Marksman mastered + every other common trade mastered
+    private static readonly int[] GoldenCompletionist = { 460, 189, 75, 37, 34, 40, 53 };
+
+    // Golden build tables, end to end: a real unit shaped into the named
+    // builds (one-job Marksman, three-job Marksman+Brawler+Burner, completionist)
+    // must land exactly on the reviewed constant rows above after
+    // JobManager.RecalculateStats. Representative-level goldens live in
+    // ProbeLevelScaling (1/10/30/99).
+    private void ProbeGrowthGoldenBuilds()
+    {
+        var savedDifficulty = DifficultySettings.Current;
+        DifficultySettings.Current = Difficulty.Easy;
+
+        var unit = UnitFactory.Create("Enemy Warrior", 1);
+        if (unit == null)
+        {
+            Check("golden build unit spawns", false);
+            DifficultySettings.Current = savedDifficulty;
+            return;
+        }
+
+        var jm = unit.GetComponent<JobManager>();
+        var stats = unit.GetComponent<Stats>();
+        var current = jm.CurrentJob;
+
+        // The rows are only meaningful against the pinned fixture
+        Check("golden fixture is a Marksman", current != null && current.id == "marksman",
+            current != null ? current.id : "no job");
+        JobDefinition brawler = null, burner = null;
+        var commons = new List<JobDefinition>();
+        foreach (var j in jm.allJobs)
+        {
+            if (j == null || j == current || j.isUnique)
+                continue;
+            commons.Add(j);
+            if (j.id == "brawler")
+                brawler = j;
+            else if (j.id == "burner")
+                burner = j;
+        }
+
+        if (current == null || current.id != "marksman" || brawler == null || burner == null)
+        {
+            Check("golden build jobs available", false);
+            Destroy(unit);
+            DifficultySettings.Current = savedDifficulty;
+            return;
+        }
+
+        var order = JobManager.statOrder;
+
+        // Rows are compared verbatim; the local closure only formats failures
+        void CheckRow(string label, int[] golden)
+        {
+            for (var i = 0; i < order.Length; i++)
+                Check(label + " " + order[i], stats[order[i]] == golden[i],
+                    $"expected {golden[i]}, got {stats[order[i]]}");
+        }
+
+        // One-job build: Marksman mastered, nothing else touched
+        jm.ProgressData.SetJobLevel(current, ProgressionModel.MaxGrade);
+        jm.RecalculateStats();
+        CheckRow("one-job golden", GoldenOneJobMarksman);
+
+        // Three-job build: Brawler and Burner mastered alongside
+        jm.ProgressData.UnlockJob(brawler);
+        jm.ProgressData.SetJobLevel(brawler, ProgressionModel.MaxGrade);
+        jm.ProgressData.UnlockJob(burner);
+        jm.ProgressData.SetJobLevel(burner, ProgressionModel.MaxGrade);
+        jm.RecalculateStats();
+        CheckRow("three-job golden", GoldenThreeJob);
+
+        // Completionist build: every common trade mastered
+        foreach (var j in commons)
+        {
+            jm.ProgressData.UnlockJob(j);
+            jm.ProgressData.SetJobLevel(j, ProgressionModel.MaxGrade);
+        }
+
+        jm.RecalculateStats();
+        CheckRow("completionist golden", GoldenCompletionist);
 
         Destroy(unit);
         DifficultySettings.Current = savedDifficulty;
