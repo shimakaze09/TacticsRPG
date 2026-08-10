@@ -1,0 +1,60 @@
+name: Feature request
+description: Propose a player-facing capability or tactical-system improvement.
+title: "[Feature] "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or player need
+      description: Describe the problem before proposing an implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: What should the player or developer be able to do?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Include gameplay rules, UI behavior, and important edge cases.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Battle gameplay
+        - AI
+        - Jobs and progression
+        - Items and economy
+        - Story and world
+        - UI and accessibility
+        - Tools, build, or CI
+        - Architecture
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Suggested acceptance criteria
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This proposal is consistent with the GDD, or explains the intended design change.
+          required: true
+        - label: I searched open and closed issues for duplicates.
+          required: true
