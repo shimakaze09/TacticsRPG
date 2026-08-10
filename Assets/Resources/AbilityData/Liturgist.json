@@ -76,7 +76,7 @@
         {
           "type": "Heal",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "",
           "duration": 0
         }

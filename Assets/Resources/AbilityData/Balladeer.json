@@ -19,7 +19,7 @@
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "Knit",
           "duration": 3
         }
@@ -43,7 +43,7 @@
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "Bulwark",
           "duration": 2
         }

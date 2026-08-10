@@ -382,6 +382,9 @@ public static class AbilityAssetGenerator
         }
     }
 
+    // Target allegiance is contract data: every entry must name a known
+    // filter, and an unknown value fails the ability's generation instead of
+    // silently accepting every living unit (issue #53).
     private static void AddTargetComponent(GameObject go, string targetType)
     {
         switch (targetType)
@@ -389,18 +392,30 @@ public static class AbilityAssetGenerator
             case "Enemy":
                 AddComponent<EnemyAbilityEffectTarget>(go);
                 break;
+            case "Ally":
+                AddComponent<AllyAbilityEffectTarget>(go);
+                break;
+            case "Self":
+                AddComponent<SelfAbilityEffectTarget>(go);
+                break;
+            case "AnyLiving":
+                AddComponent<DefaultAbilityEffectTarget>(go);
+                break;
             case "AbsorbDamage":
                 AddComponent<AbsorbDamageAbilityEffectTarget>(go);
                 break;
             case "KOd":
                 AddComponent<KOdAbilityEffectTarget>(go);
                 break;
+            case "KOdAlly":
+                AddComponent<KOdAllyAbilityEffectTarget>(go);
+                break;
             case "Undead":
                 AddComponent<UndeadAbilityEffectTarget>(go);
                 break;
             default:
-                AddComponent<DefaultAbilityEffectTarget>(go);
-                break;
+                throw new System.ArgumentException(
+                    $"Unknown ability target '{targetType}' — use Enemy, Ally, Self, AnyLiving, KOd, KOdAlly, AbsorbDamage, or Undead");
         }
     }
 

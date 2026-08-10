@@ -211,14 +211,14 @@
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Self",
           "status": "Overclock",
           "duration": 3
         },
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Self",
           "status": "Redline",
           "duration": 3
         }

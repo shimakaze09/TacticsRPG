@@ -87,7 +87,7 @@
         {
           "type": "Heal",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Self",
           "status": "",
           "duration": 0
         }
@@ -139,7 +139,7 @@
         {
           "type": "Revive",
           "hitRate": "Full",
-          "target": "KOd",
+          "target": "KOdAlly",
           "status": "",
           "duration": 0
         }
@@ -163,7 +163,7 @@
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Self",
           "status": "Overclock",
           "duration": 3
         }
