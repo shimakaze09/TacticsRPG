@@ -85,7 +85,10 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeTerrain(bc);
             ProbeLevelScaling();
             ProbeGrowthModel();
-            ProbeClockAndWaves(bc); // mutates turn count — keep last
+            ProbeControlBudget(bc);
+            ProbeClockAndWaves(bc); // mutates turn count
+            // Publishes whole rounds of turn events — keep dead last
+            yield return StartCoroutine(ProbeControlExpiry(bc));
         }
         finally
         {
@@ -154,6 +157,7 @@ public class BattleProbeRunner : MonoBehaviour
         Check("battle clock present", bc.GetComponent<BattleClock>() != null);
         Check("element rules present", bc.GetComponent<ElementRules>() != null);
         Check("elevation rules present", bc.GetComponent<ElevationRules>() != null);
+        Check("status expiry rules present", bc.GetComponent<StatusExpiryRules>() != null);
         Check("victory condition present", bc.GetComponent<BaseVictoryCondition>() != null);
         Check("wave hook when waves authored",
             def.waves.Count == 0 || bc.GetComponent<BattleEvents>() != null);
@@ -991,6 +995,236 @@ public class BattleProbeRunner : MonoBehaviour
 
         Destroy(unit);
         DifficultySettings.Current = savedDifficulty;
+    }
+
+    // ---- issue #57: RES growth + control budget -----------------------------
+
+    // The control contract: RES grows with level and job profile per
+    // ProgressionModel, facing shifts effective resistance, every landed
+    // control adds a Steeled stack (+20 effective RES), data-driven control
+    // durations cap at the budget, and status chances stay inside the
+    // contestability bounds.
+    private void ProbeControlBudget(BattleController bc)
+    {
+        // RES growth goldens: same recipe, levels 1 and 30
+        var low = UnitFactory.Create("Enemy Warrior", 1);
+        var high = UnitFactory.Create("Enemy Warrior", 30);
+        if (low != null && high != null)
+        {
+            var job = low.GetComponent<JobManager>().CurrentJob;
+            Check("RES initialized at L1",
+                low.GetComponent<Stats>()[StatTypes.RES] == ProgressionModel.ResistanceFor(job, 1),
+                $"expected {ProgressionModel.ResistanceFor(job, 1)}, got {low.GetComponent<Stats>()[StatTypes.RES]}");
+            Check("RES grows with level",
+                high.GetComponent<Stats>()[StatTypes.RES] == ProgressionModel.ResistanceFor(job, 30),
+                $"expected {ProgressionModel.ResistanceFor(job, 30)}, got {high.GetComponent<Stats>()[StatTypes.RES]}");
+            Check("RES respects the contestability cap",
+                high.GetComponent<Stats>()[StatTypes.RES] <= StatLimits.MaxRES);
+        }
+        else
+        {
+            Check("RES growth units spawn", false);
+        }
+
+        if (low != null) Destroy(low);
+        if (high != null) Destroy(high);
+
+        var alaois = Find(bc, "Alaois");
+        var rogue = Find(bc, "Enemy Rogue");
+        if (alaois == null || rogue == null)
+        {
+            Check("control budget cast present", false);
+            return;
+        }
+
+        var holder = new GameObject("Probe SType");
+        holder.transform.SetParent(alaois.transform);
+        var hitRate = holder.AddComponent<STypeHitRate>();
+        hitRate.accuracy = 85;
+
+        // Facing: attacking from behind is 20 points easier than head-on
+        var board = bc.board;
+        var rPos = rogue.tile.pos;
+        rogue.dir = Directions.East;
+        var frontTile = board.GetTile(new Point(rPos.x + 1, rPos.y));
+        var backTile = board.GetTile(new Point(rPos.x - 1, rPos.y));
+        if (frontTile != null && backTile != null && frontTile.content == null && backTile.content == null)
+        {
+            var home = alaois.tile;
+            alaois.Place(frontTile);
+            alaois.Match();
+            var front = hitRate.Calculate(rogue.tile);
+            alaois.Place(backTile);
+            alaois.Match();
+            var back = hitRate.Calculate(rogue.tile);
+            alaois.Place(home);
+            alaois.Match();
+            Check("back attack beats front by 20", back - front == 20, $"{front} front vs {back} back");
+        }
+
+        // Steeled: each landed control adds one stack of +20 effective RES,
+        // and data-driven control durations clamp to the budget
+        var before = hitRate.Calculate(rogue.tile);
+        var firstControl = StatusRegistry.Inflict(rogue, "Scrambled", 9);
+        Check("control duration clamped", firstControl != null && firstControl.duration == ControlBudget.MaxControlDuration,
+            firstControl != null ? "duration " + firstControl.duration : "inflict failed");
+        var oneStack = hitRate.Calculate(rogue.tile);
+        Check("steeled raises resistance", before - oneStack == ControlBudget.SteeledResistancePerStack,
+            $"{before} -> {oneStack}");
+
+        var secondControl = StatusRegistry.Inflict(rogue, "Scrambled", 2);
+        var twoStacks = hitRate.Calculate(rogue.tile);
+        Check("steeled stacks", before - twoStacks == 2 * ControlBudget.SteeledResistancePerStack,
+            $"{before} -> {twoStacks}");
+        Check("non-control keeps its duration",
+            StatusRegistry.Inflict(rogue, "Shredded", 9)?.duration == 9);
+
+        // Contestability bounds: chance never leaves [Min, Max] on the
+        // normal path regardless of accuracy extremes
+        hitRate.accuracy = 500;
+        Check("chance ceiling", hitRate.Calculate(rogue.tile) == ControlBudget.MaxChance,
+            "got " + hitRate.Calculate(rogue.tile));
+        hitRate.accuracy = -50;
+        Check("chance floor", hitRate.Calculate(rogue.tile) == ControlBudget.MinChance,
+            "got " + hitRate.Calculate(rogue.tile));
+
+        // Restore the rogue: drop the probe statuses we inflicted
+        firstControl?.Remove();
+        secondControl?.Remove();
+        foreach (var condition in rogue.GetComponentsInChildren<DurationStatusCondition>())
+        {
+            var effect = condition.GetComponentInParent<StatusEffect>();
+            if (effect is SteeledStatus || effect is ShreddedStatus)
+                condition.Remove();
+        }
+
+        Destroy(holder);
+
+        // Graycast is stasis — full action/CT denial belongs to the budget
+        Check("graycast classified as control", ControlBudget.IsControl("Graycast"));
+
+        // RES gear golden at the cap: equip clamps, recalculation converges,
+        // a baseline change while equipped stays exact, and unequip restores
+        // the (new) derived value — equip and unequip both route through the
+        // same deterministic recomputation
+        var wizard = UnitFactory.Create("Enemy Wizard", 99);
+        if (wizard != null)
+        {
+            var wizardStats = wizard.GetComponent<Stats>();
+            var wizardJm = wizard.GetComponent<JobManager>();
+            var derived = wizardStats[StatTypes.RES];
+            var expected = Mathf.Min(derived + 10, StatLimits.MaxRES);
+
+            var charm = new GameObject("Probe Res Charm");
+            var equippable = charm.AddComponent<Equippable>();
+            equippable.defaultSlots = EquipSlots.Accessory;
+            var modifier = charm.AddComponent<StatModifierFeature>();
+            modifier.type = StatTypes.RES;
+            modifier.amount = 10;
+
+            wizard.GetComponent<Equipment>().Equip(equippable, EquipSlots.Accessory);
+            Check("res gear equips cap-safe", wizardStats[StatTypes.RES] == expected,
+                $"derived {derived}, got {wizardStats[StatTypes.RES]}");
+            wizardJm.RecalculateStats();
+            Check("res gear recalc converges", wizardStats[StatTypes.RES] == expected,
+                $"expected {expected}, got {wizardStats[StatTypes.RES]}");
+
+            // Baseline change while equipped: switch to another job (different
+            // MDF kit → different derived RES) and the totals must stay exact
+            JobDefinition otherJob = null;
+            foreach (var job in wizardJm.allJobs)
+            {
+                if (job != null && job != wizardJm.CurrentJob && !job.isUnique)
+                {
+                    otherJob = job;
+                    break;
+                }
+            }
+
+            if (otherJob != null)
+            {
+                wizardJm.ProgressData.UnlockJob(otherJob);
+                wizardJm.SwitchJob(otherJob);
+                var switchedDerived = ProgressionModel.ResistanceFor(otherJob, 99);
+                var switchedExpected = Mathf.Min(switchedDerived + 10, StatLimits.MaxRES);
+                Check("res gear exact after job switch", wizardStats[StatTypes.RES] == switchedExpected,
+                    $"expected {switchedExpected}, got {wizardStats[StatTypes.RES]}");
+                wizard.GetComponent<Equipment>().UnEquip(equippable);
+                Check("res gear unequip restores new baseline", wizardStats[StatTypes.RES] == switchedDerived,
+                    $"expected {switchedDerived}, got {wizardStats[StatTypes.RES]}");
+            }
+            else
+            {
+                Check("res gear switch job available", false);
+            }
+
+            Destroy(wizard);
+        }
+        else
+        {
+            Check("res gear golden unit spawns", false);
+        }
+    }
+
+    // A CT-frozen victim never begins a turn, so its control (and Steeled)
+    // conditions must expire through the frozen-window fallback — the #12
+    // failure this contract exists to close — while an unfrozen bystander's
+    // statuses must never fallback-tick, and a fresh inflict must survive a
+    // partial window. Publishes whole rounds of TurnCompletedEvents, so it
+    // runs after every other probe.
+    private IEnumerator ProbeControlExpiry(BattleController bc)
+    {
+        var rogue = Find(bc, "Enemy Rogue");
+        var hania = Find(bc, "Hania");
+        var clock = bc.GetComponent<BattleClock>();
+        if (rogue == null || hania == null || clock == null)
+        {
+            Check("expiry cast present", false);
+            yield break;
+        }
+
+        var frozen = StatusRegistry.Inflict(rogue, "FreezeFrame", 2);
+        // Unfrozen bystander: same battle time passes, nothing may tick
+        var bystander = StatusRegistry.Inflict(hania, "Shredded", 2);
+        Check("freezeframe inflicted", frozen != null && bystander != null);
+        if (frozen == null || bystander == null)
+            yield break;
+
+        var steeled = rogue.GetComponentInChildren<SteeledStatus>();
+        var steeledCondition = steeled != null ? steeled.GetComponentInChildren<DurationStatusCondition>() : null;
+        Check("steeled accompanies control", steeledCondition != null);
+        if (steeledCondition == null)
+            yield break;
+
+        // Late-inflict guard: a partial window (one activation) must not tick
+        var reporter = bc.units[0];
+        reporter.Publish(new TurnCompletedEvent(reporter));
+        Check("partial window does not tick", frozen.duration == 2, "duration " + frozen.duration);
+
+        // Complete exactly two frozen windows: the control (2) runs out, and
+        // Steeled must ALSO count both denied turns — including the window in
+        // which the control removed itself mid-event — leaving exactly 1
+        for (var i = 0; i < clock.RoundLength * 2 - 1; i++)
+            reporter.Publish(new TurnCompletedEvent(reporter));
+
+        // Status removal destroys deferred
+        yield return null;
+        yield return null;
+
+        Check("frozen control expired", rogue.GetComponentInChildren<FreezeFrameStatus>() == null);
+        Check("steeled counts the control's final window", steeledCondition != null && steeledCondition.duration == 1,
+            steeledCondition != null ? "duration " + steeledCondition.duration : "condition gone");
+
+        // Unfrozen again, the fallback stays quiet; the rogue's next real
+        // turn spends Steeled's last point
+        rogue.Publish(new TurnBeganEvent(rogue));
+        yield return null;
+        yield return null;
+
+        Check("steeled expires on the next real turn", rogue.GetComponentInChildren<SteeledStatus>() == null);
+        Check("unfrozen bystander never fallback-ticks", bystander != null && bystander.duration == 2,
+            bystander != null ? "duration " + bystander.duration : "condition gone");
+        bystander.Remove();
     }
 
     // ---- 1.8: clock + reinforcements (mutates state — runs last) -----------

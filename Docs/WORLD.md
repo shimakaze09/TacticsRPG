@@ -144,6 +144,15 @@ cut as an NPC: Coldwater's information broker.
   broadens a build without saturating the 999 caps, and the 3,000–5,000 HP boss
   band comes from authored boss levels/gear rather than stacked job history.
   Party units and generated enemies share the model.
+- **Control budget** (`ControlBudget.cs` + `ProgressionModel.ResistanceFor`,
+  2026-08-10, issue #57): RES is derived, never authored — **15 base + 0.5 per
+  level above 1 + 0.5 per point of the current job's MDF kit**, capped at **75**
+  so max-accuracy control always keeps a real chance. Status hit chance is
+  clamped to **5–95** outside auto-hit/miss exceptions. Hard-control statuses
+  (sleep/stop/disable/immobilize/delayed-KO/charm/confusion/berserk) cap at
+  **3 turns** per data-driven inflict, and each landed control grants the
+  target a **Steeled** stack (+20 effective RES, 3 turns) so chains hit
+  diminishing returns.
 - **Global ceilings** (`StatLimits.cs`, enforced in the stat pipeline, job
   recalculation, and the effect clamp): max HP **20,000** (late-game bosses are
   *designed* around 3,000–5,000 — the cap is a wall, not a target), max MP 9,999,

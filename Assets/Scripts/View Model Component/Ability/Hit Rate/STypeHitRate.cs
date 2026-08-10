@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// Status-type accuracy: reduced by target resistance; the per-ability accuracy
-/// field tunes how reliably control lands.
+/// Status-type accuracy: reduced by target resistance (RES growth per
+/// ProgressionModel, Steeled stacks, facing), then bounded by the
+/// ControlBudget contract — outside auto-hit/miss exceptions, a status
+/// attempt is never a certainty and never impossible (issue #57).
 /// </summary>
 public class STypeHitRate : HitRate
 {
@@ -19,7 +21,7 @@ public class STypeHitRate : HitRate
         res = AdjustForStatusEffects(defender, res);
         res = AdjustForRelativeFacing(defender, res);
         res = Mathf.Clamp(res, 0, 100);
-        return Final(res);
+        return Mathf.Clamp(Final(res), ControlBudget.MinChance, ControlBudget.MaxChance);
     }
 
     private int GetResistance(Unit target)

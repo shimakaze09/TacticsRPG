@@ -73,6 +73,32 @@ public static class ProgressionModel
         return Mathf.RoundToInt(kit * CrossJobCarryover * earned / (MaxGrade - 1));
     }
 
+    /// <summary>Everyone's status resistance before level or job factors.</summary>
+    public const int ResistanceBase = 15;
+
+    /// <summary>RES gained per character level above 1.</summary>
+    public const float ResistancePerLevel = 0.5f;
+
+    /// <summary>RES gained per point of the current job's MDF kit — protocol-hardened trades resist better.</summary>
+    public const float ResistanceFromMdfKit = 0.5f;
+
+    /// <summary>
+    /// Status resistance derived from level and the current job's magic-
+    /// defense profile (issue #57): RES was previously never initialized, so
+    /// every unit sat at 0 and control accuracy was effectively unopposed.
+    /// Recomputed like every other combat stat; capped by StatLimits.MaxRES
+    /// so max-accuracy control always retains a real chance.
+    /// </summary>
+    public static int ResistanceFor(JobDefinition currentJob, int characterLevel)
+    {
+        // MDF sits at statOrder index 5 (MHP, MMP, ATK, DEF, MAT, MDF, SPD)
+        float mdfKit = currentJob != null ? Kit(currentJob, 5) : 0f;
+        int levelsAboveOne = Mathf.Max(0, characterLevel - 1);
+        int res = ResistanceBase +
+                  Mathf.RoundToInt(levelsAboveOne * ResistancePerLevel + mdfKit * ResistanceFromMdfKit);
+        return Mathf.Clamp(res, 0, StatLimits.MaxRES);
+    }
+
     /// <summary>
     /// Stat gained from character level alone, following the current job's
     /// growth profile. Level 1 contributes nothing — the kit already covers

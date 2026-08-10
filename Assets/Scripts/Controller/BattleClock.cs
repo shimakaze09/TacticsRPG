@@ -14,6 +14,9 @@ public class BattleClock : MonoBehaviour
     /// <summary>Current battle round, starting at 1.</summary>
     public int CurrentRound => 1 + TurnsCompleted / Mathf.Max(1, startingUnitCount);
 
+    /// <summary>Activations that make up one round (units at battle start).</summary>
+    public int RoundLength => startingUnitCount;
+
     private int startingUnitCount = 1;
 
     /// <summary>Snapshot the unit count that defines a round's length.</summary>

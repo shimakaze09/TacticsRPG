@@ -16,6 +16,13 @@ public static class StatLimits
     /// <summary>Ceiling for ATK/DEF/MAT/MDF/SPD.</summary>
     public const int MaxPrimaryStat = 999;
 
+    /// <summary>
+    /// Ceiling for RES (status resistance). Deliberately far below 100 so a
+    /// max-accuracy status attempt always keeps a real chance to land —
+    /// control stays contestable in both directions (issue #57).
+    /// </summary>
+    public const int MaxRES = 75;
+
     /// <summary>No single hit or heal may exceed this.</summary>
     public const int MaxDamagePerHit = 999;
 

@@ -57,10 +57,11 @@ and label contract.
 
 - `JobManager.RecalculateStats` is the **single authority** for derived
   stats. It rebuilds from job history + worn gear. Any new persistent
-  bonus source must be folded into that computation **and** any live
-  adjustment path (like `StatModifierFeature` on equip) must produce the
-  identical totals — the two paths converging is what keeps gear from
-  being wiped by a level-up (the 1.9 root-cause bug).
+  bonus source must be folded into that computation. On job-carrying
+  units, `StatModifierFeature` equip/unequip now *routes through* that
+  same recomputation instead of writing deltas — one path, so cap
+  clipping and baseline changes while equipped can never drift (the 1.9
+  root-cause bug, closed for good by the #57 review).
 - `StatLimits` caps (WORLD.md §4b) are enforced at the write points.
   Nothing may bypass them.
 - The growth formula is settled: **ProgressionModel v2** (WORLD.md §4b;

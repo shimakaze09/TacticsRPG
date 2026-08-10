@@ -49,6 +49,7 @@ public static class StatusRegistry
         Register<KnitStatus>();
         Register<NullgravStatus>();
         Register<OverclockStatus>();
+        Register<SteeledStatus>();
 
         // Other
         Register<DesyncStatus>();
@@ -81,6 +82,9 @@ public static class StatusRegistry
     /// <summary>
     /// Puts the named status on the target for a duration. Returns the
     /// condition, or null (with an error) for unknown names/targets.
+    /// Hard-control statuses go through the ControlBudget contract: the
+    /// duration is capped and the target gains a Steeled stack so repeat
+    /// control hits diminishing returns (issue #57).
     /// </summary>
     public static DurationStatusCondition Inflict(Unit target, string name, int duration)
     {
@@ -97,8 +101,34 @@ public static class StatusRegistry
         if (status == null)
             return null;
 
+        bool isControl = ControlBudget.IsControl(name);
         var condition = entry.inflict(status);
-        condition.duration = duration;
+        condition.duration = isControl
+            ? Mathf.Min(duration, ControlBudget.MaxControlDuration)
+            : duration;
+
+        if (isControl)
+            HardenAgainstControl(status);
+
         return condition;
+    }
+
+    // Adds or deepens the target's Steeled protection after a control status
+    // lands: one effect object, one duration condition, a stack counter —
+    // never a second Steeled instance per application.
+    private static void HardenAgainstControl(Status status)
+    {
+        var steeled = status.GetComponentInChildren<SteeledStatus>();
+        if (steeled == null)
+        {
+            var condition = status.Add<SteeledStatus, DurationStatusCondition>();
+            condition.duration = ControlBudget.SteeledDuration;
+            return;
+        }
+
+        steeled.stacks++;
+        var existing = steeled.GetComponentInChildren<DurationStatusCondition>();
+        if (existing != null)
+            existing.duration = Mathf.Max(existing.duration, ControlBudget.SteeledDuration);
     }
 }

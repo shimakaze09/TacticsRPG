@@ -5,7 +5,7 @@ using UnityEngine;
 /// Cannot evade or use reaction abilities.
 /// Wears off after 20 ticks (~2 turns).
 /// </summary>
-public class FreezeFrameStatus : StatusEffect
+public class FreezeFrameStatus : StatusEffect, ICtFreezingStatus
 {
     private Unit owner;
     private Stats stats;
