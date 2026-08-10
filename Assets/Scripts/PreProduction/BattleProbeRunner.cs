@@ -615,6 +615,15 @@ public class BattleProbeRunner : MonoBehaviour
             Check("enemy attack filter rejects fellow enemy", !enemyAttack.IsTarget(warrior.tile));
             Check("enemy attack filter rejects caster", !enemyAttack.IsTarget(rogue.tile));
 
+            // Neutral from the AI side: nobody's ally, nobody's foe — the
+            // enemy caster's support and attack must both exclude it
+            var haniaAlliance = hania.GetComponent<Alliance>();
+            var haniaSide = haniaAlliance.type;
+            haniaAlliance.type = Alliances.Neutral;
+            Check("enemy ally filter rejects neutral", !enemyAlly.IsTarget(hania.tile));
+            Check("enemy attack filter rejects neutral", !enemyAttack.IsTarget(hania.tile));
+            haniaAlliance.type = haniaSide;
+
             // KO across sides: a downed fellow enemy stops being a support
             // target for the AI just as a downed teammate does for the player
             var warriorStats = warrior.GetComponent<Stats>();
@@ -629,6 +638,9 @@ public class BattleProbeRunner : MonoBehaviour
             Check("confused enemy ally filter targets heroes", enemyAlly.IsTarget(alaois.tile));
             Check("confused enemy ally filter rejects fellow enemy", !enemyAlly.IsTarget(warrior.tile));
             Check("confused enemy ally filter still accepts caster", enemyAlly.IsTarget(rogue.tile));
+            haniaAlliance.type = Alliances.Neutral;
+            Check("confused enemy ally filter still rejects neutral", !enemyAlly.IsTarget(hania.tile));
+            haniaAlliance.type = haniaSide;
             rogueAllianceComp.confused = false;
 
             // Full-board support from the AI side: the Ally contract blesses
