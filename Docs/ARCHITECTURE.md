@@ -72,6 +72,25 @@ and label contract.
   automated balance report in
   [#58](https://github.com/shimakaze09/TacticsRPG/issues/58).
 
+### Balance report (#58, v1)
+
+- `Tactics RPG → Generate Balance Report` in-editor, or headless from the
+  same clean-checkout path as the probes:
+  `Unity -batchmode -nographics -projectPath . -executeMethod BalanceReportGenerator.RunHeadless`
+  (exit 0 = clean). Writes `BalanceReport/report.{json,md}` at the repo root
+  (gitignored) straight from the content JSON plus
+  ProgressionModel/StatLimits/GearCatalog — no play mode, no generated
+  assets, deterministic output.
+- Target bands and tolerances are versioned constants in
+  `Assets/Editor/BalanceReport/BalanceConfig.cs`; changing a band is a design
+  decision and bumps its `Version` in the same edit.
+- **Hard invariants fail CI** (exit 1): broken or misnamed ability-unlock
+  references, job ↔ catalog ↔ ability file mismatches (WORLD §5), a primary
+  stat saturating its 999 cap before level 90 single-job, zero-power heals,
+  and >10× band outliers. Band drift (level-1 HP band, 2–6 turns-to-KO,
+  zero-MP free power, dominated options) surfaces as **warnings — review
+  prompts, never failures**.
+
 ## 5. Damage pipeline placement
 
 Stages: attack/defense/power stat events → formula
