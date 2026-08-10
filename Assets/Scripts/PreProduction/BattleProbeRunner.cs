@@ -588,6 +588,97 @@ public class BattleProbeRunner : MonoBehaviour
             Destroy(instance);
         }
 
+        // The same contracts drive the AI: from an enemy caster every filter
+        // must resolve relative to its own side, for single targets and
+        // full-board broadcasts alike (issue #53 final criterion).
+        // Guest-alliance coverage is intentionally absent — no Guest value
+        // exists in Alliances yet; Guest-unit rules land with the escort
+        // objective (#32) and must extend this matrix when they do.
+        var warrior = Find(bc, "Enemy Warrior");
+        Check("second enemy present", warrior != null);
+        if (warrior != null)
+        {
+            var enemyHolder = new GameObject("Probe Enemy Filters");
+            enemyHolder.transform.SetParent(rogue.transform);
+            var enemyAlly = enemyHolder.AddComponent<AllyAbilityEffectTarget>();
+            var enemySelf = enemyHolder.AddComponent<SelfAbilityEffectTarget>();
+
+            Check("enemy ally filter accepts fellow enemy", enemyAlly.IsTarget(warrior.tile));
+            Check("enemy ally filter accepts caster", enemyAlly.IsTarget(rogue.tile));
+            Check("enemy ally filter rejects hero", !enemyAlly.IsTarget(alaois.tile));
+            Check("enemy self filter accepts only caster",
+                enemySelf.IsTarget(rogue.tile) && !enemySelf.IsTarget(warrior.tile) &&
+                !enemySelf.IsTarget(alaois.tile));
+
+            var enemyAttack = AttackOf(rogue).GetComponentInChildren<AbilityEffectTarget>();
+            Check("enemy attack filter accepts hero", enemyAttack.IsTarget(alaois.tile));
+            Check("enemy attack filter rejects fellow enemy", !enemyAttack.IsTarget(warrior.tile));
+            Check("enemy attack filter rejects caster", !enemyAttack.IsTarget(rogue.tile));
+
+            // KO across sides: a downed fellow enemy stops being a support
+            // target for the AI just as a downed teammate does for the player
+            var warriorStats = warrior.GetComponent<Stats>();
+            var warriorHP = warriorStats[StatTypes.HP];
+            warriorStats.SetValue(StatTypes.HP, 0, false);
+            Check("enemy ally filter rejects downed fellow enemy", !enemyAlly.IsTarget(warrior.tile));
+            warriorStats.SetValue(StatTypes.HP, warriorHP, false);
+
+            // Confused enemy: its support turns on heroes, never on itself
+            var rogueAllianceComp = rogue.GetComponent<Alliance>();
+            rogueAllianceComp.confused = true;
+            Check("confused enemy ally filter targets heroes", enemyAlly.IsTarget(alaois.tile));
+            Check("confused enemy ally filter rejects fellow enemy", !enemyAlly.IsTarget(warrior.tile));
+            Check("confused enemy ally filter still accepts caster", enemyAlly.IsTarget(rogue.tile));
+            rogueAllianceComp.confused = false;
+
+            // Full-board support from the AI side: the Ally contract blesses
+            // enemies only when an enemy sings it
+            var enemyBroadcast = Resources.Load<GameObject>("Abilities/Balladeer/Grit Ballad");
+            if (enemyBroadcast != null)
+            {
+                var bInstance = Instantiate(enemyBroadcast);
+                bInstance.transform.SetParent(rogue.transform);
+                var bFilter = bInstance.GetComponentInChildren<AbilityEffectTarget>();
+                foreach (var u in bc.units)
+                {
+                    var side = u.GetComponent<Alliance>().type;
+                    var living = u.GetComponent<Stats>()[StatTypes.HP] > 0;
+                    var expectLegal = side == Alliances.Enemy && living;
+                    Check("enemy broadcast legality " + u.name,
+                        bFilter.IsTarget(u.tile) == expectLegal,
+                        $"side {side}, living {living}");
+                }
+
+                Destroy(bInstance);
+            }
+
+            // Generated single-target heal, both perspectives: legal only on
+            // the caster's own living side
+            var heal = Resources.Load<GameObject>("Abilities/Sawbones/Patch Up");
+            Check("generated single-target heal present", heal != null,
+                "run Tactics RPG → Generate Content → Abilities");
+            if (heal != null)
+            {
+                var heroHeal = Instantiate(heal);
+                heroHeal.transform.SetParent(alaois.transform);
+                var heroHealFilter = heroHeal.GetComponentInChildren<AbilityEffectTarget>();
+                Check("hero heal carries Ally contract", heroHealFilter is AllyAbilityEffectTarget,
+                    heroHealFilter != null ? heroHealFilter.GetType().Name : "no filter");
+                Check("hero heal legal on teammate, illegal on enemy",
+                    heroHealFilter.IsTarget(hania.tile) && !heroHealFilter.IsTarget(rogue.tile));
+                Destroy(heroHeal);
+
+                var foeHeal = Instantiate(heal);
+                foeHeal.transform.SetParent(rogue.transform);
+                var foeHealFilter = foeHeal.GetComponentInChildren<AbilityEffectTarget>();
+                Check("enemy heal legal on fellow enemy, illegal on hero",
+                    foeHealFilter.IsTarget(warrior.tile) && !foeHealFilter.IsTarget(alaois.tile));
+                Destroy(foeHeal);
+            }
+
+            Destroy(enemyHolder);
+        }
+
         Destroy(holder);
     }
 
