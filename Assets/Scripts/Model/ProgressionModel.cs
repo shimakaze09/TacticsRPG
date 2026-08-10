@@ -19,6 +19,10 @@ using UnityEngine;
 /// jobs lands in WORLD.md §4b's designed 3,000–5,000 HP boss band.
 /// Party units and generated enemies use the same model; only their inputs
 /// differ (heroes earn levels and history, spawns are handed a level).
+/// Known contract: because the level term follows the CURRENT job, all prior
+/// level growth re-profiles retroactively on job switch — whether growth
+/// should instead be banked per level-up is decided with the cumulative
+/// growth redesign (issue #54).
 /// </summary>
 public static class ProgressionModel
 {

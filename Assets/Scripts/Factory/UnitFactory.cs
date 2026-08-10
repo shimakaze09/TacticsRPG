@@ -48,14 +48,16 @@ public static class UnitFactory
         obj.AddComponent<Status>();
         obj.AddComponent<Equipment>();
         // Rank must exist before JobManager: JobManager.Awake caches the Rank
-        // reference and its level-up JP subscription depends on it.
+        // reference and its level-up JP subscription depends on it. Alliance
+        // must too: AddJob's stat recalculation applies the enemy-HP
+        // difficulty multiplier only when it can see the unit's side.
         AddRank(obj, level);
+        AddAlliance(obj, recipe.alliance);
         AddJob(obj, recipe.job);
         EquipStartingGear(obj);
         obj.AddComponent<Health>();
         obj.AddComponent<Mana>();
         AddAttack(obj, recipe.attack);
-        AddAlliance(obj, recipe.alliance);
         AddAttackPattern(obj, recipe.strategy);
         AddElement(obj, recipe.element);
 

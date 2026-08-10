@@ -574,13 +574,20 @@ public class JobManager : MonoBehaviour, IDataPersistence
         // Award JP for each level gained
         int levelsGained = newLevel - Mathf.Max(oldLevel, lastProcessedLevel);
 
+        bool statsAlreadyRecalculated = false;
         if (levelsGained > 0 && CurrentJob != null)
         {
             int jpToAward = levelsGained * jpPerLevel;
-            AddJobPoints(jpToAward);
+            // A grade-up recalculates inside OnJobLevelUp — don't do it twice
+            statsAlreadyRecalculated = AddJobPoints(jpToAward);
 
             Debug.Log($"{gameObject.name} gained {levelsGained} levels, awarded {jpToAward} JP to {CurrentJob.jobName}");
         }
+
+        // The character-level growth term (ProgressionModel) moved even when
+        // no job grade did — stats must always follow an accepted level gain.
+        if (levelsGained > 0 && !statsAlreadyRecalculated)
+            RecalculateStats();
 
         lastProcessedLevel = newLevel;
     }

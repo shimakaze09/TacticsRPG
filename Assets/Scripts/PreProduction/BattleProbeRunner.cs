@@ -623,13 +623,18 @@ public class BattleProbeRunner : MonoBehaviour
     // Golden checks for the progression model: units of the same recipe
     // spawned at levels 1/10/30/99 must differ by exactly the documented
     // level-growth term (ProgressionModel), across striker/skirmisher/caster
-    // archetypes. MHP is only checked monotonically because difficulty may
-    // scale enemy HP; ATK/MAT/SPD/MMP are never difficulty-scaled.
+    // archetypes — MHP included. Difficulty is pinned to Easy for the exact
+    // block, then a Hard spawn must show the enemy-HP multiplier applied at
+    // creation time (the factory adds Alliance before the first stat calc).
     private void ProbeLevelScaling()
     {
+        var savedDifficulty = DifficultySettings.Current;
+        DifficultySettings.Current = Difficulty.Easy;
+
         string[] recipes = { "Enemy Warrior", "Enemy Rogue", "Enemy Wizard" };
         int[] levels = { 1, 10, 30, 99 };
-        var exactStats = new[] { StatTypes.MMP, StatTypes.ATK, StatTypes.MAT, StatTypes.SPD };
+        var exactStats = new[] { StatTypes.MHP, StatTypes.MMP, StatTypes.ATK, StatTypes.MAT, StatTypes.SPD };
+        var easyWarrior10MHP = 0;
 
         foreach (var recipe in recipes)
         {
@@ -650,27 +655,50 @@ public class BattleProbeRunner : MonoBehaviour
             {
                 var s = spawned[i].GetComponent<Stats>();
 
-                Check($"{recipe} L{levels[i]} MHP grows",
-                    s[StatTypes.MHP] > baseStats[StatTypes.MHP],
-                    $"{baseStats[StatTypes.MHP]} -> {s[StatTypes.MHP]}");
-
                 for (var k = 0; k < exactStats.Length; k++)
                 {
                     var statIndex = System.Array.IndexOf(JobManager.statOrder, exactStats[k]);
                     var expected = baseStats[exactStats[k]] +
                                    ProgressionModel.LevelGrowthBonus(job, statIndex, levels[i]);
-                    expected = Mathf.Min(expected,
-                        exactStats[k] == StatTypes.MMP ? StatLimits.MaxMP : StatLimits.MaxPrimaryStat);
+                    expected = exactStats[k] switch
+                    {
+                        StatTypes.MHP => Mathf.Min(expected, StatLimits.MaxHP),
+                        StatTypes.MMP => Mathf.Min(expected, StatLimits.MaxMP),
+                        _ => Mathf.Min(expected, StatLimits.MaxPrimaryStat)
+                    };
                     Check($"{recipe} L{levels[i]} {exactStats[k]} golden",
                         s[exactStats[k]] == expected,
                         $"expected {expected}, got {s[exactStats[k]]}");
                 }
+
+                if (recipe == "Enemy Warrior" && levels[i] == 10)
+                    easyWarrior10MHP = s[StatTypes.MHP];
             }
 
             foreach (var go in spawned)
                 if (go != null)
                     Destroy(go);
         }
+
+        // Hard difficulty must scale enemy MHP at creation, not only on the
+        // next recalculation
+        if (easyWarrior10MHP > 0)
+        {
+            DifficultySettings.Current = Difficulty.Hard;
+            var hardWarrior = UnitFactory.Create("Enemy Warrior", 10);
+            if (hardWarrior != null)
+            {
+                var expected = Mathf.Min(
+                    Mathf.RoundToInt(easyWarrior10MHP * DifficultySettings.EnemyHpMultiplier),
+                    StatLimits.MaxHP);
+                var actual = hardWarrior.GetComponent<Stats>()[StatTypes.MHP];
+                Check("hard mode scales enemy MHP at spawn", actual == expected,
+                    $"expected {expected}, got {actual}");
+                Destroy(hardWarrior);
+            }
+        }
+
+        DifficultySettings.Current = savedDifficulty;
     }
 
     // ---- 1.8: clock + reinforcements (mutates state — runs last) -----------
