@@ -15,7 +15,9 @@ multiple objectives, Easy/Hard AI, 23 jobs, and 135 data-defined abilities.
 The end-to-end loop is still under construction. A normal build currently
 opens an unfinished title scene, and the Title → Hub → Battle → Results → Hub
 journey is not yet complete. Track the current integration work in the
-[Roadmap](Docs/ROADMAP.md) and the linked GitHub issues.
+[GitHub issue tracker](https://github.com/shimakaze09/TacticsRPG/issues). The
+[Roadmap](Docs/ROADMAP.md) explains the phase, priority, group, and weight
+labels used to keep implementation focused.
 
 ## Requirements
 
@@ -74,5 +76,6 @@ historical audits.
 ## Reporting work
 
 Use the repository issue forms for reproducible bugs, feature proposals, and
-implementation tasks. Current blockers are linked from the
-[Roadmap](Docs/ROADMAP.md).
+implementation tasks. Every unfinished issue is classified by importance,
+feature group, delivery phase, and relative weight; the
+[Roadmap](Docs/ROADMAP.md) defines the workflow.

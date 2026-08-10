@@ -1,8 +1,8 @@
-# Battle system plan
+# Battle runtime status
 
 **Updated:** 2026-08-10  
-**Scope:** the tactical runtime only. Player-flow and meta-game priorities live
-in [ROADMAP.md](ROADMAP.md).
+**Scope:** implemented tactical-runtime capability, balance observations, and
+the verification contract. Implementable work lives in GitHub Issues.
 
 ## Current capability
 
@@ -17,56 +17,58 @@ The repository implements a substantial battle sandbox:
 - KO/remains behavior and salvage pickup
 - Defeat-all, defeat-target, survive-rounds, and reach-zone objectives
 - Authored `BattleDefinition` setup plus repeatable-writ fallback spawning
-- Easy pattern AI and Hard tactical AI with threat, retreat, focus, and support
+- Easy pattern AI and Hard tactical AI
 - 23 jobs and 135 data-defined abilities
 
-These systems are **implemented**, but the normal player flow that reaches and
-leaves them is incomplete. Do not describe the whole game as playable until the
-vertical-slice exit condition in `ROADMAP.md` is met.
+These systems are **implemented**, but the player-facing loop and several
+combat/progression contracts are not integrated or verified. Do not describe
+the full game as playable until the phase-1 gate in
+[ROADMAP.md](ROADMAP.md) is met.
 
-## Immediate battle-adjacent work
+## Quantitative balance snapshot
 
-1. Move scrip and inventory into canonical save data as part of the one-time
-   reward transaction ([issue #3](https://github.com/shimakaze09/TacticsRPG/issues/3)).
-2. Make `jpCost`/Cert purchasing real in the job menu, or remove the unused
-   field after an explicit design change. The current GDD chooses Cert purchase.
-3. Add an escort objective only when Guest-unit control and failure rules are
-   defined together.
-4. Connect the first two authored battles to the hub/contract flow.
+The 2026-08-10 static pass against `3857aa4` found that tuning content before
+the progression foundations are fixed would produce misleading results:
 
-## Tactical depth order
+- spawn level currently changes Rank/EXP but not combat stats
+- initialized job Grades accumulate full stat blocks across job history
+- 25 of 76 damaging abilities cost zero MP, with free power reaching 360
+- heals remain flat at 12–30 while MHP grows cumulatively
+- 10% MMP regeneration eventually exceeds every current spell cost
+- RES has no job/gear initialization path despite controlling status accuracy
 
-1. **Timeline warfare:** initiative UI, delay/push/reorder abilities, and AI
-   awareness.
-2. **Grit reactions:** deterministic build-and-spend reaction windows.
-3. **Sync terrain:** network coverage as casting geography.
-4. **In-battle salvage:** Scav-specific interaction with remains.
+Evidence, decisions, and acceptance criteria live in
+[#52](https://github.com/shimakaze09/TacticsRPG/issues/52),
+[#54](https://github.com/shimakaze09/TacticsRPG/issues/54),
+[#55](https://github.com/shimakaze09/TacticsRPG/issues/55),
+[#56](https://github.com/shimakaze09/TacticsRPG/issues/56),
+[#57](https://github.com/shimakaze09/TacticsRPG/issues/57), and
+[#58](https://github.com/shimakaze09/TacticsRPG/issues/58).
 
-Prioritize new interaction shapes over another large batch of damage/status
-abilities: forced movement, hazards, delayed actions, reactions, deployables,
-and objective interaction create more depth than additional names.
+## Work tracking
 
-## Presentation and usability
+- [Combat rules](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen+label%3A%22group%3A+combat-rules%22)
+- [Statuses](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen+label%3A%22group%3A+status%22)
+- [Balance](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen+label%3A%22group%3A+balance%22)
+- [AI](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen+label%3A%22group%3A+ai%22)
+- [Jobs](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen+label%3A%22group%3A+jobs%22)
+- [Equipment and economy](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen+label%3A%22group%3A+equipment-economy%22)
 
-- Visible turn order
-- Movement and enemy-threat previews
-- Damage/hit forecast explanations
-- AoE previews
-- Status icons, durations, and tooltips
-- Camera framing, action feedback, and minimal VFX/audio
-- Clear cancel/undo boundaries and AI-thinking feedback
+The setting-native identity proposals for jobs, gear, story objectives, and
+new post-slice jobs are tracked in issues #64–#68. Design details remain in the
+issues until ratified; approved decisions then update GDD/WORLD.
 
 ## Verification contract
 
-Every battle-system change should include:
+Every battle-system change includes:
 
 1. A deterministic probe or focused Unity test.
 2. A clean Unity compile.
 3. No new errors during a representative play session.
-4. Documentation changes only where design, setup, or public behavior changed.
+4. Balance-report output when formulas, stats, abilities, gear, encounters, or
+   rewards change.
+5. Documentation changes only where design, setup, or public behavior changed.
 
-The repository documents a headless entry point at
-`BattleProbeMenu.RunHeadless`. The last historical documentation reports 71
-passing probes, but this 2026-08-10 docs review could not rerun Unity. Automated
-clean-checkout verification is tracked in
-[issue #7](https://github.com/shimakaze09/TacticsRPG/issues/7).
+The repository documents `BattleProbeMenu.RunHeadless`, but Unity was not
+available for this review. Clean-checkout automation remains tracked in
+[#7](https://github.com/shimakaze09/TacticsRPG/issues/7).

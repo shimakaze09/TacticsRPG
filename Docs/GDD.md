@@ -1,15 +1,20 @@
 # The Long Autumn — Game Design Document
 
 **Version 1.1 · 2026-08-10 · Design authority for the whole game.**
-Setting detail lives in `WORLD.md`; battle-system status and queue in
-`BATTLE_PLAN.md`; execution order in `ROADMAP.md`. Where documents disagree,
-this one states intent, WORLD.md owns lore, BATTLE_PLAN owns implementation truth.
+Setting detail lives in `WORLD.md`; battle-system status in `BATTLE_PLAN.md`;
+delivery gates and label rules in `ROADMAP.md`. Where documents disagree,
+this one states intent, WORLD.md owns lore, and PROJECT_REVIEW/BATTLE_PLAN own
+implementation observations.
 
 Status terms in this document follow [README.md](README.md): **implemented**
 means code/content exists, **integrated** means reachable through the normal
 player flow, and **planned** means design intent. The tactical runtime is
 substantial, but the complete Title → Hub → Battle → Results → Hub loop is not
 yet integrated.
+
+GitHub Issues is the operational backlog. This document may define intended
+behavior and content, but every actionable implementation gap must be a
+classified issue rather than an embedded TODO or milestone queue.
 
 **Locked platform/scope decisions:** PC with mouse+keyboard first (controller
 post-slice) · 2D sprites on a 3D grid · vertical slice before full campaign ·
@@ -19,16 +24,16 @@ all three story seeds as one arc.
 
 ## 1. Vision & pillars
 
-**One sentence:** FFT's tactical soul in an original post-collapse world —
-battles where terrain, turn order, and information are weapons, inside a story
-about who gets to write history.
+**One sentence:** A turn-based tactics RPG where a precarious mercenary charter
+uses terrain, turn order, contracts, and contested information as weapons in a
+fight over who gets to certify reality.
 
 **The player fantasy:** you run a small mercenary charter that is always one
 bad contract from dissolving, in a world where "magic" is the liturgy of dying
 machines and the map itself is propaganda. You out-think bigger forces, keep
 your people alive, and eventually decide what the truth costs.
 
-**Identity anchors (what makes this game itself, not an FFT clone):**
+**Identity anchors:**
 
 1. **Timeline warfare** — turn order is a visible, manipulable battlefield.
    The initiative bar is a first-class UI element; abilities push, delay, and
@@ -49,9 +54,11 @@ your people alive, and eventually decide what the truth costs.
 **Anti-goals:** no number inflation, no gacha-style randomness in progression,
 no Japanese-fantasy aesthetic drift (WORLD.md §3 register), no open-world scope.
 
-**References:** FFT (turn economy, job feel), Tactics Ogre (tone), Into the
-Breach (legibility, telegraphing), Disco Elysium (institutional unreliability
-of records — tone only).
+**References:** classic isometric tactics (turn economy and expressive jobs),
+Tactics Ogre (tone), Into the Breach (legibility and telegraphing), and Disco
+Elysium (institutional unreliability of records — tone only). References are
+input, not templates: setting, jobs, equipment logic, objective language, and
+story structure must remain original.
 
 ## 2. Game structure & core loop
 
@@ -78,7 +85,7 @@ Title ─► Charter Hub ─► Contract Briefing ─► Battle ─► Results &
 ### 3.1 Battle (runtime largely implemented; player loop incomplete)
 
 Implemented in the battle runtime: CTR turn economy; composition-based abilities; honest
-statuses (per-owner durations, real combat effects, tuned accuracy); damage
+statuses (per-owner durations and real combat effects); damage
 `max(ATK×power/100 − DEF/2, 1)` with global caps; line of sight + high ground
 (±15% dmg, ±10 hit at ≥2 height); KO decay into memory-cores/salvage with
 pass-over corpses; two difficulties — Easy (pattern AI) and Hard (tactical AI
@@ -109,10 +116,12 @@ The last historical in-editor documentation reported 71 passing battle probes;
 the 2026-08-10 docs review did not rerun Unity. Clean-checkout automation is
 tracked in GitHub issue #7.
 
-Planned (queue order): the pillars. The
-**escort** objective (civilian unit with Guest alliance) lands with the
-market-rescue battle in M2 — it needs guest-unit control rules, not just a
-victory check.
+The three identity pillars remain design intent. Their implementation and the
+Chapter 1 escort objective are tracked in the classified
+[combat-rules](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen+label%3A%22group%3A+combat-rules%22)
+and
+[Chapter 1](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen+label%3A%22group%3A+content-chapter1%22)
+issue views.
 
 ### 3.2 Jobs & growth (runtime implemented; design ratified here)
 
@@ -124,7 +133,14 @@ the Job menu to learn them (jpCost field becomes live data). Rationale: Cert
 is the world's certification currency — buying your license fits; it also adds
 a meaningful post-battle decision beyond job switching.
 
-### 3.3 Equipment & economy (design for BATTLE_PLAN 1.9)
+The roster's current names and tree are canon, but each job's setting-native
+signature decision loop is under explicit review in
+[#64](https://github.com/shimakaze09/TacticsRPG/issues/64); three possible
+post-slice additions are isolated in
+[#68](https://github.com/shimakaze09/TacticsRPG/issues/68) so expansion cannot
+distract from differentiating the existing 23 jobs.
+
+### 3.3 Equipment & economy
 
 - **Slots:** primary (weapon), body (armor), trinket (accessory). Head/shield
   fold into body/trinket to keep the slice lean.
@@ -165,20 +181,14 @@ from the Attack ability; defensive traits ride the item as Features and
 hook the same TweakDamage stage statuses use. Attackers turn to face their
 target when acting, so facing rules and visuals always agree.
 
-**The full design space** — gear behavior families and when they land
-(each is data + one hook, never a new system):
-
-| Family | Examples | Lands with |
-|---|---|---|
-| Conditional damage | execute (Pit Cleaver), opener (Wrapped Knuckles), terrain-conditional (Dowsing Staff on water), crit bonuses (Absolution Point); anti-armor/anti-caster still open | **1.10 implemented** (anti-* with 1.11's resource attacks) |
-| Element interaction | affinity advantage law battle-wide, element resist/weak armor (rattan burns), Doused ignites under fire | **1.10 implemented** (branded weapons = content) |
-| On-hit statuses, resource attack | MpBurn trait (Cipher Rod), Shredded armor-tear (Pry Hook payload) | **1.11 implemented** (more payloads = content) |
-| Timeline gear | CT-push weapons (knock the target's turn later), CT-cost or recharge modifiers, initiative trinkets | **Pillar 1** (timeline warfare) |
-| Reaction gear | counter weapons, thorns armor, Grit-gain trinkets, reach weapons that deny counters | **Pillar 2** (Grit reactions) |
-| Forced movement | knockback mauls, the Pry Hook PULLING its target a tile, repositioning shields | battle polish (#28 — needs push/pull resolution + AoE previews) |
-| Mobility gear | +MOV boots, water-walking waders, nullgrav harness (fly traversal), jump kits | with terrain art pass / M2 shop tiers |
-| Auras & wearer passives | the Charter Standard buffing adjacent allies (it IS a banner), regen mesh, status-immunity trinkets, one-time death protection (Failsafe exists) | M2 (needs aura recompute + trinket slot content) |
-| Meta/economy | set bonuses (maker's marks), shop upgrade paths, cursed/bound relic gear (can't unequip, big drawback) | M2 shop rebuild + relic hunts |
+The existing trait vocabulary supports conditional damage, elements, on-hit
+statuses, resource attacks, timeline effects, reactions, forced movement,
+mobility, auras, and economy hooks. The setting-native gear direction—field
+rigs, Bulk/Signal Load budgets, maker doctrines, provenance and legality,
+contract-clause equipment, memory-core modules, and refitting rather than
+durability—is proposed in
+[#65](https://github.com/shimakaze09/TacticsRPG/issues/65). It should be
+ratified there before changing this design authority.
 
 **Anti-goals:** no durability/weapon breaking (friction without decisions),
 no random affixes (loot stays deterministic, §above), nothing that breaks
@@ -188,7 +198,8 @@ the WORLD §4b caps.
 
 Easy = classic pattern AI, no scaling — the story difficulty. Hard = tactical
 AI + enemies at 130% HP / 120% damage — the "feel hunted" difficulty.
-Selection moves into Settings when the title screen lands (M1).
+Player-facing selection is tracked in
+[#62](https://github.com/shimakaze09/TacticsRPG/issues/62).
 
 ## 4. Storytelling
 
@@ -201,12 +212,19 @@ granary and fled south."), stamped and tidy. Then the player plays the truth.
 At campaign end, the player's final choice decides which version enters the
 archive.
 
+The next story revision is deliberately tracked in
+[#66](https://github.com/shimakaze09/TacticsRPG/issues/66), while contracts,
+evidence, and testimony as tactical objectives are proposed in
+[#67](https://github.com/shimakaze09/TacticsRPG/issues/67). Those reviews must
+preserve the archive/Charter/Protocol identity while replacing inherited plot
+shapes with setting-native institutional conflicts.
+
 ### 4.2 Cast
 
 | Character | Job (unique) | Role |
 |---|---|---|
 | **Rhen Calder** (player captain) | starts Drifter | Captain of the Kestrel Charter; pragmatist forced into historiography |
-| **Aldric Vane** | Bannerlord | Rhen's oath-brother, co-founded Kestrel, left for the Ironquill Charter; the Delita-shaped mirror |
+| **Aldric Vane** | Bannerlord | Rhen's oath-brother and Kestrel co-founder; an institutionalist who believes Charter law is the last defense against arbitrary rule |
 | **Captain Gide Marrow** | Oathbreaker | Ironquill's captain; treats contract law as a weapon; Act 2 betrayer |
 | **Sister Vesper** | Knife of the Church | Cartographic Church redactor sent to "correct" the record — and the charter |
 | **Ansel Rook** | Cipherguard | Church "observer" attached to the succession; Chapter 1 boss; later defector |
@@ -243,7 +261,7 @@ are recorded as story flags in the save (PlayerProgress) from Chapter 1 on.
   everyone who knows. Finale at the First Archive.
   **Choice C (finale):** what happens to the proof —
   **publish · suppress · seize** (use it as leverage to raise Kestrel into a
-  great charter — the Delita option).
+  great charter and turn custody of truth into institutional power).
 
 **Endings matrix (4):**
 
@@ -259,10 +277,10 @@ or neither) rather than forking whole ending scenes — branch cost stays sane.
 
 ### 4.4 Delivery
 
-Chapter cards (new UI) · pre/post-battle conversations (ConversationController
-exists) · 2–3 scripted mid-battle events per chapter (reinforcement + dialogue
-triggers — needs a small battle-event hook in 1.8) · the Archive screen for
-rereading records with truth/record toggles (post-slice).
+The intended delivery vocabulary is chapter cards, pre/post-battle
+conversations, 2–3 scripted mid-battle moments per chapter, and an Archive
+screen for rereading official and witnessed records. Concrete UI, event-hook,
+and campaign work lives in the classified story/world and content issues.
 
 ### 4.5 Side content — quest taxonomy
 
@@ -316,7 +334,7 @@ with its own stamp/icon. All quest state lives in save-file story flags.
    Legendary tier sits above shop gear with a unique passive each (via the
    Feature system); one copy ever, marked in the archive when found.
 
-**Slice scope for side content (M2):** one short side story (*The Last
+**Slice scope for side content:** one short side story (*The Last
 Ferryman*), writs unlocked after battle 2 (proving the repeatable system),
 one hidden quest seed (rumor tile in battle 4's rooftops), and Choice A at
 chapter close writing its story flag. Everything else is post-slice content
@@ -359,10 +377,10 @@ tease only in battle 5), controller support, Archive screen, world-map hub.
 | Speed up AI turns | — | hold Shift |
 
 Hover always forecasts: movement range on hover-select, damage/hit% on
-hover-target. **Engineering note:** the current InputController is
-keyboard-axis only and fires static events; the M3 controls rework replaces it
-with an action-map layer (Unity Input System) implementing this table — until
-then the existing keyboard flow remains the dev-testing path.
+hover-target. The current InputController is keyboard-axis only and fires
+static events; implementation of this intended control scheme is tracked in
+the classified
+[input/accessibility issues](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen+label%3A%22group%3A+input-accessibility%22).
 
 ## 7. UI/UX — screens and style
 
@@ -382,17 +400,20 @@ then the existing keyboard flow remains the dev-testing path.
 
 ### 7.2 Screen inventory (slice)
 
-| Screen | Contents | Status |
+| Screen | Intended contents | Design role |
 |---|---|---|
-| Title | logo, Continue/New/Settings/Quit; archive-stamp animation | new (M1) |
-| Settings | difficulty (moves here from editor menu), volume sliders, resolution | new (M1) |
-| Charter Hub | ledger table: roster strip, Contracts, Jobs, Shop, Save | new (M1, minimal) |
-| Briefing | contract card: objective, pay, enemy intel silhouettes, deploy count | new (M2) |
-| **Battle HUD** | initiative bar (top, portraits in activation order — Pillar 1 seed); active-unit card (HP/MP/CT, statuses); command menu (exists); **forecast panel** on target hover: damage range, hit%, kill flag (Predict already computes); floating damage/heal numbers; status popups | partial (menus exist; bar/forecast/popups are M1) |
-| Results | existing panel + Cert earned per unit, level/job-level ups, salvage tally | exists, extend (M2) |
-| Job menu | per unit: job tree, switch job, **buy abilities with Cert** (3.2) | code exists, canvas new (M1/M2) |
-| Shop | buy/sell lists, gear compare vs equipped (1.9) | rebuild of demo shop (M2) |
-| Save slots | 3 slots + autosave, chapter/playtime stamps | new (M3; single-file today) |
+| Title | logo, Continue/New/Settings/Quit; archive-stamp animation | entry and return |
+| Settings | difficulty, volume sliders, resolution, accessibility | player preferences |
+| Charter Hub | ledger table: roster strip, Contracts, Jobs, Shop, Save | meta-game home |
+| Briefing | contract clauses, objective, pay, enemy intel silhouettes, deploy count | informed commitment |
+| **Battle HUD** | initiative bar; active-unit HP/MP/CT and statuses; command menu; forecast with damage, hit%, kill flag, and causes; feedback popups | tactical legibility |
+| Results | Cert per unit, Rank/Grade changes, rewards and salvage tally | transaction receipt |
+| Job menu | job tree, switch job, buy abilities with Cert | build planning |
+| Shop | buy/sell, field-rig loadout, provenance, compare against equipped | equipment decisions |
+| Save slots | 3 slots + autosave, chapter/playtime stamps | campaign continuity |
+
+Implementation status and acceptance criteria live in the classified
+[UI/UX issues](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen+label%3A%22group%3A+ui-ux%22).
 
 ## 8. Art direction (2D sprites on 3D grid)
 
@@ -406,13 +427,12 @@ then the existing keyboard flow remains the dev-testing path.
 - **Terrain:** 3 slice tile kits (autumn road, Coldwater town, marsh) of
   12–16 tiles each + 8–10 props per kit (carts, parapets, stalls, antennae,
   reed clumps). Tiles remain simple extruded blocks with painted tops/sides —
-  height stays readable, which is the FFT trick that matters.
+  height and cover must remain immediately readable.
 - **VFX:** sprite-sheet effects (slash arcs, protocol glyphs, smoke) plus a
   teal scanline shader for anything "Protocol"; damage numbers use the HUD sans.
-- **Production stance: placeholder-first.** Systems and battles ship on
-  primitives/proxy sprites; art lands as batches replace proxies (M2). Options
-  costed in M2: commission vs curated asset packs vs hybrid — decision then,
-  not now.
+- **Production stance: placeholder-first.** Systems and battles use
+  primitives/proxy sprites until coherent art batches replace them. Sourcing
+  and production decisions live in the classified art/audio issues.
 
 ## 9. Audio direction
 
@@ -425,56 +445,28 @@ then the existing keyboard flow remains the dev-testing path.
   Autumn," reprised in chapter cards).
 - **SFX categories:** UI (paper/stamp/tick), movement (footfalls per biome),
   impacts (phys/protocol split), statuses (apply/expire), ambience per biome.
-- **Implementation:** existing MusicPlayer/AudioSequence handles intro+loop
-  music; SFX through a light one-shot pool (M2); mix pass in M3.
-- **Sourcing:** licensed packs acceptable for SFX; music decision (commission
-  vs licensed vs produced) deferred to M2 with the art call.
+- **Runtime foundation:** existing MusicPlayer/AudioSequence handles
+  intro+loop music; remaining SFX, mix, and sourcing decisions are tracked in
+  the classified
+  [art/audio issues](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen+label%3A%22group%3A+art-audio%22).
 
-## 10. Technical gap map
+## 10. Implementation tracking
 
-| GDD feature | Existing system | Gap (queue item) |
-|---|---|---|
-| Authored battles, objectives | BattleDefinition + BattleSpawner + BattleClock + 4 victory types (**1.8 implemented**) | escort objective (M2, with market rescue) |
-| Terrain types, bridges, water | TerrainType + TerrainRules; terrain-aware movement/LoS/spawning; BoardCreator painting (**1.8b implemented**) | biome art passes per map (M2) |
-| Equipment | GearCatalog + per-job loadouts + PartyInventory, recalc-safe bonuses (**1.9 implemented**) | equip/compare UI in job menu (M2); gear art |
-| Cert buys abilities | jpCost in data, AbilityMemory | **1.13** (per §3.2 call) |
-| Initiative bar | TurnOrderController (no UI) | Pillar 1 seed (M1) |
-| Forecast panel / damage popups | Predict(), HitRate.Calculate() | Battle polish (M1) |
-| Charter Hub / Title / Settings | GameFlow states (stubs), no canvases | Meta UI (M1 minimal, M2 full) |
-| Chapter cards / mid-battle events | ConversationController; BattleEvents hook (**1.8 implemented**, runs reinforcement waves) | story triggers on the hook + card UI (M2) |
-| Quest board & story flags | PlayerProgress.cs (empty placeholder), GameData | QuestDefinition data + flag store + board UI (M2) |
-| Repeatable writs | InitBattleState's writ spawner (**1.8**: the no-definition fallback path, documented as GDD §4.5.3) | level scaling + reward hookup (M2) |
-| Branching story / endings | — | flag-gated contract availability + ending resolver (M2 flags, post-slice content) |
-| Hidden quest triggers | battle-event hook (1.8) | rumor tiles + condition checks (M2 seed, post-slice full) |
-| Legendary gear | Feature system (1.9) | legendary tier + unique passives (post-slice, quests one-time-flagged) |
-| Scrip in save | Bank in PlayerPrefs | **1.12** |
-| Save slots | single-file DataPersistenceManager | M3 |
-| Controls table | keyboard-axis InputController | M3 rework (Input System) |
-| Sprites/portraits/tiles | primitives | M2 art batches |
-| Music/SFX | MusicPlayer/AudioSequence, no content | M2 audio batch |
+The implemented-versus-integrated snapshot belongs in
+[PROJECT_REVIEW.md](PROJECT_REVIEW.md) and [BATTLE_PLAN.md](BATTLE_PLAN.md).
+All remaining executable gaps—including objectives, UI, progression,
+persistence, content, art/audio, controls, and campaign work—live in the
+[classified GitHub issue tracker](https://github.com/shimakaze09/TacticsRPG/issues).
+No technical-gap checklist is maintained in the GDD.
 
-## 11. Production plan
+## 11. Production constraints
 
-- **M0 — Systems hardening** *(current queue, in progress)*: BATTLE_PLAN
-  1.8–1.13 + docs passes B–D + tech debt as touched. Exit: an authored battle
-  can be defined in data and played clean on both difficulties.
-- **M1 — Playable loop** : Title/Settings/Hub (minimal), initiative bar,
-  forecast panel + damage popups, job menu canvas, battle 1 & 2 authored and
-  playable end-to-end from Title. Exit: "new game → two battles → growth →
-  save/continue" without the editor.
-- **M2 — Slice content**: all 6 battles, all story scenes + chapter cards,
-  shop, Cert-buys-abilities, **quest board + story flags + Choice A**, the
-  writ generator, one short side story, one hidden-quest seed, first art
-  batches (sprites/portraits/tiles for the three biomes), music/SFX first
-  pass. Exit: Chapter 1 complete with proxy-free core cast.
-- **M3 — Slice polish**: Input System controls rework, audio mix, difficulty
-  tuning pass (BATTLE_PLAN §4), save slots, performance/UX pass, external
-  playtest. Exit: shippable demo build.
-- **Post-slice:** Acts 2–3 branching content and the four endings · remaining
-  side stories (short set + *The Hollow Road* + *Faye's Ledger*) · hidden and
-  character quests · relic hunts + legendary gear · Grit reactions (Pillar 2)
-  · Sync terrain (Pillar 3) · in-battle salvage play (Pillar 4) · Archive
-  screen · controller support · region-map hub.
+Delivery follows the five phase gates in [ROADMAP.md](ROADMAP.md): stabilize,
+core loop, vertical slice, tactical identity, then campaign. A phase gate is a
+product outcome, while individual implementation and verification steps stay
+in labelled issues. The slice remains bounded to Chapter 1's six battles and
+its defined side-content seed; Acts 2–3 and unproven expansion jobs remain
+post-slice.
 
 **Top risks:** sprite production volume (mitigation: placeholder-first, 4
 facings via mirroring, palette swaps) · scope creep from pillars (mitigation:

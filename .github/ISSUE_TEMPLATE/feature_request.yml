@@ -1,6 +1,7 @@
 name: Feature request
 description: Propose a player-facing capability or tactical-system improvement.
 title: "[Feature] "
+labels: ["enhancement"]
 body:
   - type: textarea
     id: problem
@@ -23,21 +24,6 @@ body:
       description: Include gameplay rules, UI behavior, and important edge cases.
     validations:
       required: true
-  - type: dropdown
-    id: area
-    attributes:
-      label: Area
-      options:
-        - Battle gameplay
-        - AI
-        - Jobs and progression
-        - Items and economy
-        - Story and world
-        - UI and accessibility
-        - Tools, build, or CI
-        - Architecture
-    validations:
-      required: true
   - type: textarea
     id: alternatives
     attributes:
@@ -49,6 +35,73 @@ body:
       placeholder: |
         - [ ] ...
         - [ ] ...
+  - type: markdown
+    attributes:
+      value: |
+        ## Classification
+        Choose the requested planning labels below. A maintainer must apply the
+        matching `priority:*`, `group:*`, `phase:*`, and `weight:*` labels before
+        implementation starts.
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Importance
+      options:
+        - "priority: blocker"
+        - "priority: critical"
+        - "priority: high"
+        - "priority: medium"
+        - "priority: low"
+    validations:
+      required: true
+  - type: dropdown
+    id: group
+    attributes:
+      label: Primary feature group
+      options:
+        - "group: core-flow"
+        - "group: combat-rules"
+        - "group: status"
+        - "group: balance"
+        - "group: jobs"
+        - "group: progression"
+        - "group: equipment-economy"
+        - "group: persistence"
+        - "group: ai"
+        - "group: ui-ux"
+        - "group: content-chapter1"
+        - "group: story-world"
+        - "group: art-audio"
+        - "group: input-accessibility"
+        - "group: tooling-architecture"
+    validations:
+      required: true
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Earliest delivery phase
+      options:
+        - "phase: 0-stabilize"
+        - "phase: 1-core-loop"
+        - "phase: 2-vertical-slice"
+        - "phase: 3-tactical-identity"
+        - "phase: 4-campaign"
+    validations:
+      required: true
+  - type: dropdown
+    id: weight
+    attributes:
+      label: Relative weight
+      description: Use 13 only for an epic that must be split before implementation.
+      options:
+        - "weight: 1"
+        - "weight: 2"
+        - "weight: 3"
+        - "weight: 5"
+        - "weight: 8"
+        - "weight: 13"
+    validations:
+      required: true
   - type: checkboxes
     id: scope
     attributes:
@@ -57,4 +110,6 @@ body:
         - label: This proposal is consistent with the GDD, or explains the intended design change.
           required: true
         - label: I searched open and closed issues for duplicates.
+          required: true
+        - label: I understand implementation waits until the four matching tracker labels are applied.
           required: true

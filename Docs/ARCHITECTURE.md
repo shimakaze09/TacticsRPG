@@ -4,8 +4,9 @@
 Design authority for *what* to build is `GDD.md`; this document is the
 authority for *how*. The verdict that produced it: keep the event-composed
 architecture, harden the conventions around it — no DI-framework migration.
-Current implementation status belongs in `PROJECT_REVIEW.md`; work order lives
-in `ROADMAP.md` and `BATTLE_PLAN.md`.
+Current implementation status belongs in `PROJECT_REVIEW.md`; operational work
+lives only in classified GitHub issues. `ROADMAP.md` defines the phase gates
+and label contract.
 
 ## 1. The shape of the codebase
 
@@ -20,7 +21,7 @@ in `ROADMAP.md` and `BATTLE_PLAN.md`.
   event bus (`GameEventBus` via `this.Publish` / `Subscribe`).
 - **Code-defined law tables:** `TerrainRules`, `GearCatalog`, `StatLimits`,
   `CriticalHit`, `StatusRegistry`, `ElementRelationship` — design constants
-  live in code until a dedicated data pass (shop rebuild, M2).
+  currently live in code.
 - **Meta/persistence:** `GameFlowController` states + `GameData` save file.
   The meta layer is not yet integrated end to end; persistent objects must not
   own scene-local dependencies. See issues #3, #5, and #8.
@@ -62,6 +63,13 @@ in `ROADMAP.md` and `BATTLE_PLAN.md`.
   being wiped by a level-up (the 1.9 root-cause bug).
 - `StatLimits` caps (WORLD.md §4b) are enforced at the write points.
   Nothing may bypass them.
+- The current cumulative job-history formula is provisional. Do not tune new
+  job or gear numbers against it until issues
+  [#52](https://github.com/shimakaze09/TacticsRPG/issues/52) and
+  [#54](https://github.com/shimakaze09/TacticsRPG/issues/54) settle level and
+  growth semantics. Formula, content, encounter, and reward changes must feed
+  the automated balance report in
+  [#58](https://github.com/shimakaze09/TacticsRPG/issues/58).
 
 ## 5. Damage pipeline placement
 
@@ -99,9 +107,11 @@ first — don't special-case content into engine code.
 ## 7. Persistence
 
 Everything player-persistent goes in `GameData` through
-`DataPersistenceManager`. **No new PlayerPrefs.** (`Bank` and
-`PartyInventory` are grandfathered and migrate together in
-BATTLE_PLAN 1.12.)
+`DataPersistenceManager`. **No new PlayerPrefs.** Currency, roster, and
+equipment migration are tracked in issues
+[#3](https://github.com/shimakaze09/TacticsRPG/issues/3),
+[#60](https://github.com/shimakaze09/TacticsRPG/issues/60), and
+[#61](https://github.com/shimakaze09/TacticsRPG/issues/61).
 
 ## 8. Verification workflow (the law of the land)
 
@@ -118,12 +128,11 @@ BATTLE_PLAN 1.12.)
    branch and open a reviewable pull request; do not push feature work directly
    to `main`.
 
-## 9. Known debt (deferred by decision, tracked in ROADMAP §4/task list)
+## 9. Known debt tracking
 
-- Namespaces + assembly definitions (mechanical pass; enables Unity Test
-  Framework migration of the probe suite).
-- `SerializableDictionary` duplication; tweener/pool lifecycle bugs.
-- DI container consideration is **post-slice, meta-layer only** — the battle
-  layer stays event-composed.
-- Persistent-singleton ownership and repeated scene-load safety, especially
-  `UIManager` and its scene references (issue #8).
+Architecture and tooling debt is tracked in the
+[`group: tooling-architecture`](https://github.com/shimakaze09/TacticsRPG/issues?q=is%3Aissue+is%3Aopen+label%3A%22group%3A+tooling-architecture%22)
+issue view; persistence and repeated-scene-load ownership defects use their
+own primary groups. This document records the engineering rules those fixes
+must preserve, not a second debt queue. A DI container remains out of scope
+for the event-composed battle layer.
