@@ -1,0 +1,54 @@
+name: Development task
+description: Define a bounded engineering, content, documentation, or test task.
+title: "[Task] "
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What current limitation or dependency makes this work necessary?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: In scope
+      placeholder: |
+        - ...
+        - ...
+    validations:
+      required: true
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of scope
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      placeholder: |
+        - [ ] Behavior is implemented.
+        - [ ] Relevant probes/tests pass.
+        - [ ] Documentation is updated where public behavior changed.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation plan
+      description: Name the Unity checks, probes, tests, or manual scenarios required.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and related issues
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: This task is bounded enough for one reviewable pull request.
+          required: true
+        - label: I searched open and closed issues for duplicates.
+          required: true
