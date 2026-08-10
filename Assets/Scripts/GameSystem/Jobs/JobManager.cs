@@ -475,12 +475,15 @@ public class JobManager : MonoBehaviour, IDataPersistence
         // overwrites each stat, so anything equipment added at equip time
         // would otherwise vanish on the next level up or job switch.
         int[] gearBonus = new int[calculatedStats.Length];
+        int resGearBonus = 0;
         var equipment = GetComponent<Equipment>();
         if (equipment != null)
         {
             foreach (var item in equipment.items)
             foreach (var feature in item.GetComponentsInChildren<StatModifierFeature>())
             {
+                if (feature.type == StatTypes.RES)
+                    resGearBonus += feature.amount;
                 for (int i = 0; i < statOrder.Length; i++)
                     if (statOrder[i] == feature.type)
                         gearBonus[i] += feature.amount;
@@ -517,6 +520,14 @@ public class JobManager : MonoBehaviour, IDataPersistence
 
             stats.SetValue(statType, value, false);
         }
+
+        // Status resistance derives from level + the current job's profile
+        // (issue #57 — RES was never initialized, leaving control unopposed);
+        // gear may add to it, but the contestability cap always wins.
+        int resistance = Mathf.Clamp(
+            ProgressionModel.ResistanceFor(CurrentJob, characterLevel) + resGearBonus,
+            0, StatLimits.MaxRES);
+        stats.SetValue(StatTypes.RES, resistance, false);
 
         // Apply current job's movement/evade bonuses on top of the unit's
         // baseline (captured once) — never on top of the previous result,
