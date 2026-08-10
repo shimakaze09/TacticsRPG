@@ -112,6 +112,10 @@ public static class JobAssetGenerator
 
     private static void CreateJobDefinitionWithoutPrerequisites(JobDataFile jobData)
     {
+        // Reject malformed data before anything is populated so an invalid
+        // job is skipped entirely rather than shipped half-valid (issue #20)
+        ValidateJobData(jobData);
+
         // Asset files are named by stable id so display renames never move files
         string assetPath = JobAssetPath(jobData);
 
@@ -174,60 +178,38 @@ public static class JobAssetGenerator
         // Set ability catalog name
         job.abilityCatalogName = jobData.abilityCatalogName;
         
-        // Set JP requirements — the data contract is exactly seven strictly
-        // increasing cumulative thresholds for levels 2-8 (issue #20); bad
-        // data fails loudly and the asset keeps the validated default curve
-        if (ValidateJPRequirements(jobData))
-        {
-            job.jpRequirements = jobData.jpRequirements;
-        }
+        // Set JP requirements (already validated by ValidateJobData)
+        job.jpRequirements = jobData.jpRequirements;
         
         // Create the asset
         AssetDatabase.CreateAsset(job, assetPath);
         EditorUtility.SetDirty(job);
     }
 
-    // Guards the JP threshold contract (exactly 7 entries, strictly
-    // increasing) and unlock levels (1-8); logs a specific error per violation
-    private static bool ValidateJPRequirements(JobDataFile jobData)
+    // Guards the JP threshold contract and unlock levels; throws with every
+    // violation listed so the caller's per-file catch logs it and skips the
+    // job — no asset is created and the created count stays honest
+    private static void ValidateJobData(JobDataFile jobData)
     {
-        var valid = true;
+        var errors = new List<string>();
 
-        if (jobData.jpRequirements == null ||
-            jobData.jpRequirements.Length != JobDefinition.JPThresholdCount)
-        {
-            Debug.LogError($"{jobData.jobName}: jpRequirements must have exactly " +
-                           $"{JobDefinition.JPThresholdCount} entries (levels 2-8), found " +
-                           $"{jobData.jpRequirements?.Length ?? 0}");
-            valid = false;
-        }
-        else
-        {
-            for (int i = 0; i < jobData.jpRequirements.Length; i++)
-            {
-                if (jobData.jpRequirements[i] > 0 &&
-                    (i == 0 || jobData.jpRequirements[i] > jobData.jpRequirements[i - 1]))
-                    continue;
-                Debug.LogError($"{jobData.jobName}: jpRequirements[{i}] = " +
-                               $"{jobData.jpRequirements[i]} must be positive and strictly " +
-                               "greater than the previous threshold");
-                valid = false;
-            }
-        }
+        var curveError = JobDefinition.ValidateJPCurve(jobData.jpRequirements);
+        if (curveError != null)
+            errors.Add(curveError);
 
         if (jobData.abilityUnlocks != null)
         {
             foreach (var unlock in jobData.abilityUnlocks)
             {
-                if (unlock.unlockAtJobLevel >= 1 && unlock.unlockAtJobLevel <= 8)
-                    continue;
-                Debug.LogError($"{jobData.jobName}: ability '{unlock.abilityName}' unlocks at " +
-                               $"job level {unlock.unlockAtJobLevel}, outside the 1-8 range");
-                valid = false;
+                if (!JobDefinition.IsValidUnlockLevel(unlock.unlockAtJobLevel))
+                    errors.Add($"ability '{unlock.abilityName}' unlocks at job level " +
+                               $"{unlock.unlockAtJobLevel}, outside the 1-{JobDefinition.MaxJobLevel} range");
             }
         }
 
-        return valid;
+        if (errors.Count > 0)
+            throw new System.InvalidOperationException(
+                $"{jobData.jobName}: {string.Join("; ", errors)}");
     }
 
     private static void SetJobPrerequisites(JobDataFile jobData)

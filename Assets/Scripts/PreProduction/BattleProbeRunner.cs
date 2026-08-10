@@ -1014,20 +1014,30 @@ public class BattleProbeRunner : MonoBehaviour
             if (job.id == "drifter")
                 drifter = job;
 
-            Check("seven thresholds " + job.id,
-                job.jpRequirements.Length == JobDefinition.JPThresholdCount,
-                "count " + job.jpRequirements.Length);
-
-            var increasing = job.jpRequirements[0] > 0;
-            for (var i = 1; i < job.jpRequirements.Length; i++)
-                increasing &= job.jpRequirements[i] > job.jpRequirements[i - 1];
-            Check("thresholds strictly increase " + job.id, increasing);
+            Check("threshold curve valid " + job.id,
+                JobDefinition.ValidateJPCurve(job.jpRequirements) == null,
+                JobDefinition.ValidateJPCurve(job.jpRequirements) ?? "");
 
             var unlocksInRange = true;
             foreach (var unlock in job.abilityUnlocks)
-                unlocksInRange &= unlock.unlockAtJobLevel >= 1 && unlock.unlockAtJobLevel <= 8;
+                unlocksInRange &= JobDefinition.IsValidUnlockLevel(unlock.unlockAtJobLevel);
             Check("unlock levels in range " + job.id, unlocksInRange);
         }
+
+        // Failing-data contract: the shared validator the generator gates on
+        // must reject every malformed shape it exists to catch
+        Check("validator rejects null curve",
+            JobDefinition.ValidateJPCurve(null) != null);
+        Check("validator rejects wrong length",
+            JobDefinition.ValidateJPCurve(new[] { 100, 250 }) != null);
+        Check("validator rejects a plateau",
+            JobDefinition.ValidateJPCurve(new[] { 100, 250, 450, 700, 1000, 1400, 1400 }) != null);
+        Check("validator rejects non-positive gates",
+            JobDefinition.ValidateJPCurve(new[] { 0, 250, 450, 700, 1000, 1400, 1900 }) != null);
+        Check("unlock level 0 rejected", !JobDefinition.IsValidUnlockLevel(0));
+        Check("unlock level 9 rejected", !JobDefinition.IsValidUnlockLevel(9));
+        Check("unlock levels 1 and 8 accepted",
+            JobDefinition.IsValidUnlockLevel(1) && JobDefinition.IsValidUnlockLevel(8));
 
         // Boundary behavior on the shared curve: one JP below each gate stays
         // at the previous level, the gate itself advances, and past the top

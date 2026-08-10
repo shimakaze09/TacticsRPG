@@ -124,6 +124,9 @@ public class JobDefinition : ScriptableObject
 
     #region JP System
     
+    /// <summary>Highest attainable job level (mastery).</summary>
+    public const int MaxJobLevel = 8;
+
     /// <summary>
     /// Levels above 1 that JP can buy: exactly seven cumulative thresholds
     /// carry a job from level 2 through the level-8 cap (issue #20).
@@ -233,6 +236,34 @@ public class JobDefinition : ScriptableObject
         }
 
         return unlockedAbilities;
+    }
+
+    /// <summary>
+    /// Validates a JP threshold curve against the contract — exactly seven
+    /// positive, strictly increasing cumulative values (levels 2-8). Returns
+    /// null when valid, otherwise a description of the violation. Shared by
+    /// the asset generator and the probe suite (issue #20).
+    /// </summary>
+    public static string ValidateJPCurve(int[] thresholds)
+    {
+        if (thresholds == null || thresholds.Length != JPThresholdCount)
+            return $"jpRequirements must have exactly {JPThresholdCount} entries (levels 2-8), found {thresholds?.Length ?? 0}";
+
+        for (int i = 0; i < thresholds.Length; i++)
+        {
+            if (thresholds[i] <= 0)
+                return $"jpRequirements[{i}] = {thresholds[i]} must be positive";
+            if (i > 0 && thresholds[i] <= thresholds[i - 1])
+                return $"jpRequirements[{i}] = {thresholds[i]} must be strictly greater than {thresholds[i - 1]}";
+        }
+
+        return null;
+    }
+
+    /// <summary>Whether an ability unlock level is inside the valid 1..MaxJobLevel range.</summary>
+    public static bool IsValidUnlockLevel(int level)
+    {
+        return level >= 1 && level <= MaxJobLevel;
     }
 
     /// <summary>
