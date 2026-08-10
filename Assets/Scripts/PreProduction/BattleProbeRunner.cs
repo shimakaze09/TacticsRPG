@@ -77,6 +77,7 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeGearAndStats(bc);
             ProbeAbilityMemory(bc);
             ProbeTargetFilters(bc);
+            ProbeLevelScaling();
             ProbeWeaponBehavior(bc);
             ProbeTraits(bc);
             ProbeElementsAndCrits(bc);
@@ -262,6 +263,61 @@ public class BattleProbeRunner : MonoBehaviour
                 "removed " + removed);
             Check("repair keeps justified " + u.name, memory.GetLearnedAbilityCount() == before,
                 $"{before} -> {memory.GetLearnedAbilityCount()}");
+        }
+    }
+
+    // ---- issue #52: spawn level drives combat stats -------------------------
+
+    // Golden checks for the progression model: units of the same recipe
+    // spawned at levels 1/10/30/99 must differ by exactly the documented
+    // level-growth term (ProgressionModel), across striker/skirmisher/caster
+    // archetypes. MHP is only checked monotonically because difficulty may
+    // scale enemy HP; ATK/MAT/SPD/MMP are never difficulty-scaled.
+    private void ProbeLevelScaling()
+    {
+        string[] recipes = { "Enemy Warrior", "Enemy Rogue", "Enemy Wizard" };
+        int[] levels = { 1, 10, 30, 99 };
+        var exactStats = new[] { StatTypes.MMP, StatTypes.ATK, StatTypes.MAT, StatTypes.SPD };
+
+        foreach (var recipe in recipes)
+        {
+            var spawned = new GameObject[levels.Length];
+            for (var i = 0; i < levels.Length; i++)
+                spawned[i] = UnitFactory.Create(recipe, levels[i]);
+
+            if (spawned[0] == null)
+            {
+                Check("level scaling recipe " + recipe, false, "recipe failed to spawn");
+                continue;
+            }
+
+            var baseStats = spawned[0].GetComponent<Stats>();
+            var job = spawned[0].GetComponent<JobManager>().CurrentJob;
+
+            for (var i = 1; i < levels.Length; i++)
+            {
+                var s = spawned[i].GetComponent<Stats>();
+
+                Check($"{recipe} L{levels[i]} MHP grows",
+                    s[StatTypes.MHP] > baseStats[StatTypes.MHP],
+                    $"{baseStats[StatTypes.MHP]} -> {s[StatTypes.MHP]}");
+
+                for (var k = 0; k < exactStats.Length; k++)
+                {
+                    var statIndex = System.Array.IndexOf(JobManager.statOrder, exactStats[k]);
+                    var expected = baseStats[exactStats[k]] +
+                                   ProgressionModel.LevelGrowthBonus(job, statIndex, levels[i]);
+                    expected = Mathf.Min(expected,
+                        exactStats[k] == StatTypes.MMP ? StatLimits.MaxMP : StatLimits.MaxPrimaryStat);
+                    Check($"{recipe} L{levels[i]} {exactStats[k]} golden",
+                        s[exactStats[k]] == expected,
+                        $"expected {expected}, got {s[exactStats[k]]}");
+                }
+            }
+
+            foreach (var go in spawned)
+                if (go != null)
+                    Destroy(go);
         }
     }
 

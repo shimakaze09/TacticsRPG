@@ -229,6 +229,26 @@ public class JobDefinition : ScriptableObject
     }
 
     /// <summary>
+    /// Growth multiplier for a stat slot in JobManager.statOrder layout
+    /// (MHP, MMP, ATK, DEF, MAT, MDF, SPD) — the single lookup shared by
+    /// job-grade and character-level growth.
+    /// </summary>
+    public float GetStatMultiplier(int statIndex)
+    {
+        switch (statIndex)
+        {
+            case 0: return hpMultiplier;
+            case 1: return mpMultiplier;
+            case 2: return atkMultiplier;
+            case 3: return defMultiplier;
+            case 4: return matMultiplier;
+            case 5: return mdfMultiplier;
+            case 6: return spdMultiplier;
+            default: return 0f;
+        }
+    }
+
+    /// <summary>
     /// Calculates stat contribution for this job based on levels gained
     /// FFT-style: Each level in a job contributes to permanent stats
     /// </summary>

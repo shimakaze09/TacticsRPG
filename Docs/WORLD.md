@@ -133,6 +133,12 @@ cut as an NPC: Coldwater's information broker.
   intended HP restored.
 - Baseline tuning targets at job level 1, no gear: basic attacks ~10–15, kit hits
   ~15–25, capstone nukes ~30–45, against HP pools of ~35–110 (2–6 hits to KO).
+- **Progression model** (`ProgressionModel.cs`, 2026-08-10): combat stats are
+  always recomputed from job-grade history + character level + gear + difficulty,
+  never stored. Each character level above 1 adds **0.25 of a job grade** using
+  the current job's growth profile, so spawn/writ levels materially change enemy
+  stats and a level-99 unit with a few mastered jobs lands in the designed
+  3,000–5,000 HP boss band. Party units and generated enemies share the model.
 - **Global ceilings** (`StatLimits.cs`, enforced in the stat pipeline, job
   recalculation, and the effect clamp): max HP **20,000** (late-game bosses are
   *designed* around 3,000–5,000 — the cap is a wall, not a target), max MP 9,999,
