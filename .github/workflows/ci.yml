@@ -65,8 +65,8 @@ jobs:
               -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD" \
               -logFile logs/activation.log || true
           fi
-          if grep -q "No valid Unity Editor license" logs/activation.log; then
-            echo "::error::Unity license activation failed. If using email/password, the account must not have 2FA enabled (headless login cannot answer a code prompt); alternatively provide the UNITY_LICENSE secret (Personal .ulf — still free tier). See logs artifact: activation.log."
+          if grep -qE "No valid Unity Editor license|Cannot load ULF|Signature element not found|Licensing::Client\] Error: Code 4" logs/activation.log; then
+            echo "::error::Unity license activation failed. UNITY_LICENSE must be the COMPLETE .ulf XML (signature included); with email/password the account must not have 2FA enabled. See logs artifact: activation.log."
             exit 1
           fi
           echo "License activation verified."
@@ -75,33 +75,38 @@ jobs:
       # this validates the JSON cross-references and generates all three in
       # order, exiting non-zero on any validation or generation error.
       # Script compilation happens on editor startup: compile errors mean the
-      # entry method never runs and the step fails. Credentials ride along on
-      # every invocation so each session can hold the entitlement.
+      # entry method never runs and the step fails.
+      #
+      # Credentials ride along ONLY in email/password mode: with a .ulf
+      # active, -username/-password makes the editor attempt a cloud login
+      # that fails (401) and overrides the valid local license.
       - name: Validate and generate content
         run: |
-          unity-editor -batchmode -nographics -projectPath . \
-            -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD" \
+          if [ -z "$UNITY_LICENSE" ]; then set -- -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD"; else set --; fi
+          unity-editor -batchmode -nographics -projectPath . "$@" \
             -executeMethod ContentGenerationMenu.RunHeadless \
             -logFile logs/generate.log
 
       - name: Run battle probes
         run: |
-          unity-editor -batchmode -nographics -projectPath . \
-            -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD" \
+          if [ -z "$UNITY_LICENSE" ]; then set -- -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD"; else set --; fi
+          unity-editor -batchmode -nographics -projectPath . "$@" \
             -executeMethod BattleProbeMenu.RunHeadless \
             -logFile logs/probes.log
 
       - name: Balance report (hard invariants)
         run: |
-          unity-editor -batchmode -nographics -projectPath . \
-            -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD" \
+          if [ -z "$UNITY_LICENSE" ]; then set -- -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD"; else set --; fi
+          unity-editor -batchmode -nographics -projectPath . "$@" \
             -executeMethod BalanceReportGenerator.RunHeadless \
             -logFile logs/balance.log
 
-      # A Personal license holds a seat on this runner — always give it back
+      # An email/password entitlement holds a seat on this runner — give it
+      # back. A manual .ulf license has no floating seat to return.
       - name: Return Unity license
         if: always()
         run: |
+          if [ -n "$UNITY_LICENSE" ]; then echo "Manual .ulf license — nothing to return."; exit 0; fi
           unity-editor -batchmode -nographics -quit -returnlicense \
             -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD" \
             -logFile logs/return-license.log || true
