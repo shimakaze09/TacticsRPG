@@ -153,6 +153,12 @@ cut as an NPC: Coldwater's information broker.
   **3 turns** per data-driven inflict, and each landed control grants the
   target a **Steeled** stack (+20 effective RES, 3 turns) so chains hit
   diminishing returns.
+- **Tempo statuses** (`OverclockStatus`/`ThrottleStatus`, 2026-08-10, issue #19):
+  Overclock multiplies every CT gain by **1.5** (50% more turns-per-clock) and
+  Throttle by **0.5**; both read their configurable `ctMultiplier`, clamped to
+  the `StatLimits` CT-gain range (**0.25–2.0**) so no data value can freeze a
+  unit out of initiative or grant runaway turns. Stacked, they compose
+  multiplicatively (×0.75).
 - **Global ceilings** (`StatLimits.cs`, enforced in the stat pipeline, job
   recalculation, and the effect clamp): max HP **20,000** (late-game bosses are
   *designed* around 3,000–5,000 — the cap is a wall, not a target), max MP 9,999,

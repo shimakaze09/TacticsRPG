@@ -23,6 +23,16 @@ public static class StatLimits
     /// </summary>
     public const int MaxRES = 75;
 
+    /// <summary>
+    /// Safe range for CT-gain multipliers (Overclock/Throttle, issue #19).
+    /// Keeps tempo statuses meaningful without letting a misconfigured value
+    /// freeze a unit out of the initiative order or grant near-infinite turns.
+    /// </summary>
+    public const float MinCTGainMultiplier = 0.25f;
+
+    /// <summary>Upper bound of the CT-gain multiplier range.</summary>
+    public const float MaxCTGainMultiplier = 2f;
+
     /// <summary>No single hit or heal may exceed this.</summary>
     public const int MaxDamagePerHit = 999;
 
