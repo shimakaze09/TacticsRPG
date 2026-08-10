@@ -1399,6 +1399,35 @@ public class BattleProbeRunner : MonoBehaviour
             completed && Vector3.Distance(mover.transform.localPosition, Vector3.zero) < 0.001f,
             mover.transform.localPosition.ToString());
 
+        // Component-only disable (enabled = false): Unity does NOT kill the
+        // coroutine for this path, so the control must stop it explicitly —
+        // time may not advance while disabled, and re-enabling must resume a
+        // single ticker, not stack a second one (PR #87 review)
+        tween.Play();
+        var timeAtDisable = 0f;
+        tween.enabled = false;
+        timeAtDisable = tween.currentTime;
+        Check("component disable pauses", tween.playState == EasingControl.PlayState.Paused);
+        Check("component disable keeps resume target",
+            tween.previousPlayState == EasingControl.PlayState.Playing,
+            tween.previousPlayState.ToString());
+        var settleDeadline = Time.realtimeSinceStartup + 0.5f;
+        while (Time.realtimeSinceStartup < settleDeadline)
+            yield return null;
+        Check("no ticking while component-disabled",
+            Mathf.Approximately(tween.currentTime, timeAtDisable),
+            $"{timeAtDisable} -> {tween.currentTime}");
+        tween.enabled = true;
+        Check("component re-enable resumes", tween.IsPlaying);
+        completed = false;
+        deadline = Time.realtimeSinceStartup + 5f;
+        while (!completed && Time.realtimeSinceStartup < deadline)
+            yield return null;
+        Check("single ticker completes once after re-enable", completed &&
+            Vector3.Distance(mover.transform.localPosition, Vector3.right) < 0.001f,
+            mover.transform.localPosition.ToString());
+        tween.SeekToBeginning();
+
         // Play while disabled: defers, then starts on the next enable
         mover.SetActive(false);
         tween.Play();

@@ -215,8 +215,15 @@ public class EasingControl : MonoBehaviour
                 playState = PlayState.Paused;
             }
 
-            // Unity already killed the coroutine with the disable
-            tickerRoutine = null;
+            // Stop the ticker explicitly: Unity only kills coroutines when
+            // the GameObject deactivates — a bare enabled=false leaves it
+            // running, and dropping the handle here would let it tick on
+            // while disabled and double up on the next enable (PR #87 review)
+            if (tickerRoutine != null)
+            {
+                StopCoroutine(tickerRoutine);
+                tickerRoutine = null;
+            }
         }
     }
 
