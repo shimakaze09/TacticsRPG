@@ -718,7 +718,9 @@ public static class BalanceReportGenerator
         {
             foreach (AbilityAssetGenerator.AbilityData ability in file.abilities)
             {
-                if (abilityNamesById.ContainsKey(ability.id))
+                if (string.IsNullOrEmpty(ability.id))
+                    doc.errors.Add($"Ability '{ability.name}' in file '{file.job}' has no stable id.");
+                else if (abilityNamesById.ContainsKey(ability.id))
                     doc.errors.Add($"Duplicate ability id '{ability.id}'.");
                 else
                     abilityNamesById.Add(ability.id, ability.name);
@@ -738,6 +740,12 @@ public static class BalanceReportGenerator
             var referenced = new HashSet<string>();
             foreach (JobAbilityUnlockData unlock in entry.data.abilityUnlocks ?? new JobAbilityUnlockData[0])
             {
+                if (string.IsNullOrEmpty(unlock.abilityId))
+                {
+                    doc.errors.Add($"{jobId}: abilityUnlocks entry '{unlock.abilityName}' has no ability id.");
+                    continue;
+                }
+
                 referenced.Add(unlock.abilityId);
                 if (!abilityNamesById.TryGetValue(unlock.abilityId, out string realName))
                     doc.errors.Add($"{jobId}: abilityUnlocks references missing ability id '{unlock.abilityId}'.");
