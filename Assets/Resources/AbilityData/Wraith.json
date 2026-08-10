@@ -155,7 +155,7 @@
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Self",
           "status": "Ghosted",
           "duration": 3
         }

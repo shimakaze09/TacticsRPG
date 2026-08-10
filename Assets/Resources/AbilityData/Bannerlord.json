@@ -19,7 +19,7 @@
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "Bulwark",
           "duration": 2
         }
@@ -43,7 +43,7 @@
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "Overclock",
           "duration": 2
         }
@@ -67,7 +67,7 @@
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "Knit",
           "duration": 3
         }
@@ -147,14 +147,14 @@
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "Bulwark",
           "duration": 4
         },
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "Firewall",
           "duration": 4
         }

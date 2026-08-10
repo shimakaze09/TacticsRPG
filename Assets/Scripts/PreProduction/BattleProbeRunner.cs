@@ -76,6 +76,7 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeBattleSetup(bc);
             ProbeGearAndStats(bc);
             ProbeAbilityMemory(bc);
+            ProbeTargetFilters(bc);
             ProbeWeaponBehavior(bc);
             ProbeTraits(bc);
             ProbeElementsAndCrits(bc);
@@ -262,6 +263,57 @@ public class BattleProbeRunner : MonoBehaviour
             Check("repair keeps justified " + u.name, memory.GetLearnedAbilityCount() == before,
                 $"{before} -> {memory.GetLearnedAbilityCount()}");
         }
+    }
+
+    // ---- issue #53: target allegiance filters ------------------------------
+
+    // Support abilities must respect allegiance: Ally includes the caster and
+    // teammates but never foes, Self only the caster, KOdAlly only downed
+    // teammates. Filters are exercised from a hero's perspective against a
+    // live friendly and hostile unit.
+    private void ProbeTargetFilters(BattleController bc)
+    {
+        var alaois = Find(bc, "Alaois");
+        var hania = Find(bc, "Hania");
+        var rogue = Find(bc, "Enemy Rogue");
+        if (alaois == null || hania == null || rogue == null)
+        {
+            Check("target filter cast present", false);
+            return;
+        }
+
+        var holder = new GameObject("Probe Target Filters");
+        holder.transform.SetParent(alaois.transform);
+        var ally = holder.AddComponent<AllyAbilityEffectTarget>();
+        var self = holder.AddComponent<SelfAbilityEffectTarget>();
+        var koAlly = holder.AddComponent<KOdAllyAbilityEffectTarget>();
+
+        Check("ally filter accepts teammate", ally.IsTarget(hania.tile));
+        Check("ally filter accepts caster", ally.IsTarget(alaois.tile));
+        Check("ally filter rejects foe", !ally.IsTarget(rogue.tile));
+
+        Check("self filter accepts caster", self.IsTarget(alaois.tile));
+        Check("self filter rejects teammate", !self.IsTarget(hania.tile));
+        Check("self filter rejects foe", !self.IsTarget(rogue.tile));
+
+        Check("ko-ally filter rejects living teammate", !koAlly.IsTarget(hania.tile));
+
+        // Drop HP directly (bypassing the event pipeline) so the KO branch is
+        // observable without spinning up the full KO/revive status flow
+        var haniaStats = hania.GetComponent<Stats>();
+        var rogueStats = rogue.GetComponent<Stats>();
+        var haniaHP = haniaStats[StatTypes.HP];
+        var rogueHP = rogueStats[StatTypes.HP];
+        haniaStats.SetValue(StatTypes.HP, 0, false);
+        rogueStats.SetValue(StatTypes.HP, 0, false);
+
+        Check("ko-ally filter accepts downed teammate", koAlly.IsTarget(hania.tile));
+        Check("ko-ally filter rejects downed foe", !koAlly.IsTarget(rogue.tile));
+        Check("ally filter rejects downed teammate", !ally.IsTarget(hania.tile));
+
+        haniaStats.SetValue(StatTypes.HP, haniaHP, false);
+        rogueStats.SetValue(StatTypes.HP, rogueHP, false);
+        Destroy(holder);
     }
 
     // ---- 1.9b/1.9c: weapon behavior --------------------------------------

@@ -23,7 +23,7 @@
         {
           "type": "Heal",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "",
           "duration": 0
         }
@@ -72,7 +72,7 @@
         {
           "type": "Cleanse",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "",
           "duration": 0
         }
@@ -125,7 +125,7 @@
         {
           "type": "Heal",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "",
           "duration": 0
         }
@@ -149,7 +149,7 @@
         {
           "type": "Revive",
           "hitRate": "Full",
-          "target": "KOd",
+          "target": "KOdAlly",
           "status": "",
           "duration": 0
         }
