@@ -63,12 +63,13 @@ and label contract.
   being wiped by a level-up (the 1.9 root-cause bug).
 - `StatLimits` caps (WORLD.md §4b) are enforced at the write points.
   Nothing may bypass them.
-- The current cumulative job-history formula is provisional. Do not tune new
-  job or gear numbers against it until issues
-  [#52](https://github.com/shimakaze09/TacticsRPG/issues/52) and
-  [#54](https://github.com/shimakaze09/TacticsRPG/issues/54) settle level and
-  growth semantics. Formula, content, encounter, and reward changes must feed
-  the automated balance report in
+- The growth formula is settled: **ProgressionModel v2** (WORLD.md §4b;
+  issues [#52](https://github.com/shimakaze09/TacticsRPG/issues/52) /
+  [#54](https://github.com/shimakaze09/TacticsRPG/issues/54)) — current-job
+  dominance, zero-growth unlocks, bounded cross-job carryover, character-level
+  growth on the current job's profile. Job and gear tuning may now proceed
+  against it. Formula, content, encounter, and reward changes must feed the
+  automated balance report in
   [#58](https://github.com/shimakaze09/TacticsRPG/issues/58).
 
 ## 5. Damage pipeline placement

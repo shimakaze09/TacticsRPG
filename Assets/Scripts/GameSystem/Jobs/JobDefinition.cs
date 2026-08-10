@@ -248,31 +248,6 @@ public class JobDefinition : ScriptableObject
         }
     }
 
-    /// <summary>
-    /// Calculates stat contribution for this job based on levels gained
-    /// FFT-style: Each level in a job contributes to permanent stats
-    /// </summary>
-    public void CalculateStatContribution(int jobLevels, ref int[] statContribution)
-    {
-        if (statContribution == null || statContribution.Length < 7)
-        {
-            Debug.LogError("Invalid stat contribution array");
-            return;
-        }
-
-        // Apply job-specific growth for each level gained in this job
-        for (int i = 0; i < jobLevels; i++)
-        {
-            statContribution[0] += Mathf.RoundToInt(baseStats[0] * hpMultiplier); // MHP
-            statContribution[1] += Mathf.RoundToInt(baseStats[1] * mpMultiplier); // MMP
-            statContribution[2] += Mathf.RoundToInt(baseStats[2] * atkMultiplier); // ATK
-            statContribution[3] += Mathf.RoundToInt(baseStats[3] * defMultiplier); // DEF
-            statContribution[4] += Mathf.RoundToInt(baseStats[4] * matMultiplier); // MAT
-            statContribution[5] += Mathf.RoundToInt(baseStats[5] * mdfMultiplier); // MDF
-            statContribution[6] += Mathf.RoundToInt(baseStats[6] * spdMultiplier); // SPD
-        }
-    }
-
     #endregion
 
     #region Validation

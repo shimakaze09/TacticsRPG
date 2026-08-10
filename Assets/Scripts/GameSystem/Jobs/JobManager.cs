@@ -3,12 +3,13 @@ using UnityEngine;
 
 /// <summary>
 /// Per-unit brain of the job system: switches and unlocks jobs, accumulates JP
-/// into job levels, recalculates stats from the unit's whole job-level history
-/// (final stats = sum of each job's levels x its multipliers, plus character-
-/// level growth per ProgressionModel, plus the current job's movement bonuses,
-/// scaled/capped for difficulty and StatLimits), learns abilities as job levels
-/// rise, publishes job events, and persists progress for Hero units. Lives
-/// alongside Stats/Rank/Equipment on the unit.
+/// into job levels, recalculates stats per the ProgressionModel growth model
+/// (current job's kit and grades dominate, other unlocked jobs carry over a
+/// bounded fraction, character level follows the current job's profile, plus
+/// gear and the current job's movement bonuses, scaled/capped for difficulty
+/// and StatLimits), learns abilities as job levels rise, publishes job events,
+/// and persists progress for Hero units. Lives alongside Stats/Rank/Equipment
+/// on the unit.
 /// </summary>
 public class JobManager : MonoBehaviour, IDataPersistence
 {
@@ -415,17 +416,18 @@ public class JobManager : MonoBehaviour, IDataPersistence
     /// <summary>
     /// CORE STAT RECALCULATION ALGORITHM
     /// 
-    /// FFT-style stat calculation:
-    /// 1. Start with base stats (level 1, no job)
-    /// 2. For each job the character has leveled:
-    ///    - Add (JobLevels * JobMultipliers) to stats
-    /// 3. Add character-level growth from the current job's profile
-    ///    (ProgressionModel — makes spawn/writ levels matter, issue #52)
+    /// Growth model v2 (ProgressionModel, issue #54):
+    /// 1. Current job: kit plus TrainedGradeStep per grade earned beyond 1
+    /// 2. Every other unlocked job: bounded kit-fraction carryover scaled by
+    ///    training progress (unlocks alone grant nothing)
+    /// 3. Character-level growth from the current job's profile
+    ///    (makes spawn/writ levels matter, issue #52)
     /// 4. Add worn gear bonuses (agrees with StatModifierFeature's live
     ///    adjustments on Equip/UnEquip — both paths produce the same totals)
     /// 5. Apply current job's movement bonuses
     ///
-    /// This ensures stats reflect full job history, not just current job.
+    /// The current job defines the band; history broadens it without
+    /// saturating the caps.
     /// </summary>
     public void RecalculateStats(bool restoreToFull = false)
     {
@@ -438,25 +440,31 @@ public class JobManager : MonoBehaviour, IDataPersistence
         // Initialize stat array (MHP, MMP, ATK, DEF, MAT, MDF, SPD)
         int[] calculatedStats = new int[7];
 
-        // Get all job levels from progress data
+        // Growth model v2 (ProgressionModel, issue #54): the current job's
+        // kit and trained grades dominate, every other unlocked job carries
+        // over only a bounded kit-fraction, and character level follows the
+        // current job's profile. Unlocks alone grant nothing.
         var jobLevelHistory = progressData.GetAllJobLevels(allJobs);
+        int characterLevel = rank != null ? rank.LVL : stats[StatTypes.LVL];
+        string currentKey = JobProgressData.JobKey(CurrentJob);
 
-        // Calculate stat contributions from each job
         foreach (var kvp in jobLevelHistory)
         {
             JobDefinition job = kvp.Key;
-            int jobLevels = kvp.Value;
+            int grade = kvp.Value;
 
-            if (job != null && jobLevels > 0)
+            if (job == null || grade <= 0)
+                continue;
+
+            bool isCurrent = JobProgressData.JobKey(job) == currentKey;
+            for (int i = 0; i < calculatedStats.Length; i++)
             {
-                job.CalculateStatContribution(jobLevels, ref calculatedStats);
+                calculatedStats[i] += isCurrent
+                    ? ProgressionModel.CurrentJobContribution(job, i, grade)
+                    : ProgressionModel.CrossJobContribution(job, i, grade);
             }
         }
 
-        // Character-level growth: spawn/writ/earned levels must materially
-        // change combat stats without fabricating job history (issue #52;
-        // model documented in ProgressionModel).
-        int characterLevel = rank != null ? rank.LVL : stats[StatTypes.LVL];
         if (CurrentJob != null)
         {
             for (int i = 0; i < calculatedStats.Length; i++)
