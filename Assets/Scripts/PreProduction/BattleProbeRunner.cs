@@ -448,6 +448,8 @@ public class BattleProbeRunner : MonoBehaviour
         alaoisAlliance.confused = true;
         Check("confused ally filter targets foes", ally.IsTarget(rogue.tile));
         Check("confused ally filter rejects teammate", !ally.IsTarget(hania.tile));
+        Check("confused ally filter still accepts caster", ally.IsTarget(alaois.tile));
+        Check("confused attack filter never targets caster", !attackFilter.IsTarget(alaois.tile));
         Check("confused self filter unaffected",
             self.IsTarget(alaois.tile) && !self.IsTarget(rogue.tile));
         rogueAlliance.type = Alliances.Neutral;
