@@ -2,21 +2,20 @@ using UnityEngine;
 
 /// <summary>
 /// Removes its status after N of the owner's turns. Owners denied all turns
-/// (CT frozen by a status implementing ICtFreezingStatus) would never tick,
-/// making "3 turns" mean forever — the #12 failure — so while the owner is
-/// frozen the condition also counts battle-wide activations and ticks once
-/// per full round-length window measured from its last tick. Scoping the
-/// fallback to actual CT freeze keeps naturally slow units' statuses at full
-/// duration, and measuring the window from the last tick (not from round
-/// boundaries) means a late-round inflict still gets its full first window
-/// (issue #57).
+/// (CT frozen by an ICtFreezingStatus) never tick naturally — the #12
+/// failure — so StatusExpiryRules drives FallbackActivation battle-wide: one
+/// full round-length window of activations without an owner turn counts as
+/// one denied turn. The rules component snapshots frozen-ness per unit
+/// before ticking, so a control expiring mid-event still counts that window
+/// for its sibling conditions; scoping to actual CT freeze keeps naturally
+/// slow units' statuses at full duration, and per-condition windows mean a
+/// late inflict always gets its complete first window (issue #57).
 /// </summary>
 public class DurationStatusCondition : StatusCondition
 {
     public int duration = 10;
 
     private Unit owner;
-    private BattleClock clock;
     private int activationsSinceTick;
 
     private void OnEnable()
@@ -28,10 +27,6 @@ public class DurationStatusCondition : StatusCondition
             this.SubscribeToSender<TurnBeganEvent>(OnNewTurn, owner);
         else
             this.Subscribe<TurnBeganEvent>(OnNewTurn);
-
-        // Fallback clock for owners whose CT is frozen
-        this.Subscribe<TurnCompletedEvent>(OnAnyTurnCompleted);
-        clock = FindAnyObjectByType<BattleClock>();
     }
 
     private void OnDisable()
@@ -40,8 +35,6 @@ public class DurationStatusCondition : StatusCondition
             this.UnsubscribeFromSender<TurnBeganEvent>(OnNewTurn, owner);
         else
             this.Unsubscribe<TurnBeganEvent>(OnNewTurn);
-
-        this.Unsubscribe<TurnCompletedEvent>(OnAnyTurnCompleted);
     }
 
     private void OnNewTurn(TurnBeganEvent e)
@@ -50,22 +43,23 @@ public class DurationStatusCondition : StatusCondition
         Tick();
     }
 
-    // While the owner is CT-frozen, count every battle activation; one full
-    // round-length window without an owner turn equals one denied turn.
-    // Unfrozen owners never fallback-tick — their own turns are the clock.
-    private void OnAnyTurnCompleted(TurnCompletedEvent e)
+    /// <summary>
+    /// Advances the frozen-window fallback clock. Called by StatusExpiryRules
+    /// once per completed battle activation, with the owner's frozen state
+    /// snapshotted before any of its conditions tick: a full round-length
+    /// window while frozen equals one denied turn; any unfrozen activation
+    /// resets the window.
+    /// </summary>
+    public void FallbackActivation(bool ownerFrozen, int roundLength)
     {
-        if (clock == null || owner == null)
-            return;
-
-        if (owner.GetComponentInChildren<ICtFreezingStatus>() == null)
+        if (!ownerFrozen)
         {
             activationsSinceTick = 0;
             return;
         }
 
         activationsSinceTick++;
-        if (activationsSinceTick >= clock.RoundLength)
+        if (activationsSinceTick >= roundLength)
         {
             activationsSinceTick = 0;
             Tick();

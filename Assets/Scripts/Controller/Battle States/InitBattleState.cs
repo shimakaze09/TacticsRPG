@@ -45,6 +45,8 @@ public class InitBattleState : BattleState
             owner.gameObject.AddComponent<ElevationRules>();
         if (owner.GetComponent<ElementRules>() == null)
             owner.gameObject.AddComponent<ElementRules>();
+        if (owner.GetComponent<StatusExpiryRules>() == null)
+            owner.gameObject.AddComponent<StatusExpiryRules>();
 
         var clock = owner.gameObject.AddComponent<BattleClock>();
 

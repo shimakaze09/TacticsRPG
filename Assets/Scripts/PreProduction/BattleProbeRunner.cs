@@ -157,6 +157,7 @@ public class BattleProbeRunner : MonoBehaviour
         Check("battle clock present", bc.GetComponent<BattleClock>() != null);
         Check("element rules present", bc.GetComponent<ElementRules>() != null);
         Check("elevation rules present", bc.GetComponent<ElevationRules>() != null);
+        Check("status expiry rules present", bc.GetComponent<StatusExpiryRules>() != null);
         Check("victory condition present", bc.GetComponent<BaseVictoryCondition>() != null);
         Check("wave hook when waves authored",
             def.waves.Count == 0 || bc.GetComponent<BattleEvents>() != null);
@@ -1189,16 +1190,21 @@ public class BattleProbeRunner : MonoBehaviour
         if (frozen == null || bystander == null)
             yield break;
 
-        Check("steeled accompanies control", rogue.GetComponentInChildren<SteeledStatus>() != null);
+        var steeled = rogue.GetComponentInChildren<SteeledStatus>();
+        var steeledCondition = steeled != null ? steeled.GetComponentInChildren<DurationStatusCondition>() : null;
+        Check("steeled accompanies control", steeledCondition != null);
+        if (steeledCondition == null)
+            yield break;
 
         // Late-inflict guard: a partial window (one activation) must not tick
         var reporter = bc.units[0];
         reporter.Publish(new TurnCompletedEvent(reporter));
         Check("partial window does not tick", frozen.duration == 2, "duration " + frozen.duration);
 
-        // Roll four full frozen windows — enough for the control (2) and its
-        // Steeled (3) to run out even though the rogue never activates
-        for (var i = 0; i < clock.RoundLength * 4; i++)
+        // Complete exactly two frozen windows: the control (2) runs out, and
+        // Steeled must ALSO count both denied turns — including the window in
+        // which the control removed itself mid-event — leaving exactly 1
+        for (var i = 0; i < clock.RoundLength * 2 - 1; i++)
             reporter.Publish(new TurnCompletedEvent(reporter));
 
         // Status removal destroys deferred
@@ -1206,7 +1212,16 @@ public class BattleProbeRunner : MonoBehaviour
         yield return null;
 
         Check("frozen control expired", rogue.GetComponentInChildren<FreezeFrameStatus>() == null);
-        Check("steeled expired with it", rogue.GetComponentInChildren<SteeledStatus>() == null);
+        Check("steeled counts the control's final window", steeledCondition != null && steeledCondition.duration == 1,
+            steeledCondition != null ? "duration " + steeledCondition.duration : "condition gone");
+
+        // Unfrozen again, the fallback stays quiet; the rogue's next real
+        // turn spends Steeled's last point
+        rogue.Publish(new TurnBeganEvent(rogue));
+        yield return null;
+        yield return null;
+
+        Check("steeled expires on the next real turn", rogue.GetComponentInChildren<SteeledStatus>() == null);
         Check("unfrozen bystander never fallback-ticks", bystander != null && bystander.duration == 2,
             bystander != null ? "duration " + bystander.duration : "condition gone");
         bystander.Remove();
