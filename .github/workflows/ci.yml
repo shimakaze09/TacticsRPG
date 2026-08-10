@@ -5,10 +5,12 @@
 #
 # Requires repository secrets (Settings → Secrets and variables → Actions):
 #   UNITY_EMAIL / UNITY_PASSWORD — a Unity account holding a Personal (free)
-#   license. Headless login cannot answer a two-factor prompt: use a
-#   dedicated CI account with 2FA disabled, or additionally provide
-#   UNITY_LICENSE (the contents of a Personal .ulf file — still free tier),
-#   which takes precedence when present.
+#   license, with two-step verification DISABLED (headless login cannot
+#   answer a code prompt; a dedicated CI account is the usual pattern —
+#   Unity has discontinued manual .alf/.ulf activation for Personal, so
+#   email/password is the supported free-tier path).
+#   UNITY_LICENSE — optional legacy fallback: the complete XML of an
+#   already-valid license file matching this runner; takes precedence.
 # See Docs/ARCHITECTURE.md §8 for the local forms of these commands.
 
 name: CI
@@ -51,22 +53,32 @@ jobs:
             library-${{ env.UNITY_VERSION }}-
 
       # Activation must verifiably succeed before anything else runs — a
-      # swallowed failure here just resurfaces as an opaque exit 198 later
+      # swallowed failure here just resurfaces as an opaque exit 198 later.
+      # The email/password path retries: Unity's licensing backend is flaky
+      # on first contact from a fresh machine.
       - name: Activate Unity license
         run: |
           mkdir -p logs
+          failed_sig="No valid Unity Editor license|Cannot load ULF|Signature element not found|Licensing::Client\] Error: Code 4|Access token is unavailable"
           if [ -n "$UNITY_LICENSE" ]; then
             echo "$UNITY_LICENSE" > /tmp/Unity_lic.ulf
             unity-editor -batchmode -nographics -quit \
               -manualLicenseFile /tmp/Unity_lic.ulf \
               -logFile logs/activation.log || true
           else
-            unity-editor -batchmode -nographics -quit \
-              -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD" \
-              -logFile logs/activation.log || true
+            for attempt in 1 2 3; do
+              unity-editor -batchmode -nographics -quit \
+                -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD" \
+                -logFile logs/activation.log || true
+              if ! grep -qE "$failed_sig" logs/activation.log; then
+                break
+              fi
+              echo "Activation attempt $attempt failed; retrying..."
+              sleep 15
+            done
           fi
-          if grep -qE "No valid Unity Editor license|Cannot load ULF|Signature element not found|Licensing::Client\] Error: Code 4" logs/activation.log; then
-            echo "::error::Unity license activation failed. UNITY_LICENSE must be the COMPLETE .ulf XML (signature included); with email/password the account must not have 2FA enabled. See logs artifact: activation.log."
+          if grep -qE "$failed_sig" logs/activation.log; then
+            echo "::error::Unity license activation failed. Email/password requires an account WITHOUT two-step verification (headless login cannot answer a code prompt) — use a dedicated CI account. If UNITY_LICENSE is set, it must be the complete XML of a license valid for this runner. See logs artifact: activation.log."
             exit 1
           fi
           echo "License activation verified."

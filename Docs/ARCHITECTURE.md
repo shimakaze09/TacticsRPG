@@ -165,9 +165,12 @@ equipment migration are tracked in issues
   report upload as artifacts. Pushes to main additionally produce a Windows
   build artifact via `CIBuild.Build`, which regenerates content before
   building. Requires the `UNITY_EMAIL` / `UNITY_PASSWORD` repository secrets
-  (a Unity Personal license account — the workflow activates on start and
-  returns the seat when done); the Library folder is cached keyed on
-  `packages-lock.json` + editor version.
+  — a Unity Personal account **without two-step verification** (headless
+  login cannot answer a code prompt; Unity discontinued manual .alf/.ulf
+  activation for Personal, so a dedicated 2FA-free CI account is the
+  supported free-tier path). The workflow activates on start and returns the
+  seat when done; the Library folder is cached keyed on `packages-lock.json`
+  + editor version.
 
 ## 9. Known debt tracking
 
