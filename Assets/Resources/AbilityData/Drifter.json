@@ -75,7 +75,7 @@
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Self",
           "status": "Bulwark",
           "duration": 3
         }
@@ -103,7 +103,7 @@
         {
           "type": "Heal",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "",
           "duration": 0
         }
@@ -127,7 +127,7 @@
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Self",
           "status": "Knit",
           "duration": 3
         }

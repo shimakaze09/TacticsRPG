@@ -44,7 +44,7 @@
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "Overclock",
           "duration": 3
         }
@@ -68,7 +68,7 @@
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "Nullgrav",
           "duration": 3
         }

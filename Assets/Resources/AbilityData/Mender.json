@@ -23,7 +23,7 @@
         {
           "type": "Heal",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "",
           "duration": 0
         }
@@ -47,7 +47,7 @@
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "Knit",
           "duration": 4
         }
@@ -71,7 +71,7 @@
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "Bulwark",
           "duration": 4
         }
@@ -95,7 +95,7 @@
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "Firewall",
           "duration": 4
         }
@@ -123,7 +123,7 @@
         {
           "type": "Heal",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "",
           "duration": 0
         }
@@ -147,7 +147,7 @@
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "Failsafe",
           "duration": 4
         }
@@ -175,7 +175,7 @@
         {
           "type": "Heal",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "",
           "duration": 0
         }

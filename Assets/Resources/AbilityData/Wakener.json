@@ -23,7 +23,7 @@
         {
           "type": "Heal",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "",
           "duration": 0
         }
@@ -139,14 +139,14 @@
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "Bulwark",
           "duration": 3
         },
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Ally",
           "status": "Firewall",
           "duration": 3
         }

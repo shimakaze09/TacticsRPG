@@ -119,7 +119,7 @@
         {
           "type": "Inflict",
           "hitRate": "Full",
-          "target": "Default",
+          "target": "Self",
           "status": "Nullgrav",
           "duration": 4
         }

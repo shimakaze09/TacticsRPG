@@ -79,6 +79,7 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeWeaponBehavior(bc);
             ProbeTraits(bc);
             ProbeElementsAndCrits(bc);
+            ProbeTargetFilters(bc);
             // Status removal destroys deferred, so this block yields frames
             yield return StartCoroutine(ProbeControlStatuses(bc));
             ProbeTerrain(bc);
@@ -473,6 +474,112 @@ public class BattleProbeRunner : MonoBehaviour
             if (CriticalHit.Roll(alaois))
                 crits++;
         Check("crit roll near 15%", crits > 20 && crits < 110, crits + "/400");
+    }
+
+    // ---- issue #53: target allegiance filters ------------------------------
+
+    // Support abilities must respect allegiance: Ally includes the caster and
+    // teammates but never foes, Self only the caster, KOdAlly only downed
+    // teammates. Filters are exercised from a hero's perspective against a
+    // live friendly and hostile unit.
+    private void ProbeTargetFilters(BattleController bc)
+    {
+        var alaois = Find(bc, "Alaois");
+        var hania = Find(bc, "Hania");
+        var rogue = Find(bc, "Enemy Rogue");
+        if (alaois == null || hania == null || rogue == null)
+        {
+            Check("target filter cast present", false);
+            return;
+        }
+
+        var holder = new GameObject("Probe Target Filters");
+        holder.transform.SetParent(alaois.transform);
+        var ally = holder.AddComponent<AllyAbilityEffectTarget>();
+        var self = holder.AddComponent<SelfAbilityEffectTarget>();
+        var koAlly = holder.AddComponent<KOdAllyAbilityEffectTarget>();
+
+        Check("ally filter accepts teammate", ally.IsTarget(hania.tile));
+        Check("ally filter accepts caster", ally.IsTarget(alaois.tile));
+        Check("ally filter rejects foe", !ally.IsTarget(rogue.tile));
+
+        Check("self filter accepts caster", self.IsTarget(alaois.tile));
+        Check("self filter rejects teammate", !self.IsTarget(hania.tile));
+        Check("self filter rejects foe", !self.IsTarget(rogue.tile));
+
+        Check("ko-ally filter rejects living teammate", !koAlly.IsTarget(hania.tile));
+
+        // Drop HP directly (bypassing the event pipeline) so the KO branch is
+        // observable without spinning up the full KO/revive status flow
+        var haniaStats = hania.GetComponent<Stats>();
+        var rogueStats = rogue.GetComponent<Stats>();
+        var haniaHP = haniaStats[StatTypes.HP];
+        var rogueHP = rogueStats[StatTypes.HP];
+        haniaStats.SetValue(StatTypes.HP, 0, false);
+        rogueStats.SetValue(StatTypes.HP, 0, false);
+
+        Check("ko-ally filter accepts downed teammate", koAlly.IsTarget(hania.tile));
+        Check("ko-ally filter rejects downed foe", !koAlly.IsTarget(rogue.tile));
+        Check("ally filter rejects downed teammate", !ally.IsTarget(hania.tile));
+
+        haniaStats.SetValue(StatTypes.HP, haniaHP, false);
+        rogueStats.SetValue(StatTypes.HP, rogueHP, false);
+
+        // Neutral units are nobody's ally and nobody's foe — support and
+        // attack filters must both exclude them
+        var rogueAlliance = rogue.GetComponent<Alliance>();
+        var savedType = rogueAlliance.type;
+        rogueAlliance.type = Alliances.Neutral;
+        var attackFilter = AttackOf(alaois).GetComponentInChildren<AbilityEffectTarget>();
+        Check("ally filter rejects neutral", !ally.IsTarget(rogue.tile));
+        Check("attack filter rejects neutral", !attackFilter.IsTarget(rogue.tile));
+        rogueAlliance.type = savedType;
+
+        // Confusion (Swayed) swaps ally and foe — it must not admit Neutral
+        // units or divert the Self contract
+        var alaoisAlliance = alaois.GetComponent<Alliance>();
+        alaoisAlliance.confused = true;
+        Check("confused ally filter targets foes", ally.IsTarget(rogue.tile));
+        Check("confused ally filter rejects teammate", !ally.IsTarget(hania.tile));
+        Check("confused ally filter still accepts caster", ally.IsTarget(alaois.tile));
+        Check("confused attack filter never targets caster", !attackFilter.IsTarget(alaois.tile));
+        Check("confused self filter unaffected",
+            self.IsTarget(alaois.tile) && !self.IsTarget(rogue.tile));
+        rogueAlliance.type = Alliances.Neutral;
+        Check("confused ally filter still rejects neutral", !ally.IsTarget(rogue.tile));
+        rogueAlliance.type = savedType;
+        alaoisAlliance.confused = false;
+
+        // End to end through generated data: a full-board support broadcast
+        // must carry the Ally contract from JSON to prefab and be legal on
+        // every living hero and illegal on every enemy
+        var broadcast = Resources.Load<GameObject>("Abilities/Balladeer/Grit Ballad");
+        Check("generated broadcast present", broadcast != null,
+            "run Tactics RPG → Generate Content → Abilities");
+        if (broadcast != null)
+        {
+            var instance = Instantiate(broadcast);
+            instance.transform.SetParent(alaois.transform);
+            var broadcastFilter = instance.GetComponentInChildren<AbilityEffectTarget>();
+            Check("broadcast carries Ally contract", broadcastFilter is AllyAbilityEffectTarget,
+                broadcastFilter != null ? broadcastFilter.GetType().Name : "no filter");
+            if (broadcastFilter != null)
+            {
+                foreach (var u in bc.units)
+                {
+                    var side = u.GetComponent<Alliance>().type;
+                    var living = u.GetComponent<Stats>()[StatTypes.HP] > 0;
+                    var expectLegal = side == Alliances.Hero && living;
+                    Check("broadcast legality " + u.name,
+                        broadcastFilter.IsTarget(u.tile) == expectLegal,
+                        $"side {side}, living {living}");
+                }
+            }
+
+            Destroy(instance);
+        }
+
+        Destroy(holder);
     }
 
     // ---- 1.11: behavior-control statuses ------------------------------------
