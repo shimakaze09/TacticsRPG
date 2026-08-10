@@ -148,10 +148,15 @@ public class AbilityMemory
     }
 
     /// <summary>
-    /// Removes learned abilities that the character's job progress does not
-    /// justify — repair for saves written while locked jobs leaked their
-    /// Grade-1 abilities (issue #51). Also drops equipped abilities that lose
-    /// their backing. Returns how many entries were scrubbed.
+    /// Removes learned abilities attributable to the locked-job leak (issue
+    /// #51): the bug taught exactly the Grade-1 unlock list of every job the
+    /// character never unlocked, so only ids on a locked job's Grade-1 list —
+    /// and not also granted by any unlocked job at its grade — are scrubbed.
+    /// Deliberately conservative: anything the leak cannot explain is kept,
+    /// so legitimately learned abilities survive even though no
+    /// purchase-provenance data exists yet (that model belongs to #17/#51).
+    /// Also drops equipped abilities that lose their backing.
+    /// Returns how many entries were scrubbed.
     /// </summary>
     public int RepairLearnedAbilities(JobProgressData progressData, List<JobDefinition> allJobs)
     {
@@ -159,25 +164,34 @@ public class AbilityMemory
             return 0;
 
         var justified = new HashSet<string>();
+        var leaked = new HashSet<string>();
         foreach (var job in allJobs)
         {
-            if (job == null || !progressData.IsJobUnlocked(job))
+            if (job == null)
                 continue;
 
-            int jobLevel = progressData.GetJobLevel(job);
-            if (jobLevel > 0)
+            if (progressData.IsJobUnlocked(job))
             {
-                foreach (var abilityName in job.GetUnlockedAbilities(jobLevel))
-                    justified.Add(abilityName);
+                int jobLevel = progressData.GetJobLevel(job);
+                if (jobLevel > 0)
+                {
+                    foreach (var abilityName in job.GetUnlockedAbilities(jobLevel))
+                        justified.Add(abilityName);
+                }
+            }
+            else
+            {
+                foreach (var abilityName in job.GetUnlockedAbilities(1))
+                    leaked.Add(abilityName);
             }
         }
 
         int removed = 0;
         for (int i = learnedAbilities.Count - 1; i >= 0; i--)
         {
-            if (!justified.Contains(learnedAbilities[i]))
+            if (leaked.Contains(learnedAbilities[i]) && !justified.Contains(learnedAbilities[i]))
             {
-                Debug.LogWarning($"Repairing ability memory: removing unjustified '{learnedAbilities[i]}'");
+                Debug.LogWarning($"Repairing ability memory: removing leaked '{learnedAbilities[i]}'");
                 learnedAbilities.RemoveAt(i);
                 removed++;
             }

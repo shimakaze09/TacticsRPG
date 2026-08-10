@@ -253,12 +253,36 @@ public class BattleProbeRunner : MonoBehaviour
                 }
             }
 
-            // Save repair scrubs leaked ids and nothing else
-            memory.learnedAbilities.Add("__probe_leaked_ability__");
+            // Save repair scrubs exactly what the leak taught (a locked job's
+            // Grade-1 id) while keeping ids it cannot attribute to the leak —
+            // a legitimately learned ability must survive repair even though
+            // no purchase-provenance data exists yet
+            string leakedId = null;
+            if (lockedJob != null)
+            {
+                foreach (var name in lockedJob.GetUnlockedAbilities(1))
+                {
+                    if (!justified.Contains(name))
+                    {
+                        leakedId = name;
+                        break;
+                    }
+                }
+            }
+
+            memory.learnedAbilities.Add("__probe_unattributable_ability__");
+            if (leakedId != null)
+                memory.learnedAbilities.Add(leakedId);
+
             var removed = memory.RepairLearnedAbilities(progress, jm.allJobs);
-            Check("repair scrubs leaked id " + u.name,
-                removed == 1 && !memory.HasLearnedAbility("__probe_leaked_ability__"),
-                "removed " + removed);
+            if (leakedId != null)
+                Check("repair scrubs leaked id " + u.name,
+                    removed == 1 && !memory.HasLearnedAbility(leakedId),
+                    $"removed {removed} for {leakedId}");
+            Check("repair keeps unattributable id " + u.name,
+                memory.HasLearnedAbility("__probe_unattributable_ability__"));
+
+            memory.learnedAbilities.Remove("__probe_unattributable_ability__");
             Check("repair keeps justified " + u.name, memory.GetLearnedAbilityCount() == before,
                 $"{before} -> {memory.GetLearnedAbilityCount()}");
         }
