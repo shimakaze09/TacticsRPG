@@ -124,8 +124,10 @@ public class AbilityMemory
     }
 
     /// <summary>
-    /// Syncs all learned abilities from job progress data
-    /// Useful for initialization and data integrity
+    /// Syncs learned abilities from job progress data. Only jobs the character
+    /// has actually unlocked (and therefore has a progress entry for) may
+    /// teach — a job with no entry must contribute nothing, or every locked
+    /// and character-exclusive job leaks its Grade-1 abilities (issue #51).
     /// </summary>
     public void SyncLearnedAbilities(JobProgressData progressData, List<JobDefinition> allJobs)
     {
@@ -134,7 +136,7 @@ public class AbilityMemory
 
         foreach (var job in allJobs)
         {
-            if (job == null)
+            if (job == null || !progressData.IsJobUnlocked(job))
                 continue;
 
             int jobLevel = progressData.GetJobLevel(job);
@@ -143,6 +145,48 @@ public class AbilityMemory
                 UpdateLearnedAbilities(job, jobLevel);
             }
         }
+    }
+
+    /// <summary>
+    /// Removes learned abilities that the character's job progress does not
+    /// justify — repair for saves written while locked jobs leaked their
+    /// Grade-1 abilities (issue #51). Also drops equipped abilities that lose
+    /// their backing. Returns how many entries were scrubbed.
+    /// </summary>
+    public int RepairLearnedAbilities(JobProgressData progressData, List<JobDefinition> allJobs)
+    {
+        if (progressData == null || allJobs == null)
+            return 0;
+
+        var justified = new HashSet<string>();
+        foreach (var job in allJobs)
+        {
+            if (job == null || !progressData.IsJobUnlocked(job))
+                continue;
+
+            int jobLevel = progressData.GetJobLevel(job);
+            if (jobLevel > 0)
+            {
+                foreach (var abilityName in job.GetUnlockedAbilities(jobLevel))
+                    justified.Add(abilityName);
+            }
+        }
+
+        int removed = 0;
+        for (int i = learnedAbilities.Count - 1; i >= 0; i--)
+        {
+            if (!justified.Contains(learnedAbilities[i]))
+            {
+                Debug.LogWarning($"Repairing ability memory: removing unjustified '{learnedAbilities[i]}'");
+                learnedAbilities.RemoveAt(i);
+                removed++;
+            }
+        }
+
+        if (removed > 0)
+            ValidateEquippedAbilities();
+
+        return removed;
     }
     
     #endregion
