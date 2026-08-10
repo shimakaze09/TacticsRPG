@@ -76,6 +76,7 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeBattleSetup(bc);
             ProbeGearAndStats(bc);
             ProbeAbilityMemory(bc);
+            ProbeCertPurchases(bc);
             ProbeWeaponBehavior(bc);
             ProbeTraits(bc);
             ProbeElementsAndCrits(bc);
@@ -300,6 +301,129 @@ public class BattleProbeRunner : MonoBehaviour
             Check("repair keeps justified " + u.name, memory.GetLearnedAbilityCount() == before,
                 $"{before} -> {memory.GetLearnedAbilityCount()}");
         }
+    }
+
+    // ---- issue #51: Cert buys abilities -------------------------------------
+
+    // The purchase contract: nothing enters permanent memory automatically —
+    // not on spawn, unlock, or level-up. Grades gate what is purchasable and
+    // banked Cert pays for it; spending never regresses a grade; purchases
+    // and the spent bank survive a serialization round trip.
+    private void ProbeCertPurchases(BattleController bc)
+    {
+        // Heroes may carry grandfathered grade-granted entries from saves made
+        // before the purchase model; ProbeAbilityMemory already proves each is
+        // justified by real progress. The genuinely fresh case is the spawn
+        // below: its factory sync must teach nothing.
+        var unit = UnitFactory.Create("Enemy Warrior", 1);
+        if (unit == null)
+        {
+            Check("cert purchase unit spawns", false);
+            return;
+        }
+
+        var jm = unit.GetComponent<JobManager>();
+        var progress = jm.ProgressData;
+        var memory = jm.AbilityMemory;
+        var current = jm.CurrentJob;
+
+        Check("fresh spawn memory empty", memory.GetLearnedAbilityCount() == 0,
+            memory.GetLearnedAbilityCount() + " entries");
+
+        // Cast: a locked common job, a unique job, and the current job's
+        // cheapest grade-1 and highest-gated unlocks
+        JobDefinition lockedCommon = null, unique = null;
+        foreach (var job in jm.allJobs)
+        {
+            if (job == null || job == current)
+                continue;
+            if (job.isUnique && unique == null)
+                unique = job;
+            else if (!job.isUnique && !progress.IsJobUnlocked(job) && lockedCommon == null)
+                lockedCommon = job;
+        }
+
+        JobAbilityUnlock gradeOne = null, gated = null;
+        foreach (var unlock in current.abilityUnlocks)
+        {
+            if (unlock.unlockAtJobLevel <= 1 && gradeOne == null)
+                gradeOne = unlock;
+            if (gated == null || unlock.unlockAtJobLevel > gated.unlockAtJobLevel)
+                gated = unlock;
+        }
+
+        Check("purchase cast present",
+            lockedCommon != null && unique != null && gradeOne != null &&
+            gated != null && gated.unlockAtJobLevel > 1);
+        if (lockedCommon == null || unique == null || gradeOne == null ||
+            gated == null || gated.unlockAtJobLevel <= 1)
+        {
+            Destroy(unit);
+            return;
+        }
+
+        string GradeOneId() => string.IsNullOrEmpty(gradeOne.abilityId) ? gradeOne.abilityName : gradeOne.abilityId;
+        string GatedId() => string.IsNullOrEmpty(gated.abilityId) ? gated.abilityName : gated.abilityId;
+
+        // Locked and unique jobs sell nothing
+        Check("locked common job refuses purchase",
+            jm.PurchaseAbility(lockedCommon, "anything") == AbilityMemory.PurchaseResult.JobLocked);
+        Check("unique job refuses purchase",
+            jm.PurchaseAbility(unique, "anything") == AbilityMemory.PurchaseResult.JobLocked);
+
+        // Unlocking a job still grants nothing by itself
+        progress.UnlockJob(lockedCommon);
+        Check("unlock grants no abilities", memory.GetLearnedAbilityCount() == 0,
+            memory.GetLearnedAbilityCount() + " entries");
+
+        // Grade gate holds regardless of bank
+        progress.SetJobJP(current, 0);
+        Check("grade gate refuses early purchase",
+            jm.PurchaseAbility(current, GatedId()) == AbilityMemory.PurchaseResult.GradeTooLow);
+
+        // An empty bank cannot buy a priced ability
+        if (gradeOne.jpCost > 0)
+            Check("empty bank refuses purchase",
+                jm.PurchaseAbility(current, GradeOneId()) == AbilityMemory.PurchaseResult.InsufficientCert);
+
+        // A funded purchase succeeds, debits exactly its cost, and never
+        // regresses the grade the earned total already bought
+        progress.SetJobJP(current, 2000);
+        var levelBefore = progress.GetJobLevel(current);
+        var bankBefore = progress.GetAvailableJP(current);
+        Check("funded purchase succeeds",
+            jm.PurchaseAbility(current, GradeOneId()) == AbilityMemory.PurchaseResult.Success);
+        Check("purchase learns the ability", memory.HasLearnedAbility(GradeOneId()));
+        Check("purchase debits exactly its cost",
+            progress.GetAvailableJP(current) == bankBefore - gradeOne.jpCost,
+            $"{bankBefore} -> {progress.GetAvailableJP(current)} (cost {gradeOne.jpCost})");
+        Check("spending never regresses grade", progress.GetJobLevel(current) == levelBefore,
+            $"{levelBefore} -> {progress.GetJobLevel(current)}");
+
+        Check("repurchase refused",
+            jm.PurchaseAbility(current, GradeOneId()) == AbilityMemory.PurchaseResult.AlreadyLearned);
+        Check("unknown ability refused",
+            jm.PurchaseAbility(current, "__no_such_ability__") == AbilityMemory.PurchaseResult.UnknownAbility);
+
+        // Switching jobs neither adds nor removes learned entries
+        var countBeforeSwitch = memory.GetLearnedAbilityCount();
+        progress.SwitchJob(lockedCommon);
+        jm.AbilityMemory.SyncLearnedAbilities(progress, jm.allJobs);
+        Check("job switch preserves memory",
+            memory.GetLearnedAbilityCount() == countBeforeSwitch &&
+            memory.HasLearnedAbility(GradeOneId()));
+        progress.SwitchJob(current);
+
+        // Reload: purchases and the spent bank survive serialization
+        var memoryCopy = JsonUtility.FromJson<AbilityMemory>(JsonUtility.ToJson(memory));
+        Check("reload keeps purchased ability", memoryCopy.HasLearnedAbility(GradeOneId()));
+        var progressCopy = JsonUtility.FromJson<JobProgressData>(JsonUtility.ToJson(progress));
+        Check("reload keeps the spent bank",
+            progressCopy.GetAvailableJP(current) == progress.GetAvailableJP(current) &&
+            progressCopy.GetJobLevel(current) == progress.GetJobLevel(current),
+            $"bank {progressCopy.GetAvailableJP(current)} vs {progress.GetAvailableJP(current)}");
+
+        Destroy(unit);
     }
 
     // ---- 1.9b/1.9c: weapon behavior --------------------------------------
