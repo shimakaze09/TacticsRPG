@@ -66,9 +66,13 @@ jobs:
               -manualLicenseFile /tmp/Unity_lic.ulf \
               -logFile logs/activation.log || true
           else
+            # Strip stray CR/LF a secret paste can carry — the web login
+            # trims them, the licensing API does not
+            UE=$(printf %s "$UNITY_EMAIL" | tr -d '\r\n')
+            UP=$(printf %s "$UNITY_PASSWORD" | tr -d '\r\n')
             for attempt in 1 2 3; do
               unity-editor -batchmode -nographics -quit \
-                -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD" \
+                -username "$UE" -password "$UP" \
                 -logFile logs/activation.log || true
               if ! grep -qE "$failed_sig" logs/activation.log; then
                 break
@@ -94,21 +98,21 @@ jobs:
       # that fails (401) and overrides the valid local license.
       - name: Validate and generate content
         run: |
-          if [ -z "$UNITY_LICENSE" ]; then set -- -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD"; else set --; fi
+          if [ -z "$UNITY_LICENSE" ]; then set -- -username "$(printf %s "$UNITY_EMAIL" | tr -d '\r\n')" -password "$(printf %s "$UNITY_PASSWORD" | tr -d '\r\n')"; else set --; fi
           unity-editor -batchmode -nographics -projectPath . "$@" \
             -executeMethod ContentGenerationMenu.RunHeadless \
             -logFile logs/generate.log
 
       - name: Run battle probes
         run: |
-          if [ -z "$UNITY_LICENSE" ]; then set -- -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD"; else set --; fi
+          if [ -z "$UNITY_LICENSE" ]; then set -- -username "$(printf %s "$UNITY_EMAIL" | tr -d '\r\n')" -password "$(printf %s "$UNITY_PASSWORD" | tr -d '\r\n')"; else set --; fi
           unity-editor -batchmode -nographics -projectPath . "$@" \
             -executeMethod BattleProbeMenu.RunHeadless \
             -logFile logs/probes.log
 
       - name: Balance report (hard invariants)
         run: |
-          if [ -z "$UNITY_LICENSE" ]; then set -- -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD"; else set --; fi
+          if [ -z "$UNITY_LICENSE" ]; then set -- -username "$(printf %s "$UNITY_EMAIL" | tr -d '\r\n')" -password "$(printf %s "$UNITY_PASSWORD" | tr -d '\r\n')"; else set --; fi
           unity-editor -batchmode -nographics -projectPath . "$@" \
             -executeMethod BalanceReportGenerator.RunHeadless \
             -logFile logs/balance.log
@@ -120,7 +124,7 @@ jobs:
         run: |
           if [ -n "$UNITY_LICENSE" ]; then echo "Manual .ulf license — nothing to return."; exit 0; fi
           unity-editor -batchmode -nographics -quit -returnlicense \
-            -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD" \
+            -username "$(printf %s "$UNITY_EMAIL" | tr -d '\r\n')" -password "$(printf %s "$UNITY_PASSWORD" | tr -d '\r\n')" \
             -logFile logs/return-license.log || true
 
       - name: Upload logs and balance report
