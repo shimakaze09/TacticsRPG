@@ -1,73 +1,72 @@
-# Battle System Plan — the working queue
+# Battle system plan
 
-**Date:** 2026-07-29 · Successor to `CODE_AUDIT.md` Phase 2/4 for everything battle-scoped.
-Design intent for these systems lives in `GDD.md` (§3 gameplay, §5 slice battles).
-Design stance: **FFT is the base, not the target.** Genre-floor competence first (fix the
-lying systems), then original pillars that make this game its own.
+**Updated:** 2026-08-10  
+**Scope:** the tactical runtime only. Player-flow and meta-game priorities live
+in [ROADMAP.md](ROADMAP.md).
 
-Work strictly top-down: items in §1 block everything below them.
+## Current capability
 
----
+The repository implements a substantial battle sandbox:
 
-## 1. Fix the lying systems (in progress)
+- CTR/SPD turn order with move/action economy
+- Height-aware grid movement, facing, line of sight, and terrain rules
+- Composed abilities with range, area, targeting, hit, power, and effect parts
+- Physical/magical damage, deterministic forecasts, elements, and criticals
+- Status application, duration, expiry, and behavior-control effects
+- Equipment loadouts, weapon shapes/arcs/ranges, and composable gear traits
+- KO/remains behavior and salvage pickup
+- Defeat-all, defeat-target, survive-rounds, and reach-zone objectives
+- Authored `BattleDefinition` setup plus repeatable-writ fallback spawning
+- Easy pattern AI and Hard tactical AI with threat, retreat, focus, and support
+- 23 jobs and 135 data-defined abilities
 
-| # | Item | Status |
-|---|---|---|
-| 1.1 | **Statuses must affect combat.** Bulwark/Firewall/Redline/Doused/Static/Ghosted wired into `TweakDamageEvent` / `HitRateStatusCheckEvent`. | **done** (verified: Bulwark cut physical 14→9, restored on expiry, magic unaffected) |
-| 1.2 | **Durations tick per-owner**, not on every unit's turn. | **done** |
-| 1.3 | **Condition parenting bugs**: `GetComponent` vs `GetComponentInChildren` in the KO/Ghosted/Failsafe/Deadline family; Deadline must respect Failsafe (sibling status lookup). | **done** |
-| 1.4 | **Control needs a miss chance**: per-ability `accuracy` in AbilityData (hard control 60–70%, soft debuffs 80–90%). RES-as-stat axis deferred until gear. | **done** (53 hostile inflictions tuned) |
-| 1.5 | **AI runs on fossils**: attack patterns reference abilities that don't exist (`Water`, `Cure`, `Prominence`). Rebuild per-job patterns so enemies cast their actual kits. `SmartComputerPlayer` stays dead until a deliberate AI project. | **done** (patterns rebuilt; `SmartComputerPlayer` superseded by `TacticalComputerPlayer` and safe to delete) |
-| 1.5b | **Difficulty modes** (2026-07-30): Easy = pattern AI, no scaling. Hard = `TacticalComputerPlayer` (scores every ability×move×target with Predict + hit chance; kill priority, focus fire, heal/status logic) + enemy HP ×1.3 and damage ×1.2 — tougher, deliberately beatable. Switch via `Tactics RPG → Difficulty` until the options UI exists; setting lives in PlayerPrefs (`DifficultySettings`). | **done** |
-| 1.5c | **AI act-then-move** (hit-and-run): the tactical AI attacks from its current tile and *then* spends the move retreating whenever staying put scores ≥95% of the best move-then-attack plan and a safer tile exists. Safety = max-min Manhattan distance to **all** living foes (1.5d upgrades this to expected damage). Verified in-editor: staged Marksman shot Kamau then retreated, min distance to any hero 4→7. Easy AI unchanged. | **done** (2026-07-31) |
-| 1.5d | **AI threat map** (foundation): per-tile expected damage from enemies that could reach+hit it next turn. Consumed by the hit-and-run retreat leg, a global safer-ground bias on all plans, and 1.5e/1.5g. | **done** (2026-07-31: verified — tile beside a hero 76.8 expected damage vs 0.0 in cover; kiting retreat now drops threat 81.3→52.5) |
-| 1.5e | **AI self-preservation**: below 30% HP with no kill available, units retreat toward an allied healer with usable heals (danger-weighted approach), else the safest tile — with a parting shot when one is worth taking from the current tile. Healers weigh destination danger 3x and, when idle, drift toward the most wounded ally. | **done** (2026-07-31: verified — wounded Scav fled 76.8→0.0 threat with no healer; approached a spawned healer 4→2 when one existed) |
-| 1.5f | **AI team focus fire + target value**: deterministic focus nomination (every teammate computes the same kill-first pick — no shared state needed) with an assist bonus; damage values scale by role (healer 1.35 > caster 1.2 > striker 1.0 > tank 0.9), wounded-ness, and kill feasibility. Never forces reach: units attack the best reachable target and their movement drifts toward the focus (post-strike converge leg + a gentle per-tile pull). | **done** (2026-07-31: verified — two enemies independently aimed at the healer; with focus unreachable the shooter hit the reachable caster while closing 15→12 on the focus) |
-| 1.5g | **AI support discipline**: heal value scales with target criticality (stabilize the dying before topping off); healers refuse non-support casts that would break the emergency heal/revive MP reserve while allies are hurt or down; idle healers seek corpses they can revive, then the most wounded ally. Buff-while-closing was already emergent from scoring. | **done** (2026-07-31: verified — medic chose Field Surgery on the 15% ally over the 60% one; with a corpse present it planned the revive itself, closing 3→1) |
-| 1.6 | Line-of-sight / arc for ranged attacks; high-ground combat bonus. | **done** (2026-07-31: `LineOfSight` blocks Constant ranges > 1 behind terrain, walls truncate Line volleys, `ElevationRules` grants ±15% damage and ±10 hit at ≥2 height difference; Infinite ranges bypass by design) |
-| 1.7 | **KO decay & salvage**: after three skipped activations a fallen unit decays into board remains — a memory-core (restores half of the collector's missing HP/MP) or salvage (scrip scaled by level) — and is fully removed from battle (fixes the latent zombie-turn bug where decayed corpses re-entered the turn order). Walkers pass over KO'd units (can't end on them); ending a move on remains collects them. Pillar 4 (Scav-specific salvage play) builds on this. | **done** (2026-07-31: verified — corpse passable, Salvage spawned at 70 scrip, units 6→5 with tile freed, collection paid 5000→5070) |
-| 1.8 | **Authored battle setup**: `BattleDefinition` ScriptableObject (level ref, per-unit spawn entries with position/facing/level, victory type, reinforcement waves) consumed by `InitBattleState` — game flow's `PendingBattle` first, scene `testBattle` second, writ-style random generation (the GDD §4.5.3 repeatable-contract path) when neither. `BattleClock` defines rounds atop the CTR scheduler (1 + turns/startingUnits); `BattleEvents` spawns waves on their round; `SurviveRoundsVictoryCondition` + `ReachZoneVictoryCondition` join DefeatAll/DefeatTarget (escort waits for M2's guest-control rules); `BattleSpawner` places units with nearest-free-tile fallback. First authored battle: Toll Road Ambush (Resources/Battles). | **done** (2026-07-30: verified in play mode — 5 units at exact authored tiles, round flipped at 5 activations, wave landed 5→7 units tile-linked, SurviveRounds declared Hero victor past round 1, ReachZone flips only when a living hero stands in the zone, writ fallback still spawns 6 + leader rule; fixed double-registration of authored units found during probe) |
-| 1.8b | **Real terrain**: `TerrainType` (Field/Road/Water/Obstacle/Building/Bridge) with the law in `TerrainRules` — per-type pass flags, stop flags, sight blocking, default skin. Water blocks walkers (flyers hover, teleporters blink over but can't end submerged); trees let flyers cross but nobody stop, and block LoS; buildings wall out everything and sight; bridges are open ground. Movement search/filter, LineOfSight, BattleSpawner placement, and the writ spawner are all terrain-aware; `LevelData.tileTerrains` persists types (legacy assets infer from skins); BoardCreator paints terrain (P key / button); tinted block prefabs Road/Obstacle/Building/Bridge; selection tint now blends with the skin color instead of erasing it. Dead `TileType`/`TileTraversalOverride` deleted. First terrain map: Level_4 "Coldwater Crossing" (river + single bridge + tree clusters + ruin), Toll Road Ambush plays on it. Feeds Pillar 3 (Sync coverage as another terrain layer). | **done** (2026-07-30: verified in play mode — walker MOV12 reaches 0 water/0 obstacle tiles and every east-bank path crosses only Bridge tiles; flyer hovers on 22 water tiles, never stops on trees/buildings; teleporter crosses but never ends on water; LoS blocked by trees and ruin, clear over water; walker authored onto water relocated to nearest ground, flyer onto building relocated, flyer onto water hovers legally; AI planned a legal road move toward the bridge) |
-| 1.9 | **Equipment actually equips** (audit §6): `GearCatalog` defines every wearable (per-job starting weapon + role armor, GDD §3.3 flavor names, shop tiers/prices); `ItemFactory` builds Equippables with StatModifierFeatures tagged by `GearTag`; UnitFactory equips each unit's loadout at spawn (keyed off the resolved job id). Root cause fixed: `RecalculateStats` overwrote stats and wiped gear — it now folds worn-gear bonuses into the same write, agreeing with the live Equip/UnEquip path. Shop sells catalog tier-1 stock and purchases land in `PartyInventory` (PlayerPrefs beside Bank; both migrate in 1.12). Orphaned `WeaponAbilityPower` deleted (generator only emits Physical/Magical; weapons act through ATK). | **done** (2026-07-30: verified in play mode — all 5 spawned units wear their job's loadout; unequip dropped ATK 16→9 (exactly the mace's +7) and re-equip restored it; RecalculateStats left ATK/DEF unchanged with gear on; estimated hit armed 51.2 vs unarmed 28.8; shop purchase deducted 450 scrip and PartyInventory persisted 'slug_thrower') |
-| 1.9b | **Gear behavior model** (requested 2026-07-30): weapons define their whole basic attack — reach (`WeaponAbilityRange`, live from the worn item), fire arc (Direct blocked by standing units + cover, Arcing lobs over), shape (`WeaponAbilityArea`: Target / Line spray / Sweep through 3), and damage profile (`WeaponPowerScale`: precision >100%, coverage <100%); and ANY gear carries composable `GearTrait`s — Recoil and WindedAfterStrike run on-hit from the Attack ability (`WeaponTraitRunner`), PhysicalResist/Weakness shape incoming damage from the worn item (`GearDefenseFeature`, same TweakDamage stage as statuses). Element-tagged traits are data-ready; their hook lands with 1.10. Showcase gear: Recurve Lath (arcing bow), Drip-Torch (line, 75%), Two-Head Blade (120% + 50% recoil), Pit Cleaver (sweep + self-Throttle), Rattan Jacket (phys −15%, fire +25% pending 1.10). AI threat estimates read weapon reach and damage profile. | **done** (2026-07-30: verified in play mode — Attack range component reads the rifle at reach 5; a standing unit blocked direct fire on the same shot arcing fire cleared; sweep returned target + both flanking tiles; drip-torch returned the 3-tile ray; Predict mace −21 vs two-head −31 (exact 150→180 power math); recoil cost the attacker exactly half a 40-damage hit; the cleaver swing applied Throttle(2); rattan cut predicted damage −24→−21) |
-| 1.9c | **Gear traits wave 2** (requested 2026-07-30, "think more"): FlankBonus (+X% from behind — every knife has it, Absolution Point +40%), StatusOnHit (Static Knife statics 25%, Drip-Torch douses 35%; chance + duration in data, inflicted via the same reflection path as Inflict effects, no double-stacking), Lifesteal (Grief-Edge feeds 25% of damage back), and minimum range as a weapon property (Slug-Thrower dead zone inside 2). Full design space mapped in GDD §3.3 — conditional damage / element / timeline / reaction / forced-movement / mobility / aura / meta families each assigned to a queue item. Also fixed (user-reported): attackers now turn to face their target before striking (`PerformAbilityState.FaceTargets`), so visuals agree with facing-based hit rates and flank bonuses. | **done** (2026-07-30: verified in play mode — rifle can't target adjacent tiles; Absolution Point predicted −26 front vs −36 back (exact ×1.4); Grief-Edge healed 50→60 on a 40-damage hit; Static inflicted at forced 100%; west-facing attacker turned East before the blow, rotation 90°) |
-| 1.10 | **Elements + crits**: `TweakDamageEvent` now carries the damage's element (the ability's own `Elements` component when present, else the attacker's affinity). `ElementRules` on the BattleController applies the ElementRelationship table battle-wide — +25% into the element you beat, −25% into the one that beats you. The six active recipes got affinities (Alaois Earth, Hania Water, Kamau Fire, Rogue Air, Warrior Earth, Wizard Lightning). Element-tagged GearTraits went live (Rattan Jacket burns +25% under fire); Doused upgraded — +25% all damage, +50% under fire (the slag ignites). **Crits** roll at application (never in Predict, so forecasts/AI stay deterministic): base 5% + CritBonus gear, ×1.5, `CriticalHitEvent` published for the future popup. Conditional-damage traits joined: Execute (Pit Cleaver +30% below 30% HP), Opener (Wrapped Knuckles +25% vs untouched), TerrainBonus (Dowsing Staff +30% standing on water), CritBonus (Absolution Point +10%). | **done** (2026-07-30: verified in play mode — fire attacker predicted −21 neutral / −26 vs Ice / −15 vs Water (exact ±25%); rattan took −23 fire vs −14 lightning with resist+restraint compounding exactly; crit chance 5→15 with the Point and 400 rolls yielded exactly 60 crits; knuckles −19 full vs −15 touched; cleaver −18 healthy vs −23 dying; all five spawned units carry their recipe affinities) |
-| HRD | **Architecture hardening** (2026-07-30, user-approved before 1.11): subscription-safety (`EventSubscriptions`) on the multi-subscription ability/trait/rules components; typed `StatusRegistry` replaces reflection infliction (Inflict effects + StatusOnHit traits); the whole session's verification history became the committed `BattleProbeRunner` suite — 50 checks over setup/gear/weapon behavior/traits/elements/crits/terrain/clock, runnable via menu or headless CI (exit code 0 = green); `ARCHITECTURE.md` written as the extension guideline (event-bus rules, lifecycle rules, stats law, damage-stage placement, per-system recipes, verification law). | **done** (2026-07-30: suite PASSED 50/50 in-editor) |
-| FIX | **Pass-through + aim facing** (user-reported 2026-07-30): movement occupant rule is now FFT-standard — units pass freely THROUGH allies (never ending on them), downed bodies stay passable for everyone, and only a standing foe blocks the way (body-blocking a bridge remains a deliberate tactic). And the attacker now watches the cursor while aiming (`AbilityTargetState.FaceCursor`) instead of snapping to the target after the attack; `PerformAbilityState.FaceTargets` stays as the guarantee for the AI path. | **done** (2026-07-30: suite grew to 52 checks with ally-passable/foe-blocks corridor probes, PASSED 52/52; live check — South-facing attacker turned North the moment the cursor moved north, East as it tracked east) |
-| 1.11 | **Behavior-control statuses**: all three now truly seize control via `Driver.special` (shared `ControlSeizure` helper — control returns only when the LAST behavior status ends). **Swayed** flips `Alliance.confused`, so the regular battle brain (both difficulties — every AI path targets through `IsMatch`) earnestly fights for the other side. **Scrambled** and **Redline** dictate the turn through `ITurnPlanOverride` (checked by CommandSelectionState before the CPU brain): Scrambled wanders to a random reachable tile and coin-flips a basic-attack swing at a random neighbor — friend, foe, or empty air; Redline keeps its +33% physical damage but charges the NEAREST unit on any side and swings when its weapon reaches. Resource-attack gear joined per GDD §3.3: **MpBurn** trait (Cipher Rod drains 6 MP per hit) and the new **Shredded** status (+25% incoming physical while torn) as the Pry Hook's 30% on-hit payload. | **done** (2026-07-30: probe suite grew to 65 checks — swayed seizure/flip/restore, redline charge-the-nearest plan, scrambled legal wander, control returning only after the last status, MP 10→4 on a cipher-rod hit, shredded raising predicted physical damage — PASSED 65/65; the suite caught a real bug on its first run: Status.Remove detaches effects before destroying them, so seizure release read null parents — statuses now cache driver/owner at enable) |
-| FIX2 | **KO death visuals** (user-reported 2026-07-30): a unit at 0 HP looked fully alive while standing on the board — which also made the (intended) walk-through-downed-bodies rule read as "walking through living enemies". KOStatus now drops the body visibly: squashed flat and tinted ash-gray while down, restored on revival (placeholder until the art pass brings real death animation). | **done** (2026-07-30: suite grew to 71 checks — zero HP applies KO + flattens the body, revival removes KO + stands it back up; follow-up: hostile attacks can no longer target downed bodies — `EnemyAbilityEffectTarget` now requires a LIVING foe, while revives keep using the KOd filter — and a revived unit becomes attackable again) |
-| 1.12 | **Scrip out of PlayerPrefs** (audit §6): Bank balance belongs in GameData (save file), not machine-wide prefs. PartyInventory (added in 1.9) migrates with it. | queued |
-| 1.13 | **jpCost decision** (audit §5): unlock data carries JP prices that nothing spends — either implement JP-buys-abilities (FFT-style shopping in the job menu) or delete the field. Design call, then wire. | queued |
+These systems are **implemented**, but the normal player flow that reaches and
+leaves them is incomplete. Do not describe the whole game as playable until the
+vertical-slice exit condition in `ROADMAP.md` is met.
 
-## 2. Original pillars (design + build, in order)
+## Immediate battle-adjacent work
 
-1. **Timeline warfare** — turn-order manipulation as a core axis. Visible initiative
-   bar; delay/push/reorder abilities; Clockhand as the identity job. (CTR manipulation
-   already works — this formalizes it into UI + more abilities + AI awareness.)
-2. **Grit reactions** — units build Grit by dealing/taking hits, *spend* it to trigger
-   equipped reactions (counter, brace, auto-stim). Deterministic, no Brave-style dice.
-   Requires a reaction window after `BaseAbilityEffect.Apply`.
-3. **Sync terrain** — network coverage as casting terrain: Protocol abilities scale up
-   in high-Sync tiles (old-world infrastructure), down in dead zones. Physical jobs
-   ignore it. Maps become casting geography; Wastewalker reads/alters it.
-4. **In-battle salvage** — KO decay produces salvage the Scav can grab mid-fight
-   (builds on 1.7).
+1. Move scrip and inventory into canonical save data as part of the one-time
+   reward transaction ([issue #3](https://github.com/shimakaze09/TacticsRPG/issues/3)).
+2. Make `jpCost`/Cert purchasing real in the job menu, or remove the unused
+   field after an explicit design change. The current GDD chooses Cert purchase.
+3. Add an escort objective only when Guest-unit control and failure rules are
+   defined together.
+4. Connect the first two authored battles to the hub/contract flow.
 
-## 3. Polish (any time after §1)
+## Tactical depth order
 
-- Damage popups / floating text (highest feel-per-effort in the project).
-- Initiative bar UI (doubles as pillar #1's foundation).
-- Predicted damage in the confirm screen (`Predict()` already computes it).
-- AoE previews for blasts and lines; camera follows the action.
-- `PerformAbilityState.Animate` — minimal attack/hit/death tweens.
+1. **Timeline warfare:** initiative UI, delay/push/reorder abilities, and AI
+   awareness.
+2. **Grit reactions:** deterministic build-and-spend reaction windows.
+3. **Sync terrain:** network coverage as casting geography.
+4. **In-battle salvage:** Scav-specific interaction with remains.
 
-## 4. Tuning (blocked on §1; numbers are placeholders until then)
+Prioritize new interaction shapes over another large batch of damage/status
+abilities: forced movement, hazards, delayed actions, reactions, deployables,
+and objective interaction create more depth than additional names.
 
-- Status durations (once per-owner) and control accuracy bands.
-- MP economy: 10% MMP regen/turn vs costs 6–30; Colossus at 30 MP is once-per-battle — intended?
-- CTR act/move costs and the SPD 4–8 spread (value of one Overclock turn).
-- AoE vs single-target damage premium; MP-per-damage efficiency curves.
-- EVD/facing bands (current EVD 4–15 unvalidated against A-type math).
+## Presentation and usability
 
-Numeric law (see WORLD.md §4b): damage/heals cap at 999 per hit, HP wall 20,000
-(bosses ~3–5k), primary stats cap 999. Tune under the caps.
+- Visible turn order
+- Movement and enemy-threat previews
+- Damage/hit forecast explanations
+- AoE previews
+- Status icons, durations, and tooltips
+- Camera framing, action feedback, and minimal VFX/audio
+- Clear cancel/undo boundaries and AI-thinking feedback
+
+## Verification contract
+
+Every battle-system change should include:
+
+1. A deterministic probe or focused Unity test.
+2. A clean Unity compile.
+3. No new errors during a representative play session.
+4. Documentation changes only where design, setup, or public behavior changed.
+
+The repository documents a headless entry point at
+`BattleProbeMenu.RunHeadless`. The last historical documentation reports 71
+passing probes, but this 2026-08-10 docs review could not rerun Unity. Automated
+clean-checkout verification is tracked in
+[issue #7](https://github.com/shimakaze09/TacticsRPG/issues/7).
