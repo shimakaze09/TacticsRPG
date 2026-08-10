@@ -1,88 +1,77 @@
-# Roadmap — the master work queue
+# Roadmap
 
-**Updated:** 2026-07-30. Ordered top-down; **design authority is `GDD.md`** —
-this file is the execution order for its production plan (§11). Battle-scoped
-detail lives in `BATTLE_PLAN.md`, structure/audit history in
-`PROJECT_REVIEW.md` + `CODE_AUDIT.md`, world/content rules in `WORLD.md`.
-Statuses here mirror BATTLE_PLAN — when in doubt, BATTLE_PLAN §1 is the
-authority for battle items.
+**Updated:** 2026-08-10  
+**Goal:** turn the existing battle framework into one complete, repeatable
+player journey before expanding content.
 
-**Milestone mapping (GDD §11):** §1–§2 below = **M0** (systems hardening).
-**M1** (playable loop) = meta UI minimal + initiative bar + forecast/popups +
-first two authored battles. **M2** (slice content) = 6 battles, story scenes,
-shop, Cert-buys-abilities, **quest board + story flags + writ generator +
-Choice A + first side story**, art/audio first pass. **M3** (polish) =
-controls rework, mix, tuning, save slots. Post-slice: branching Acts 2–3 and
-the four endings, side/hidden/character quests, relic hunts, pillars —
-full taxonomy in GDD §4.3/§4.5.
+Design intent belongs in [GDD.md](GDD.md). Battle-specific detail belongs in
+[BATTLE_PLAN.md](BATTLE_PLAN.md). Current assessment and evidence belong in
+[PROJECT_REVIEW.md](PROJECT_REVIEW.md).
 
-## 1. Documentation passes (in progress)
+## M1 — Playable vertical slice spine
 
-File-level summaries: **done** (every script). Method comments remain
-(~1,316 of 1,592 methods), in three passes — each lands as its own verified,
-pushed commit:
+Exit condition: a fresh player build can complete
+**Title → Hub → Battle → Results → Hub**, repeat the loop for a second battle,
+then save, quit, and continue without losing rewards.
 
-1. Battle core + ability pipeline (states, controllers, ability components, modifiers)
-2. Actor/status/AI/persistence
-3. UI/animation/audio/items/tools
+Work in this order:
 
-Convention (see `CLAUDE.md`): file summary + method comments, nothing noisier.
-Files touched by feature work get their method comments in the same change.
+1. [#2 — Build starts on a non-interactive title scene](https://github.com/shimakaze09/TacticsRPG/issues/2)
+2. [#4 — World state does not load or present a hub scene](https://github.com/shimakaze09/TacticsRPG/issues/4)
+3. [#8 — Make UIManager ownership safe across repeated battle loads](https://github.com/shimakaze09/TacticsRPG/issues/8)
+4. [#5 — Consolidate post-battle orchestration and reward ownership](https://github.com/shimakaze09/TacticsRPG/issues/5)
+5. [#3 — Persist scrip and item rewards](https://github.com/shimakaze09/TacticsRPG/issues/3)
+6. [#9 — Add a usable continuation path after battle results](https://github.com/shimakaze09/TacticsRPG/issues/9)
 
-## 2. Battle fixes — finish BATTLE_PLAN §1
+Do not add another meta-flow singleton or a second reward pipeline. Keep
+`GameFlowController` as the orchestration authority and use one save-backed
+reward transaction.
 
-Done so far: **1.1–1.4** (status honesty, per-owner durations, condition
-parenting, control accuracy) · **1.5/1.5b** (AI patterns rebuilt, Easy/Hard
-difficulties with the tactical AI) · **1.5c** (hit-and-run) · **1.6**
-(line-of-sight + high ground).
+## M1.1 — Reliability and collaboration
 
-Remaining, in strict order:
+- [#7 — Automate generated content, compile checks, and battle probes](https://github.com/shimakaze09/TacticsRPG/issues/7)
+- Add runtime/editor/test assembly definitions after the vertical-slice branch
+  is stable.
+- Add focused tests around persistence, rewards, stat derivation, and repeated
+  scene transitions.
 
-- ~~1.5d~~ AI threat map — **done** (2026-07-31)
-- ~~1.5e~~ AI self-preservation — **done** (2026-07-31)
-- ~~1.5f~~ AI team focus fire + target value model — **done** (2026-07-31)
-- ~~1.5g~~ AI support discipline — **done** (2026-07-31)
-- ~~1.7~~ KO decay & salvage pickup — **done** (2026-07-31)
-- ~~1.8~~ Authored battle setup: BattleDefinition assets, BattleClock rounds, reinforcement waves, SurviveRounds victory — **done** (2026-07-30)
-- ~~1.8b~~ Real terrain: TerrainType/TerrainRules, terrain-aware movement/LoS/spawning, BoardCreator painting, Coldwater Crossing map — **done** (2026-07-30)
-- ~~1.9~~ Equipment actually equips: GearCatalog + per-job loadouts, recalc keeps gear bonuses, shop→PartyInventory — **done** (2026-07-30)
-- ~~1.9b~~ Gear behavior model: weapon reach/arc/shape/damage profile + composable GearTraits (recoil, self-slow, resists) — **done** (2026-07-30)
-- ~~1.9c~~ Gear traits wave 2: flank bonus, status-on-hit, lifesteal, rifle dead zone; attack-facing fix; full family map in GDD §3.3 — **done** (2026-07-30)
-- ~~1.10~~ Elements + crits: battle-wide affinity law, element gear traits live, deterministic-forecast crits, conditional damage traits — **done** (2026-07-30)
-- ~~HRD~~ Architecture hardening (user-approved detour): `EventSubscriptions` symmetric-cleanup bag on the risky subscribers, typed `StatusRegistry` (reflection infliction gone), the 50-check `BattleProbeRunner` regression suite (menu + headless/CI entry), and `ARCHITECTURE.md` as the how-to-build authority — **done** (2026-07-30; suite green 50/50). Remaining debt stays in §"tech debt": namespaces/asmdefs → UTF migration, SerializableDictionary dedup, tweener/pool lifecycle.
-- ~~1.11~~ Behavior-control statuses seize control: Swayed fights for the enemy, Scrambled acts randomly, Redline charges the nearest; MP burn + Shredded resource attacks — **done** (2026-07-30)
-- **1.12** Scrip moves from PlayerPrefs into GameData (audit §6) ← **next**
-- **1.13** jpCost design decision: JP-buys-abilities or delete the field (audit §5)
+## M2 — Usable meta game
 
-## 3. Original pillars — BATTLE_PLAN §2 (design + build, in order)
+- [#6 — Replace placeholder ShopState transactions](https://github.com/shimakaze09/TacticsRPG/issues/6)
+- Contract briefing and party/deployment selection
+- Job menu canvas with Cert spending and job switching
+- Settings UI, including difficulty
+- First two authored battles connected to the normal flow
+- Turn-order bar, forecast explanations, status tooltips, and damage feedback
 
-1. **Timeline warfare**: initiative bar UI, delay/push/reorder abilities, AI awareness
-2. **Grit reactions**: build-and-spend reaction resource, reaction window after abilities
-3. **Sync terrain**: network coverage as casting geography
-4. **In-battle salvage**: Scav grabs decayed remains (builds on 1.7)
+Exit condition: two authored contracts are playable from the hub with real
+growth, inventory, and shop state.
 
-## 4. Battle polish — BATTLE_PLAN §3
+## M3 — Chapter 1 content
 
-Damage popups (first — highest feel-per-effort), confirm-screen damage preview,
-AoE previews, camera follow, minimal ability/hit/death animation.
+- Six authored battles and story scenes from `GDD.md` §5
+- Quest board and story flags, including Choice A
+- Repeatable writs and one short side story
+- First production art/audio batches
+- Input System controls and save slots
+- External playtest and balance pass
 
-## 5. Tuning — BATTLE_PLAN §4
+## Post-slice
 
-Status durations + control accuracy bands, MP economy, CTR/SPD economy,
-AoE-vs-single-target premium. Blocked on play-testing the honesty fixes.
+- Acts 2–3 and ending branches
+- Remaining side, hidden, character, and relic quests
+- Timeline warfare expansion, Grit reactions, Sync terrain, and deeper salvage
+- Archive screen, controller support, and region-map presentation
 
-## 6. Meta game
+## Technical debt to interleave carefully
 
-- Job-change menu **scene UI** (controller code exists, no canvas)
-- Title screen (StartMenu has no canvas — game currently dead-ends there)
-- Difficulty option in-game (editor menu exists; PlayerPrefs-backed)
-- Shop flow integration, then world map / roster / save slots (audit Phase 4)
+- Namespaces and assembly definitions
+- Consolidate duplicate `SerializableDictionary` implementations
+- Split oversized coordinators such as `JobManager`, `UIManager`, and
+  `TacticalComputerPlayer`
+- Repair Tweener/EasingControl and pooled-object scene lifecycles
+- Replace static input-event lifetime assumptions during the Input System pass
 
-## 7. Tech debt (interleave when touching the area)
-
-- Namespaces (279 files in global namespace); folder renames ("Data Persistance",
-  "Exceptions" → Modifiers)
-- Consolidate the two SerializableDictionary implementations
-- EasingControl/Tweener lifecycle bugs; GameObjectPoolController scene-survival bugs;
-  Point.GetHashCode collisions; static input events across scene loads
-- First edit-mode tests around Stats/modifiers/JobProgressData/hit-rate math
+Completed historical work is preserved in Git history and
+[CODE_AUDIT.md](CODE_AUDIT.md); it is intentionally not duplicated in this
+queue.
