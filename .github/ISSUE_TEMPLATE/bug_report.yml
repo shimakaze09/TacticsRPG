@@ -1,0 +1,59 @@
+name: Bug report
+description: Report reproducible incorrect behavior in gameplay, tools, builds, or data.
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping improve TacticsRPG. Please describe one reproducible problem per issue.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What went wrong, and why does it matter?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      placeholder: |
+        1. Open...
+        2. Select...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: revision
+    attributes:
+      label: Revision
+      description: Commit SHA or branch where the problem occurs.
+  - type: input
+    id: unity
+    attributes:
+      label: Unity and operating-system version
+      placeholder: Unity 6000.5.5f1, Windows 11
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs, screenshots, or recordings
+      description: Remove secrets and personal data before attaching evidence.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I generated Abilities, Catalogs, and Jobs in the documented order.
+        - label: I searched open and closed issues for duplicates.
+          required: true

@@ -1,30 +1,26 @@
-# TacticsRPG Code Audit
+# TacticsRPG code audit — historical archive
 
-**Date:** 2026-07-28 · **Branch:** `claude/project-fft-comparison-9dia0i` (audited at commit `d7c36a2`)
-**Method:** Full-source review across six areas — battle core, ability/status/stats pipeline, job system + JSON data, meta-game flow/UI/persistence, AI, and build/content tooling. Every finding below was verified against the actual code path (file:line cited); nothing is speculative.
+**Captured:** 2026-07-28  
+**Audited revision:** `d7c36a2` on `claude/project-fft-comparison-9dia0i`  
+**Archive note updated:** 2026-08-10
 
----
+> This file preserves the original line-level audit. It is not the current
+> defect list, roadmap, or implementation status. Many findings below were
+> fixed or superseded after the audited revision, while new integration
+> findings were discovered later.
 
-## ⚠ Status update (2026-07-31) — most findings below are FIXED
+Use these current sources instead:
 
-This document is the **historical 2026-07-28 snapshot**; the live queue is
-`ROADMAP.md` / `BATTLE_PLAN.md`. Where the findings stand now:
+- [PROJECT_REVIEW.md](PROJECT_REVIEW.md) for the current source assessment
+- [ROADMAP.md](ROADMAP.md) for execution order
+- [BATTLE_PLAN.md](BATTLE_PLAN.md) for battle-specific work
+- GitHub issues [#2](https://github.com/shimakaze09/TacticsRPG/issues/2)
+  through [#9](https://github.com/shimakaze09/TacticsRPG/issues/9) for active,
+  evidence-backed integration defects
 
-- **Fixed**: all P0s (Phase 0) · defense check, damage model reworked with global
-  caps · status system fully honest (infliction, durations per-owner, condition
-  parenting, combat-effect wiring, control accuracy) · job system (stable IDs,
-  JP off-by-one, MOV/JMP/EVD drift, unique unlocks, component order, full-heal)
-  · persistence (registration, apply-on-load, New Game reset, atomic writes,
-  hero-only saves, currentJob survives) · one flow architecture (GameStateManager
-  deleted) · AI (patterns rebuilt, movement-check bug, SmartComputerPlayer
-  replaced by TacticalComputerPlayer, hit-and-run) · line-of-sight + high ground
-  · legacy Job component removed · content re-themed with a redesigned 23-job
-  roster (§8's "verbatim FFT data" concern superseded — see WORLD.md).
-- **Still open, holding queue slots**: equipment wiring (BATTLE_PLAN 1.9) ·
-  elements/crits (1.10) · behavior-control statuses (1.11) · scrip in
-  PlayerPrefs (1.12) · jpCost (1.13) · meta/scene UI + world layer (ROADMAP §6)
-  · tech-debt items (ROADMAP §7) · §8 FFT-gap mechanics superseded by the
-  original pillars (BATTLE_PLAN §2).
+The remainder of this document is intentionally historical. Statements such as
+"currently," "still open," and line-number references describe the 2026-07-28
+snapshot unless an inline update explicitly says otherwise.
 
 ---
 

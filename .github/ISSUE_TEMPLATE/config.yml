@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation index
+    url: https://github.com/shimakaze09/TacticsRPG/blob/main/Docs/README.md
+    about: Check current status, design authority, architecture rules, and the roadmap before filing.

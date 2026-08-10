@@ -1,9 +1,15 @@
 # The Long Autumn — Game Design Document
 
-**Version 1.0 · 2026-07-31 · Design authority for the whole game.**
+**Version 1.1 · 2026-08-10 · Design authority for the whole game.**
 Setting detail lives in `WORLD.md`; battle-system status and queue in
 `BATTLE_PLAN.md`; execution order in `ROADMAP.md`. Where documents disagree,
 this one states intent, WORLD.md owns lore, BATTLE_PLAN owns implementation truth.
+
+Status terms in this document follow [README.md](README.md): **implemented**
+means code/content exists, **integrated** means reachable through the normal
+player flow, and **planned** means design intent. The tactical runtime is
+substantial, but the complete Title → Hub → Battle → Results → Hub loop is not
+yet integrated.
 
 **Locked platform/scope decisions:** PC with mouse+keyboard first (controller
 post-slice) · 2D sprites on a 3D grid · vertical slice before full campaign ·
@@ -69,9 +75,9 @@ Title ─► Charter Hub ─► Contract Briefing ─► Battle ─► Results &
 
 ## 3. Gameplay systems
 
-### 3.1 Battle (status: largely shipped — see BATTLE_PLAN §1)
+### 3.1 Battle (runtime largely implemented; player loop incomplete)
 
-Shipped and verified: CTR turn economy; composition-based abilities; honest
+Implemented in the battle runtime: CTR turn economy; composition-based abilities; honest
 statuses (per-owner durations, real combat effects, tuned accuracy); damage
 `max(ATK×power/100 − DEF/2, 1)` with global caps; line of sight + high ground
 (±15% dmg, ±10 hit at ≥2 height); KO decay into memory-cores/salvage with
@@ -92,18 +98,23 @@ elements and crits (1.10: battle-wide affinity advantage, unit affinities
 on the cast, gear element traits live, Doused ignites under fire, and
 critical hits that roll only at application so forecasts stay honest).
 
-Control-seizing statuses shipped with 1.11: Swayed units genuinely fight
+Control-seizing statuses are implemented: Swayed units genuinely fight
 for the other side (alliance inversion + AI control), Scrambled units
 wander and swing at random, Redlined units charge whoever is nearest at
 +33% damage; resource attacks joined the gear table (MP burn, the
 Shredded armor-tear status).
+
+These claims describe repository capability, not an end-to-end shipped game.
+The last historical in-editor documentation reported 71 passing battle probes;
+the 2026-08-10 docs review did not rerun Unity. Clean-checkout automation is
+tracked in GitHub issue #7.
 
 Planned (queue order): the pillars. The
 **escort** objective (civilian unit with Guest alliance) lands with the
 market-rescue battle in M2 — it needs guest-unit control rules, not just a
 victory check.
 
-### 3.2 Jobs & growth (shipped, design ratified here)
+### 3.2 Jobs & growth (runtime implemented; design ratified here)
 
 23-job roster and tree per WORLD.md §2. Character EXP/levels come from Rank;
 job levels come from Cert (JP) earned per activation; stats derive from job
@@ -130,7 +141,7 @@ a meaningful post-battle decision beyond job switching.
   (§4.5.6): one copy ever, unique passive via the Feature system, above shop
   gear but not outside the stat caps.
 
-**Gear behavior model** (shipped with 1.9): every item is defined along
+**Gear behavior model** (implemented with 1.9): every item is defined along
 composable axes, so new gear is data, not new systems —
 
 | Axis | What it does | Examples |
@@ -159,9 +170,9 @@ target when acting, so facing rules and visuals always agree.
 
 | Family | Examples | Lands with |
 |---|---|---|
-| Conditional damage | execute (Pit Cleaver), opener (Wrapped Knuckles), terrain-conditional (Dowsing Staff on water), crit bonuses (Absolution Point); anti-armor/anti-caster still open | **1.10 shipped** (anti-* with 1.11's resource attacks) |
-| Element interaction | affinity advantage law battle-wide, element resist/weak armor (rattan burns), Doused ignites under fire | **1.10 shipped** (branded weapons = content) |
-| On-hit statuses, resource attack | MpBurn trait (Cipher Rod), Shredded armor-tear (Pry Hook payload) | **1.11 shipped** (more payloads = content) |
+| Conditional damage | execute (Pit Cleaver), opener (Wrapped Knuckles), terrain-conditional (Dowsing Staff on water), crit bonuses (Absolution Point); anti-armor/anti-caster still open | **1.10 implemented** (anti-* with 1.11's resource attacks) |
+| Element interaction | affinity advantage law battle-wide, element resist/weak armor (rattan burns), Doused ignites under fire | **1.10 implemented** (branded weapons = content) |
+| On-hit statuses, resource attack | MpBurn trait (Cipher Rod), Shredded armor-tear (Pry Hook payload) | **1.11 implemented** (more payloads = content) |
 | Timeline gear | CT-push weapons (knock the target's turn later), CT-cost or recharge modifiers, initiative trinkets | **Pillar 1** (timeline warfare) |
 | Reaction gear | counter weapons, thorns armor, Grit-gain trinkets, reach weapons that deny counters | **Pillar 2** (Grit reactions) |
 | Forced movement | knockback mauls, the Pry Hook PULLING its target a tile, repositioning shields | battle polish (#28 — needs push/pull resolution + AoE previews) |
@@ -173,7 +184,7 @@ target when acting, so facing rules and visuals always agree.
 no random affixes (loot stays deterministic, §above), nothing that breaks
 the WORLD §4b caps.
 
-### 3.4 Difficulty (shipped)
+### 3.4 Difficulty (runtime implemented)
 
 Easy = classic pattern AI, no scaling — the story difficulty. Hard = tactical
 AI + enemies at 130% HP / 120% damage — the "feel hunted" difficulty.
@@ -423,14 +434,14 @@ then the existing keyboard flow remains the dev-testing path.
 
 | GDD feature | Existing system | Gap (queue item) |
 |---|---|---|
-| Authored battles, objectives | BattleDefinition + BattleSpawner + BattleClock + 4 victory types (**1.8 shipped**) | escort objective (M2, with market rescue) |
-| Terrain types, bridges, water | TerrainType + TerrainRules; terrain-aware movement/LoS/spawning; BoardCreator painting (**1.8b shipped**) | biome art passes per map (M2) |
-| Equipment | GearCatalog + per-job loadouts + PartyInventory, recalc-safe bonuses (**1.9 shipped**) | equip/compare UI in job menu (M2); gear art |
+| Authored battles, objectives | BattleDefinition + BattleSpawner + BattleClock + 4 victory types (**1.8 implemented**) | escort objective (M2, with market rescue) |
+| Terrain types, bridges, water | TerrainType + TerrainRules; terrain-aware movement/LoS/spawning; BoardCreator painting (**1.8b implemented**) | biome art passes per map (M2) |
+| Equipment | GearCatalog + per-job loadouts + PartyInventory, recalc-safe bonuses (**1.9 implemented**) | equip/compare UI in job menu (M2); gear art |
 | Cert buys abilities | jpCost in data, AbilityMemory | **1.13** (per §3.2 call) |
 | Initiative bar | TurnOrderController (no UI) | Pillar 1 seed (M1) |
 | Forecast panel / damage popups | Predict(), HitRate.Calculate() | Battle polish (M1) |
 | Charter Hub / Title / Settings | GameFlow states (stubs), no canvases | Meta UI (M1 minimal, M2 full) |
-| Chapter cards / mid-battle events | ConversationController; BattleEvents hook (**1.8 shipped**, runs reinforcement waves) | story triggers on the hook + card UI (M2) |
+| Chapter cards / mid-battle events | ConversationController; BattleEvents hook (**1.8 implemented**, runs reinforcement waves) | story triggers on the hook + card UI (M2) |
 | Quest board & story flags | PlayerProgress.cs (empty placeholder), GameData | QuestDefinition data + flag store + board UI (M2) |
 | Repeatable writs | InitBattleState's writ spawner (**1.8**: the no-definition fallback path, documented as GDD §4.5.3) | level scaling + reward hookup (M2) |
 | Branching story / endings | — | flag-gated contract availability + ending resolver (M2 flags, post-slice content) |

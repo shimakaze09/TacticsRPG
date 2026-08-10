@@ -1,9 +1,9 @@
 # The Long Autumn — World Bible & Naming Conventions
 
-**Status:** v1 (2026-07-29) — established by the re-theme content sweep. This document is
-the authority for names and flavor; the game's overall design (loop, story arc, slice,
-UI/art/audio direction) lives in `GDD.md`. Mechanics are unchanged from the FFT-style systems;
-only expression (names, fiction, terminology) is original.
+**Status:** v1.1 (2026-08-10). This document is the authority for setting,
+names, and flavor. The game's overall design lives in `GDD.md`; implementation
+status belongs in `PROJECT_REVIEW.md`, `ROADMAP.md`, and `BATTLE_PLAN.md`.
+Lore entries do not imply that the corresponding feature is player-reachable.
 
 ---
 
@@ -80,8 +80,8 @@ Drifter (root)
 | `cipherguard` | Cipherguard | Unique — **Ansel Rook**: blade + protocol hybrid |
 | `liturgist` | Liturgist | Unique — **Deacon Wray**: sermons that mend and unmake |
 
-Character names on unique jobs are **placeholders** until the story cast is finalized
-(full cast sheet: GDD.md §4.2). Cut jobs (`echo`, `actuary`, `fireband`, `silencer`)
+Character names on unique jobs are ratified by the current cast sheet in
+GDD.md §4.2. Cut jobs (`echo`, `actuary`, `fireband`, `silencer`)
 may return later only with mechanics of their own (mimicry, formula targeting, etc.
 need engine support first). **Widow Faye** — once the Silencer's owner — survives the
 cut as an NPC: Coldwater's information broker.
@@ -112,8 +112,9 @@ cut as an NPC: Coldwater's information broker.
 - **`Common/Attack`** — generic term, referenced by unit-recipe attack paths.
 - **Code identifiers** (`jpCost`, `AddJobPoints`, `StatTypes`) — internal API, no
   player exposure. UI strings should say Cert/Grade/scrip when panels get built.
-- **Actuary's formula names** (Level Prime, HP Multiple 4, …) — mechanically
-  descriptive, kept as-is.
+- **Legacy formula-targeting names** (Level Prime, HP Multiple 4, …) may remain
+  in historical or unused data. Actuary is not part of the active 23-job roster;
+  formula targeting must earn a new implementation slot before returning.
 
 ## 4b. Damage & healing conventions (2026-07-29)
 

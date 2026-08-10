@@ -1,9 +1,11 @@
 # Architecture & Extension Guidelines
 
-**Updated:** 2026-07-30. The rules for adding anything to this codebase.
+**Updated:** 2026-08-10. The rules for adding anything to this codebase.
 Design authority for *what* to build is `GDD.md`; this document is the
 authority for *how*. The verdict that produced it: keep the event-composed
 architecture, harden the conventions around it — no DI-framework migration.
+Current implementation status belongs in `PROJECT_REVIEW.md`; work order lives
+in `ROADMAP.md` and `BATTLE_PLAN.md`.
 
 ## 1. The shape of the codebase
 
@@ -20,6 +22,8 @@ architecture, harden the conventions around it — no DI-framework migration.
   `CriticalHit`, `StatusRegistry`, `ElementRelationship` — design constants
   live in code until a dedicated data pass (shop rebuild, M2).
 - **Meta/persistence:** `GameFlowController` states + `GameData` save file.
+  The meta layer is not yet integrated end to end; persistent objects must not
+  own scene-local dependencies. See issues #3, #5, and #8.
 
 ## 2. Event bus rules
 
@@ -110,14 +114,16 @@ BATTLE_PLAN 1.12.)
    `BattleProbeRunner`** — the suite is the accumulated proof of every
    invariant, and it must stay green.
 3. Zero new console errors in a play session.
-4. Docs sync (BATTLE_PLAN / ROADMAP / GDD / this file) in the same commit
-   batch as the change. Split commits by logical unit; push to
-   `origin/main`.
+4. Update only the documents whose authority changed. Publish work on a focused
+   branch and open a reviewable pull request; do not push feature work directly
+   to `main`.
 
 ## 9. Known debt (deferred by decision, tracked in ROADMAP §4/task list)
 
 - Namespaces + assembly definitions (mechanical pass; enables Unity Test
   Framework migration of the probe suite).
 - `SerializableDictionary` duplication; tweener/pool lifecycle bugs.
-- DI container consideration is **post-slice, meta-layer only** — the
-  battle layer stays event-composed.
+- DI container consideration is **post-slice, meta-layer only** — the battle
+  layer stays event-composed.
+- Persistent-singleton ownership and repeated scene-load safety, especially
+  `UIManager` and its scene references (issue #8).
