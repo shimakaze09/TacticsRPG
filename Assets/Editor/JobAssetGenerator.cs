@@ -112,6 +112,10 @@ public static class JobAssetGenerator
 
     private static void CreateJobDefinitionWithoutPrerequisites(JobDataFile jobData)
     {
+        // Reject malformed data before anything is populated so an invalid
+        // job is skipped entirely rather than shipped half-valid (issue #20)
+        ValidateJobData(jobData);
+
         // Asset files are named by stable id so display renames never move files
         string assetPath = JobAssetPath(jobData);
 
@@ -174,15 +178,38 @@ public static class JobAssetGenerator
         // Set ability catalog name
         job.abilityCatalogName = jobData.abilityCatalogName;
         
-        // Set JP requirements
-        if (jobData.jpRequirements != null && jobData.jpRequirements.Length == 8)
-        {
-            job.jpRequirements = jobData.jpRequirements;
-        }
+        // Set JP requirements (already validated by ValidateJobData)
+        job.jpRequirements = jobData.jpRequirements;
         
         // Create the asset
         AssetDatabase.CreateAsset(job, assetPath);
         EditorUtility.SetDirty(job);
+    }
+
+    // Guards the JP threshold contract and unlock levels; throws with every
+    // violation listed so the caller's per-file catch logs it and skips the
+    // job — no asset is created and the created count stays honest
+    private static void ValidateJobData(JobDataFile jobData)
+    {
+        var errors = new List<string>();
+
+        var curveError = JobDefinition.ValidateJPCurve(jobData.jpRequirements);
+        if (curveError != null)
+            errors.Add(curveError);
+
+        if (jobData.abilityUnlocks != null)
+        {
+            foreach (var unlock in jobData.abilityUnlocks)
+            {
+                if (!JobDefinition.IsValidUnlockLevel(unlock.unlockAtJobLevel))
+                    errors.Add($"ability '{unlock.abilityName}' unlocks at job level " +
+                               $"{unlock.unlockAtJobLevel}, outside the 1-{JobDefinition.MaxJobLevel} range");
+            }
+        }
+
+        if (errors.Count > 0)
+            throw new System.InvalidOperationException(
+                $"{jobData.jobName}: {string.Join("; ", errors)}");
     }
 
     private static void SetJobPrerequisites(JobDataFile jobData)

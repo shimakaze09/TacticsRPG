@@ -85,6 +85,7 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeTerrain(bc);
             ProbeLevelScaling();
             ProbeGrowthModel();
+            ProbeJobThresholds();
             ProbeControlBudget(bc);
             // Tempo statuses add/remove effects, which destroy deferred
             yield return StartCoroutine(ProbeTempoStatuses(bc));
@@ -997,6 +998,73 @@ public class BattleProbeRunner : MonoBehaviour
 
         Destroy(unit);
         DifficultySettings.Current = savedDifficulty;
+    }
+
+    // ---- issue #20: JP thresholds ------------------------------------------
+
+    // Every job carries exactly seven strictly-increasing cumulative JP
+    // thresholds (levels 2-8) with in-range unlock levels and no dead master
+    // gate, and the level lookup agrees with the data at every boundary.
+    private void ProbeJobThresholds()
+    {
+        var jobs = Resources.LoadAll<JobDefinition>("Jobs");
+        Check("jobs loaded for threshold probe", jobs.Length > 0);
+
+        JobDefinition drifter = null;
+        foreach (var job in jobs)
+        {
+            if (job.id == "drifter")
+                drifter = job;
+
+            Check("threshold curve valid " + job.id,
+                JobDefinition.ValidateJPCurve(job.jpRequirements) == null,
+                JobDefinition.ValidateJPCurve(job.jpRequirements) ?? "");
+
+            var unlocksInRange = true;
+            foreach (var unlock in job.abilityUnlocks)
+                unlocksInRange &= JobDefinition.IsValidUnlockLevel(unlock.unlockAtJobLevel);
+            Check("unlock levels in range " + job.id, unlocksInRange);
+        }
+
+        // Failing-data contract: the shared validator the generator gates on
+        // must reject every malformed shape it exists to catch
+        Check("validator rejects null curve",
+            JobDefinition.ValidateJPCurve(null) != null);
+        Check("validator rejects wrong length",
+            JobDefinition.ValidateJPCurve(new[] { 100, 250 }) != null);
+        Check("validator rejects a plateau",
+            JobDefinition.ValidateJPCurve(new[] { 100, 250, 450, 700, 1000, 1400, 1400 }) != null);
+        Check("validator rejects non-positive gates",
+            JobDefinition.ValidateJPCurve(new[] { 0, 250, 450, 700, 1000, 1400, 1900 }) != null);
+        Check("unlock level 0 rejected", !JobDefinition.IsValidUnlockLevel(0));
+        Check("unlock level 9 rejected", !JobDefinition.IsValidUnlockLevel(9));
+        Check("unlock levels 1 and 8 accepted",
+            JobDefinition.IsValidUnlockLevel(1) && JobDefinition.IsValidUnlockLevel(8));
+
+        // Boundary behavior on the shared curve: one JP below each gate stays
+        // at the previous level, the gate itself advances, and past the top
+        // gate the job is simply level 8 — no phantom master gate beyond it
+        Check("drifter present for boundaries", drifter != null);
+        if (drifter != null)
+        {
+            Check("zero JP is grade 1", drifter.GetJobLevelForJP(0) == 1);
+            for (var i = 0; i < drifter.jpRequirements.Length; i++)
+            {
+                var gate = drifter.jpRequirements[i];
+                Check($"jp {gate - 1} holds level {i + 1}",
+                    drifter.GetJobLevelForJP(gate - 1) == i + 1,
+                    "got " + drifter.GetJobLevelForJP(gate - 1));
+                Check($"jp {gate} reaches level {i + 2}",
+                    drifter.GetJobLevelForJP(gate) == i + 2,
+                    "got " + drifter.GetJobLevelForJP(gate));
+            }
+
+            var top = drifter.jpRequirements[drifter.jpRequirements.Length - 1];
+            Check("huge JP stays level 8", drifter.GetJobLevelForJP(99999) == 8);
+            Check("maxed next-gate reports the real top",
+                drifter.GetJPForNextLevel(top) == top,
+                "got " + drifter.GetJPForNextLevel(top));
+        }
     }
 
     // ---- issue #57: RES growth + control budget -----------------------------

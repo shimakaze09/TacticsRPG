@@ -124,20 +124,28 @@ public class JobDefinition : ScriptableObject
 
     #region JP System
     
+    /// <summary>Highest attainable job level (mastery).</summary>
+    public const int MaxJobLevel = 8;
+
+    /// <summary>
+    /// Levels above 1 that JP can buy: exactly seven cumulative thresholds
+    /// carry a job from level 2 through the level-8 cap (issue #20).
+    /// </summary>
+    public const int JPThresholdCount = 7;
+
     [Header("Job Points (JP) System")]
-    [Tooltip("JP required to reach each job level (cumulative)")]
-    public int[] jpRequirements = new int[8] 
-    { 
+    [Tooltip("JP required to reach each job level (cumulative; exactly 7 entries for levels 2-8)")]
+    public int[] jpRequirements = new int[JPThresholdCount]
+    {
         100,   // Level 2
         250,   // Level 3
         450,   // Level 4
         700,   // Level 5
         1000,  // Level 6
         1400,  // Level 7
-        1900,  // Level 8
-        2500   // Level 8 (Master)
+        1900   // Level 8
     };
-    
+
     #endregion
 
     #region Public Methods
@@ -188,8 +196,10 @@ public class JobDefinition : ScriptableObject
 
         for (int i = jpRequirements.Length - 1; i >= 0; i--)
         {
+            // +2 because index 0 is the level-2 gate; the clamp only guards
+            // against oversized legacy arrays (the contract is 7 entries)
             if (jp >= jpRequirements[i])
-                return Mathf.Min(i + 2, 8); // +2 because array starts at level 2 requirements; max job level is 8
+                return Mathf.Min(i + 2, 8);
         }
 
         return 1;
@@ -229,6 +239,34 @@ public class JobDefinition : ScriptableObject
     }
 
     /// <summary>
+    /// Validates a JP threshold curve against the contract — exactly seven
+    /// positive, strictly increasing cumulative values (levels 2-8). Returns
+    /// null when valid, otherwise a description of the violation. Shared by
+    /// the asset generator and the probe suite (issue #20).
+    /// </summary>
+    public static string ValidateJPCurve(int[] thresholds)
+    {
+        if (thresholds == null || thresholds.Length != JPThresholdCount)
+            return $"jpRequirements must have exactly {JPThresholdCount} entries (levels 2-8), found {thresholds?.Length ?? 0}";
+
+        for (int i = 0; i < thresholds.Length; i++)
+        {
+            if (thresholds[i] <= 0)
+                return $"jpRequirements[{i}] = {thresholds[i]} must be positive";
+            if (i > 0 && thresholds[i] <= thresholds[i - 1])
+                return $"jpRequirements[{i}] = {thresholds[i]} must be strictly greater than {thresholds[i - 1]}";
+        }
+
+        return null;
+    }
+
+    /// <summary>Whether an ability unlock level is inside the valid 1..MaxJobLevel range.</summary>
+    public static bool IsValidUnlockLevel(int level)
+    {
+        return level >= 1 && level <= MaxJobLevel;
+    }
+
+    /// <summary>
     /// Growth multiplier for a stat slot in JobManager.statOrder layout
     /// (MHP, MMP, ATK, DEF, MAT, MDF, SPD) — the single lookup shared by
     /// job-grade and character-level growth.
@@ -260,7 +298,19 @@ public class JobDefinition : ScriptableObject
             baseStats = new int[7] { 50, 20, 5, 5, 5, 5, 5 };
         }
 
-        // Ensure JP requirements are increasing
+        // Enforce the threshold contract: exactly 7 entries (levels 2-8),
+        // padding a short array so every level keeps a reachable gate
+        if (jpRequirements == null || jpRequirements.Length != JPThresholdCount)
+        {
+            var resized = new int[JPThresholdCount];
+            for (int i = 0; i < JPThresholdCount; i++)
+                resized[i] = jpRequirements != null && i < jpRequirements.Length
+                    ? jpRequirements[i]
+                    : (i > 0 ? resized[i - 1] + 100 : 100);
+            jpRequirements = resized;
+        }
+
+        // Ensure JP requirements are strictly increasing
         for (int i = 1; i < jpRequirements.Length; i++)
         {
             if (jpRequirements[i] <= jpRequirements[i - 1])
