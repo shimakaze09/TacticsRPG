@@ -29,12 +29,13 @@ public static class ControlBudget
     public const int SteeledDuration = 3;
 
     // Hard-control statuses: action denial (sleep/stop/disable/immobilize/
-    // delayed KO) and seizure (charm/confusion/berserk). Soft tempo or
+    // delayed KO/stasis) and seizure (charm/confusion/berserk). Soft tempo or
     // resource ailments (Throttle, DeadAir, Desync) stay outside the budget.
     private static readonly HashSet<string> controlStatuses = new(StringComparer.OrdinalIgnoreCase)
     {
         "Blackout",
         "FreezeFrame",
+        "Graycast",
         "Jammed",
         "Pinned",
         "Deadline",

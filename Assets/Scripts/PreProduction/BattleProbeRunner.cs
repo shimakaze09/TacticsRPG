@@ -86,7 +86,9 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeLevelScaling();
             ProbeGrowthModel();
             ProbeControlBudget(bc);
-            ProbeClockAndWaves(bc); // mutates turn count — keep last
+            ProbeClockAndWaves(bc); // mutates turn count
+            // Publishes whole rounds of turn events — keep dead last
+            yield return StartCoroutine(ProbeControlExpiry(bc));
         }
         finally
         {
@@ -1096,6 +1098,77 @@ public class BattleProbeRunner : MonoBehaviour
         }
 
         Destroy(holder);
+
+        // Graycast is stasis — full action/CT denial belongs to the budget
+        Check("graycast classified as control", ControlBudget.IsControl("Graycast"));
+
+        // RES gear golden at the cap: equip clamps, recalculation converges
+        // on the same total, unequip restores the derived value exactly
+        var wizard = UnitFactory.Create("Enemy Wizard", 99);
+        if (wizard != null)
+        {
+            var wizardStats = wizard.GetComponent<Stats>();
+            var derived = wizardStats[StatTypes.RES];
+            var expected = Mathf.Min(derived + 10, StatLimits.MaxRES);
+
+            var charm = new GameObject("Probe Res Charm");
+            var equippable = charm.AddComponent<Equippable>();
+            equippable.defaultSlots = EquipSlots.Accessory;
+            var modifier = charm.AddComponent<StatModifierFeature>();
+            modifier.type = StatTypes.RES;
+            modifier.amount = 10;
+
+            wizard.GetComponent<Equipment>().Equip(equippable, EquipSlots.Accessory);
+            Check("res gear equips cap-safe", wizardStats[StatTypes.RES] == expected,
+                $"derived {derived}, got {wizardStats[StatTypes.RES]}");
+            wizard.GetComponent<JobManager>().RecalculateStats();
+            Check("res gear recalc converges", wizardStats[StatTypes.RES] == expected,
+                $"expected {expected}, got {wizardStats[StatTypes.RES]}");
+            wizard.GetComponent<Equipment>().UnEquip(equippable);
+            Check("res gear unequip restores", wizardStats[StatTypes.RES] == derived,
+                $"expected {derived}, got {wizardStats[StatTypes.RES]}");
+            Destroy(wizard);
+        }
+        else
+        {
+            Check("res gear golden unit spawns", false);
+        }
+    }
+
+    // A CT-frozen victim never begins a turn, so its control (and Steeled)
+    // conditions must expire through the battle-round fallback instead —
+    // the #12 failure this contract exists to close. Publishes whole rounds
+    // of TurnCompletedEvents, so it runs after every other probe.
+    private IEnumerator ProbeControlExpiry(BattleController bc)
+    {
+        var rogue = Find(bc, "Enemy Rogue");
+        if (rogue == null)
+        {
+            Check("expiry target present", false);
+            yield break;
+        }
+
+        var frozen = StatusRegistry.Inflict(rogue, "FreezeFrame", 2);
+        Check("freezeframe inflicted", frozen != null);
+        if (frozen == null)
+            yield break;
+
+        Check("steeled accompanies control", rogue.GetComponentInChildren<SteeledStatus>() != null);
+
+        // Four full round rollovers without the rogue ever activating —
+        // enough for the control (2) and its Steeled (3) to run out
+        var reporter = bc.units[0];
+        var roundLength = bc.units.Count + 2;
+        for (var round = 0; round < 4; round++)
+            for (var i = 0; i < roundLength; i++)
+                reporter.Publish(new TurnCompletedEvent(reporter));
+
+        // Status removal destroys deferred
+        yield return null;
+        yield return null;
+
+        Check("frozen control expired", rogue.GetComponentInChildren<FreezeFrameStatus>() == null);
+        Check("steeled expired with it", rogue.GetComponentInChildren<SteeledStatus>() == null);
     }
 
     // ---- 1.8: clock + reinforcements (mutates state — runs last) -----------
