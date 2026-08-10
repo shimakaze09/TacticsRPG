@@ -1101,10 +1101,26 @@ public class BattleProbeRunner : MonoBehaviour
         }
     }
 
-    // Golden build tables, end to end: a real unit whose progress is shaped
-    // into the named issue #54 builds (one-job, three-job, completionist)
-    // must land exactly on model-predicted stats after recalculation.
-    // Representative-level goldens live in ProbeLevelScaling (1/10/30/99).
+    // Reviewed golden rows for the named issue #54 builds. The fixture is an
+    // Enemy Warrior recipe at character level 1 on Easy: Marksman as the
+    // current job (the recipe's authored trade) with its recipe gear worn. statOrder layout:
+    // MHP, MMP, ATK, DEF, MAT, MDF, SPD. These are deliberately hard
+    // constants — NOT recomputed through ProgressionModel — so formula or
+    // job-data drift fails loudly; update them only alongside a conscious,
+    // reviewed balance change.
+    private static readonly int[] GoldenOneJobMarksman = { 228, 44, 54, 17, 9, 15, 30 };
+
+    // Marksman mastered + Brawler and Burner mastered as cross-jobs
+    private static readonly int[] GoldenThreeJob = { 258, 63, 57, 19, 12, 18, 33 };
+
+    // Marksman mastered + every other common trade mastered
+    private static readonly int[] GoldenCompletionist = { 460, 189, 75, 37, 34, 40, 53 };
+
+    // Golden build tables, end to end: a real unit shaped into the named
+    // builds (one-job Marksman, three-job Marksman+Brawler+Burner, completionist)
+    // must land exactly on the reviewed constant rows above after
+    // JobManager.RecalculateStats. Representative-level goldens live in
+    // ProbeLevelScaling (1/10/30/99).
     private void ProbeGrowthGoldenBuilds()
     {
         var savedDifficulty = DifficultySettings.Current;
@@ -1121,12 +1137,24 @@ public class BattleProbeRunner : MonoBehaviour
         var jm = unit.GetComponent<JobManager>();
         var stats = unit.GetComponent<Stats>();
         var current = jm.CurrentJob;
+
+        // The rows are only meaningful against the pinned fixture
+        Check("golden fixture is a Marksman", current != null && current.id == "marksman",
+            current != null ? current.id : "no job");
+        JobDefinition brawler = null, burner = null;
         var commons = new List<JobDefinition>();
         foreach (var j in jm.allJobs)
-            if (j != null && j != current && !j.isUnique)
-                commons.Add(j);
+        {
+            if (j == null || j == current || j.isUnique)
+                continue;
+            commons.Add(j);
+            if (j.id == "brawler")
+                brawler = j;
+            else if (j.id == "burner")
+                burner = j;
+        }
 
-        if (current == null || commons.Count < 2)
+        if (current == null || current.id != "marksman" || brawler == null || burner == null)
         {
             Check("golden build jobs available", false);
             Destroy(unit);
@@ -1135,39 +1163,27 @@ public class BattleProbeRunner : MonoBehaviour
         }
 
         var order = JobManager.statOrder;
-        var baseline = new int[order.Length];
-        for (var i = 0; i < order.Length; i++)
-            baseline[i] = stats[order[i]];
 
-        // One-job build: the current trade mastered, nothing else touched
+        // Rows are compared verbatim; the local closure only formats failures
+        void CheckRow(string label, int[] golden)
+        {
+            for (var i = 0; i < order.Length; i++)
+                Check(label + " " + order[i], stats[order[i]] == golden[i],
+                    $"expected {golden[i]}, got {stats[order[i]]}");
+        }
+
+        // One-job build: Marksman mastered, nothing else touched
         jm.ProgressData.SetJobLevel(current, ProgressionModel.MaxGrade);
         jm.RecalculateStats();
-        var oneJob = new int[order.Length];
-        for (var i = 0; i < order.Length; i++)
-        {
-            oneJob[i] = baseline[i]
-                        - ProgressionModel.CurrentJobContribution(current, i, 1)
-                        + ProgressionModel.CurrentJobContribution(current, i, ProgressionModel.MaxGrade);
-            Check("one-job golden " + order[i], stats[order[i]] == oneJob[i],
-                $"expected {oneJob[i]}, got {stats[order[i]]}");
-        }
+        CheckRow("one-job golden", GoldenOneJobMarksman);
 
-        // Three-job build: two more trades mastered alongside
-        var second = commons[0];
-        var third = commons[1];
-        jm.ProgressData.UnlockJob(second);
-        jm.ProgressData.SetJobLevel(second, ProgressionModel.MaxGrade);
-        jm.ProgressData.UnlockJob(third);
-        jm.ProgressData.SetJobLevel(third, ProgressionModel.MaxGrade);
+        // Three-job build: Brawler and Burner mastered alongside
+        jm.ProgressData.UnlockJob(brawler);
+        jm.ProgressData.SetJobLevel(brawler, ProgressionModel.MaxGrade);
+        jm.ProgressData.UnlockJob(burner);
+        jm.ProgressData.SetJobLevel(burner, ProgressionModel.MaxGrade);
         jm.RecalculateStats();
-        for (var i = 0; i < order.Length; i++)
-        {
-            var expected = oneJob[i]
-                           + ProgressionModel.CrossJobContribution(second, i, ProgressionModel.MaxGrade)
-                           + ProgressionModel.CrossJobContribution(third, i, ProgressionModel.MaxGrade);
-            Check("three-job golden " + order[i], stats[order[i]] == expected,
-                $"expected {expected}, got {stats[order[i]]}");
-        }
+        CheckRow("three-job golden", GoldenThreeJob);
 
         // Completionist build: every common trade mastered
         foreach (var j in commons)
@@ -1177,14 +1193,7 @@ public class BattleProbeRunner : MonoBehaviour
         }
 
         jm.RecalculateStats();
-        for (var i = 0; i < order.Length; i++)
-        {
-            var expected = oneJob[i];
-            foreach (var j in commons)
-                expected += ProgressionModel.CrossJobContribution(j, i, ProgressionModel.MaxGrade);
-            Check("completionist golden " + order[i], stats[order[i]] == expected,
-                $"expected {expected}, got {stats[order[i]]}");
-        }
+        CheckRow("completionist golden", GoldenCompletionist);
 
         Destroy(unit);
         DifficultySettings.Current = savedDifficulty;
