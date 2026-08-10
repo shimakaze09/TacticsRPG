@@ -124,8 +124,10 @@ public class AbilityMemory
     }
 
     /// <summary>
-    /// Syncs all learned abilities from job progress data
-    /// Useful for initialization and data integrity
+    /// Syncs learned abilities from job progress data. Only jobs the character
+    /// has actually unlocked (and therefore has a progress entry for) may
+    /// teach — a job with no entry must contribute nothing, or every locked
+    /// and character-exclusive job leaks its Grade-1 abilities (issue #51).
     /// </summary>
     public void SyncLearnedAbilities(JobProgressData progressData, List<JobDefinition> allJobs)
     {
@@ -134,7 +136,7 @@ public class AbilityMemory
 
         foreach (var job in allJobs)
         {
-            if (job == null)
+            if (job == null || !progressData.IsJobUnlocked(job))
                 continue;
 
             int jobLevel = progressData.GetJobLevel(job);
@@ -143,6 +145,62 @@ public class AbilityMemory
                 UpdateLearnedAbilities(job, jobLevel);
             }
         }
+    }
+
+    /// <summary>
+    /// Removes learned abilities attributable to the locked-job leak (issue
+    /// #51): the bug taught exactly the Grade-1 unlock list of every job the
+    /// character never unlocked, so only ids on a locked job's Grade-1 list —
+    /// and not also granted by any unlocked job at its grade — are scrubbed.
+    /// Deliberately conservative: anything the leak cannot explain is kept,
+    /// so legitimately learned abilities survive even though no
+    /// purchase-provenance data exists yet (that model belongs to #17/#51).
+    /// Also drops equipped abilities that lose their backing.
+    /// Returns how many entries were scrubbed.
+    /// </summary>
+    public int RepairLearnedAbilities(JobProgressData progressData, List<JobDefinition> allJobs)
+    {
+        if (progressData == null || allJobs == null)
+            return 0;
+
+        var justified = new HashSet<string>();
+        var leaked = new HashSet<string>();
+        foreach (var job in allJobs)
+        {
+            if (job == null)
+                continue;
+
+            if (progressData.IsJobUnlocked(job))
+            {
+                int jobLevel = progressData.GetJobLevel(job);
+                if (jobLevel > 0)
+                {
+                    foreach (var abilityName in job.GetUnlockedAbilities(jobLevel))
+                        justified.Add(abilityName);
+                }
+            }
+            else
+            {
+                foreach (var abilityName in job.GetUnlockedAbilities(1))
+                    leaked.Add(abilityName);
+            }
+        }
+
+        int removed = 0;
+        for (int i = learnedAbilities.Count - 1; i >= 0; i--)
+        {
+            if (leaked.Contains(learnedAbilities[i]) && !justified.Contains(learnedAbilities[i]))
+            {
+                Debug.LogWarning($"Repairing ability memory: removing leaked '{learnedAbilities[i]}'");
+                learnedAbilities.RemoveAt(i);
+                removed++;
+            }
+        }
+
+        if (removed > 0)
+            ValidateEquippedAbilities();
+
+        return removed;
     }
     
     #endregion

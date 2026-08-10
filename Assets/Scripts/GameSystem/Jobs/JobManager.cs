@@ -666,6 +666,13 @@ public class JobManager : MonoBehaviour, IDataPersistence
             data.abilityMemoryData.TryGetValue(unitName, out AbilityMemory loadedMemory))
         {
             abilityMemory = loadedMemory;
+
+            // Older saves may carry Grade-1 abilities leaked from locked jobs
+            // (issue #51) — scrub only what the leak can explain; anything
+            // else stays (no purchase-provenance data exists to judge it by).
+            int repaired = abilityMemory.RepairLearnedAbilities(progressData, allJobs);
+            if (repaired > 0)
+                Debug.LogWarning($"Repaired ability memory for {unitName}: removed {repaired} leaked abilities");
         }
 
         // Recalculate stats after loading

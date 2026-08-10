@@ -227,14 +227,28 @@ public class JobProgressData
     }
 
     /// <summary>
-    /// Gets job level for a specific job
+    /// Gets job level for a specific job. Returns 0 when the job has no
+    /// progress entry — "never trained" must stay distinct from Grade 1, or
+    /// locked jobs leak their Grade-1 abilities (issue #51).
     /// </summary>
     public int GetJobLevel(JobDefinition job)
     {
         if (job == null)
             return 0;
 
-        return jobLevels.TryGetValue(JobKey(job), out int level) ? level : 1;
+        return jobLevels.TryGetValue(JobKey(job), out int level) ? level : 0;
+    }
+
+    /// <summary>
+    /// Whether this character has any progress entry for the job (created on
+    /// unlock). Jobs without an entry contribute nothing to stats or abilities.
+    /// </summary>
+    public bool HasJobEntry(JobDefinition job)
+    {
+        if (job == null)
+            return false;
+
+        return jobLevels.ContainsKey(JobKey(job));
     }
 
     /// <summary>
