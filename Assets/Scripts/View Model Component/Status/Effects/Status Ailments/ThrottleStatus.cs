@@ -1,12 +1,13 @@
 using UnityEngine;
 
 /// <summary>
-/// Throttle (slow): Unit's effective speed is halved (round down).
-/// Lasts for 32 ticks (~3-4 turns). Opposed to Haste.
+/// Throttle (slow): Unit gains half CT each clock tick and its effective Speed
+/// is halved (round down). The CT multiplier is data-configurable and clamped
+/// to the StatLimits CT-gain range (issue #19). Opposed to Overclock.
 /// </summary>
 public class ThrottleStatus : StatusEffect
 {
-    [Tooltip("CT gain multiplier (0.5 = half CT gain)")]
+    [Tooltip("CT gain multiplier (0.5 = half CT per tick). Clamped to the StatLimits CT-gain range.")]
     public float ctMultiplier = 0.5f;
 
     private Stats stats;
@@ -27,21 +28,20 @@ public class ThrottleStatus : StatusEffect
             this.UnsubscribeFromSender<StatWillChangeEvent>(OnStatWillChange, stats);
     }
 
+    // Scales CTR gains by the clamped multiplier and halves effective Speed so
+    // both the initiative math and any SPD-derived checks see the slow
     private void OnStatWillChange(StatWillChangeEvent e)
     {
-        // Halve CT gain (if your system uses CTR or similar stat)
         if (e.StatType == StatTypes.CTR)
         {
-            // Half the CT increment
-            var modifier = new MultDeltaModifier(0, ctMultiplier);
-            e.Exception.AddModifier(modifier);
+            var safe = Mathf.Clamp(ctMultiplier,
+                StatLimits.MinCTGainMultiplier, StatLimits.MaxCTGainMultiplier);
+            e.Exception.AddModifier(new MultDeltaModifier(0, safe));
         }
 
-        // Also halve speed stat
         if (e.StatType == StatTypes.SPD)
         {
-            var modifier = new MultValueModifier(0, 0.5f);
-            e.Exception.AddModifier(modifier);
+            e.Exception.AddModifier(new MultValueModifier(0, 0.5f));
         }
     }
 }
