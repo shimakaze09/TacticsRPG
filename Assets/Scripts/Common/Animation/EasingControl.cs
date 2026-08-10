@@ -5,6 +5,10 @@ using UnityEngine;
 /// <summary>
 /// Core animation timer: ticks a 0..1 value through an easing equation with
 /// play/pause/reverse/loop controls and events. Tweeners build on this.
+/// Lifecycle contract (issue #23): disabling mid-play pauses and re-enabling
+/// resumes the in-flight state; Play/Reverse requested while disabled start on
+/// the next enable; on completion the control is Stopped before completedEvent
+/// fires, so handlers (including destroy-on-complete) see final state.
 /// </summary>
 public class EasingControl : MonoBehaviour
 {
@@ -74,11 +78,13 @@ public class EasingControl : MonoBehaviour
 
     #region MonoBehaviour
 
+    // Re-enabling resumes whatever state the disable interrupted
     private void OnEnable()
     {
         Resume();
     }
 
+    // Disabling pauses; SetPlayState records the in-flight state for resume
     private void OnDisable()
     {
         Pause();
@@ -166,6 +172,11 @@ public class EasingControl : MonoBehaviour
 
     #region Private
 
+    // Applies a state transition. While inactive no coroutine may run, so the
+    // requested state is recorded for the next enable instead — critically,
+    // pausing from OnDisable must keep the in-flight state as the resume
+    // target rather than overwrite it (the old code lost it, so a disabled
+    // then re-enabled control never resumed; issue #23)
     private void SetPlayState(PlayState target)
     {
         if (isActiveAndEnabled)
@@ -187,8 +198,25 @@ public class EasingControl : MonoBehaviour
         }
         else
         {
-            previousPlayState = target;
-            playState = PlayState.Paused;
+            if (target == PlayState.Stopped)
+            {
+                previousPlayState = PlayState.Stopped;
+                playState = PlayState.Stopped;
+            }
+            else if (target == PlayState.Paused)
+            {
+                if (IsPlaying)
+                    previousPlayState = playState;
+                playState = PlayState.Paused;
+            }
+            else // Play/Reverse while disabled — defer to the next enable
+            {
+                previousPlayState = target;
+                playState = PlayState.Paused;
+            }
+
+            // Unity already killed the coroutine with the disable
+            tickerRoutine = null;
         }
     }
 
@@ -245,8 +273,11 @@ public class EasingControl : MonoBehaviour
             }
             else
             {
-                OnComplete();
+                // Stop first so completion handlers observe final state; a
+                // Tweener's destroy-on-complete then tears down a component
+                // that is already fully stopped (issue #23)
                 Stop();
+                OnComplete();
             }
         }
     }
