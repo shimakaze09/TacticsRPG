@@ -4,9 +4,9 @@
 # artifact is produced on pushes to main.
 #
 # Requires repository secrets (Settings → Secrets and variables → Actions):
-#   UNITY_LICENSE — the contents of a Unity .ulf license file
-#   UNITY_EMAIL / UNITY_PASSWORD — the Unity account for that license
-# See Docs/ARCHITECTURE.md §8 for the local forms of these commands.
+#   UNITY_EMAIL / UNITY_PASSWORD — a Unity account holding a Personal
+#   (free) license; the run activates it on start and returns the seat when
+#   done. See Docs/ARCHITECTURE.md §8 for the local forms of these commands.
 
 name: CI
 
@@ -26,10 +26,10 @@ jobs:
       # game-ci editor image matching ProjectSettings/ProjectVersion.txt
       image: unityci/editor:ubuntu-6000.5.5f1-base-3
     steps:
-      - name: Check license secret
+      - name: Check license secrets
         run: |
-          if [ -z "${{ secrets.UNITY_LICENSE }}" ]; then
-            echo "::error::UNITY_LICENSE secret is not configured — see the header of this workflow."
+          if [ -z "${{ secrets.UNITY_EMAIL }}" ] || [ -z "${{ secrets.UNITY_PASSWORD }}" ]; then
+            echo "::error::UNITY_EMAIL / UNITY_PASSWORD secrets are not configured — see the header of this workflow."
             exit 1
           fi
 
@@ -43,14 +43,14 @@ jobs:
           restore-keys: |
             library-${{ env.UNITY_VERSION }}-
 
-      - name: Activate Unity license
+      - name: Activate Unity license (Personal, email/password)
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         run: |
           mkdir -p logs
-          echo "$UNITY_LICENSE" > /tmp/Unity_lic.ulf
           unity-editor -batchmode -nographics -quit \
-            -manualLicenseFile /tmp/Unity_lic.ulf \
+            -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD" \
             -logFile logs/activation.log || true
 
       # A clean checkout has no generated Jobs/Abilities/Catalog assets —
@@ -75,6 +75,17 @@ jobs:
           unity-editor -batchmode -nographics -projectPath . \
             -executeMethod BalanceReportGenerator.RunHeadless \
             -logFile logs/balance.log
+
+      # A Personal license holds a seat on this runner — always give it back
+      - name: Return Unity license
+        if: always()
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        run: |
+          unity-editor -batchmode -nographics -quit -returnlicense \
+            -username "$UNITY_EMAIL" -password "$UNITY_PASSWORD" \
+            -logFile logs/return-license.log || true
 
       - name: Upload logs and balance report
         if: always()
@@ -107,7 +118,6 @@ jobs:
       - name: Build
         uses: game-ci/unity-builder@v4
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:

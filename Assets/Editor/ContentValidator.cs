@@ -29,6 +29,10 @@ public static class ContentValidator
         var allAbilityIds = new HashSet<string>();
         var unlockedAbilityIds = new HashSet<string>();
 
+        // Case-insensitive: generated prefab folders are Unity asset paths,
+        // where two jobs differing only in case collide and the later file
+        // silently erases the earlier one's output
+        var seenAbilityJobs = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
         foreach (var file in JsonFiles(AbilityDataPath, errors))
         {
             var data = Load<AbilityAssetGenerator.AbilityDataFile>(file, errors);
@@ -38,6 +42,12 @@ public static class ContentValidator
             if (string.IsNullOrEmpty(data.job))
             {
                 errors.Add($"{Path.GetFileName(file)}: missing 'job' name");
+                continue;
+            }
+
+            if (!seenAbilityJobs.Add(data.job))
+            {
+                errors.Add($"{Path.GetFileName(file)}: duplicate AbilityData file for job '{data.job}' — the later file would erase the earlier one's generated output");
                 continue;
             }
 
@@ -63,13 +73,21 @@ public static class ContentValidator
         }
 
         // Catalogs are generated from AbilityData names (WORLD.md §5.2/§5.3):
-        // every catalog must match a job file and list only its ability names
+        // every catalog must match a job file and list only its ability names.
+        // Duplicate catalog names collide on the same generated asset path.
         var catalogNames = new HashSet<string>();
+        var seenCatalogNames = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
         foreach (var file in JsonFiles(CatalogDataPath, errors))
         {
             var data = Load<CatalogAssetGenerator.CatalogDataFile>(file, errors);
             if (data == null)
                 continue;
+
+            if (!seenCatalogNames.Add(data.catalogName ?? ""))
+            {
+                errors.Add($"{Path.GetFileName(file)}: duplicate CatalogData file for catalog '{data.catalogName}'");
+                continue;
+            }
 
             catalogNames.Add(data.catalogName);
             if (!abilityNamesByJob.TryGetValue(data.catalogName, out var jobNames))
@@ -84,8 +102,11 @@ public static class ContentValidator
                         errors.Add($"catalog '{data.catalogName}': entry '{entry}' is not an ability of that job");
         }
 
-        // Jobs: unique ids, resolvable catalog, resolvable unlock references,
-        // in-range unlock levels, and a valid JP curve
+        // Jobs, first pass: parse everything and collect resolved ids so
+        // prerequisite references can be validated before any asset exists —
+        // the generator only discovers a dangling prerequisite in its second
+        // pass, after the whole job tree has been written
+        var jobFiles = new List<(string label, JobDataFile data)>();
         var jobIds = new HashSet<string>();
         foreach (var file in JsonFiles(JobDataPath, errors))
         {
@@ -97,7 +118,13 @@ public static class ContentValidator
             var id = string.IsNullOrEmpty(data.id) ? Slug(data.jobName) : data.id;
             if (!jobIds.Add(id))
                 errors.Add($"{jobLabel}: duplicate job id '{id}'");
+            jobFiles.Add((jobLabel, data));
+        }
 
+        // Jobs, second pass: catalog references, unlock references and
+        // levels, JP curves, and prerequisite targets/levels
+        foreach (var (jobLabel, data) in jobFiles)
+        {
             if (string.IsNullOrEmpty(data.abilityCatalogName))
             {
                 errors.Add($"{jobLabel}: missing abilityCatalogName");
@@ -132,6 +159,21 @@ public static class ContentValidator
                 if (unlock.jpCost < 0)
                     errors.Add($"{jobLabel}: unlock '{unlock.abilityName}' has negative jpCost {unlock.jpCost}");
             }
+
+            // Prerequisites resolve exactly like the generator's second pass:
+            // requiredJobId, else the slug of requiredJobName, must name a job
+            foreach (var prereq in data.prerequisites ?? new JobPrerequisiteData[0])
+            {
+                var requiredId = string.IsNullOrEmpty(prereq.requiredJobId)
+                    ? Slug(prereq.requiredJobName)
+                    : prereq.requiredJobId;
+
+                if (!jobIds.Contains(requiredId))
+                    errors.Add($"{jobLabel}: prerequisite '{prereq.requiredJobName}' resolves to job id '{requiredId}' which no JobData defines");
+
+                if (!JobDefinition.IsValidUnlockLevel(prereq.requiredLevel))
+                    errors.Add($"{jobLabel}: prerequisite '{prereq.requiredJobName}' requires level {prereq.requiredLevel}, outside 1-{JobDefinition.MaxJobLevel}");
+            }
         }
 
         // WORLD.md §5.1: every defined ability should be unlockable somewhere.
@@ -141,8 +183,10 @@ public static class ContentValidator
                 warnings.Add($"ability '{id}' is not unlockable by any job (recipe-only?)");
     }
 
-    // Enumerates a source folder, reporting a missing folder as an error —
-    // a clean checkout must carry all three
+    // Enumerates a source folder. A missing folder or one with zero JSON
+    // files is a hard error — each dataset is foundational, and generators
+    // delete existing output before writing, so an emptied folder would
+    // otherwise erase generated content while "succeeding"
     private static IEnumerable<string> JsonFiles(string path, List<string> errors)
     {
         if (!Directory.Exists(path))
@@ -151,7 +195,10 @@ public static class ContentValidator
             return new string[0];
         }
 
-        return Directory.GetFiles(path, "*.json", SearchOption.TopDirectoryOnly);
+        var files = Directory.GetFiles(path, "*.json", SearchOption.TopDirectoryOnly);
+        if (files.Length == 0)
+            errors.Add($"content folder has no JSON files: {path}");
+        return files;
     }
 
     // Parses one JSON file, converting parse failures into validation errors
