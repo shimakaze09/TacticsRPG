@@ -431,6 +431,59 @@ public class BattleProbeRunner : MonoBehaviour
 
         haniaStats.SetValue(StatTypes.HP, haniaHP, false);
         rogueStats.SetValue(StatTypes.HP, rogueHP, false);
+
+        // Neutral units are nobody's ally and nobody's foe — support and
+        // attack filters must both exclude them
+        var rogueAlliance = rogue.GetComponent<Alliance>();
+        var savedType = rogueAlliance.type;
+        rogueAlliance.type = Alliances.Neutral;
+        var attackFilter = AttackOf(alaois).GetComponentInChildren<AbilityEffectTarget>();
+        Check("ally filter rejects neutral", !ally.IsTarget(rogue.tile));
+        Check("attack filter rejects neutral", !attackFilter.IsTarget(rogue.tile));
+        rogueAlliance.type = savedType;
+
+        // Confusion (Swayed) swaps ally and foe — it must not admit Neutral
+        // units or divert the Self contract
+        var alaoisAlliance = alaois.GetComponent<Alliance>();
+        alaoisAlliance.confused = true;
+        Check("confused ally filter targets foes", ally.IsTarget(rogue.tile));
+        Check("confused ally filter rejects teammate", !ally.IsTarget(hania.tile));
+        Check("confused self filter unaffected",
+            self.IsTarget(alaois.tile) && !self.IsTarget(rogue.tile));
+        rogueAlliance.type = Alliances.Neutral;
+        Check("confused ally filter still rejects neutral", !ally.IsTarget(rogue.tile));
+        rogueAlliance.type = savedType;
+        alaoisAlliance.confused = false;
+
+        // End to end through generated data: a full-board support broadcast
+        // must carry the Ally contract from JSON to prefab and be legal on
+        // every living hero and illegal on every enemy
+        var broadcast = Resources.Load<GameObject>("Abilities/Balladeer/Grit Ballad");
+        Check("generated broadcast present", broadcast != null,
+            "run Tactics RPG → Generate Content → Abilities");
+        if (broadcast != null)
+        {
+            var instance = Instantiate(broadcast);
+            instance.transform.SetParent(alaois.transform);
+            var broadcastFilter = instance.GetComponentInChildren<AbilityEffectTarget>();
+            Check("broadcast carries Ally contract", broadcastFilter is AllyAbilityEffectTarget,
+                broadcastFilter != null ? broadcastFilter.GetType().Name : "no filter");
+            if (broadcastFilter != null)
+            {
+                foreach (var u in bc.units)
+                {
+                    var side = u.GetComponent<Alliance>().type;
+                    var living = u.GetComponent<Stats>()[StatTypes.HP] > 0;
+                    var expectLegal = side == Alliances.Hero && living;
+                    Check("broadcast legality " + u.name,
+                        broadcastFilter.IsTarget(u.tile) == expectLegal,
+                        $"side {side}, living {living}");
+                }
+            }
+
+            Destroy(instance);
+        }
+
         Destroy(holder);
     }
 
