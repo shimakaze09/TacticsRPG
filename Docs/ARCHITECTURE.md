@@ -158,19 +158,16 @@ equipment migration are tracked in issues
   `Unity -batchmode -nographics -projectPath . -executeMethod ContentGenerationMenu.RunHeadless`
   (exit 0 only when validation and all three generators succeed). The
   individual generator menu items remain for targeted regeneration.
-- **CI** (`.github/workflows/ci.yml`): every PR and push to main starts from
-  a clean checkout (no generated content), regenerates via the validated
-  entry, runs the battle probes, and enforces the balance report's hard
-  invariants (`BalanceReportGenerator.RunHeadless`); logs and the balance
-  report upload as artifacts. Pushes to main additionally produce a Windows
-  build artifact via `CIBuild.Build`, which regenerates content before
-  building. Requires the `UNITY_EMAIL` / `UNITY_PASSWORD` repository secrets
-  — a Unity Personal account **without two-step verification** (headless
-  login cannot answer a code prompt; Unity discontinued manual .alf/.ulf
-  activation for Personal, so a dedicated 2FA-free CI account is the
-  supported free-tier path). The workflow activates on start and returns the
-  seat when done; the Library folder is cached keyed on `packages-lock.json`
-  + editor version.
+- **CI** (`.github/workflows/ci.yml`): every PR and push to main runs
+  `Tools/validate_content.py` — a license-free mirror of `ContentValidator`
+  covering the same id/reference/curve rules — in seconds on a plain runner.
+  **Keep the Python and C# rule sets in sync when either changes.** Unity
+  compilation, generation, and the battle probes remain the local pre-PR
+  law above; editor-based CI was attempted and dropped because Unity's
+  current licensing offers no workable headless path for Personal accounts
+  (manual .alf/.ulf activation discontinued, API login rejected).
+  `CIBuild.Build` remains available as a local headless build entry that
+  regenerates content before building.
 
 ## 9. Known debt tracking
 

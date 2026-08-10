@@ -56,10 +56,10 @@ gitignored. Without generation, jobs and battle abilities cannot load.
 ## Verification
 
 The repository includes an in-editor battle probe suite
-(`Tactics RPG → Run Battle Probes`). Continuous integration regenerates
-content from a clean checkout, compiles, and runs the suite on every pull
-request; command forms and CI details live in
-[ARCHITECTURE.md §8](Docs/ARCHITECTURE.md).
+(`Tactics RPG → Run Battle Probes`), run locally before every pull request.
+Continuous integration validates the content data (ids and all
+job/ability/catalog cross-references) on every pull request; command forms
+and CI details live in [ARCHITECTURE.md §8](Docs/ARCHITECTURE.md).
 
 ## Documentation
 
