@@ -1,0 +1,38 @@
+# One-time helper for issue #7's CI licensing (free tier): produces a Unity
+# manual-activation request file (.alf) inside the exact CI editor image.
+#
+# Usage (once):
+#   1. Actions → "Request Unity activation file" → Run workflow
+#   2. Download the 'unity-activation-file' artifact and extract the .alf
+#   3. Upload it at https://license.unity3d.com/manual, choose Personal,
+#      and download the resulting Unity_v6000.x.ulf
+#   4. Paste that file's CONTENTS into the UNITY_LICENSE repository secret
+# The main CI workflow prefers UNITY_LICENSE when present, so this bypasses
+# headless email/password login entirely (and therefore works with 2FA).
+
+name: Request Unity activation file
+
+on:
+  workflow_dispatch:
+
+jobs:
+  request-alf:
+    name: Create .alf activation request
+    runs-on: ubuntu-latest
+    container:
+      image: unityci/editor:ubuntu-6000.5.5f1-base-3
+    steps:
+      - name: Create manual activation file
+        run: |
+          unity-editor -batchmode -nographics -quit \
+            -createManualActivationFile \
+            -logFile activation-request.log || true
+          ls Unity_*.alf
+
+      - name: Upload activation file
+        uses: actions/upload-artifact@v4
+        with:
+          name: unity-activation-file
+          path: |
+            Unity_*.alf
+            activation-request.log
