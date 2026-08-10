@@ -388,16 +388,8 @@ public class JobManager : MonoBehaviour, IDataPersistence
     {
         Debug.Log($"{gameObject.name}'s {job.jobName} leveled up: {oldLevel} → {newLevel}");
 
-        // Learn new abilities unlocked at this level
-        var newAbilities = job.GetUnlockedAbilities(newLevel);
-        foreach (var abilityName in newAbilities)
-        {
-            if (abilityMemory.LearnAbility(abilityName))
-            {
-                this.Publish(new AbilityLearnedEvent(this, abilityName, job));
-                Debug.Log($"Learned ability: {abilityName}");
-            }
-        }
+        // Grades make abilities purchasable, never learned: Cert buys
+        // abilities (GDD design call, issue #51) via PurchaseAbility
 
         // Recalculate stats (job level affects stats)
         RecalculateStats();
@@ -407,6 +399,23 @@ public class JobManager : MonoBehaviour, IDataPersistence
 
         // Publish level up event
         this.Publish(new JobLevelUpEvent(this, job, oldLevel, newLevel));
+    }
+
+    /// <summary>
+    /// Spends banked Cert to learn an ability from one of this unit's jobs
+    /// (GDD: Cert buys abilities; grades only gate what is purchasable).
+    /// Publishes AbilityLearnedEvent on success.
+    /// </summary>
+    public AbilityMemory.PurchaseResult PurchaseAbility(JobDefinition job, string abilityId)
+    {
+        var result = abilityMemory.PurchaseAbility(progressData, job, abilityId);
+        if (result == AbilityMemory.PurchaseResult.Success)
+        {
+            this.Publish(new AbilityLearnedEvent(this, abilityId, job));
+            Debug.Log($"{gameObject.name} purchased ability: {abilityId}");
+        }
+
+        return result;
     }
 
     #endregion

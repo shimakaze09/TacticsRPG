@@ -13,8 +13,9 @@ using UnityEngine;
 /// - Reaction Ability: 1 slot for counter/trigger abilities
 /// - Movement Ability: 1 slot for movement-enhancing abilities
 /// 
-/// ABILITY RETENTION:
-/// - Once an ability is unlocked (by reaching job level), it's "learned" permanently
+/// ABILITY RETENTION (Cert-purchase model, GDD + issue #51):
+/// - Reaching a job grade only makes its abilities *purchasable*; the player
+///   spends banked Cert (PurchaseAbility) to learn one permanently
 /// - Learned abilities can be equipped even when in a different job
 /// - Only abilities from unlocked jobs can be equipped
 /// 
@@ -111,40 +112,72 @@ public class AbilityMemory
     }
 
     /// <summary>
-    /// Updates learned abilities based on current job progress
-    /// Call this when job levels change
+    /// Why an ability purchase succeeded or was refused (issue #51).
     /// </summary>
-    public int UpdateLearnedAbilities(JobDefinition job, int jobLevel)
+    public enum PurchaseResult
     {
-        if (job == null)
-            return 0;
-
-        var unlockedAbilities = job.GetUnlockedAbilities(jobLevel);
-        return LearnAbilities(unlockedAbilities);
+        Success,
+        JobLocked,
+        UnknownAbility,
+        GradeTooLow,
+        AlreadyLearned,
+        InsufficientCert
     }
 
     /// <summary>
-    /// Syncs learned abilities from job progress data. Only jobs the character
-    /// has actually unlocked (and therefore has a progress entry for) may
-    /// teach — a job with no entry must contribute nothing, or every locked
-    /// and character-exclusive job leaks its Grade-1 abilities (issue #51).
+    /// Spends banked Cert to learn one ability — the only way new entries
+    /// reach permanent memory (GDD design call: Cert buys abilities; grades
+    /// merely unlock them for purchase). Validates the job is unlocked, the
+    /// grade gate is met, the ability is not already known, and the job's
+    /// bank covers its jpCost before anything changes.
+    /// </summary>
+    public PurchaseResult PurchaseAbility(JobProgressData progressData, JobDefinition job, string abilityId)
+    {
+        if (progressData == null || job == null || string.IsNullOrEmpty(abilityId))
+            return PurchaseResult.UnknownAbility;
+
+        if (!progressData.IsJobUnlocked(job))
+            return PurchaseResult.JobLocked;
+
+        JobAbilityUnlock unlock = null;
+        foreach (var candidate in job.abilityUnlocks)
+        {
+            var id = string.IsNullOrEmpty(candidate.abilityId) ? candidate.abilityName : candidate.abilityId;
+            if (id == abilityId)
+            {
+                unlock = candidate;
+                break;
+            }
+        }
+
+        if (unlock == null)
+            return PurchaseResult.UnknownAbility;
+
+        if (progressData.GetJobLevel(job) < unlock.unlockAtJobLevel)
+            return PurchaseResult.GradeTooLow;
+
+        if (HasLearnedAbility(abilityId))
+            return PurchaseResult.AlreadyLearned;
+
+        if (!progressData.TrySpendJP(job, unlock.jpCost))
+            return PurchaseResult.InsufficientCert;
+
+        LearnAbility(abilityId);
+        return PurchaseResult.Success;
+    }
+
+    /// <summary>
+    /// Reconciles memory with job progress after loads and job changes.
+    /// Under the Cert-purchase model this teaches nothing — reaching a grade
+    /// only makes abilities purchasable (issue #51) — it now solely drops
+    /// equipped entries whose backing was lost.
     /// </summary>
     public void SyncLearnedAbilities(JobProgressData progressData, List<JobDefinition> allJobs)
     {
         if (progressData == null || allJobs == null)
             return;
 
-        foreach (var job in allJobs)
-        {
-            if (job == null || !progressData.IsJobUnlocked(job))
-                continue;
-
-            int jobLevel = progressData.GetJobLevel(job);
-            if (jobLevel > 0)
-            {
-                UpdateLearnedAbilities(job, jobLevel);
-            }
-        }
+        ValidateEquippedAbilities();
     }
 
     /// <summary>

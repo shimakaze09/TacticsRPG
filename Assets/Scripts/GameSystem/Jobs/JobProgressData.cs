@@ -43,6 +43,9 @@ public class JobProgressData
     [Tooltip("Set of unlocked job ids")]
     public List<string> unlockedJobs = new List<string>();
 
+    [Tooltip("Cert (JP) spent on ability purchases per job id. The spendable bank is earned minus spent; grades always derive from the earned total, so purchases never regress a job level (issue #51)")]
+    public SerializableDictionary<string, int> jobSpentJP = new SerializableDictionary<string, int>();
+
     [Tooltip("Character level at time of last stat calculation (for validation)")]
     public int lastCalculatedLevel = 1;
 
@@ -81,6 +84,7 @@ public class JobProgressData
         jobJP = new SerializableDictionary<string, int>();
         jobLevels = new SerializableDictionary<string, int>();
         unlockedJobs = new List<string>();
+        jobSpentJP = new SerializableDictionary<string, int>();
     }
 
     /// <summary>
@@ -224,6 +228,41 @@ public class JobProgressData
         // Update level based on JP
         int level = job.GetJobLevelForJP(jp);
         SetJobLevel(job, level);
+    }
+
+    /// <summary>Cert already spent on ability purchases from this job.</summary>
+    public int GetSpentJP(JobDefinition job)
+    {
+        if (job == null)
+            return 0;
+
+        return jobSpentJP != null && jobSpentJP.TryGetValue(JobKey(job), out int spent) ? spent : 0;
+    }
+
+    /// <summary>
+    /// The spendable Cert bank for a job: earned total minus purchases.
+    /// Grades derive from the earned total, so spending never lowers them.
+    /// </summary>
+    public int GetAvailableJP(JobDefinition job)
+    {
+        return Mathf.Max(0, GetJobJP(job) - GetSpentJP(job));
+    }
+
+    /// <summary>
+    /// Spends Cert from a job's bank (issue #51: Cert buys abilities).
+    /// Returns false without side effects when the bank cannot cover it.
+    /// </summary>
+    public bool TrySpendJP(JobDefinition job, int amount)
+    {
+        if (job == null || amount < 0)
+            return false;
+
+        if (GetAvailableJP(job) < amount)
+            return false;
+
+        jobSpentJP ??= new SerializableDictionary<string, int>();
+        jobSpentJP[JobKey(job)] = GetSpentJP(job) + amount;
+        return true;
     }
 
     /// <summary>
