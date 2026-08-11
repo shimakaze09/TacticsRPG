@@ -505,6 +505,38 @@ public class BattleProbeRunner : MonoBehaviour
             removedCalls == 1, removedCalls + " calls");
         bus.Unsubscribe(remover);
 
+        // Nested publish of the same event type: the copy-on-write marker
+        // must survive until the OUTERMOST publish returns — a handler that
+        // subscribes after a nested publish completed must still wait for
+        // the next outer publish (PR #92 review regression)
+        var h3Calls = 0;
+        System.Action<ProbeBusEvent> h3 = _ => h3Calls++;
+        var h1Calls = 0;
+        System.Action<ProbeBusEvent> h1 = _ =>
+        {
+            h1Calls++;
+            if (h1Calls == 1)
+                bus.Publish(new ProbeBusEvent());
+        };
+        var h2Calls = 0;
+        System.Action<ProbeBusEvent> h2 = _ =>
+        {
+            h2Calls++;
+            if (h2Calls == 2)
+                bus.Subscribe(h3);
+        };
+        bus.Subscribe(h1);
+        bus.Subscribe(h2);
+        bus.Publish(new ProbeBusEvent());
+        Check("subscribe after nested publish still waits", h3Calls == 0,
+            $"h3 {h3Calls}, h1 {h1Calls}, h2 {h2Calls}");
+        bus.Publish(new ProbeBusEvent());
+        Check("subscribe after nested publish gets the next outer publish", h3Calls == 1,
+            h3Calls + " calls");
+        bus.Unsubscribe(h1);
+        bus.Unsubscribe(h2);
+        bus.Unsubscribe(h3);
+
         // A destroyed component's global subscription (null sender, dead
         // delegate target) is never invoked and publish prunes it
         var go = new GameObject("Probe Bus Listener");

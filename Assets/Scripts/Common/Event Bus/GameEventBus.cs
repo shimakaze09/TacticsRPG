@@ -53,8 +53,10 @@ public class GameEventBus
     // Maps event types to their subscription lists
     private readonly Dictionary<Type, List<Subscription>> _subscriptions = new();
 
-    // Tracks active invocations to prevent modification during iteration
-    private readonly HashSet<List<Subscription>> _invoking = new();
+    // Tracks active invocation depth per list: nested publishes of the same
+    // event type each increment, and the copy-on-write marker only clears at
+    // the outermost return (PR #92 review)
+    private readonly Dictionary<List<Subscription>, int> _invoking = new();
 
     #endregion
 
@@ -96,7 +98,7 @@ public class GameEventBus
         }
 
         // Copy list if currently invoking to prevent modification during iteration
-        if (_invoking.Contains(list))
+        if (_invoking.ContainsKey(list))
         {
             list = new List<Subscription>(list);
             _subscriptions[eventType] = list;
@@ -134,7 +136,7 @@ public class GameEventBus
         var list = _subscriptions[eventType];
 
         // Copy list if currently invoking to prevent modification during iteration
-        if (_invoking.Contains(list))
+        if (_invoking.ContainsKey(list))
         {
             list = new List<Subscription>(list);
             _subscriptions[eventType] = list;
@@ -180,7 +182,8 @@ public class GameEventBus
             return;
 
         var list = _subscriptions[eventType];
-        _invoking.Add(list);
+        _invoking.TryGetValue(list, out var depth);
+        _invoking[list] = depth + 1;
         var deadSeen = false;
 
         try
@@ -236,7 +239,10 @@ public class GameEventBus
         }
         finally
         {
-            _invoking.Remove(list);
+            if (_invoking.TryGetValue(list, out var remaining) && remaining <= 1)
+                _invoking.Remove(list);
+            else
+                _invoking[list] = remaining - 1;
         }
 
         if (deadSeen)
@@ -272,7 +278,7 @@ public class GameEventBus
             var list = kvp.Value;
 
             // Copy if invoking
-            if (_invoking.Contains(list))
+            if (_invoking.ContainsKey(list))
             {
                 list = new List<Subscription>(list);
                 _subscriptions[kvp.Key] = list;
@@ -333,7 +339,7 @@ public class GameEventBus
         if (!_subscriptions.TryGetValue(eventType, out var list))
             return;
 
-        if (_invoking.Contains(list))
+        if (_invoking.ContainsKey(list))
         {
             list = new List<Subscription>(list);
             _subscriptions[eventType] = list;
