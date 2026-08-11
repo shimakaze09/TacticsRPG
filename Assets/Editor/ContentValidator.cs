@@ -127,7 +127,11 @@ public static class ContentValidator
 
             var jobLabel = string.IsNullOrEmpty(data.jobName) ? Path.GetFileName(file) : data.jobName;
             var id = string.IsNullOrEmpty(data.id) ? Slug(data.jobName) : data.id;
-            if (!jobIdsCI.Add(id))
+            // An empty resolved id would target 'Jobs/.asset' — hard error,
+            // and only real ids may enter the reference sets
+            if (string.IsNullOrEmpty(id))
+                errors.Add($"{jobLabel}: job id resolves empty — 'id' or 'jobName' must be set");
+            else if (!jobIdsCI.Add(id))
                 errors.Add($"{jobLabel}: duplicate job id '{id}' (asset paths are case-insensitive)");
             else
                 jobIds.Add(id);

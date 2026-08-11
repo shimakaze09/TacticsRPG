@@ -134,7 +134,11 @@ def main() -> int:
             continue
         label = data.get("jobName") or file.name
         jid = data.get("id") or slug(data.get("jobName") or "")
-        if jid.lower() in job_ids_ci:
+        # An empty resolved id would target 'Jobs/.asset' — hard error, and
+        # only real ids may enter the reference sets
+        if not jid:
+            errors.append(f"{label}: job id resolves empty — 'id' or 'jobName' must be set")
+        elif jid.lower() in job_ids_ci:
             errors.append(f"{label}: duplicate job id '{jid}' (asset paths are case-insensitive)")
         else:
             job_ids_ci.add(jid.lower())
