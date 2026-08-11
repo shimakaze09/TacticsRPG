@@ -149,20 +149,38 @@ public static class UnitFactory
         // Initialize with the specified job
         jobManager.ProgressData.InitializeWithBasicJobs(jobDefinition);
         
-        // Sync abilities with job progress
+        // Sync abilities with job progress and grant the certification's
+        // free Grade-1 starter kit to player-owned units (issue #17)
         jobManager.AbilityMemory.SyncLearnedAbilities(jobManager.ProgressData, jobManager.allJobs);
+        jobManager.GrantStarterKit();
         
         // Calculate initial stats and fill HP/MP for the fresh unit
         jobManager.RecalculateStats(true);
         
-        // Create ability catalog based on job's catalog name
-        CreateJobAbilityCatalog(obj, jobDefinition.abilityCatalogName);
+        // Create ability catalog based on job's catalog name, and gate every
+        // usability check through the loadout projection (issue #17)
+        RebuildAbilityCatalog(obj, jobDefinition.abilityCatalogName);
+        obj.AddComponent<AbilityLoadoutGate>();
         
         Debug.Log($"Added JobManager to {obj.name} with job: {jobDefinition.jobName}");
     }
 
-    private static void CreateJobAbilityCatalog(GameObject obj, string catalogName)
+    /// <summary>
+    /// Builds (or replaces) the unit's ability catalog from a catalog name —
+    /// the runtime kit follows the certification, so a job switch rebuilds
+    /// this in the same frame (issue #17).
+    /// </summary>
+    public static void RebuildAbilityCatalog(GameObject obj, string catalogName)
     {
+        var existing = obj.GetComponentInChildren<AbilityCatalog>();
+        if (existing != null)
+        {
+            // Deactivate before the deferred destroy so same-frame catalog
+            // queries only ever see the replacement
+            existing.gameObject.SetActive(false);
+            Object.Destroy(existing.gameObject);
+        }
+
         if (string.IsNullOrEmpty(catalogName))
         {
             Debug.LogWarning($"Job has no ability catalog specified for {obj.name}");
