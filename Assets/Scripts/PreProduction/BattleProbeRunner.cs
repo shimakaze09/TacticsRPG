@@ -77,6 +77,7 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeGearAndStats(bc);
             ProbeAbilityMemory(bc);
             ProbeCertPurchases(bc);
+            ProbeContractRewards(bc);
             ProbeBattleLoadout(bc);
             ProbeStateMachineAtomicity();
             ProbeGameFlowAtomicity();
@@ -443,6 +444,232 @@ public class BattleProbeRunner : MonoBehaviour
             $"bank {progressCopy.GetAvailableJP(current)} vs {progress.GetAvailableJP(current)}");
 
         Destroy(unit);
+    }
+
+    // ---- issue #59: contract rewards ----------------------------------------
+
+    // The reward-policy contract: forecast and settle share one shape and one
+    // model, authored pay is flat (reinforcement kills add nothing), only
+    // Enemy-alliance kills pay, difficulty never scales rewards, defeat pays
+    // the consolation fraction, and commit is an exactly-once transaction
+    // with the KO share rule. Bank/inventory/difficulty state is restored.
+    private void ProbeContractRewards(BattleController bc)
+    {
+        var definition = ScriptableObject.CreateInstance<BattleDefinition>();
+        definition.rewards.basePay = 300;
+        definition.rewards.bonusPay = 120;
+        definition.rewards.expAward = 80;
+        definition.rewards.certAward = 40;
+        definition.rewards.defeatPayPercent = 25;
+
+        string salvageId = null;
+        foreach (var gear in GearCatalog.All)
+        {
+            salvageId = gear.id;
+            break;
+        }
+
+        Check("salvage id available", salvageId != null);
+        if (salvageId != null)
+            definition.rewards.salvage.Add(salvageId);
+
+        // Forecast quotes the best case from the same payload shape
+        var forecast = RewardPolicy.Forecast(definition);
+        Check("forecast quotes full-clear pay", forecast.goldGained == 420 &&
+            forecast.expGained == 80 && forecast.jpGained == 40 &&
+            forecast.itemsGained.Length == (salvageId != null ? 1 : 0),
+            $"gold {forecast.goldGained}, exp {forecast.expGained}, cert {forecast.jpGained}");
+        var writForecast = RewardPolicy.ForecastWrit(3);
+        Check("writ forecast is bounded per-enemy pay",
+            writForecast.goldGained == 800 && writForecast.expGained == 300 && writForecast.jpGained == 150,
+            $"gold {writForecast.goldGained}");
+
+        var heroA = UnitFactory.Create("Alaois", 1);
+        var heroB = UnitFactory.Create("Hania", 1);
+        var enemyA = UnitFactory.Create("Enemy Rogue", 1);
+        var enemyB = UnitFactory.Create("Enemy Warrior", 1);
+        var neutral = UnitFactory.Create("Enemy Wizard", 1);
+        neutral.GetComponent<Alliance>().type = Alliances.Neutral;
+
+        var originalUnits = new List<Unit>(bc.units);
+        int originalGold = Bank.Instance.gold;
+        var originalDifficulty = DifficultySettings.Current;
+
+        try
+        {
+            bc.units.Clear();
+            foreach (var go in new[] { heroA, heroB, enemyA, enemyB, neutral })
+                bc.units.Add(go.GetComponent<Unit>());
+
+            void Kill(GameObject go) => go.GetComponent<Stats>().SetValue(StatTypes.HP, 0, false);
+            void Revive(GameObject go) => go.GetComponent<Stats>().SetValue(StatTypes.HP, 5, false);
+
+            // Full clear: base + bonus, participants are the heroes only
+            Kill(enemyA);
+            Kill(enemyB);
+            Kill(neutral);
+            var full = RewardPolicy.Settle(bc, definition, true);
+            Check("full clear pays base + bonus", full.goldGained == 420, $"gold {full.goldGained}");
+            Check("authored victory awards exp/cert", full.expGained == 80 && full.jpGained == 40);
+            Check("salvage rides the payload", salvageId == null || (full.itemsGained.Length == 1 && full.itemsGained[0] == salvageId));
+            Check("participants are hero units only", full.playerUnits.Length == 2);
+
+            // A surviving enemy withholds only the bonus
+            Revive(enemyB);
+            var partial = RewardPolicy.Settle(bc, definition, true);
+            Check("partial clear pays base only", partial.goldGained == 300, $"gold {partial.goldGained}");
+
+            // Authored pay is flat: an extra dead wave enemy changes nothing
+            var waveEnemy = UnitFactory.Create("Enemy Rogue", 1);
+            bc.units.Add(waveEnemy.GetComponent<Unit>());
+            Kill(waveEnemy);
+            var farmed = RewardPolicy.Settle(bc, definition, true);
+            Check("reinforcement kills add no pay", farmed.goldGained == partial.goldGained,
+                $"{partial.goldGained} -> {farmed.goldGained}");
+            Destroy(waveEnemy);
+            bc.units.RemoveAt(bc.units.Count - 1);
+
+            // Defeat pays the authored consolation fraction, nothing else
+            var defeat = RewardPolicy.Settle(bc, definition, false);
+            Check("defeat pays the consolation fraction", defeat.goldGained == 75, $"gold {defeat.goldGained}");
+            Check("defeat awards no exp/cert/salvage",
+                defeat.expGained == 0 && defeat.jpGained == 0 && defeat.itemsGained.Length == 0);
+
+            // Writ fallback: dead neutrals never pay, dead enemies do
+            Kill(enemyB);
+            var writ = RewardPolicy.Settle(bc, null, true);
+            Check("writ pays per enemy, neutrals excluded",
+                writ.goldGained == 700 && writ.expGained == 200 && writ.jpGained == 100,
+                $"gold {writ.goldGained}, exp {writ.expGained}");
+
+            // Difficulty toggling buys nothing
+            DifficultySettings.Current = Difficulty.Easy;
+            var easy = RewardPolicy.Settle(bc, definition, true);
+            DifficultySettings.Current = Difficulty.Hard;
+            var hard = RewardPolicy.Settle(bc, definition, true);
+            Check("difficulty never scales rewards",
+                easy.goldGained == hard.goldGained && easy.expGained == hard.expGained &&
+                easy.jpGained == hard.jpGained);
+
+            // Pre-payload contracts (all-zero rewards) pay like writs, not
+            // zero, capped to the AUTHORED starting roster — both authored
+            // enemies are down at this point (PR #99 review)
+            var legacy = ScriptableObject.CreateInstance<BattleDefinition>();
+            legacy.enemies.Add(new SpawnEntry());
+            legacy.enemies.Add(new SpawnEntry());
+            var legacySettle = RewardPolicy.Settle(bc, legacy, true);
+            Check("legacy contract falls back to writ pay",
+                legacySettle.goldGained == 700 && legacySettle.expGained == 200 && legacySettle.jpGained == 100,
+                $"gold {legacySettle.goldGained}, exp {legacySettle.expGained}");
+
+            // A dead reinforcement must not inflate legacy pay past the
+            // authored roster (and thus past the forecast)
+            var legacyWave = UnitFactory.Create("Enemy Rogue", 1);
+            bc.units.Add(legacyWave.GetComponent<Unit>());
+            Kill(legacyWave);
+            var legacyFarmed = RewardPolicy.Settle(bc, legacy, true);
+            Check("legacy pay capped at the authored roster",
+                legacyFarmed.goldGained == 700 && legacyFarmed.expGained == 200,
+                $"gold {legacyFarmed.goldGained}");
+            bc.units.RemoveAt(bc.units.Count - 1);
+            Destroy(legacyWave);
+
+            var legacyForecast = RewardPolicy.Forecast(legacy);
+            Check("legacy forecast quotes the same writ pay",
+                legacyForecast.goldGained == 700 && legacyForecast.expGained == 200);
+
+            // The explicit flag makes a deliberately zero-pay contract stick
+            legacy.rewards.authored = true;
+            var intentionalZero = RewardPolicy.Settle(bc, legacy, true);
+            Check("intentionally zero-pay contract pays zero",
+                intentionalZero.goldGained == 0 && intentionalZero.expGained == 0 && intentionalZero.jpGained == 0,
+                $"gold {intentionalZero.goldGained}");
+            Destroy(legacy);
+
+            // Commit: exactly once, KO'd participants keep the half share.
+            // heroB starts just past the level-2 threshold: after the half
+            // share it has NOT leveled this battle, but detection using the
+            // headline award would claim it had (the PR #99 review bug)
+            // EXP first (its level-up recalc refills HP), then the KO
+            int levelTwoExp = Rank.ExperienceForLevel(2);
+            heroB.GetComponent<Stats>().SetValue(StatTypes.EXP, levelTwoExp + 6, false);
+            Kill(heroB);
+            var payload = RewardPolicy.Settle(bc, definition, true);
+            var rankA = heroA.GetComponent<Rank>();
+            var rankB = heroB.GetComponent<Rank>();
+            int expABefore = rankA.EXP;
+            int expBBefore = rankB.EXP;
+            int salvageBefore = CountOf(salvageId);
+
+            RewardPolicy.Commit(payload);
+            Check("commit records the real per-unit shares",
+                payload.grantedExp != null && payload.grantedExp.Length == 2 &&
+                payload.grantedExp[0] == 80 && payload.grantedExp[1] == 40,
+                payload.grantedExp == null ? "null" : string.Join(",", payload.grantedExp));
+            Check("KO level-up detection uses the granted share",
+                rankB.LVL == 2 && !rankB.DidLevelUp(payload.grantedExp[1]) && rankB.DidLevelUp(payload.expGained),
+                $"LVL {rankB.LVL}, exp {rankB.EXP}/{levelTwoExp}");
+            Check("commit pays surviving participant in full", rankA.EXP == expABefore + 80,
+                $"{expABefore} -> {rankA.EXP}");
+            Check("commit pays KO'd participant the half share", rankB.EXP == expBBefore + 40,
+                $"{expBBefore} -> {rankB.EXP}");
+            Check("commit credits the bank once", Bank.Instance.gold == originalGold + 420,
+                $"{originalGold} -> {Bank.Instance.gold}");
+            Check("commit banks the salvage", salvageId == null || CountOf(salvageId) == salvageBefore + 1);
+
+            RewardPolicy.Commit(payload);
+            Check("recommit is a no-op", rankA.EXP == expABefore + 80 && Bank.Instance.gold == originalGold + 420 &&
+                (salvageId == null || CountOf(salvageId) == salvageBefore + 1));
+
+            // Defeat routes to Title, never the post-battle flow — the flow
+            // boundary itself must commit the consolation (PR #99 review)
+            if (GameFlowController.Instance == null)
+            {
+                var flowGo = new GameObject("Probe Reward Flow");
+                var flow = flowGo.AddComponent<GameFlowController>();
+                flow.GetState<TitleState>().Initialize(flow);
+                int bankBeforeDefeat = Bank.Instance.gold;
+                var defeatPayload = RewardPolicy.Settle(bc, definition, false);
+                flow.NotifyBattleEnded(defeatPayload);
+                Check("defeat consolation committed at the flow boundary",
+                    defeatPayload.committed && Bank.Instance.gold == bankBeforeDefeat + 75,
+                    $"{bankBeforeDefeat} -> {Bank.Instance.gold}");
+                DestroyImmediate(flowGo);
+            }
+            else
+            {
+                Check("defeat commit probe skipped (live controller present)", true);
+            }
+        }
+        finally
+        {
+            bc.units.Clear();
+            bc.units.AddRange(originalUnits);
+            Bank.Instance.gold = originalGold;
+            if (salvageId != null)
+                PartyInventory.Instance.Remove(salvageId);
+            DifficultySettings.Current = originalDifficulty;
+
+            Destroy(heroA);
+            Destroy(heroB);
+            Destroy(enemyA);
+            Destroy(enemyB);
+            Destroy(neutral);
+            Destroy(definition);
+        }
+    }
+
+    // Copies of one gear id currently in the party inventory.
+    private static int CountOf(string gearId)
+    {
+        if (gearId == null)
+            return 0;
+
+        int count = 0;
+        foreach (var id in PartyInventory.Instance.Items)
+            if (id == gearId)
+                count++;
+        return count;
     }
 
     // ---- issue #17: battle loadout projection -------------------------------
