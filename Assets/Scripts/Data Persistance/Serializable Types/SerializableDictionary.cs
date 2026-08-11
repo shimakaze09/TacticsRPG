@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Dictionary that survives Unity/JsonUtility serialization by flattening to
-/// parallel key/value lists (used inside GameData).
+/// The project's one dictionary that survives Unity/JsonUtility serialization,
+/// flattening to parallel lists serialized as "keys"/"values" — the field
+/// names shipped save files and level assets contain, so they must never be
+/// renamed. Used by GameData save payloads and LevelData tile skins.
 /// </summary>
 [Serializable]
 public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver
@@ -12,6 +14,7 @@ public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, IS
     [SerializeField] private List<TKey> keys = new();
     [SerializeField] private List<TValue> values = new();
 
+    /// <summary>Flattens the live dictionary into the parallel lists Unity serializes.</summary>
     public void OnBeforeSerialize()
     {
         keys.Clear();
@@ -23,6 +26,11 @@ public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, IS
         }
     }
 
+    /// <summary>
+    /// Rebuilds the dictionary from the serialized lists. Corrupt data must
+    /// not abort a load: a count mismatch logs and keeps the pairs that
+    /// exist, and duplicate keys resolve last-wins instead of throwing.
+    /// </summary>
     public void OnAfterDeserialize()
     {
         Clear();
@@ -32,6 +40,7 @@ public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, IS
                            ") does not match the amount of values (" + values.Count +
                            ") which indicates that something went wrong.");
 
-        for (var i = 0; i < keys.Count; i++) Add(keys[i], values[i]);
+        var count = Math.Min(keys.Count, values.Count);
+        for (var i = 0; i < count; i++) this[keys[i]] = values[i];
     }
 }
