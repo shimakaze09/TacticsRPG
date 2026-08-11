@@ -104,10 +104,13 @@ public abstract class BaseGameFlowState : State
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(SceneName);
         asyncLoad.allowSceneActivation = false;
 
-        // Wait until scene is almost loaded (0.9 = ready but not activated)
+        // Wait until scene is almost loaded (0.9 = ready but not activated).
+        // Progress updates are generation-gated: once superseded, the
+        // loading UI belongs to the newer transition
         while (asyncLoad.progress < 0.9f)
         {
-            Controller.UpdateLoadingProgress(asyncLoad.progress);
+            if (Controller.SceneGeneration == myGeneration)
+                Controller.UpdateLoadingProgress(asyncLoad.progress);
             yield return null;
         }
 
@@ -117,16 +120,16 @@ public abstract class BaseGameFlowState : State
         // Wait for scene to fully load
         yield return asyncLoad;
 
-        // Hide loading UI
-        Controller.ShowLoadingScreen(false);
-
         if (Controller.SceneGeneration != myGeneration)
         {
-            Debug.LogWarning($"[GameFlow] Stale scene load of '{SceneName}' (generation {myGeneration} vs {Controller.SceneGeneration}) — OnSceneReady suppressed.");
+            // Stale: neither the loading UI nor OnSceneReady are ours to
+            // touch — the superseding generation owns both now
+            Debug.LogWarning($"[GameFlow] Stale scene load of '{SceneName}' (generation {myGeneration} vs {Controller.SceneGeneration}) — completion suppressed.");
             yield break;
         }
 
-        // Scene is ready
+        // Hide loading UI and hand the scene to the state
+        Controller.ShowLoadingScreen(false);
         OnSceneReady();
     }
 
