@@ -17,6 +17,17 @@ public sealed class AiPlanScorer
     /// <summary>Flat bonus for a plan whose predicted damage finishes a foe.</summary>
     public const float KillBonus = 60f;
 
+    /// <summary>
+    /// Worth of denying one enemy action (issue #57): the currency the
+    /// expected-lost-actions control valuation is paid in. Calibrated so the
+    /// strongest legacy flat values (Swayed 32, Blackout 30) land near their
+    /// contract products.
+    /// </summary>
+    public const float ActionWorth = 11f;
+
+    /// <summary>Throttle's CT multiplier, mirrored from ThrottleStatus for tempo valuation (issue #19).</summary>
+    public const float ThrottleCtMultiplier = 0.5f;
+
     /// <summary>Extra value per fraction of HP the target is already missing (focus fire).</summary>
     public const float LowHealthFocusWeight = 12f;
 
@@ -254,19 +265,24 @@ public sealed class AiPlanScorer
                 return CountRemovableStatuses(defender) * CleansePerStatus;
 
             case InflictAbilityEffect inflict when !isDown:
-                return ScoreStatus(inflict.statusName, defender, defStats, isFoe);
+                return ScoreStatus(inflict, defender, defStats, isFoe);
 
             default:
                 return 0f;
         }
     }
 
-    // Tactical worth of landing a status: only statuses that exist in the
-    // StatusRegistry are valued (an unregistered name would silently no-op
-    // when inflicted, so it must score zero), re-applying an active status is
-    // worthless, and silencing is amplified against real casters
-    private float ScoreStatus(string statusName, Unit defender, Stats defStats, bool isFoe)
+    // Tactical worth of landing a status. Hard-control statuses are valued
+    // by EXPECTED LOST ACTIONS (issues #57/#19): the contract's
+    // lost-actions-per-turn times the contract-capped forecast duration
+    // times one action's worth — so a boss-immune cast scores zero and a
+    // longer or harder denial is worth exactly proportionally more. Tempo
+    // ailments derive lost actions from the same ctMultiplier the status
+    // actually applies. Everything else keeps the flat table; unknown names
+    // score zero (they would silently no-op), re-application is worthless.
+    private float ScoreStatus(InflictAbilityEffect inflict, Unit defender, Stats defStats, bool isFoe)
     {
+        var statusName = inflict.statusName;
         var type = StatusRegistry.Resolve(statusName);
         if (type == null)
         {
@@ -277,17 +293,47 @@ public sealed class AiPlanScorer
         if (defender.GetComponentInChildren(type) != null)
             return 0f;
 
-        if (!StatusValues.TryGetValue(statusName, out var value))
-            value = 10f;
+        float value;
+        var controlValue = ExpectedControlValue(inflict, defender);
+        if (controlValue >= 0f)
+        {
+            value = controlValue;
+        }
+        else if (statusName == "Throttle")
+        {
+            // Tempo: lost actions follow the status's own CT multiplier —
+            // the exact value the initiative math applies (issue #19)
+            var lostPerTurn = 1f - ThrottleCtMultiplier;
+            value = lostPerTurn * Mathf.Max(1, inflict.duration) * ActionWorth;
+        }
+        else
+        {
+            if (!StatusValues.TryGetValue(statusName, out value))
+                value = 10f;
 
-        if (statusName == "DeadAir" && defStats[StatTypes.MMP] >= 20)
-            value *= 1.6f;
+            if (statusName == "DeadAir" && defStats[StatTypes.MMP] >= 20)
+                value *= 1.6f;
+        }
 
         var isBuff = BuffStatuses.Contains(statusName);
         if (isBuff)
             return isFoe ? 0f : value;
 
         return isFoe ? value : -value;
+    }
+
+    /// <summary>
+    /// Expected-lost-actions worth of one control inflict against one target
+    /// (issue #57): contract lost-actions-per-turn × contract-capped
+    /// forecast duration × ActionWorth; zero for an immune boss-tier target;
+    /// -1 when the status is not under the control contract at all.
+    /// </summary>
+    public static float ExpectedControlValue(InflictAbilityEffect inflict, Unit target)
+    {
+        if (!ControlBudget.TryGetProfile(inflict.statusName, out var profile))
+            return -1f;
+
+        return profile.LostActionsPerTurn * inflict.ForecastDuration(target) * ActionWorth;
     }
 
     // How many duration-based statuses a cleanse could strip from a unit

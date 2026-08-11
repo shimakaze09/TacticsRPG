@@ -32,7 +32,8 @@
           "hitRate": "A",
           "target": "Enemy",
           "status": "Jammed",
-          "duration": 2
+          "duration": 2,
+          "accuracy": 85
         }
       ]
     },

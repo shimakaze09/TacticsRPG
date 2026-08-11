@@ -155,7 +155,11 @@ public class InitBattleState : BattleState
         var locations = new List<Tile>(board.tiles.Values);
         foreach (var recipe in recipes)
         {
-            var level = Random.Range(9, 12);
+            // Writ levels draw from the documented chapter band and share the
+            // authored path's progression model (issue #52)
+            var level = Mathf.Clamp(
+                Random.Range(ProgressionModel.WritLevelMin, ProgressionModel.WritLevelMax + 1),
+                ProgressionModel.WritLevelMin, ProgressionModel.WritLevelMax);
             var instance = UnitFactory.Create(recipe, level);
             instance.transform.SetParent(container);
 

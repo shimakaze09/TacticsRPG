@@ -102,10 +102,21 @@ public static class StatusRegistry
             return null;
 
         bool isControl = ControlBudget.IsControl(name);
+        var hasProfile = ControlBudget.TryGetProfile(name, out var profile);
+
+        // Boss policy: seizure-class statuses never land on boss-tier
+        // targets — nothing is applied and no Steeled stack accrues
+        if (hasProfile && profile.BossImmune && ControlBudget.IsBossTier(target))
+        {
+            Debug.Log($"[StatusRegistry] '{name}' shrugged off by boss-tier target '{target.name}' (issue #57 contract)");
+            return null;
+        }
+
         var condition = entry.inflict(status);
-        condition.duration = isControl
-            ? Mathf.Min(duration, ControlBudget.MaxControlDuration)
-            : duration;
+        var cap = hasProfile
+            ? Mathf.Min(profile.MaxDuration, ControlBudget.MaxControlDuration)
+            : ControlBudget.MaxControlDuration;
+        condition.duration = isControl ? Mathf.Min(duration, cap) : duration;
 
         if (isControl)
             HardenAgainstControl(status);
