@@ -448,11 +448,15 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Show settings menu
+    /// Show settings menu — the scene-assigned panel when one exists,
+    /// otherwise the self-building SettingsPanelController (issue #62)
     /// </summary>
     public void ShowSettings()
     {
-        ShowPanel(settingsPanel);
+        if (settingsPanel != null)
+            ShowPanel(settingsPanel);
+        else
+            SettingsPanelController.Open();
     }
 
     /// <summary>
@@ -460,7 +464,10 @@ public class UIManager : MonoBehaviour
     /// </summary>
     public void HideSettings()
     {
-        HidePanel(settingsPanel);
+        if (settingsPanel != null)
+            HidePanel(settingsPanel);
+        else if (SettingsPanelController.IsOpen)
+            SettingsPanelController.Open().Close();
     }
 
     #endregion

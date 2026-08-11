@@ -138,8 +138,7 @@ public class TitleState : BaseGameFlowState
     public void HandleOptions()
     {
         Debug.Log("[TitleState] Options clicked");
-        // TODO: Show options/settings panel
-        // Controller.UIManager.ShowPanel<SettingsPanel>();
+        SettingsPanelController.Open();
     }
 
     /// <summary>
