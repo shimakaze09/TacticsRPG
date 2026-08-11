@@ -95,8 +95,8 @@
           "hitRate": "S",
           "target": "Enemy",
           "status": "Redline",
-          "duration": 3,
-          "accuracy": 75
+          "duration": 2,
+          "accuracy": 70
         }
       ]
     },

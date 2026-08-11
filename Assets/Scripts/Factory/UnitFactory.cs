@@ -167,8 +167,8 @@ public static class UnitFactory
 
     /// <summary>
     /// Builds (or replaces) the unit's ability catalog from a catalog name —
-    /// the runtime kit follows the certification, so a job switch rebuilds
-    /// this in the same frame (issue #17).
+    /// the runtime kit follows the certification, so a job switch, spawn
+    /// override, or save load rebuilds this in the same frame (issue #17).
     /// </summary>
     public static void RebuildAbilityCatalog(GameObject obj, string catalogName)
     {

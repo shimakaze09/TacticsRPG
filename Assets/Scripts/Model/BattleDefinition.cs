@@ -42,7 +42,11 @@ public class BattleDefinition : ScriptableObject
     public List<ReinforcementWave> waves = new List<ReinforcementWave>();
 }
 
-/// <summary>One unit to spawn: recipe name, level, board position, facing.</summary>
+/// <summary>
+/// One unit to spawn: recipe name, level, board position, facing — plus
+/// optional boss-tuning overrides (issue #52) that replace the recipe's
+/// job, current-job grade, or starting gear for this spawn only.
+/// </summary>
 [Serializable]
 public class SpawnEntry
 {
@@ -50,6 +54,15 @@ public class SpawnEntry
     public int level = 1;
     public Point position;
     public Directions facing = Directions.South;
+
+    [Tooltip("Optional job id replacing the recipe's job (boss tuning); empty keeps the recipe's job")]
+    public string jobOverride = "";
+
+    [Tooltip("Optional current-job grade 1-8; 0 keeps the spawn default")]
+    public int gradeOverride;
+
+    [Tooltip("Optional GearCatalog ids replacing the job's starting gear entirely; empty keeps defaults")]
+    public List<string> gearOverride = new List<string>();
 }
 
 /// <summary>Extra spawns arriving at the start of a given battle round.</summary>

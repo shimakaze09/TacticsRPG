@@ -14,6 +14,26 @@ public class InflictAbilityEffect : BaseAbilityEffect
         return 0;
     }
 
+    /// <summary>
+    /// The duration this inflict would actually apply to the target after
+    /// the ControlBudget contract — per-status and global caps, and zero for
+    /// a boss-tier target immune to this status. Forecast UI and the AI read
+    /// the same number the application path enforces (issue #57).
+    /// </summary>
+    public int ForecastDuration(Unit target)
+    {
+        if (!ControlBudget.TryGetProfile(statusName, out var profile))
+            return ControlBudget.IsControl(statusName)
+                ? UnityEngine.Mathf.Min(duration, ControlBudget.MaxControlDuration)
+                : duration;
+
+        if (profile.BossImmune && ControlBudget.IsBossTier(target))
+            return 0;
+
+        return UnityEngine.Mathf.Min(duration,
+            UnityEngine.Mathf.Min(profile.MaxDuration, ControlBudget.MaxControlDuration));
+    }
+
     protected override int OnApply(Tile target)
     {
         var unit = target.content.GetComponent<Unit>();
