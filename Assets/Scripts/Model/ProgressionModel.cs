@@ -44,6 +44,16 @@ public static class ProgressionModel
     public const int MaxGrade = 8;
 
     /// <summary>
+    /// Chapter-1 writ band (issue #52): generated writ battles draw and
+    /// clamp their spawn levels here so repeatable contracts stay inside the
+    /// slice's tuned difficulty. Later chapters widen the band deliberately.
+    /// </summary>
+    public const int WritLevelMin = 8;
+
+    /// <summary>Upper bound of the chapter-1 writ band.</summary>
+    public const int WritLevelMax = 12;
+
+    /// <summary>
     /// The current job's whole contribution for one statOrder slot: its kit
     /// once, plus TrainedGradeStep of the kit per grade earned beyond 1.
     /// </summary>

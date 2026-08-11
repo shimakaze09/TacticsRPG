@@ -97,7 +97,7 @@
           "target": "Enemy",
           "status": "Deadline",
           "duration": 3,
-          "accuracy": 65
+          "accuracy": 60
         }
       ]
     },

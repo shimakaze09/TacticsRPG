@@ -77,6 +77,8 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeGearAndStats(bc);
             ProbeAbilityMemory(bc);
             ProbeCertPurchases(bc);
+            ProbeContractRewards(bc);
+            ProbeBattleLoadout(bc);
             ProbeStateMachineAtomicity();
             ProbeGameFlowAtomicity();
             ProbeEventBusLifecycle();
@@ -88,6 +90,7 @@ public class BattleProbeRunner : MonoBehaviour
             yield return StartCoroutine(ProbeControlStatuses(bc));
             ProbeTerrain(bc);
             ProbeLevelScaling();
+            ProbeSpawnOverridesAndGoldens(bc);
             ProbeGrowthModel();
             ProbeGrowthBands();
             ProbeGrowthGoldenBuilds();
@@ -95,6 +98,8 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeSerializableDictionary();
             ProbeSettingsAndDifficultyLock();
             ProbeControlBudget(bc);
+            // Status removals destroy deferred, so this block yields frames
+            yield return StartCoroutine(ProbeControlContract(bc));
             // Tempo statuses add/remove effects, which destroy deferred
             yield return StartCoroutine(ProbeTempoStatuses(bc));
             // Drives real tween ticks and pool teardown across frames
@@ -440,6 +445,446 @@ public class BattleProbeRunner : MonoBehaviour
             $"bank {progressCopy.GetAvailableJP(current)} vs {progress.GetAvailableJP(current)}");
 
         Destroy(unit);
+    }
+
+    // ---- issue #59: contract rewards ----------------------------------------
+
+    // The reward-policy contract: forecast and settle share one shape and one
+    // model, authored pay is flat (reinforcement kills add nothing), only
+    // Enemy-alliance kills pay, difficulty never scales rewards, defeat pays
+    // the consolation fraction, and commit is an exactly-once transaction
+    // with the KO share rule. Bank/inventory/difficulty state is restored.
+    private void ProbeContractRewards(BattleController bc)
+    {
+        var definition = ScriptableObject.CreateInstance<BattleDefinition>();
+        definition.rewards.basePay = 300;
+        definition.rewards.bonusPay = 120;
+        definition.rewards.expAward = 80;
+        definition.rewards.certAward = 40;
+        definition.rewards.defeatPayPercent = 25;
+
+        string salvageId = null;
+        foreach (var gear in GearCatalog.All)
+        {
+            salvageId = gear.id;
+            break;
+        }
+
+        Check("salvage id available", salvageId != null);
+        if (salvageId != null)
+            definition.rewards.salvage.Add(salvageId);
+
+        // Forecast quotes the best case from the same payload shape
+        var forecast = RewardPolicy.Forecast(definition);
+        Check("forecast quotes full-clear pay", forecast.goldGained == 420 &&
+            forecast.expGained == 80 && forecast.jpGained == 40 &&
+            forecast.itemsGained.Length == (salvageId != null ? 1 : 0),
+            $"gold {forecast.goldGained}, exp {forecast.expGained}, cert {forecast.jpGained}");
+        var writForecast = RewardPolicy.ForecastWrit(3);
+        Check("writ forecast is bounded per-enemy pay",
+            writForecast.goldGained == 800 && writForecast.expGained == 300 && writForecast.jpGained == 150,
+            $"gold {writForecast.goldGained}");
+
+        var heroA = UnitFactory.Create("Alaois", 1);
+        var heroB = UnitFactory.Create("Hania", 1);
+        var enemyA = UnitFactory.Create("Enemy Rogue", 1);
+        var enemyB = UnitFactory.Create("Enemy Warrior", 1);
+        var neutral = UnitFactory.Create("Enemy Wizard", 1);
+        neutral.GetComponent<Alliance>().type = Alliances.Neutral;
+
+        var originalUnits = new List<Unit>(bc.units);
+        int originalGold = Bank.Instance.gold;
+        var originalDifficulty = DifficultySettings.Current;
+
+        try
+        {
+            bc.units.Clear();
+            foreach (var go in new[] { heroA, heroB, enemyA, enemyB, neutral })
+                bc.units.Add(go.GetComponent<Unit>());
+
+            void Kill(GameObject go) => go.GetComponent<Stats>().SetValue(StatTypes.HP, 0, false);
+            void Revive(GameObject go) => go.GetComponent<Stats>().SetValue(StatTypes.HP, 5, false);
+
+            // Full clear: base + bonus, participants are the heroes only
+            Kill(enemyA);
+            Kill(enemyB);
+            Kill(neutral);
+            var full = RewardPolicy.Settle(bc, definition, true);
+            Check("full clear pays base + bonus", full.goldGained == 420, $"gold {full.goldGained}");
+            Check("authored victory awards exp/cert", full.expGained == 80 && full.jpGained == 40);
+            Check("salvage rides the payload", salvageId == null || (full.itemsGained.Length == 1 && full.itemsGained[0] == salvageId));
+            Check("participants are hero units only", full.playerUnits.Length == 2);
+
+            // A surviving enemy withholds only the bonus
+            Revive(enemyB);
+            var partial = RewardPolicy.Settle(bc, definition, true);
+            Check("partial clear pays base only", partial.goldGained == 300, $"gold {partial.goldGained}");
+
+            // Authored pay is flat: an extra dead wave enemy changes nothing
+            var waveEnemy = UnitFactory.Create("Enemy Rogue", 1);
+            bc.units.Add(waveEnemy.GetComponent<Unit>());
+            Kill(waveEnemy);
+            var farmed = RewardPolicy.Settle(bc, definition, true);
+            Check("reinforcement kills add no pay", farmed.goldGained == partial.goldGained,
+                $"{partial.goldGained} -> {farmed.goldGained}");
+            Destroy(waveEnemy);
+            bc.units.RemoveAt(bc.units.Count - 1);
+
+            // Defeat pays the authored consolation fraction, nothing else
+            var defeat = RewardPolicy.Settle(bc, definition, false);
+            Check("defeat pays the consolation fraction", defeat.goldGained == 75, $"gold {defeat.goldGained}");
+            Check("defeat awards no exp/cert/salvage",
+                defeat.expGained == 0 && defeat.jpGained == 0 && defeat.itemsGained.Length == 0);
+
+            // Writ fallback: dead neutrals never pay, dead enemies do
+            Kill(enemyB);
+            var writ = RewardPolicy.Settle(bc, null, true);
+            Check("writ pays per enemy, neutrals excluded",
+                writ.goldGained == 700 && writ.expGained == 200 && writ.jpGained == 100,
+                $"gold {writ.goldGained}, exp {writ.expGained}");
+
+            // Difficulty toggling buys nothing
+            DifficultySettings.Current = Difficulty.Easy;
+            var easy = RewardPolicy.Settle(bc, definition, true);
+            DifficultySettings.Current = Difficulty.Hard;
+            var hard = RewardPolicy.Settle(bc, definition, true);
+            Check("difficulty never scales rewards",
+                easy.goldGained == hard.goldGained && easy.expGained == hard.expGained &&
+                easy.jpGained == hard.jpGained);
+
+            // Pre-payload contracts (all-zero rewards) pay like writs, not
+            // zero, capped to the AUTHORED starting roster — both authored
+            // enemies are down at this point (PR #99 review)
+            var legacy = ScriptableObject.CreateInstance<BattleDefinition>();
+            legacy.enemies.Add(new SpawnEntry());
+            legacy.enemies.Add(new SpawnEntry());
+            var legacySettle = RewardPolicy.Settle(bc, legacy, true);
+            Check("legacy contract falls back to writ pay",
+                legacySettle.goldGained == 700 && legacySettle.expGained == 200 && legacySettle.jpGained == 100,
+                $"gold {legacySettle.goldGained}, exp {legacySettle.expGained}");
+
+            // A dead reinforcement must not inflate legacy pay past the
+            // authored roster (and thus past the forecast)
+            var legacyWave = UnitFactory.Create("Enemy Rogue", 1);
+            bc.units.Add(legacyWave.GetComponent<Unit>());
+            Kill(legacyWave);
+            var legacyFarmed = RewardPolicy.Settle(bc, legacy, true);
+            Check("legacy pay capped at the authored roster",
+                legacyFarmed.goldGained == 700 && legacyFarmed.expGained == 200,
+                $"gold {legacyFarmed.goldGained}");
+            bc.units.RemoveAt(bc.units.Count - 1);
+            Destroy(legacyWave);
+
+            var legacyForecast = RewardPolicy.Forecast(legacy);
+            Check("legacy forecast quotes the same writ pay",
+                legacyForecast.goldGained == 700 && legacyForecast.expGained == 200);
+
+            // The explicit flag makes a deliberately zero-pay contract stick
+            legacy.rewards.authored = true;
+            var intentionalZero = RewardPolicy.Settle(bc, legacy, true);
+            Check("intentionally zero-pay contract pays zero",
+                intentionalZero.goldGained == 0 && intentionalZero.expGained == 0 && intentionalZero.jpGained == 0,
+                $"gold {intentionalZero.goldGained}");
+            Destroy(legacy);
+
+            // Commit: exactly once, KO'd participants keep the half share.
+            // heroB starts just past the level-2 threshold: after the half
+            // share it has NOT leveled this battle, but detection using the
+            // headline award would claim it had (the PR #99 review bug)
+            // EXP first (its level-up recalc refills HP), then the KO
+            int levelTwoExp = Rank.ExperienceForLevel(2);
+            heroB.GetComponent<Stats>().SetValue(StatTypes.EXP, levelTwoExp + 6, false);
+            Kill(heroB);
+            var payload = RewardPolicy.Settle(bc, definition, true);
+            var rankA = heroA.GetComponent<Rank>();
+            var rankB = heroB.GetComponent<Rank>();
+            int expABefore = rankA.EXP;
+            int expBBefore = rankB.EXP;
+            int salvageBefore = CountOf(salvageId);
+
+            RewardPolicy.Commit(payload);
+            Check("commit records the real per-unit shares",
+                payload.grantedExp != null && payload.grantedExp.Length == 2 &&
+                payload.grantedExp[0] == 80 && payload.grantedExp[1] == 40,
+                payload.grantedExp == null ? "null" : string.Join(",", payload.grantedExp));
+            Check("KO level-up detection uses the granted share",
+                rankB.LVL == 2 && !rankB.DidLevelUp(payload.grantedExp[1]) && rankB.DidLevelUp(payload.expGained),
+                $"LVL {rankB.LVL}, exp {rankB.EXP}/{levelTwoExp}");
+            Check("commit pays surviving participant in full", rankA.EXP == expABefore + 80,
+                $"{expABefore} -> {rankA.EXP}");
+            Check("commit pays KO'd participant the half share", rankB.EXP == expBBefore + 40,
+                $"{expBBefore} -> {rankB.EXP}");
+            Check("commit credits the bank once", Bank.Instance.gold == originalGold + 420,
+                $"{originalGold} -> {Bank.Instance.gold}");
+            Check("commit banks the salvage", salvageId == null || CountOf(salvageId) == salvageBefore + 1);
+
+            RewardPolicy.Commit(payload);
+            Check("recommit is a no-op", rankA.EXP == expABefore + 80 && Bank.Instance.gold == originalGold + 420 &&
+                (salvageId == null || CountOf(salvageId) == salvageBefore + 1));
+
+            // Defeat routes to Title, never the post-battle flow — the flow
+            // boundary itself must commit the consolation (PR #99 review)
+            if (GameFlowController.Instance == null)
+            {
+                var flowGo = new GameObject("Probe Reward Flow");
+                var flow = flowGo.AddComponent<GameFlowController>();
+                flow.GetState<TitleState>().Initialize(flow);
+                int bankBeforeDefeat = Bank.Instance.gold;
+                var defeatPayload = RewardPolicy.Settle(bc, definition, false);
+                flow.NotifyBattleEnded(defeatPayload);
+                Check("defeat consolation committed at the flow boundary",
+                    defeatPayload.committed && Bank.Instance.gold == bankBeforeDefeat + 75,
+                    $"{bankBeforeDefeat} -> {Bank.Instance.gold}");
+                DestroyImmediate(flowGo);
+            }
+            else
+            {
+                Check("defeat commit probe skipped (live controller present)", true);
+            }
+        }
+        finally
+        {
+            bc.units.Clear();
+            bc.units.AddRange(originalUnits);
+            Bank.Instance.gold = originalGold;
+            if (salvageId != null)
+                PartyInventory.Instance.Remove(salvageId);
+            DifficultySettings.Current = originalDifficulty;
+
+            Destroy(heroA);
+            Destroy(heroB);
+            Destroy(enemyA);
+            Destroy(enemyB);
+            Destroy(neutral);
+            Destroy(definition);
+        }
+    }
+
+    // Copies of one gear id currently in the party inventory.
+    private static int CountOf(string gearId)
+    {
+        if (gearId == null)
+            return 0;
+
+        int count = 0;
+        foreach (var id in PartyInventory.Instance.Items)
+            if (id == gearId)
+                count++;
+        return count;
+    }
+
+    // ---- issue #17: battle loadout projection -------------------------------
+
+    // The battle kit is a projection: player-owned units use grade gates AND
+    // purchases (Grade-1 arrives free with the certification), generated
+    // enemies project from the grade their level implies, the gate blocks
+    // players and AI through the one CanPerform seam, job switches rebuild
+    // the catalog in the same frame, and the projection rebuilds purely from
+    // persisted state.
+    private void ProbeBattleLoadout(BattleController bc)
+    {
+        var alaois = Find(bc, "Alaois");
+        if (alaois == null)
+        {
+            Check("loadout cast present", false);
+            return;
+        }
+
+        // Scene hero: Grade-1 starter kit usable, higher unlocks locked
+        var heroJm = alaois.GetComponent<JobManager>();
+        var heroJob = heroJm.CurrentJob;
+        string starterName = null, lockedName = null;
+        foreach (var unlock in heroJob.abilityUnlocks)
+        {
+            if (unlock.unlockAtJobLevel <= 1 && starterName == null)
+                starterName = unlock.abilityName;
+            if (unlock.unlockAtJobLevel > 1 && lockedName == null)
+                lockedName = unlock.abilityName;
+        }
+
+        Check("hero starter ability usable", starterName != null && heroJm.IsAbilityUsable(starterName),
+            starterName ?? "none");
+        Check("hero locked ability not usable", lockedName != null && !heroJm.IsAbilityUsable(lockedName),
+            lockedName ?? "none");
+        Check("attack always usable", heroJm.IsAbilityUsable("Attack"));
+
+        // The gate enforces it end to end: the locked ability's runtime
+        // instance fails CanPerform, and the AI generates no candidates for it
+        Ability lockedAbility = null;
+        foreach (var a in alaois.GetComponentsInChildren<Ability>())
+        {
+            if (a.name == lockedName)
+            {
+                lockedAbility = a;
+                break;
+            }
+        }
+
+        Check("locked ability exists in the catalog", lockedAbility != null);
+        if (lockedAbility != null)
+            Check("gate vetoes locked ability CanPerform", !lockedAbility.CanPerform());
+
+        var prevActor = bc.turn.actor;
+        bc.turn.actor = alaois;
+        var heroCtx = AiTurnContext.Build(bc, alaois);
+        var heroCands = AiCandidateGenerator.Generate(heroCtx);
+        Check("AI never plans a locked ability",
+            !heroCands.Exists(c => c.Ability != null && c.Ability.name == lockedName));
+        bc.turn.actor = prevActor;
+
+        // Enemy projection follows spawn level through the JP curve: a L1
+        // spawn holds only Grade-1 abilities, a L30 spawn the whole kit
+        var lowGo = UnitFactory.Create("Enemy Rogue", 1);
+        var highGo = UnitFactory.Create("Enemy Rogue", 30);
+        var lowJm = lowGo.GetComponent<JobManager>();
+        var highJm = highGo.GetComponent<JobManager>();
+        var enemyJob = lowJm.CurrentJob;
+        string enemyTop = null;
+        var enemyTopLevel = 0;
+        foreach (var unlock in enemyJob.abilityUnlocks)
+        {
+            if (unlock.unlockAtJobLevel > enemyTopLevel)
+            {
+                enemyTopLevel = unlock.unlockAtJobLevel;
+                enemyTop = unlock.abilityName;
+            }
+        }
+
+        Check("low-level enemy lacks its capstone",
+            enemyTopLevel > 1 && !lowJm.IsAbilityUsable(enemyTop), enemyTop ?? "none");
+        Check("high-level enemy holds its full kit", highJm.IsAbilityUsable(enemyTop),
+            enemyTop ?? "none");
+        Destroy(lowGo);
+        Destroy(highGo);
+
+        // Purchase makes an ability usable; the projection rebuilds purely
+        // from persisted progress and memory
+        var buyerGo = UnitFactory.Create("Hania", 10);
+        var buyerJm = buyerGo.GetComponent<JobManager>();
+        var buyerJob = buyerJm.CurrentJob;
+        JobAbilityUnlock target = null;
+        foreach (var unlock in buyerJob.abilityUnlocks)
+        {
+            var candidateId = string.IsNullOrEmpty(unlock.abilityId) ? unlock.abilityName : unlock.abilityId;
+            if (unlock.unlockAtJobLevel >= 2 && !buyerJm.AbilityMemory.HasLearnedAbility(candidateId))
+            {
+                target = unlock;
+                break;
+            }
+        }
+
+        Check("purchase target exists", target != null);
+        if (target != null)
+        {
+            var targetId = string.IsNullOrEmpty(target.abilityId) ? target.abilityName : target.abilityId;
+            Check("unpurchased ability not usable", !buyerJm.IsAbilityUsable(target.abilityName));
+            buyerJm.ProgressData.SetJobJP(buyerJob, 2000);
+            var bought = buyerJm.PurchaseAbility(buyerJob, targetId);
+            Check("purchase succeeds", bought == AbilityMemory.PurchaseResult.Success, bought.ToString());
+            Check("purchased ability becomes usable", buyerJm.IsAbilityUsable(target.abilityName));
+            buyerJm.InvalidateLoadout();
+            Check("projection rebuilds from persisted state alone",
+                buyerJm.IsAbilityUsable(target.abilityName));
+        }
+
+        // Job switch rebuilds the catalog and projection in the same frame,
+        // granting the new certification's starter kit
+        JobDefinition secondJob = null;
+        foreach (var j in buyerJm.allJobs)
+        {
+            if (j != null && j != buyerJob && !j.isUnique)
+            {
+                secondJob = j;
+                break;
+            }
+        }
+
+        Check("switch target job exists", secondJob != null);
+        if (secondJob != null)
+        {
+            buyerJm.ProgressData.UnlockJob(secondJob);
+            var switched = buyerJm.SwitchJob(secondJob);
+            var catalog = buyerGo.GetComponentInChildren<AbilityCatalog>();
+            string newStarter = null;
+            foreach (var unlock in secondJob.abilityUnlocks)
+            {
+                if (unlock.unlockAtJobLevel <= 1)
+                {
+                    newStarter = unlock.abilityName;
+                    break;
+                }
+            }
+
+            Check("job switch rebuilds catalog same frame",
+                switched && catalog != null && catalog.gameObject.activeSelf,
+                catalog == null ? "no catalog" : "ok");
+            Check("switched-in certification grants its starter",
+                newStarter != null && buyerJm.IsAbilityUsable(newStarter), newStarter ?? "none");
+            Check("old job's kit is no longer usable",
+                target != null && !buyerJm.IsAbilityUsable(target.abilityName));
+        }
+
+        Destroy(buyerGo);
+
+        // Reload: a save carrying a different certification than the
+        // spawn-time default must swap the runtime catalog in the same
+        // frame (PR #98 review)
+        var reloadGo = UnitFactory.Create("Alaois", 1);
+        var reloadJm = reloadGo.GetComponent<JobManager>();
+        var reloadDefault = reloadJm.CurrentJob;
+        JobDefinition savedJob = null;
+        foreach (var j in reloadJm.allJobs)
+        {
+            if (j != null && j != reloadDefault && !j.isUnique)
+            {
+                savedJob = j;
+                break;
+            }
+        }
+
+        Check("reload cast present", savedJob != null);
+        if (savedJob != null)
+        {
+            var savedProgress = JsonUtility.FromJson<JobProgressData>(JsonUtility.ToJson(reloadJm.ProgressData));
+            savedProgress.UnlockJob(savedJob);
+            savedProgress.SwitchJob(savedJob);
+            var gameData = new GameData();
+            gameData.jobProgressData.Add(reloadGo.name, savedProgress);
+            reloadJm.LoadData(gameData);
+
+            string savedStarter = null;
+            foreach (var unlock in savedJob.abilityUnlocks)
+            {
+                if (unlock.unlockAtJobLevel <= 1)
+                {
+                    savedStarter = unlock.abilityName;
+                    break;
+                }
+            }
+
+            var reloadCatalog = reloadGo.GetComponentInChildren<AbilityCatalog>();
+            bool starterInCatalog = false;
+            if (reloadCatalog != null && savedStarter != null)
+            {
+                foreach (var a in reloadCatalog.GetComponentsInChildren<Ability>(true))
+                {
+                    if (a.name == savedStarter)
+                    {
+                        starterInCatalog = true;
+                        break;
+                    }
+                }
+            }
+
+            Check("reload with saved job swaps catalog same frame",
+                reloadJm.CurrentJob == savedJob && reloadCatalog != null &&
+                reloadCatalog.gameObject.activeSelf && starterInCatalog,
+                reloadJm.CurrentJob != savedJob ? "job not applied" : "catalog stale");
+            Check("saved job's starter usable after reload",
+                savedStarter != null && reloadJm.IsAbilityUsable(savedStarter), savedStarter ?? "none");
+        }
+
+        Destroy(reloadGo);
     }
 
     // ---- issue #18: state machine atomicity ---------------------------------
@@ -1575,6 +2020,206 @@ public class BattleProbeRunner : MonoBehaviour
         DifficultySettings.Current = savedDifficulty;
     }
 
+    // ---- issue #52: authored overrides + archetype goldens ------------------
+
+    // Reviewed golden rows (MHP, ATK, MAT) for the three generated-enemy
+    // archetypes at levels 1/10/30/99 — striker (Enemy Warrior, marksman
+    // kit), skirmisher (Enemy Rogue, scav kit), caster (Enemy Wizard,
+    // ghostspeaker kit) — plus the full statOrder row for the boss archetype
+    // built from SpawnEntry overrides (warden job, grade 8, twohead_blade)
+    // at level 30. Hard constants on the Easy fixture with recipe gear:
+    // formula or data drift fails loudly; retune only with a conscious,
+    // reviewed balance change.
+    private static readonly int[,] GoldenStrikerRows = { { 51, 17, 2 }, { 165, 40, 7 }, { 418, 92, 17 }, { 1291, 272, 53 } };
+    private static readonly int[,] GoldenSkirmisherRows = { { 51, 12, 3 }, { 165, 27, 10 }, { 418, 60, 26 }, { 1291, 174, 81 } };
+    private static readonly int[,] GoldenCasterRows = { { 38, 2, 16 }, { 123, 6, 36 }, { 312, 15, 82 }, { 964, 46, 239 } };
+    private static readonly int[] GoldenBossRow = { 1311, 84, 117, 151, 21, 58, 37 };
+
+    // The remaining issue #52 contract: SpawnEntry overrides build the boss
+    // archetype (job/grade/gear replaced, stats recalculated), archetype
+    // stats land exactly on the reviewed rows at 1/10/30/99, and Toll Road's
+    // authored levels (heroes 10, enemies 9) produce basic-attack
+    // hits-to-KO inside the WORLD §4b 2-6 band under the locked formula.
+    private void ProbeSpawnOverridesAndGoldens(BattleController bc)
+    {
+        var savedDifficulty = DifficultySettings.Current;
+        DifficultySettings.Current = Difficulty.Easy;
+
+        // Archetype goldens against the hard rows
+        var recipes = new[] { "Enemy Warrior", "Enemy Rogue", "Enemy Wizard" };
+        var rows = new[] { GoldenStrikerRows, GoldenSkirmisherRows, GoldenCasterRows };
+        int[] levels = { 1, 10, 30, 99 };
+        for (var r = 0; r < recipes.Length; r++)
+        {
+            for (var l = 0; l < levels.Length; l++)
+            {
+                var spawned = UnitFactory.Create(recipes[r], levels[l]);
+                if (spawned == null)
+                {
+                    Check("golden archetype spawns " + recipes[r], false);
+                    continue;
+                }
+
+                var stats = spawned.GetComponent<Stats>();
+                Check($"{recipes[r]} L{levels[l]} golden row",
+                    stats[StatTypes.MHP] == rows[r][l, 0] &&
+                    stats[StatTypes.ATK] == rows[r][l, 1] &&
+                    stats[StatTypes.MAT] == rows[r][l, 2],
+                    $"got {stats[StatTypes.MHP]}/{stats[StatTypes.ATK]}/{stats[StatTypes.MAT]}, expected {rows[r][l, 0]}/{rows[r][l, 1]}/{rows[r][l, 2]}");
+                Destroy(spawned);
+            }
+        }
+
+        // Boss archetype via SpawnEntry overrides, end to end through the
+        // real spawner: job, grade, and gear all replaced, then recalculated
+        Tile bossTile = null;
+        foreach (var t in bc.board.tiles.Values)
+        {
+            if (t.content == null && t.CanStop(TileTraversalFlags.Ground))
+            {
+                bossTile = t;
+                break;
+            }
+        }
+
+        Check("boss override found a tile", bossTile != null);
+        if (bossTile != null)
+        {
+            var entry = new SpawnEntry
+            {
+                recipe = "Enemy Rogue",
+                level = 30,
+                position = bossTile.pos,
+                jobOverride = "warden",
+                gradeOverride = 8,
+                gearOverride = new List<string> { "twohead_blade" }
+            };
+            var boss = BattleSpawner.Spawn(bc, entry, null);
+            Check("boss override spawns", boss != null);
+            if (boss != null)
+            {
+                var jm = boss.GetComponent<JobManager>();
+                var stats = boss.GetComponent<Stats>();
+                Check("boss override switches the job",
+                    jm.CurrentJob != null && jm.CurrentJob.id == "warden",
+                    jm.CurrentJob != null ? jm.CurrentJob.id : "null");
+                Check("boss override applies the grade", jm.CurrentJobLevel == 8,
+                    "grade " + jm.CurrentJobLevel);
+                Check("boss override replaces the gear",
+                    boss.GetComponent<Equipment>().items.Count == 1,
+                    boss.GetComponent<Equipment>().items.Count + " items");
+
+                // The runtime kit must follow the override job — the recipe
+                // built the rogue catalog before the switch (PR #96 review)
+                var bossCatalog = boss.GetComponentInChildren<AbilityCatalog>();
+                var catalogJobs = new HashSet<string>();
+                if (bossCatalog != null)
+                {
+                    foreach (var a in bossCatalog.GetComponentsInChildren<Ability>(true))
+                        catalogJobs.Add(a.name);
+                }
+
+                string wardenAbility = null;
+                foreach (var unlock in jm.CurrentJob.abilityUnlocks)
+                {
+                    if (unlock.unlockAtJobLevel <= 1)
+                    {
+                        wardenAbility = unlock.abilityName;
+                        break;
+                    }
+                }
+
+                Check("boss override rebuilds the ability catalog",
+                    bossCatalog != null && bossCatalog.gameObject.activeSelf &&
+                    wardenAbility != null && catalogJobs.Contains(wardenAbility),
+                    wardenAbility == null ? "no warden unlock" : string.Join(",", catalogJobs));
+                var order = JobManager.statOrder;
+                var bossMatch = true;
+                var got = "";
+                for (var i = 0; i < order.Length; i++)
+                {
+                    bossMatch &= stats[order[i]] == GoldenBossRow[i];
+                    got += (i > 0 ? "/" : "") + stats[order[i]];
+                }
+
+                Check("boss archetype golden row", bossMatch, "got " + got);
+
+                bc.units.Remove(boss);
+                bossTile.content = null;
+                Destroy(boss.gameObject);
+            }
+        }
+
+        // Toll Road validation under the locked formula: its authored levels
+        // (heroes 10, enemies 9) must put basic-attack hits-to-KO in the
+        // WORLD §4b 2-6 band for the matchups the design tunes — the hero
+        // striker killing a skirmisher, and the enemy damage-dealer
+        // (Enemy Warrior's marksman kit) threatening the squishiest hero
+        // (Hania, sawbones). The party tank soaking many light hits is the
+        // warden archetype working, not a band violation.
+        Tile heroTile = null, foeTile = null;
+        foreach (var t in bc.board.tiles.Values)
+        {
+            if (t.content != null || !t.CanStop(TileTraversalFlags.Ground))
+                continue;
+            if (heroTile == null)
+            {
+                heroTile = t;
+            }
+            else if (foeTile == null && (Mathf.Abs(t.pos.x - heroTile.pos.x) + Mathf.Abs(t.pos.y - heroTile.pos.y)) == 1)
+            {
+                foeTile = t;
+                break;
+            }
+        }
+
+        Check("toll road validation found tiles", heroTile != null && foeTile != null);
+        if (heroTile != null && foeTile != null)
+        {
+            var strikerGo = UnitFactory.Create("Alaois", 10);
+            var skirmisherGo = UnitFactory.Create("Enemy Rogue", 9);
+            var striker = strikerGo.GetComponent<Unit>();
+            var skirmisher = skirmisherGo.GetComponent<Unit>();
+            striker.Place(heroTile);
+            striker.Match();
+            skirmisher.Place(foeTile);
+            skirmisher.Match();
+
+            var heroHit = -AttackOf(striker).GetComponentInChildren<DamageAbilityEffect>().Predict(skirmisher.tile);
+            var skirmisherHp = skirmisherGo.GetComponent<Stats>()[StatTypes.MHP];
+            var heroTtk = heroHit > 0 ? Mathf.CeilToInt(skirmisherHp / (float)heroHit) : 99;
+            Check("toll road hero-vs-enemy TTK in the 2-6 band",
+                heroTtk >= 2 && heroTtk <= 6, $"dmg {heroHit} vs {skirmisherHp} HP = {heroTtk} hits");
+
+            heroTile.content = null;
+            foeTile.content = null;
+            Destroy(strikerGo);
+            Destroy(skirmisherGo);
+
+            var squishyGo = UnitFactory.Create("Hania", 10);
+            var damageGo = UnitFactory.Create("Enemy Warrior", 9);
+            var squishy = squishyGo.GetComponent<Unit>();
+            var damageDealer = damageGo.GetComponent<Unit>();
+            squishy.Place(heroTile);
+            squishy.Match();
+            damageDealer.Place(foeTile);
+            damageDealer.Match();
+
+            var foeHit = -AttackOf(damageDealer).GetComponentInChildren<DamageAbilityEffect>().Predict(squishy.tile);
+            var squishyHp = squishyGo.GetComponent<Stats>()[StatTypes.MHP];
+            var foeTtk = foeHit > 0 ? Mathf.CeilToInt(squishyHp / (float)foeHit) : 99;
+            Check("toll road enemy-vs-squishy TTK in the 2-6 band",
+                foeTtk >= 2 && foeTtk <= 6, $"dmg {foeHit} vs {squishyHp} HP = {foeTtk} hits");
+
+            heroTile.content = null;
+            foeTile.content = null;
+            Destroy(squishyGo);
+            Destroy(damageGo);
+        }
+
+        DifficultySettings.Current = savedDifficulty;
+    }
+
     // ---- issue #54: band preservation + golden build tables -----------------
 
     // The four archetype trades must keep their identity bands through the
@@ -1837,6 +2482,231 @@ public class BattleProbeRunner : MonoBehaviour
                 drifter.GetJPForNextLevel(top) == top,
                 "got " + drifter.GetJPForNextLevel(top));
         }
+    }
+
+    // ---- issue #57: per-status control contract ------------------------------
+
+    // The completed control contract: per-status duration and accuracy
+    // ceilings, boss-tier immunity for seizure statuses, forecast duration
+    // matching the applied duration, elevation feeding status accuracy,
+    // dispel, control-through-KO, and the AI's expected-lost-actions
+    // valuation reading the exact same contract the engine enforces.
+    private IEnumerator ProbeControlContract(BattleController bc)
+    {
+        var alaois = Find(bc, "Alaois");
+        var rogue = Find(bc, "Enemy Rogue");
+        if (alaois == null || rogue == null || rogue.tile == null)
+        {
+            Check("control contract cast present", false);
+            yield break;
+        }
+
+        var rogueStats = rogue.GetComponent<Stats>();
+
+        // Per-status duration ceiling: FreezeFrame caps at 2 even though the
+        // global control cap is 3
+        var frozen = StatusRegistry.Inflict(rogue, "FreezeFrame", 3);
+        Check("per-status duration ceiling applies",
+            frozen != null && frozen.duration == 2, frozen != null ? "duration " + frozen.duration : "null");
+
+        // Forecast returns the exact number the application enforced
+        var forecastGo = new GameObject("Probe Control Forecast");
+        forecastGo.transform.SetParent(alaois.transform);
+        var forecastInflict = forecastGo.AddComponent<InflictAbilityEffect>();
+        forecastInflict.statusName = "FreezeFrame";
+        forecastInflict.duration = 3;
+        Check("forecast duration matches applied duration",
+            frozen != null && forecastInflict.ForecastDuration(rogue) == frozen.duration,
+            "forecast " + forecastInflict.ForecastDuration(rogue));
+        if (frozen != null)
+            frozen.Remove();
+
+        // Strip the Steeled stack the landing added, so later checks see a
+        // clean sheet
+        var steeled = rogue.GetComponentInChildren<SteeledStatus>();
+        var steeledCondition = steeled != null ? steeled.GetComponentInChildren<DurationStatusCondition>() : null;
+        if (steeledCondition != null)
+            steeledCondition.Remove();
+
+        // Removal destroys deferred — let the sheet actually clear
+        yield return null;
+
+        // Accuracy ceiling: with zero resistance a status attempt would sit
+        // at the 95 contestability cap — a Swayed inflict sibling caps it at
+        // the contract's 60
+        var savedRes = rogueStats[StatTypes.RES];
+        rogueStats.SetValue(StatTypes.RES, 0, false);
+        var hitGo = new GameObject("Probe Control HitRate");
+        hitGo.transform.SetParent(alaois.transform);
+        var hitInflict = hitGo.AddComponent<InflictAbilityEffect>();
+        hitInflict.statusName = "Swayed";
+        hitInflict.duration = 2;
+        var hitRate = hitGo.AddComponent<STypeHitRate>();
+        Check("per-status accuracy ceiling applies",
+            hitRate.Calculate(rogue.tile) == 60, "chance " + hitRate.Calculate(rogue.tile));
+
+        // Boss policy: wearing a unique job makes the rogue boss-tier —
+        // seizure statuses refuse to land (no Steeled accrues), the forecast
+        // says zero, but non-immune control still works
+        var jm = rogue.GetComponent<JobManager>();
+        var homeJob = jm.CurrentJob;
+        JobDefinition uniqueJob = null;
+        foreach (var j in jm.allJobs)
+        {
+            if (j != null && j.isUnique)
+            {
+                uniqueJob = j;
+                break;
+            }
+        }
+
+        Check("a unique job exists for boss policy", uniqueJob != null);
+        if (uniqueJob != null && homeJob != null)
+        {
+            jm.ProgressData.UnlockJob(uniqueJob);
+            jm.ProgressData.SwitchJob(uniqueJob);
+            Check("unique job marks boss tier", ControlBudget.IsBossTier(rogue));
+            var seized = StatusRegistry.Inflict(rogue, "Swayed", 2);
+            Check("boss shrugs off seizure", seized == null);
+            Check("refused seizure grants no steeled stack",
+                rogue.GetComponentInChildren<SteeledStatus>() == null);
+            Check("boss-immune forecast chance is zero", hitRate.Calculate(rogue.tile) == 0);
+            var slept = StatusRegistry.Inflict(rogue, "Blackout", 3);
+            Check("non-immune control still lands on a boss",
+                slept != null && slept.duration <= 3, slept != null ? "duration " + slept.duration : "null");
+            if (slept != null)
+                slept.Remove();
+            var bossSteeled = rogue.GetComponentInChildren<SteeledStatus>();
+            var bossSteeledCondition = bossSteeled != null ? bossSteeled.GetComponentInChildren<DurationStatusCondition>() : null;
+            if (bossSteeledCondition != null)
+                bossSteeledCondition.Remove();
+            jm.ProgressData.SwitchJob(homeJob);
+            jm.RecalculateStats();
+            yield return null;
+        }
+
+        rogueStats.SetValue(StatTypes.RES, savedRes, false);
+
+        // Elevation feeds status accuracy through the shared hit-rate
+        // pipeline: firing from high ground onto a lower target lands more
+        // often than the reverse
+        Tile high = null, low = null;
+        foreach (var t in bc.board.tiles.Values)
+        {
+            if (t.content != null)
+                continue;
+            foreach (var u in bc.board.tiles.Values)
+            {
+                if (u.content != null || u == t)
+                    continue;
+                if (Mathf.Abs(t.pos.x - u.pos.x) + Mathf.Abs(t.pos.y - u.pos.y) <= 3 && t.height - u.height >= 2)
+                {
+                    high = t;
+                    low = u;
+                    break;
+                }
+            }
+
+            if (high != null)
+                break;
+        }
+
+        Check("elevation probe found a height pair", high != null && low != null);
+        if (high != null && low != null)
+        {
+            // Use a non-profiled status so no accuracy ceiling flattens the
+            // elevation delta, and give the target real resistance so the
+            // chances sit inside the contestability bounds with headroom
+            hitInflict.statusName = "Static";
+            rogueStats.SetValue(StatTypes.RES, 40, false);
+            var attackerHome = alaois.tile;
+            var targetHome = rogue.tile;
+            var targetHomeDir = rogue.dir;
+            // Pin facing to front for both measurements — a back attack's
+            // -20 would otherwise cancel the elevation shift exactly
+            alaois.Place(high);
+            alaois.Match();
+            rogue.Place(low);
+            rogue.dir = rogue.tile.GetDirection(alaois.tile);
+            rogue.Match();
+            var downhill = hitRate.Calculate(rogue.tile);
+            rogue.Place(high);
+            alaois.Place(low);
+            rogue.dir = rogue.tile.GetDirection(alaois.tile);
+            rogue.Match();
+            alaois.Match();
+            var uphill = hitRate.Calculate(rogue.tile);
+            Check("high ground improves status accuracy", downhill > uphill,
+                $"downhill {downhill} vs uphill {uphill}");
+            alaois.Place(attackerHome);
+            rogue.Place(targetHome);
+            rogue.dir = targetHomeDir;
+            alaois.Match();
+            rogue.Match();
+            rogueStats.SetValue(StatTypes.RES, savedRes, false);
+        }
+
+        Destroy(hitGo);
+
+        // Dispel: a cleanse strips a curable ailment
+        var afflicted = StatusRegistry.Inflict(rogue, "Static", 3);
+        Check("dispel setup lands static", afflicted != null && rogue.GetComponentInChildren<StaticStatus>() != null);
+        var cleansePrefab = Resources.Load<GameObject>("Abilities/Sawbones/Antitoxin");
+        Check("cleanse prefab present", cleansePrefab != null);
+        if (cleansePrefab != null)
+        {
+            // Self-cast: the cleanse carries the Ally contract, so it must
+            // be cast from the afflicted unit's own side
+            var cleanse = Instantiate(cleansePrefab);
+            cleanse.transform.SetParent(rogue.transform);
+            var effect = cleanse.GetComponentInChildren<CleanseAbilityEffect>();
+            Check("cleanse effect present", effect != null);
+            if (effect != null)
+            {
+                effect.Apply(rogue.tile);
+                yield return null;
+                Check("dispel removes the ailment", rogue.GetComponentInChildren<StaticStatus>() == null);
+            }
+
+            Destroy(cleanse);
+        }
+
+        // Control through KO: a pinned unit that goes down still revives,
+        // and the KO state itself is outside the control budget
+        Check("KO is not budget control", !ControlBudget.IsControl("KO"));
+        var pinned = StatusRegistry.Inflict(rogue, "Pinned", 2);
+        var hp = rogueStats[StatTypes.HP];
+        rogueStats.SetValue(StatTypes.HP, 0, false);
+        rogueStats.SetValue(StatTypes.HP, hp, false);
+        Check("control does not block revival", rogueStats[StatTypes.HP] == hp);
+        if (pinned != null)
+            pinned.Remove();
+        var lastSteeled = rogue.GetComponentInChildren<SteeledStatus>();
+        var lastSteeledCondition = lastSteeled != null ? lastSteeled.GetComponentInChildren<DurationStatusCondition>() : null;
+        if (lastSteeledCondition != null)
+            lastSteeledCondition.Remove();
+
+        // AI valuation reads the same contract the engine enforces:
+        // lost-actions × capped duration × ActionWorth, zero for immune
+        // bosses, and non-control statuses fall through to the flat table
+        forecastInflict.statusName = "Swayed";
+        forecastInflict.duration = 5;
+        var expectedSwayed = 1.5f * 2 * AiPlanScorer.ActionWorth;
+        Check("AI control value is expected lost actions",
+            Mathf.Approximately(AiPlanScorer.ExpectedControlValue(forecastInflict, rogue), expectedSwayed),
+            AiPlanScorer.ExpectedControlValue(forecastInflict, rogue).ToString("F1") + " vs " + expectedSwayed);
+        forecastInflict.statusName = "Static";
+        Check("non-control statuses stay on the flat table",
+            AiPlanScorer.ExpectedControlValue(forecastInflict, rogue) < 0f);
+
+        // The tempo mirror constant must match the status it mirrors
+        var throttleGo = new GameObject("Probe Throttle Mirror");
+        var throttle = throttleGo.AddComponent<ThrottleStatus>();
+        Check("throttle mirror constant in sync",
+            Mathf.Approximately(throttle.ctMultiplier, AiPlanScorer.ThrottleCtMultiplier),
+            throttle.ctMultiplier.ToString("F2"));
+        Destroy(throttleGo);
+        Destroy(forecastGo);
     }
 
     // ---- issue #22: serializable dictionary ----
@@ -2155,8 +3025,10 @@ public class BattleProbeRunner : MonoBehaviour
         // Steeled: each landed control adds one stack of +20 effective RES,
         // and data-driven control durations clamp to the budget
         var before = hitRate.Calculate(rogue.tile);
+        // Scrambled's per-status ceiling (2) is tighter than the global cap
+        ControlBudget.TryGetProfile("Scrambled", out var scrambledProfile);
         var firstControl = StatusRegistry.Inflict(rogue, "Scrambled", 9);
-        Check("control duration clamped", firstControl != null && firstControl.duration == ControlBudget.MaxControlDuration,
+        Check("control duration clamped", firstControl != null && firstControl.duration == scrambledProfile.MaxDuration,
             firstControl != null ? "duration " + firstControl.duration : "inflict failed");
         var oneStack = hitRate.Calculate(rogue.tile);
         Check("steeled raises resistance", before - oneStack == ControlBudget.SteeledResistancePerStack,
@@ -2914,6 +3786,12 @@ public class BattleProbeRunner : MonoBehaviour
             var infinite = Instantiate(infinitePrefab);
             infinite.name = "Furnace";
             infinite.transform.SetParent(rogue.transform);
+
+            // The planted ability is cross-kit by design — suspend the
+            // loadout gate (issue #17) so the stand-tile regression can run
+            var gate = rogue.GetComponent<AbilityLoadoutGate>();
+            if (gate != null)
+                gate.enabled = false;
             var regCtx = AiTurnContext.Build(bc, rogue);
             var safe = regCtx.SafestMoveTile();
             var regCands = AiCandidateGenerator.Generate(regCtx)
@@ -2938,6 +3816,8 @@ public class BattleProbeRunner : MonoBehaviour
             }
 
             Destroy(infinite);
+            if (gate != null)
+                gate.enabled = true;
         }
 
         rogueStats.SetValue(StatTypes.MP, savedRogueMp, false);
