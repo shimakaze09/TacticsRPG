@@ -1,15 +1,18 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
 /// The Easy-difficulty AI: follows the unit's AttackPattern, rates firing
 /// positions by target marks and attack angle, and otherwise advances toward
-/// the nearest foe.
+/// the nearest foe. Degrades safely — a missing or malformed pattern falls
+/// back to the unit's basic attack, and a turn with nothing worth doing
+/// becomes a simple advance.
 /// </summary>
 public class ComputerPlayer : MonoBehaviour
 {
     #region MonoBehaviour
 
+    // Caches the battle this brain plans for (it lives on the controller)
     private void Awake()
     {
         bc = GetComponent<BattleController>();
@@ -19,21 +22,32 @@ public class ComputerPlayer : MonoBehaviour
 
     #region Public
 
+    /// <summary>
+    /// Builds the acting unit's plan for this turn: pick an ability via the
+    /// unit's attack pattern (basic attack when absent or empty), choose the
+    /// best firing position for it, or advance when nothing is in reach.
+    /// </summary>
     public virtual PlanOfAttack Evaluate()
     {
         var poa = new PlanOfAttack();
         var pattern = actor.GetComponentInChildren<AttackPattern>();
         if (pattern)
             pattern.Pick(poa);
-        else
+
+        // Empty/malformed patterns leave the plan blank — fall back to the
+        // basic attack instead of planning with a null ability
+        if (poa.ability == null)
             DefaultAttackPattern(poa);
 
-        if (IsPositionIndependent(poa))
-            PlanPositionIndependent(poa);
-        else if (IsDirectionIndependent(poa))
-            PlanDirectionIndependent(poa);
-        else
-            PlanDirectionDependent(poa);
+        if (poa.ability != null)
+        {
+            if (IsPositionIndependent(poa))
+                PlanPositionIndependent(poa);
+            else if (IsDirectionIndependent(poa))
+                PlanDirectionIndependent(poa);
+            else
+                PlanDirectionDependent(poa);
+        }
 
         if (poa.ability == null)
             MoveTowardOpponent(poa);
@@ -54,25 +68,29 @@ public class ComputerPlayer : MonoBehaviour
 
     #region Private
 
+    // Pattern-less (or pattern-failed) units swing their basic attack; the
+    // resolver warns and degrades when even that is missing
     private void DefaultAttackPattern(PlanOfAttack poa)
     {
-        // Just get the first "Attack" ability
-        poa.ability = actor.GetComponentInChildren<Ability>();
+        poa.ability = BasicAttackResolver.Resolve(actor);
         poa.target = Targets.Foe;
     }
 
+    // True for abilities whose fire options ignore the caster's position
     private bool IsPositionIndependent(PlanOfAttack poa)
     {
         var range = poa.ability.GetComponent<AbilityRange>();
         return range.positionOriented == false;
     }
 
+    // True for abilities aimed at a tile rather than along a facing
     private bool IsDirectionIndependent(PlanOfAttack poa)
     {
         var range = poa.ability.GetComponent<AbilityRange>();
         return !range.directionOriented;
     }
 
+    // Position doesn't matter: stand anywhere reachable and fire
     private void PlanPositionIndependent(PlanOfAttack poa)
     {
         var moveOptions = GetMoveOptions();
@@ -80,6 +98,8 @@ public class ComputerPlayer : MonoBehaviour
         poa.moveLocation = poa.fireLocation = tile.pos;
     }
 
+    // Rates every (stand tile, aim tile) pair and keeps the best; restores
+    // the actor's real tile before choosing
     private void PlanDirectionIndependent(PlanOfAttack poa)
     {
         var startTile = actor.tile;
@@ -117,6 +137,8 @@ public class ComputerPlayer : MonoBehaviour
         PickBestOption(poa, list);
     }
 
+    // Rates every (stand tile, facing) pair for directional abilities;
+    // restores the actor's real tile and facing before choosing
     private void PlanDirectionDependent(PlanOfAttack poa)
     {
         var startTile = actor.tile;
@@ -147,6 +169,7 @@ public class ComputerPlayer : MonoBehaviour
         PickBestOption(poa, list);
     }
 
+    // True when the tile's occupant matches what the plan wants to hit
     private bool IsAbilityTargetMatch(PlanOfAttack poa, Tile tile)
     {
         var isMatch = false;
@@ -164,18 +187,17 @@ public class ComputerPlayer : MonoBehaviour
         return isMatch;
     }
 
+    /// <summary>
+    /// Every tile the acting unit may end its move on (its own tile
+    /// included) — shared with the tactical brain via AiTurnContext.
+    /// </summary>
     protected List<Tile> GetMoveOptions()
     {
-        // Check movement on the acting unit, not on this controller object
-        var movement = actor.GetComponent<Movement>();
-        if (movement == null || !movement.CanMove())
-            return new List<Tile> { actor.tile };
-
-        var options = movement.GetTilesInRange(bc.board);
-        options.Add(actor.tile);
-        return options;
+        return AiTurnContext.ComputeMoveOptions(bc, actor);
     }
 
+    // Counts favorable/unfavorable marks inside the ability's area for one
+    // candidate fire location
     private void RateFireLocation(PlanOfAttack poa, AttackOption option)
     {
         var area = poa.ability.GetComponent<AbilityArea>();
@@ -193,6 +215,8 @@ public class ComputerPlayer : MonoBehaviour
         }
     }
 
+    // Keeps the highest-scoring options (ties broken by attack angle, then
+    // randomly); clears the plan's ability when nothing scored at all
     private void PickBestOption(PlanOfAttack poa, List<AttackOption> list)
     {
         var bestScore = 1;
@@ -241,6 +265,7 @@ public class ComputerPlayer : MonoBehaviour
         poa.moveLocation = choice.bestMoveTile.pos;
     }
 
+    // Board-search for the closest living foe, cached in nearestFoe
     protected void FindNearestFoe()
     {
         nearestFoe = null;
@@ -265,6 +290,8 @@ public class ComputerPlayer : MonoBehaviour
         });
     }
 
+    // Fallback movement: walk the path toward the nearest foe as far as
+    // reachable, or stay put when there is nowhere to go
     protected void MoveTowardOpponent(PlanOfAttack poa)
     {
         var moveOptions = GetMoveOptions();
@@ -287,6 +314,10 @@ public class ComputerPlayer : MonoBehaviour
         poa.moveLocation = actor.tile.pos;
     }
 
+    /// <summary>
+    /// End-of-turn facing: square up to the nearest foe when one exists,
+    /// otherwise a random direction.
+    /// </summary>
     public virtual Directions DetermineEndFacingDirection()
     {
         var dir = (Directions)Random.Range(0, 4);
