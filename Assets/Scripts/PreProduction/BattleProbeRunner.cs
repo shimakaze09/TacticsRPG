@@ -94,6 +94,7 @@ public class BattleProbeRunner : MonoBehaviour
             yield return StartCoroutine(ProbeTempoStatuses(bc));
             // Drives real tween ticks and pool teardown across frames
             yield return StartCoroutine(ProbePoolAndTweenLifecycles(bc));
+            ProbeAiPlanningExtraction(bc);
             ProbeClockAndWaves(bc); // mutates turn count
             // Publishes whole rounds of turn events — keep dead last
             yield return StartCoroutine(ProbeControlExpiry(bc));
@@ -1933,6 +1934,176 @@ public class BattleProbeRunner : MonoBehaviour
         Check("unfrozen bystander never fallback-ticks", bystander != null && bystander.duration == 2,
             bystander != null ? "duration " + bystander.duration : "condition gone");
         bystander.Remove();
+    }
+
+    // ---- issue #25: AI planning extraction ----
+
+    // The tactical AI's planning must be a pure read of the battle:
+    // hypothetical placement may never leak into real occupancy, identical
+    // inputs must choose identical plans, a surrounded melee unit must still
+    // find candidates, and the Easy AI's fallbacks must resolve the real
+    // basic attack and survive malformed patterns without throwing.
+    private void ProbeAiPlanningExtraction(BattleController bc)
+    {
+        var rogue = Find(bc, "Enemy Rogue");
+        if (rogue == null || rogue.tile == null)
+        {
+            Check("ai planning cast present", false);
+            return;
+        }
+
+        var cpu = bc.GetComponent<TacticalComputerPlayer>();
+        if (cpu == null)
+            cpu = bc.gameObject.AddComponent<TacticalComputerPlayer>();
+
+        // Surround the rogue with living foes on its walkable neighbors so
+        // melee candidates must exist even with movement fully blocked
+        var rogueAlliance = rogue.GetComponent<Alliance>();
+        var foes = new List<Unit>();
+        foreach (var u in bc.units)
+        {
+            if (u == null || u == rogue || u.tile == null)
+                continue;
+            var ua = u.GetComponent<Alliance>();
+            var us = u.GetComponent<Stats>();
+            if (ua != null && us != null && us[StatTypes.HP] > 0 && rogueAlliance.IsMatch(ua, Targets.Foe))
+                foes.Add(u);
+        }
+
+        var offsets = new[] { new Point(0, 1), new Point(0, -1), new Point(1, 0), new Point(-1, 0) };
+        var movedFoes = new List<Unit>();
+        var homeTiles = new List<Tile>();
+        var adjacentFoes = 0;
+        var next = 0;
+        foreach (var offset in offsets)
+        {
+            var tile = bc.board.GetTile(rogue.tile.pos + offset);
+            if (tile == null || Mathf.Abs(tile.height - rogue.tile.height) > 1)
+                continue;
+
+            if (tile.content == null && next < foes.Count)
+            {
+                var foe = foes[next++];
+                movedFoes.Add(foe);
+                homeTiles.Add(foe.tile);
+                foe.Place(tile);
+            }
+
+            if (tile.content != null)
+            {
+                var occupant = tile.content.GetComponentInChildren<Unit>();
+                var oa = occupant != null ? occupant.GetComponent<Alliance>() : null;
+                if (oa != null && rogueAlliance.IsMatch(oa, Targets.Foe))
+                    adjacentFoes++;
+            }
+        }
+
+        Check("surround setup has an adjacent foe", adjacentFoes > 0);
+
+        // Candidate generation: a surrounded melee unit still finds options
+        var context = AiTurnContext.Build(bc, rogue);
+        var candidates = AiCandidateGenerator.Generate(context);
+        Check("surrounded melee unit yields candidates", candidates.Count > 0);
+
+        // Full Hard-AI evaluation is a pure read: every tile's occupancy and
+        // every unit's tile/facing must come back exactly as they were
+        var prevActor = bc.turn.actor;
+        bc.turn.actor = rogue;
+        var tiles = new List<Tile>(bc.board.tiles.Values);
+        var contentBefore = new List<GameObject>(tiles.Count);
+        foreach (var tile in tiles)
+            contentBefore.Add(tile.content);
+        var tileBefore = new Dictionary<Unit, Tile>();
+        var dirBefore = new Dictionary<Unit, Directions>();
+        foreach (var u in bc.units)
+        {
+            if (u == null)
+                continue;
+            tileBefore[u] = u.tile;
+            dirBefore[u] = u.dir;
+        }
+
+        var planA = cpu.Evaluate();
+
+        var occupancyIntact = true;
+        for (var i = 0; i < tiles.Count; i++)
+        {
+            if (tiles[i].content != contentBefore[i])
+            {
+                occupancyIntact = false;
+                break;
+            }
+        }
+
+        var unitsIntact = true;
+        foreach (var u in bc.units)
+        {
+            if (u == null)
+                continue;
+            if (tileBefore[u] != u.tile || dirBefore[u] != u.dir)
+            {
+                unitsIntact = false;
+                break;
+            }
+        }
+
+        Check("planning leaves tile occupancy untouched", occupancyIntact);
+        Check("planning leaves every unit in place", unitsIntact);
+
+        // Determinism: identical inputs choose the identical plan
+        var planB = cpu.Evaluate();
+        Check("planning is deterministic",
+            planA.ability == planB.ability &&
+            planA.moveLocation == planB.moveLocation &&
+            planA.fireLocation == planB.fireLocation &&
+            planA.attackDirection == planB.attackDirection &&
+            planA.actFirst == planB.actFirst &&
+            planA.postActMoveLocation == planB.postActMoveLocation);
+
+        bc.turn.actor = prevActor;
+        for (var i = 0; i < movedFoes.Count; i++)
+            movedFoes[i].Place(homeTiles[i]);
+
+        // The default plan resolves the real basic attack, not whichever
+        // ability descendant happens to be found first
+        var go = UnitFactory.Create("Enemy Warrior", 1);
+        var probeUnit = go.GetComponent<Unit>();
+        var basic = BasicAttackResolver.Resolve(probeUnit);
+        Check("default pattern resolves the Attack ability", basic != null && basic.name == "Attack",
+            basic == null ? "null" : basic.name);
+
+        // Malformed patterns degrade to safe fallbacks instead of throwing
+        var plan = new PlanOfAttack();
+        var pattern = go.AddComponent<AttackPattern>();
+        pattern.pickers = new List<BaseAbilityPicker>();
+        var threw = false;
+        try
+        {
+            pattern.Pick(plan);
+        }
+        catch
+        {
+            threw = true;
+        }
+
+        Check("empty attack pattern degrades without throwing", !threw && plan.ability == null);
+
+        var picker = go.AddComponent<RandomAbilityPicker>();
+        picker.pickers = new List<BaseAbilityPicker>();
+        threw = false;
+        try
+        {
+            picker.Pick(plan);
+        }
+        catch
+        {
+            threw = true;
+        }
+
+        Check("empty picker list degrades to the basic attack", !threw && plan.ability == basic,
+            plan.ability == null ? "null" : plan.ability.name);
+
+        Destroy(go);
     }
 
     // ---- 1.8: clock + reinforcements (mutates state — runs last) -----------
