@@ -1,0 +1,32 @@
+# CI for TacticsRPG (issue #7), license-free form: every PR and push to main
+# gets a fast content-data gate — Tools/validate_content.py mirrors the
+# in-editor ContentValidator (ids, catalog/unlock/prerequisite references,
+# unlock levels, JP curves, duplicate/empty datasets) with no Unity editor
+# or license involved.
+#
+# Unity compilation, generation, and the battle probe suite remain the LOCAL
+# pre-PR law (Docs/ARCHITECTURE.md §8): run them in-editor or headless before
+# opening a PR. Editor-based CI was attempted and dropped — Unity's current
+# licensing offers no workable headless path for Personal accounts here
+# (manual .alf/.ulf activation discontinued; API login rejected).
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate-content:
+    name: Validate content data
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate content JSON cross-references
+        run: python Tools/validate_content.py

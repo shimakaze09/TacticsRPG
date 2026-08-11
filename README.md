@@ -30,12 +30,9 @@ re-serialize assets and update `Packages/packages-lock.json`.
 ## Fresh-clone setup
 
 Job, ability, and catalog assets are generated from JSON and are not committed.
-Before entering Play mode, open the project in Unity and run these commands in
-order:
-
-1. `Tactics RPG → Generate Content → Abilities`
-2. `Tactics RPG → Generate Content → Catalogs`
-3. `Tactics RPG → Generate Content → Jobs`
+Before entering Play mode, open the project in Unity and run
+`Tactics RPG → Generate Content → All (Validated)` — it cross-checks the
+content data and generates everything in the required order.
 
 Source data lives in:
 
@@ -58,14 +55,11 @@ gitignored. Without generation, jobs and battle abilities cannot load.
 
 ## Verification
 
-The repository includes an in-editor battle probe suite:
-
-- Menu: `Tactics RPG → Run Battle Probes`
-- Headless entry point: `BattleProbeMenu.RunHeadless`
-
-Unity compilation and probes are not yet run automatically on GitHub. CI and
-headless content generation are tracked in
-[issue #7](https://github.com/shimakaze09/TacticsRPG/issues/7).
+The repository includes an in-editor battle probe suite
+(`Tactics RPG → Run Battle Probes`), run locally before every pull request.
+Continuous integration validates the content data (ids and all
+job/ability/catalog cross-references) on every pull request; command forms
+and CI details live in [ARCHITECTURE.md §8](Docs/ARCHITECTURE.md).
 
 ## Documentation
 

@@ -149,6 +149,26 @@ equipment migration are tracked in issues
    branch and open a reviewable pull request; do not push feature work directly
    to `main`.
 
+### Content generation and CI (issue #7)
+
+- **One-shot generation**: `Tactics RPG → Generate Content → All (Validated)`
+  cross-validates the content JSON (`ContentValidator` — ids, catalog and
+  unlock references, unlock levels, JP curves), then runs Abilities →
+  Catalogs → Jobs in order. Headless form:
+  `Unity -batchmode -nographics -projectPath . -executeMethod ContentGenerationMenu.RunHeadless`
+  (exit 0 only when validation and all three generators succeed). The
+  individual generator menu items remain for targeted regeneration.
+- **CI** (`.github/workflows/ci.yml`): every PR and push to main runs
+  `Tools/validate_content.py` — a license-free mirror of `ContentValidator`
+  covering the same id/reference/curve rules — in seconds on a plain runner.
+  **Keep the Python and C# rule sets in sync when either changes.** Unity
+  compilation, generation, and the battle probes remain the local pre-PR
+  law above; editor-based CI was attempted and dropped because Unity's
+  current licensing offers no workable headless path for Personal accounts
+  (manual .alf/.ulf activation discontinued, API login rejected).
+  `CIBuild.Build` remains available as a local headless build entry that
+  regenerates content before building.
+
 ## 9. Known debt tracking
 
 Architecture and tooling debt is tracked in the
