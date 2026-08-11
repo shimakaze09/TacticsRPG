@@ -9,6 +9,11 @@ using UnityEngine;
 public class LevelData : ScriptableObject
 {
     public List<Vector3> tiles;
-    public SerializableDictionary<Vector3, string> tileSkins;
+
+    // Initialized so pre-skin legacy assets (Level_2 has no serialized
+    // tileSkins block) deserialize to an empty map instead of null —
+    // Board.Load and BoardCreator.Load index it without a null check
+    public SerializableDictionary<Vector3, string> tileSkins = new SerializableDictionary<Vector3, string>();
+
     public List<int> tileTerrains;
 }

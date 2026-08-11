@@ -1544,6 +1544,16 @@ public class BattleProbeRunner : MonoBehaviour
         var nullsBack = JsonUtility.FromJson<DictProbeWrapper>(JsonUtility.ToJson(nulls));
         Check("dict null value keeps its key",
             nullsBack.strings.Count == 1 && string.IsNullOrEmpty(nullsBack.strings["hollow"]));
+
+        // Legacy shipped asset: Level_2 predates tileSkins and carries no
+        // serialized block — it must deserialize to a usable empty map, not
+        // null, because the board loaders index it unguarded (PR #93 review)
+        var legacy = Resources.Load<LevelData>("Levels/Level_2");
+        Check("legacy level asset loads", legacy != null);
+        if (legacy != null)
+            Check("legacy level has a usable empty skin map",
+                legacy.tileSkins != null && !legacy.tileSkins.TryGetValue(Vector3.zero, out _),
+                legacy.tileSkins == null ? "null map" : "count " + legacy.tileSkins.Count);
     }
 
     // ---- issue #57: RES growth + control budget -----------------------------
