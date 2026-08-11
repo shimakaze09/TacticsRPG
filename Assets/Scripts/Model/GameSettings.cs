@@ -18,6 +18,7 @@ public static class GameSettings
     public const int Version = 1;
 
     private const string VersionKey = "TacticsRPG.Settings.Version";
+    private const string MasterKey = "TacticsRPG.Settings.MasterVolume";
     private const string MusicKey = "TacticsRPG.Settings.MusicVolume";
     private const string SfxKey = "TacticsRPG.Settings.SfxVolume";
     private const string TextScaleKey = "TacticsRPG.Settings.TextScale";
@@ -25,6 +26,9 @@ public static class GameSettings
     private const string WindowModeKey = "TacticsRPG.Settings.WindowMode";
     private const string ResolutionWidthKey = "TacticsRPG.Settings.ResolutionWidth";
     private const string ResolutionHeightKey = "TacticsRPG.Settings.ResolutionHeight";
+
+    /// <summary>Default master volume percent.</summary>
+    public const int DefaultMasterVolume = 100;
 
     /// <summary>Default music volume percent.</summary>
     public const int DefaultMusicVolume = 80;
@@ -38,14 +42,26 @@ public static class GameSettings
     /// <summary>Battle speed steps (percent); index 0 is the default.</summary>
     public static readonly int[] BattleSpeedSteps = { 100, 150, 200 };
 
-    /// <summary>Music volume percent (0–100). Applies immediately (#35 routes channels).</summary>
+    /// <summary>
+    /// Master volume percent (0–100). Applies immediately via the global
+    /// audio listener — the one volume control that genuinely works today;
+    /// the per-channel music/SFX values become effective when #35 adds
+    /// channel routing.
+    /// </summary>
+    public static int MasterVolume
+    {
+        get => Mathf.Clamp(PlayerPrefs.GetInt(MasterKey, DefaultMasterVolume), 0, 100);
+        set => WriteInt(MasterKey, Mathf.Clamp(value, 0, 100));
+    }
+
+    /// <summary>Music channel volume percent (0–100); stored now, routed by #35.</summary>
     public static int MusicVolume
     {
         get => Mathf.Clamp(PlayerPrefs.GetInt(MusicKey, DefaultMusicVolume), 0, 100);
         set => WriteInt(MusicKey, Mathf.Clamp(value, 0, 100));
     }
 
-    /// <summary>SFX volume percent (0–100). Applies immediately via the audio listener.</summary>
+    /// <summary>SFX channel volume percent (0–100); stored now, routed by #35.</summary>
     public static int SfxVolume
     {
         get => Mathf.Clamp(PlayerPrefs.GetInt(SfxKey, DefaultSfxVolume), 0, 100);
@@ -118,6 +134,7 @@ public static class GameSettings
     /// <summary>Restores every setting to its default and stamps the schema version.</summary>
     public static void ResetToDefaults()
     {
+        MasterVolume = DefaultMasterVolume;
         MusicVolume = DefaultMusicVolume;
         SfxVolume = DefaultSfxVolume;
         TextScalePercent = DefaultTextScale;
@@ -131,8 +148,7 @@ public static class GameSettings
     /// <summary>Applies the immediate-tier settings (audio; callers apply text scale per canvas).</summary>
     public static void ApplyImmediate()
     {
-        // Until #35 adds channel routing, SFX volume drives the master listener
-        AudioListener.volume = SfxVolume / 100f;
+        AudioListener.volume = MasterVolume / 100f;
     }
 
     // Stored preferences take effect from boot, not from the first time the

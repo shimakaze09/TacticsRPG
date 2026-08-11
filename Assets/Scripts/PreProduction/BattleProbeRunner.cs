@@ -1911,7 +1911,8 @@ public class BattleProbeRunner : MonoBehaviour
     {
         string[] keys =
         {
-            "TacticsRPG.Settings.Version", "TacticsRPG.Settings.MusicVolume",
+            "TacticsRPG.Settings.Version", "TacticsRPG.Settings.MasterVolume",
+            "TacticsRPG.Settings.MusicVolume",
             "TacticsRPG.Settings.SfxVolume", "TacticsRPG.Settings.TextScale",
             "TacticsRPG.Settings.BattleSpeed", "TacticsRPG.Settings.WindowMode",
             "TacticsRPG.Settings.ResolutionWidth", "TacticsRPG.Settings.ResolutionHeight"
@@ -1935,6 +1936,7 @@ public class BattleProbeRunner : MonoBehaviour
             PlayerPrefs.SetInt("TacticsRPG.Settings.MusicVolume", 7);
             GameSettings.MigrateIfNeeded();
             Check("settings migration restores defaults",
+                GameSettings.MasterVolume == GameSettings.DefaultMasterVolume &&
                 GameSettings.MusicVolume == GameSettings.DefaultMusicVolume &&
                 GameSettings.SfxVolume == GameSettings.DefaultSfxVolume &&
                 GameSettings.TextScalePercent == GameSettings.DefaultTextScale &&
@@ -2015,14 +2017,39 @@ public class BattleProbeRunner : MonoBehaviour
                 !DifficultySettings.IsLockedForBattle &&
                 Mathf.Approximately(Time.timeScale, 1f) &&
                 BattleSessionGuard.ActiveBattleSpeedPercent == null);
+
+            // Forfeit path: leaving the Battle flow state must release the
+            // session even when the successor is scene-less and the battle
+            // scene (and the guard's OnDestroy) stays alive (PR #100 review)
+            if (GameFlowController.Instance == null)
+            {
+                var forfeitFlowGo = new GameObject("Probe Forfeit Flow");
+                var forfeitFlow = forfeitFlowGo.AddComponent<GameFlowController>();
+                var battleFlowState = forfeitFlow.GetState<BattleFlowState>();
+                battleFlowState.Initialize(forfeitFlow);
+                var forfeitGuard = new GameObject("Probe Forfeit Guard").AddComponent<BattleSessionGuard>();
+                forfeitGuard.Arm();
+                battleFlowState.Exit();
+                Check("battle flow exit releases the session without scene unload",
+                    !DifficultySettings.IsLockedForBattle &&
+                    Mathf.Approximately(Time.timeScale, 1f) &&
+                    BattleSessionGuard.ActiveBattleSpeedPercent == null);
+                DestroyImmediate(forfeitGuard.gameObject);
+                DestroyImmediate(forfeitFlowGo);
+            }
+            else
+            {
+                Check("battle flow exit probe skipped (live controller present)", true);
+            }
+
             Time.timeScale = scaleBefore;
 
             // Immediate settings genuinely apply: audio to the listener,
             // text scale through a CanvasScaler when one is present
             float volumeBefore = AudioListener.volume;
-            GameSettings.SfxVolume = 60;
+            GameSettings.MasterVolume = 60;
             GameSettings.ApplyImmediate();
-            Check("sfx volume drives the listener", Mathf.Approximately(AudioListener.volume, 0.6f),
+            Check("master volume drives the listener", Mathf.Approximately(AudioListener.volume, 0.6f),
                 AudioListener.volume.ToString());
             AudioListener.volume = volumeBefore;
 

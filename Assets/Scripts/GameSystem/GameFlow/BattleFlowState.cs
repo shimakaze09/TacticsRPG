@@ -71,6 +71,11 @@ public class BattleFlowState : BaseGameFlowState
     {
         Debug.Log("[BattleFlowState] Exiting battle state");
 
+        // Leaving the Battle flow state ends the battle session even when
+        // the successor is scene-less (World after a forfeit) and the battle
+        // scene — and thus the guard's OnDestroy — stays alive (issue #62)
+        BattleSessionGuard.Release();
+
         // Unsubscribe from battle events
         UnsubscribeFromBattleEvents();
 

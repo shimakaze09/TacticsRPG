@@ -21,7 +21,7 @@ public class SettingsPanelController : MonoBehaviour
 
     private Canvas canvas;
     private TMP_Text difficultyValue, difficultyDescription;
-    private TMP_Text musicValue, sfxValue, textScaleValue, speedValue, windowValue, resolutionValue;
+    private TMP_Text masterValue, textScaleValue, speedValue, windowValue, resolutionValue;
     private TMP_Text countdownLabel;
     private GameObject confirmRow;
 
@@ -99,16 +99,11 @@ public class SettingsPanelController : MonoBehaviour
         RefreshAll();
     }
 
-    private void StepMusic(int direction)
+    // One volume control that genuinely works today (the global listener);
+    // per-channel music/SFX rows arrive with #35's routing
+    private void StepMaster(int direction)
     {
-        GameSettings.MusicVolume += direction * 10;
-        GameSettings.ApplyImmediate();
-        RefreshAll();
-    }
-
-    private void StepSfx(int direction)
-    {
-        GameSettings.SfxVolume += direction * 10;
+        GameSettings.MasterVolume += direction * 10;
         GameSettings.ApplyImmediate();
         RefreshAll();
     }
@@ -208,8 +203,7 @@ public class SettingsPanelController : MonoBehaviour
         if (DifficultySettings.IsLockedForBattle && preference != DifficultySettings.Current)
             difficultyDescription.text += " Change takes effect next battle.";
 
-        musicValue.text = GameSettings.MusicVolume + "%";
-        sfxValue.text = GameSettings.SfxVolume + "%";
+        masterValue.text = GameSettings.MasterVolume + "%";
         textScaleValue.text = GameSettings.TextScalePercent + "%";
         speedValue.text = (GameSettings.BattleSpeedPercent / 100f).ToString("0.#") + "x (next battle)";
         windowValue.text = GameSettings.WindowMode == FullScreenMode.Windowed ? "Windowed" : "Fullscreen";
@@ -285,8 +279,7 @@ public class SettingsPanelController : MonoBehaviour
         difficultyValue = MakeStepperRow(card.transform, "Difficulty", StepDifficulty);
         difficultyDescription = MakeText(card.transform, "DifficultyDescription", "", 14, FontStyles.Italic);
 
-        musicValue = MakeStepperRow(card.transform, "Music volume", StepMusic);
-        sfxValue = MakeStepperRow(card.transform, "SFX volume", StepSfx);
+        masterValue = MakeStepperRow(card.transform, "Master volume", StepMaster);
         textScaleValue = MakeStepperRow(card.transform, "Text scale", StepTextScale);
         speedValue = MakeStepperRow(card.transform, "Battle speed", StepBattleSpeed);
         windowValue = MakeStepperRow(card.transform, "Window mode", StepWindowMode);
