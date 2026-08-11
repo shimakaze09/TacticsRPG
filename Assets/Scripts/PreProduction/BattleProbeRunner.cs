@@ -91,6 +91,7 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeGrowthGoldenBuilds();
             ProbeJobThresholds();
             ProbeSerializableDictionary();
+            ProbeSettingsAndDifficultyLock();
             ProbeControlBudget(bc);
             // Tempo statuses add/remove effects, which destroy deferred
             yield return StartCoroutine(ProbeTempoStatuses(bc));
@@ -250,9 +251,18 @@ public class BattleProbeRunner : MonoBehaviour
                     justified.Add(name);
             }
 
+            // Mirror RepairLearnedAbilities' policy: only entries the old
+            // locked-job leak can explain are violations — save-loaded
+            // grandfathered purchases/grants are kept by design (issue #51)
+            var leakable = new HashSet<string>();
+            foreach (var job in jm.allJobs)
+                if (job != null && !progress.IsJobUnlocked(job))
+                    foreach (var name in job.GetUnlockedAbilities(1))
+                        leakable.Add(name);
             foreach (var learned in memory.learnedAbilities)
-                Check("learned ability justified " + u.name, justified.Contains(learned),
-                    learned + " has no backing job progress");
+                Check("learned ability not leak-attributable " + u.name,
+                    justified.Contains(learned) || !leakable.Contains(learned),
+                    learned + " is a locked job's grade-1 ability with no backing progress");
 
             // Re-sync must not add anything new for unchanged progress
             var before = memory.GetLearnedAbilityCount();
@@ -1692,6 +1702,119 @@ public class BattleProbeRunner : MonoBehaviour
             Check("legacy level has a usable empty skin map",
                 legacy.tileSkins != null && !legacy.tileSkins.TryGetValue(Vector3.zero, out _),
                 legacy.tileSkins == null ? "null map" : "count " + legacy.tileSkins.Count);
+    }
+
+    // ---- issue #62: device settings + difficulty lock -----------------------
+
+    // The settings contract: defaults on first run, clamped writes, invalid
+    // stored values recover on read, persistence is write-through, an
+    // unsupported saved resolution falls back to the current screen
+    // (device switch), the revert countdown expires exactly once confirmed
+    // or not, mid-battle difficulty edits do not leak into Current, and the
+    // panel opens/closes without scene wiring. All prefs are restored.
+    private void ProbeSettingsAndDifficultyLock()
+    {
+        string[] keys =
+        {
+            "TacticsRPG.Settings.Version", "TacticsRPG.Settings.MusicVolume",
+            "TacticsRPG.Settings.SfxVolume", "TacticsRPG.Settings.TextScale",
+            "TacticsRPG.Settings.BattleSpeed", "TacticsRPG.Settings.WindowMode",
+            "TacticsRPG.Settings.ResolutionWidth", "TacticsRPG.Settings.ResolutionHeight"
+        };
+        var saved = new Dictionary<string, int>();
+        foreach (var key in keys)
+            if (PlayerPrefs.HasKey(key))
+                saved[key] = PlayerPrefs.GetInt(key);
+
+        // The probe battle locked difficulty at init; release to reach the
+        // stored preference, and restore the equivalent lock afterwards
+        bool wasLocked = DifficultySettings.IsLockedForBattle;
+        if (wasLocked)
+            DifficultySettings.ReleaseBattleLock();
+        var storedDifficulty = DifficultySettings.Current;
+
+        try
+        {
+            // Version mismatch resets to defaults
+            PlayerPrefs.DeleteKey("TacticsRPG.Settings.Version");
+            PlayerPrefs.SetInt("TacticsRPG.Settings.MusicVolume", 7);
+            GameSettings.MigrateIfNeeded();
+            Check("settings migration restores defaults",
+                GameSettings.MusicVolume == GameSettings.DefaultMusicVolume &&
+                GameSettings.SfxVolume == GameSettings.DefaultSfxVolume &&
+                GameSettings.TextScalePercent == GameSettings.DefaultTextScale &&
+                GameSettings.BattleSpeedPercent == GameSettings.BattleSpeedSteps[0]);
+
+            // Writes clamp
+            GameSettings.MusicVolume = 250;
+            Check("volume clamps high", GameSettings.MusicVolume == 100);
+            GameSettings.MusicVolume = -5;
+            Check("volume clamps low", GameSettings.MusicVolume == 0);
+
+            // Corrupted stored values recover on read
+            PlayerPrefs.SetInt("TacticsRPG.Settings.TextScale", 999);
+            Check("invalid text scale recovers", GameSettings.TextScalePercent == GameSettings.MaxTextScale);
+            PlayerPrefs.SetInt("TacticsRPG.Settings.BattleSpeed", 130);
+            Check("battle speed snaps to a legal step", GameSettings.BattleSpeedPercent == 150);
+
+            // Persistence is write-through
+            GameSettings.SfxVolume = 30;
+            Check("settings persist to prefs",
+                PlayerPrefs.GetInt("TacticsRPG.Settings.SfxVolume", -1) == 30);
+
+            // Device switch: an unsupported saved resolution falls back
+            PlayerPrefs.SetInt("TacticsRPG.Settings.ResolutionWidth", 12345);
+            PlayerPrefs.SetInt("TacticsRPG.Settings.ResolutionHeight", 777);
+            var fallback = GameSettings.PreferredResolution;
+            Check("unsupported resolution falls back to current",
+                fallback.width == Screen.currentResolution.width &&
+                fallback.height == Screen.currentResolution.height,
+                $"{fallback.width}x{fallback.height}");
+
+            // Revert countdown: confirm-or-revert with a hard deadline
+            var countdown = new RevertCountdown();
+            countdown.Arm(100f);
+            Check("countdown arms with full window",
+                countdown.Armed && countdown.RemainingSeconds(100f) == 10);
+            Check("countdown holds before the deadline", !countdown.HasExpired(109.9f));
+            Check("countdown expires at the deadline", countdown.HasExpired(110f));
+            countdown.Confirm();
+            Check("confirm defuses the revert", !countdown.Armed && !countdown.HasExpired(120f));
+            countdown.Arm(200f, 5f);
+            Check("re-arm restarts the window", countdown.RemainingSeconds(202f) == 3);
+
+            // Difficulty edits during a battle do not reach Current
+            DifficultySettings.Current = Difficulty.Easy;
+            DifficultySettings.LockForBattle();
+            DifficultySettings.Current = Difficulty.Hard;
+            Check("difficulty locked during battle",
+                DifficultySettings.Current == Difficulty.Easy && DifficultySettings.IsLockedForBattle);
+            DifficultySettings.ReleaseBattleLock();
+            Check("preference applies after the battle", DifficultySettings.Current == Difficulty.Hard);
+
+            // The panel builds itself without scene wiring
+            var panel = SettingsPanelController.Open();
+            Check("settings panel opens", SettingsPanelController.IsOpen);
+            panel.Close();
+            Check("settings panel closes", !SettingsPanelController.IsOpen);
+            Destroy(panel.gameObject);
+        }
+        finally
+        {
+            foreach (var key in keys)
+            {
+                if (saved.TryGetValue(key, out int value))
+                    PlayerPrefs.SetInt(key, value);
+                else
+                    PlayerPrefs.DeleteKey(key);
+            }
+
+            PlayerPrefs.Save();
+            DifficultySettings.ReleaseBattleLock();
+            DifficultySettings.Current = storedDifficulty;
+            if (wasLocked)
+                DifficultySettings.LockForBattle();
+        }
     }
 
     // ---- issue #57: RES growth + control budget -----------------------------
