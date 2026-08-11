@@ -14,6 +14,14 @@ public class STypeHitRate : HitRate
         if (AutomaticMiss(defender))
             return Final(100);
 
+        // Boss policy (issue #57): a boss-immune status can never land on a
+        // boss-tier target — the forecast says so honestly
+        var inflict = GetComponent<InflictAbilityEffect>();
+        var profile = default(ControlBudget.ControlProfile);
+        var hasProfile = inflict != null && ControlBudget.TryGetProfile(inflict.statusName, out profile);
+        if (hasProfile && profile.BossImmune && ControlBudget.IsBossTier(defender))
+            return 0;
+
         if (AutomaticHit(defender))
             return Final(0);
 
@@ -21,7 +29,14 @@ public class STypeHitRate : HitRate
         res = AdjustForStatusEffects(defender, res);
         res = AdjustForRelativeFacing(defender, res);
         res = Mathf.Clamp(res, 0, 100);
-        return Mathf.Clamp(Final(res), ControlBudget.MinChance, ControlBudget.MaxChance);
+        var chance = Mathf.Clamp(Final(res), ControlBudget.MinChance, ControlBudget.MaxChance);
+
+        // Per-status accuracy ceiling: stronger denial caps lower — enforced
+        // here so data, forecast, and the actual roll all agree
+        if (hasProfile)
+            chance = Mathf.Min(chance, profile.MaxAccuracy);
+
+        return chance;
     }
 
     private int GetResistance(Unit target)

@@ -155,7 +155,15 @@ cut as an NPC: Coldwater's information broker.
   (sleep/stop/disable/immobilize/delayed-KO/charm/confusion/berserk) cap at
   **3 turns** per data-driven inflict, and each landed control grants the
   target a **Steeled** stack (+20 effective RES, 3 turns) so chains hit
-  diminishing returns.
+  diminishing returns. The **per-status contract** (2026-08-11, issue #57,
+  `ControlBudget.ControlProfile`): each control status carries a
+  lost-actions-per-turn weight, a duration ceiling, and a data-accuracy
+  ceiling — full denial (Blackout/Graycast 75 acc ×3t, FreezeFrame 65×2),
+  partial denial (Jammed/Pinned 85×3), seizure (Scrambled/Redline 70×2,
+  Swayed 60×2) and Deadline (60×3). **Seizure statuses and Deadline never
+  land on boss-tier targets** (units wearing unique jobs). The forecast, the
+  applied duration, and the Hard AI's expected-lost-actions valuation
+  (`weight × capped duration × ActionWorth`) all read this one table.
 - **Tempo statuses** (`OverclockStatus`/`ThrottleStatus`, 2026-08-10, issue #19):
   Overclock multiplies every CT gain by **1.5** (50% more turns-per-clock) and
   Throttle by **0.5**; both read their configurable `ctMultiplier`, clamped to

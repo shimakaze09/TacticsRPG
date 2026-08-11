@@ -95,6 +95,8 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeJobThresholds();
             ProbeSerializableDictionary();
             ProbeControlBudget(bc);
+            // Status removals destroy deferred, so this block yields frames
+            yield return StartCoroutine(ProbeControlContract(bc));
             // Tempo statuses add/remove effects, which destroy deferred
             yield return StartCoroutine(ProbeTempoStatuses(bc));
             // Drives real tween ticks and pool teardown across frames
@@ -2039,6 +2041,231 @@ public class BattleProbeRunner : MonoBehaviour
         }
     }
 
+    // ---- issue #57: per-status control contract ------------------------------
+
+    // The completed control contract: per-status duration and accuracy
+    // ceilings, boss-tier immunity for seizure statuses, forecast duration
+    // matching the applied duration, elevation feeding status accuracy,
+    // dispel, control-through-KO, and the AI's expected-lost-actions
+    // valuation reading the exact same contract the engine enforces.
+    private IEnumerator ProbeControlContract(BattleController bc)
+    {
+        var alaois = Find(bc, "Alaois");
+        var rogue = Find(bc, "Enemy Rogue");
+        if (alaois == null || rogue == null || rogue.tile == null)
+        {
+            Check("control contract cast present", false);
+            yield break;
+        }
+
+        var rogueStats = rogue.GetComponent<Stats>();
+
+        // Per-status duration ceiling: FreezeFrame caps at 2 even though the
+        // global control cap is 3
+        var frozen = StatusRegistry.Inflict(rogue, "FreezeFrame", 3);
+        Check("per-status duration ceiling applies",
+            frozen != null && frozen.duration == 2, frozen != null ? "duration " + frozen.duration : "null");
+
+        // Forecast returns the exact number the application enforced
+        var forecastGo = new GameObject("Probe Control Forecast");
+        forecastGo.transform.SetParent(alaois.transform);
+        var forecastInflict = forecastGo.AddComponent<InflictAbilityEffect>();
+        forecastInflict.statusName = "FreezeFrame";
+        forecastInflict.duration = 3;
+        Check("forecast duration matches applied duration",
+            frozen != null && forecastInflict.ForecastDuration(rogue) == frozen.duration,
+            "forecast " + forecastInflict.ForecastDuration(rogue));
+        if (frozen != null)
+            frozen.Remove();
+
+        // Strip the Steeled stack the landing added, so later checks see a
+        // clean sheet
+        var steeled = rogue.GetComponentInChildren<SteeledStatus>();
+        var steeledCondition = steeled != null ? steeled.GetComponentInChildren<DurationStatusCondition>() : null;
+        if (steeledCondition != null)
+            steeledCondition.Remove();
+
+        // Removal destroys deferred — let the sheet actually clear
+        yield return null;
+
+        // Accuracy ceiling: with zero resistance a status attempt would sit
+        // at the 95 contestability cap — a Swayed inflict sibling caps it at
+        // the contract's 60
+        var savedRes = rogueStats[StatTypes.RES];
+        rogueStats.SetValue(StatTypes.RES, 0, false);
+        var hitGo = new GameObject("Probe Control HitRate");
+        hitGo.transform.SetParent(alaois.transform);
+        var hitInflict = hitGo.AddComponent<InflictAbilityEffect>();
+        hitInflict.statusName = "Swayed";
+        hitInflict.duration = 2;
+        var hitRate = hitGo.AddComponent<STypeHitRate>();
+        Check("per-status accuracy ceiling applies",
+            hitRate.Calculate(rogue.tile) == 60, "chance " + hitRate.Calculate(rogue.tile));
+
+        // Boss policy: wearing a unique job makes the rogue boss-tier —
+        // seizure statuses refuse to land (no Steeled accrues), the forecast
+        // says zero, but non-immune control still works
+        var jm = rogue.GetComponent<JobManager>();
+        var homeJob = jm.CurrentJob;
+        JobDefinition uniqueJob = null;
+        foreach (var j in jm.allJobs)
+        {
+            if (j != null && j.isUnique)
+            {
+                uniqueJob = j;
+                break;
+            }
+        }
+
+        Check("a unique job exists for boss policy", uniqueJob != null);
+        if (uniqueJob != null && homeJob != null)
+        {
+            jm.ProgressData.UnlockJob(uniqueJob);
+            jm.ProgressData.SwitchJob(uniqueJob);
+            Check("unique job marks boss tier", ControlBudget.IsBossTier(rogue));
+            var seized = StatusRegistry.Inflict(rogue, "Swayed", 2);
+            Check("boss shrugs off seizure", seized == null);
+            Check("refused seizure grants no steeled stack",
+                rogue.GetComponentInChildren<SteeledStatus>() == null);
+            Check("boss-immune forecast chance is zero", hitRate.Calculate(rogue.tile) == 0);
+            var slept = StatusRegistry.Inflict(rogue, "Blackout", 3);
+            Check("non-immune control still lands on a boss",
+                slept != null && slept.duration <= 3, slept != null ? "duration " + slept.duration : "null");
+            if (slept != null)
+                slept.Remove();
+            var bossSteeled = rogue.GetComponentInChildren<SteeledStatus>();
+            var bossSteeledCondition = bossSteeled != null ? bossSteeled.GetComponentInChildren<DurationStatusCondition>() : null;
+            if (bossSteeledCondition != null)
+                bossSteeledCondition.Remove();
+            jm.ProgressData.SwitchJob(homeJob);
+            jm.RecalculateStats();
+            yield return null;
+        }
+
+        rogueStats.SetValue(StatTypes.RES, savedRes, false);
+
+        // Elevation feeds status accuracy through the shared hit-rate
+        // pipeline: firing from high ground onto a lower target lands more
+        // often than the reverse
+        Tile high = null, low = null;
+        foreach (var t in bc.board.tiles.Values)
+        {
+            if (t.content != null)
+                continue;
+            foreach (var u in bc.board.tiles.Values)
+            {
+                if (u.content != null || u == t)
+                    continue;
+                if (Mathf.Abs(t.pos.x - u.pos.x) + Mathf.Abs(t.pos.y - u.pos.y) <= 3 && t.height - u.height >= 2)
+                {
+                    high = t;
+                    low = u;
+                    break;
+                }
+            }
+
+            if (high != null)
+                break;
+        }
+
+        Check("elevation probe found a height pair", high != null && low != null);
+        if (high != null && low != null)
+        {
+            // Use a non-profiled status so no accuracy ceiling flattens the
+            // elevation delta, and give the target real resistance so the
+            // chances sit inside the contestability bounds with headroom
+            hitInflict.statusName = "Static";
+            rogueStats.SetValue(StatTypes.RES, 40, false);
+            var attackerHome = alaois.tile;
+            var targetHome = rogue.tile;
+            var targetHomeDir = rogue.dir;
+            // Pin facing to front for both measurements — a back attack's
+            // -20 would otherwise cancel the elevation shift exactly
+            alaois.Place(high);
+            alaois.Match();
+            rogue.Place(low);
+            rogue.dir = rogue.tile.GetDirection(alaois.tile);
+            rogue.Match();
+            var downhill = hitRate.Calculate(rogue.tile);
+            rogue.Place(high);
+            alaois.Place(low);
+            rogue.dir = rogue.tile.GetDirection(alaois.tile);
+            rogue.Match();
+            alaois.Match();
+            var uphill = hitRate.Calculate(rogue.tile);
+            Check("high ground improves status accuracy", downhill > uphill,
+                $"downhill {downhill} vs uphill {uphill}");
+            alaois.Place(attackerHome);
+            rogue.Place(targetHome);
+            rogue.dir = targetHomeDir;
+            alaois.Match();
+            rogue.Match();
+            rogueStats.SetValue(StatTypes.RES, savedRes, false);
+        }
+
+        Destroy(hitGo);
+
+        // Dispel: a cleanse strips a curable ailment
+        var afflicted = StatusRegistry.Inflict(rogue, "Static", 3);
+        Check("dispel setup lands static", afflicted != null && rogue.GetComponentInChildren<StaticStatus>() != null);
+        var cleansePrefab = Resources.Load<GameObject>("Abilities/Sawbones/Antitoxin");
+        Check("cleanse prefab present", cleansePrefab != null);
+        if (cleansePrefab != null)
+        {
+            // Self-cast: the cleanse carries the Ally contract, so it must
+            // be cast from the afflicted unit's own side
+            var cleanse = Instantiate(cleansePrefab);
+            cleanse.transform.SetParent(rogue.transform);
+            var effect = cleanse.GetComponentInChildren<CleanseAbilityEffect>();
+            Check("cleanse effect present", effect != null);
+            if (effect != null)
+            {
+                effect.Apply(rogue.tile);
+                yield return null;
+                Check("dispel removes the ailment", rogue.GetComponentInChildren<StaticStatus>() == null);
+            }
+
+            Destroy(cleanse);
+        }
+
+        // Control through KO: a pinned unit that goes down still revives,
+        // and the KO state itself is outside the control budget
+        Check("KO is not budget control", !ControlBudget.IsControl("KO"));
+        var pinned = StatusRegistry.Inflict(rogue, "Pinned", 2);
+        var hp = rogueStats[StatTypes.HP];
+        rogueStats.SetValue(StatTypes.HP, 0, false);
+        rogueStats.SetValue(StatTypes.HP, hp, false);
+        Check("control does not block revival", rogueStats[StatTypes.HP] == hp);
+        if (pinned != null)
+            pinned.Remove();
+        var lastSteeled = rogue.GetComponentInChildren<SteeledStatus>();
+        var lastSteeledCondition = lastSteeled != null ? lastSteeled.GetComponentInChildren<DurationStatusCondition>() : null;
+        if (lastSteeledCondition != null)
+            lastSteeledCondition.Remove();
+
+        // AI valuation reads the same contract the engine enforces:
+        // lost-actions × capped duration × ActionWorth, zero for immune
+        // bosses, and non-control statuses fall through to the flat table
+        forecastInflict.statusName = "Swayed";
+        forecastInflict.duration = 5;
+        var expectedSwayed = 1.5f * 2 * AiPlanScorer.ActionWorth;
+        Check("AI control value is expected lost actions",
+            Mathf.Approximately(AiPlanScorer.ExpectedControlValue(forecastInflict, rogue), expectedSwayed),
+            AiPlanScorer.ExpectedControlValue(forecastInflict, rogue).ToString("F1") + " vs " + expectedSwayed);
+        forecastInflict.statusName = "Static";
+        Check("non-control statuses stay on the flat table",
+            AiPlanScorer.ExpectedControlValue(forecastInflict, rogue) < 0f);
+
+        // The tempo mirror constant must match the status it mirrors
+        var throttleGo = new GameObject("Probe Throttle Mirror");
+        var throttle = throttleGo.AddComponent<ThrottleStatus>();
+        Check("throttle mirror constant in sync",
+            Mathf.Approximately(throttle.ctMultiplier, AiPlanScorer.ThrottleCtMultiplier),
+            throttle.ctMultiplier.ToString("F2"));
+        Destroy(throttleGo);
+        Destroy(forecastGo);
+    }
+
     // ---- issue #22: serializable dictionary ----
 
     // JsonUtility wrapper mirroring how GameData embeds its dictionaries as
@@ -2167,8 +2394,10 @@ public class BattleProbeRunner : MonoBehaviour
         // Steeled: each landed control adds one stack of +20 effective RES,
         // and data-driven control durations clamp to the budget
         var before = hitRate.Calculate(rogue.tile);
+        // Scrambled's per-status ceiling (2) is tighter than the global cap
+        ControlBudget.TryGetProfile("Scrambled", out var scrambledProfile);
         var firstControl = StatusRegistry.Inflict(rogue, "Scrambled", 9);
-        Check("control duration clamped", firstControl != null && firstControl.duration == ControlBudget.MaxControlDuration,
+        Check("control duration clamped", firstControl != null && firstControl.duration == scrambledProfile.MaxDuration,
             firstControl != null ? "duration " + firstControl.duration : "inflict failed");
         var oneStack = hitRate.Calculate(rogue.tile);
         Check("steeled raises resistance", before - oneStack == ControlBudget.SteeledResistancePerStack,

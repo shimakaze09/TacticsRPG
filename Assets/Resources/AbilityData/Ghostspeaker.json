@@ -125,7 +125,7 @@
           "target": "Enemy",
           "status": "Scrambled",
           "duration": 2,
-          "accuracy": 75
+          "accuracy": 70
         }
       ]
     },
