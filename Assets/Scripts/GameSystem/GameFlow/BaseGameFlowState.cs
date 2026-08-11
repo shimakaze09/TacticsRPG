@@ -38,10 +38,6 @@ public abstract class BaseGameFlowState : State
     /// </summary>
     protected virtual bool RequiresSceneLoad => !string.IsNullOrEmpty(SceneName);
 
-    // In-flight scene load, stopped on Exit so a dead state never runs
-    // completion code
-    private Coroutine _loadRoutine;
-
     #endregion
 
     #region Initialization
@@ -65,7 +61,12 @@ public abstract class BaseGameFlowState : State
 
         if (RequiresSceneLoad)
         {
-            _loadRoutine = Controller.StartCoroutine(LoadSceneAsync());
+            // The load routine is deliberately never stopped: it set
+            // allowSceneActivation = false, and killing it before activation
+            // is restored would wedge Unity's scene-load queue forever. It
+            // always runs to completion on the controller; the generation
+            // check inside suppresses stale side effects instead.
+            Controller.StartCoroutine(LoadSceneAsync());
         }
         else
         {
@@ -76,14 +77,6 @@ public abstract class BaseGameFlowState : State
     public override void Exit()
     {
         Debug.Log($"[GameFlow] Exiting {StateType} state");
-
-        if (_loadRoutine != null)
-        {
-            Controller.StopCoroutine(_loadRoutine);
-            _loadRoutine = null;
-            Controller.ShowLoadingScreen(false);
-        }
-
         OnStateExit();
         base.Exit();
     }
@@ -126,7 +119,6 @@ public abstract class BaseGameFlowState : State
 
         // Hide loading UI
         Controller.ShowLoadingScreen(false);
-        _loadRoutine = null;
 
         if (Controller.SceneGeneration != myGeneration)
         {

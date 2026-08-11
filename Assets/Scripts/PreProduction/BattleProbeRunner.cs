@@ -78,6 +78,7 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeAbilityMemory(bc);
             ProbeCertPurchases(bc);
             ProbeStateMachineAtomicity();
+            ProbeGameFlowAtomicity();
             ProbeWeaponBehavior(bc);
             ProbeTraits(bc);
             ProbeElementsAndCrits(bc);
@@ -502,22 +503,15 @@ public class BattleProbeRunner : MonoBehaviour
         Check("same-state transition is a no-op", b.enters == 1 && b.exits == 0,
             $"enters {b.enters}, exits {b.exits}");
 
-        // An exception inside Enter must not strand _inTransition
+        // An exception inside Enter is contained (logged, never propagated):
+        // the machine still lands on the requested state, so no caller can
+        // observe a half-transition (PR #94 review)
         var thrower = go.AddComponent<ProbeThrowingState>();
-        var threw = false;
-        try
-        {
-            machine.CurrentState = thrower;
-        }
-        catch (System.InvalidOperationException)
-        {
-            threw = true;
-        }
-
-        Check("throwing Enter propagates but swaps the state",
-            threw && machine.CurrentState == thrower);
+        machine.CurrentState = thrower;
+        Check("throwing Enter is contained and the swap completes",
+            machine.CurrentState == thrower);
         machine.CurrentState = a;
-        Check("machine stays usable after a throwing transition",
+        Check("machine stays usable after a faulted transition",
             machine.CurrentState == a && a.enters == 2, $"enters {a.enters}");
 
         // A re-entrant request from inside Enter is rejected, not applied
@@ -536,6 +530,84 @@ public class BattleProbeRunner : MonoBehaviour
             machine.CurrentState != null ? machine.CurrentState.GetType().Name : "null");
 
         Destroy(go);
+    }
+
+    // Captures flow notification order and can request a transition from
+    // inside a notification — which must queue, never interleave
+    private class ProbeFlowListener : IGameFlowEventListener
+    {
+        public GameFlowController flow;
+        public GameFlowState? requestDuringChanging;
+        public readonly List<string> log = new List<string>();
+
+        public void OnFlowStateChanging(GameFlowState fromState, GameFlowState toState)
+        {
+            log.Add($"changing:{fromState}->{toState}");
+            if (requestDuringChanging != null)
+            {
+                var request = requestDuringChanging.Value;
+                requestDuringChanging = null;
+                flow.TransitionToState(request);
+            }
+        }
+
+        public void OnFlowStateChanged(GameFlowState newState)
+        {
+            log.Add("changed:" + newState);
+        }
+    }
+
+    // The flow layer's own issue #18 contract, on a transient controller
+    // destroyed before its Start can auto-transition: bookkeeping follows the
+    // swap, a same-state request is a pure no-op (no generation bump, no
+    // notifications), and a listener requesting a transition mid-notification
+    // is queued and executed afterward with events in order (PR #94 review)
+    private void ProbeGameFlowAtomicity()
+    {
+        if (GameFlowController.Instance != null)
+        {
+            Check("flow atomicity probe skipped (live controller present)", true);
+            return;
+        }
+
+        var go = new GameObject("Probe Game Flow");
+        var flow = go.AddComponent<GameFlowController>();
+        flow.GetState<TitleState>().Initialize(flow);
+        flow.GetState<ShopState>().Initialize(flow);
+
+        flow.TransitionToState(GameFlowState.Title);
+        Check("flow bookkeeping follows the swap",
+            flow.CurrentFlowState == GameFlowState.Title, flow.CurrentFlowState.ToString());
+
+        // Same-state request: nothing changes, and crucially the state's own
+        // in-flight scene load generation stays valid
+        var generation = flow.SceneGeneration;
+        var listener = new ProbeFlowListener { flow = flow };
+        flow.RegisterListener(listener);
+        flow.TransitionToState(GameFlowState.Title);
+        Check("same-state request is a pure no-op",
+            flow.CurrentFlowState == GameFlowState.Title &&
+            flow.SceneGeneration == generation &&
+            listener.log.Count == 0,
+            $"gen {generation}->{flow.SceneGeneration}, events [{string.Join("|", listener.log)}]");
+
+        // Listener re-entry: a request made during the pre-notification must
+        // queue and run after the current transition, events strictly ordered
+        listener.requestDuringChanging = GameFlowState.Title;
+        flow.TransitionToState(GameFlowState.Shop);
+        var expected = "changing:Title->Shop|changed:Shop|changing:Shop->Title|changed:Title";
+        Check("listener re-entry queues with ordered events",
+            flow.CurrentFlowState == GameFlowState.Title &&
+            string.Join("|", listener.log) == expected,
+            string.Join("|", listener.log));
+
+        Check("executed transitions bump the generation",
+            flow.SceneGeneration > generation,
+            $"{generation} -> {flow.SceneGeneration}");
+
+        flow.UnregisterListener(listener);
+        DestroyImmediate(go);
+        Check("transient flow controller cleaned up", GameFlowController.Instance == null);
     }
 
     // ---- 1.9b/1.9c: weapon behavior --------------------------------------
