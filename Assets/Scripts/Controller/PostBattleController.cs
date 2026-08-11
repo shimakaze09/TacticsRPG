@@ -123,41 +123,16 @@ public class PostBattleController : MonoBehaviour
 
     #region Rewards
 
+    // Commits the settled payload through RewardPolicy — EXP/Cert per
+    // participant, scrip to the Bank, salvage to the party inventory —
+    // exactly once even if the flow re-enters.
     private void AwardRewards()
     {
-        if (resultsData == null || resultsData.playerUnits == null)
+        if (resultsData == null)
             return;
 
-        Debug.Log($"[PostBattleController] Awarding rewards: {resultsData.expGained} EXP, {resultsData.jpGained} JP");
-
-        foreach (var unit in resultsData.playerUnits)
-        {
-            if (unit == null)
-                continue;
-
-            // Award EXP
-            var rank = unit.GetComponent<Rank>();
-            if (rank != null)
-            {
-                rank.EXP += resultsData.expGained;
-            }
-
-            // Award JP
-            var jobManager = unit.GetComponent<JobManager>();
-            if (jobManager != null)
-            {
-                jobManager.AddJobPoints(resultsData.jpGained);
-            }
-        }
-
-        // Award gold (if you have a currency system)
-        // GameData.gold += resultsData.goldGained;
-
-        // Add items to inventory (if you have an inventory system)
-        // foreach (var item in resultsData.itemsGained)
-        // {
-        //     Inventory.AddItem(item);
-        // }
+        Debug.Log($"[PostBattleController] Committing rewards: {resultsData.expGained} EXP, {resultsData.jpGained} Cert, {resultsData.goldGained} scrip");
+        RewardPolicy.Commit(resultsData);
     }
 
     #endregion
