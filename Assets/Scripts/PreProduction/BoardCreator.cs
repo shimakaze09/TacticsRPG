@@ -114,7 +114,7 @@ public class BoardCreator : MonoBehaviour
             CreateSaveDirectory();
         var board = ScriptableObject.CreateInstance<LevelData>();
         board.tiles = new List<Vector3>(tiles.Count);
-        board.tileSkins = new Utils.SerializableDictionary<Vector3, string>();
+        board.tileSkins = new SerializableDictionary<Vector3, string>();
         board.tileTerrains = new List<int>(tiles.Count);
 
         foreach (var t in tiles.Values)

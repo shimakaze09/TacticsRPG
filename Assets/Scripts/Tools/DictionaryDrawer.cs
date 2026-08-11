@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityObject = UnityEngine.Object;
 
 /// <summary>
-/// Editor property drawer that renders Utils.SerializableDictionary fields as
+/// Editor property drawer that renders SerializableDictionary fields as
 /// editable key/value rows in the inspector.
 /// </summary>
 public abstract class DictionaryDrawer<TK, TV> : PropertyDrawer
@@ -26,7 +26,7 @@ public abstract class DictionaryDrawer<TK, TV> : PropertyDrawer
             { typeof(Rect), (rect, value) => EditorGUI.RectField(rect, (Rect)value) }
         };
 
-    private Utils.SerializableDictionary<TK, TV> _Dictionary;
+    private SerializableDictionary<TK, TV> _Dictionary;
     private bool _Foldout;
 
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
@@ -123,10 +123,10 @@ public abstract class DictionaryDrawer<TK, TV> : PropertyDrawer
         if (_Dictionary == null)
         {
             var target = property.serializedObject.targetObject;
-            _Dictionary = fieldInfo.GetValue(target) as Utils.SerializableDictionary<TK, TV>;
+            _Dictionary = fieldInfo.GetValue(target) as SerializableDictionary<TK, TV>;
             if (_Dictionary == null)
             {
-                _Dictionary = new Utils.SerializableDictionary<TK, TV>();
+                _Dictionary = new SerializableDictionary<TK, TV>();
                 fieldInfo.SetValue(target, _Dictionary);
             }
 
@@ -173,7 +173,7 @@ public abstract class DictionaryDrawer<TK, TV> : PropertyDrawer
     }
 }
 
-[CustomPropertyDrawer(typeof(Utils.SerializableDictionary<Vector3, string>))]
+[CustomPropertyDrawer(typeof(SerializableDictionary<Vector3, string>))]
 public class TileSkinsDrawer : DictionaryDrawer<Vector3, string>
 {
 }

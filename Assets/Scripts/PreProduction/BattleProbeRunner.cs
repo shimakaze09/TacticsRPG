@@ -90,6 +90,7 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeGrowthBands();
             ProbeGrowthGoldenBuilds();
             ProbeJobThresholds();
+            ProbeSerializableDictionary();
             ProbeControlBudget(bc);
             // Tempo statuses add/remove effects, which destroy deferred
             yield return StartCoroutine(ProbeTempoStatuses(bc));
@@ -1629,6 +1630,66 @@ public class BattleProbeRunner : MonoBehaviour
                 drifter.GetJPForNextLevel(top) == top,
                 "got " + drifter.GetJPForNextLevel(top));
         }
+    }
+
+    // ---- issue #22: serializable dictionary ----
+
+    // JsonUtility wrapper mirroring how GameData embeds its dictionaries as
+    // serialized fields (JsonUtility is exercised the way real saves use it)
+    [System.Serializable]
+    private class DictProbeWrapper
+    {
+        public SerializableDictionary<string, int> ints = new SerializableDictionary<string, int>();
+        public SerializableDictionary<string, string> strings = new SerializableDictionary<string, string>();
+    }
+
+    // The save-dictionary contract: JsonUtility round-trips preserve content,
+    // the shipped "keys"/"values" field names stay stable so old saves load,
+    // duplicate serialized keys resolve last-wins instead of throwing
+    // mid-load, null values keep their key, and reserialization is stable
+    private void ProbeSerializableDictionary()
+    {
+        var empty = JsonUtility.FromJson<DictProbeWrapper>(JsonUtility.ToJson(new DictProbeWrapper()));
+        Check("dict empty round-trip", empty.ints.Count == 0 && empty.strings.Count == 0);
+
+        var w = new DictProbeWrapper();
+        w.ints["ash"] = 1;
+        w.ints["briar"] = 2;
+        w.ints["fen"] = -3;
+        var json = JsonUtility.ToJson(w);
+        Check("dict json keeps shipped field names",
+            json.Contains("\"keys\"") && json.Contains("\"values\""));
+
+        var back = JsonUtility.FromJson<DictProbeWrapper>(json);
+        Check("dict populated round-trip",
+            back.ints.Count == 3 && back.ints["ash"] == 1 && back.ints["briar"] == 2 && back.ints["fen"] == -3);
+        Check("dict reserialize stable", JsonUtility.ToJson(back) == json);
+
+        // Hand-built corrupt payload: the same key twice must not abort the
+        // load — the later pair wins
+        var dup = JsonUtility.FromJson<DictProbeWrapper>(
+            "{\"ints\":{\"keys\":[\"ash\",\"ash\"],\"values\":[1,2]},\"strings\":{\"keys\":[],\"values\":[]}}");
+        Check("dict duplicate key last-wins",
+            dup.ints.Count == 1 && dup.ints["ash"] == 2,
+            "count " + dup.ints.Count + (dup.ints.ContainsKey("ash") ? ", value " + dup.ints["ash"] : ""));
+
+        // JsonUtility writes null strings as empty, so the key must survive
+        // with a null-or-empty value
+        var nulls = new DictProbeWrapper();
+        nulls.strings["hollow"] = null;
+        var nullsBack = JsonUtility.FromJson<DictProbeWrapper>(JsonUtility.ToJson(nulls));
+        Check("dict null value keeps its key",
+            nullsBack.strings.Count == 1 && string.IsNullOrEmpty(nullsBack.strings["hollow"]));
+
+        // Legacy shipped asset: Level_2 predates tileSkins and carries no
+        // serialized block — it must deserialize to a usable empty map, not
+        // null, because the board loaders index it unguarded (PR #93 review)
+        var legacy = Resources.Load<LevelData>("Levels/Level_2");
+        Check("legacy level asset loads", legacy != null);
+        if (legacy != null)
+            Check("legacy level has a usable empty skin map",
+                legacy.tileSkins != null && !legacy.tileSkins.TryGetValue(Vector3.zero, out _),
+                legacy.tileSkins == null ? "null map" : "count " + legacy.tileSkins.Count);
     }
 
     // ---- issue #57: RES growth + control budget -----------------------------
