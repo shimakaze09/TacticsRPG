@@ -95,6 +95,7 @@ public class BattleProbeRunner : MonoBehaviour
             // Drives real tween ticks and pool teardown across frames
             yield return StartCoroutine(ProbePoolAndTweenLifecycles(bc));
             ProbeAiPlanningExtraction(bc);
+            ProbeAiScenarios(bc);
             ProbeClockAndWaves(bc); // mutates turn count
             // Publishes whole rounds of turn events — keep dead last
             yield return StartCoroutine(ProbeControlExpiry(bc));
@@ -2104,6 +2105,256 @@ public class BattleProbeRunner : MonoBehaviour
             plan.ability == null ? "null" : plan.ability.name);
 
         Destroy(go);
+    }
+
+    // The four issue #25 decision scenarios, staged deterministically on the
+    // live board — focus fire on the nominated wounded target, no increased
+    // exposure for a critical unit, a healer spending its turn on the
+    // wounded ally, and safe degradation with no living foes — plus the
+    // PR #95 regression: a non-position-oriented candidate is scored from
+    // the exact tile it commits to.
+    private void ProbeAiScenarios(BattleController bc)
+    {
+        var rogue = Find(bc, "Enemy Rogue");
+        var hania = Find(bc, "Hania");
+        var alaois = Find(bc, "Alaois");
+        if (rogue == null || hania == null || alaois == null || rogue.tile == null)
+        {
+            Check("ai scenario cast present", false);
+            return;
+        }
+
+        var cpu = bc.GetComponent<TacticalComputerPlayer>();
+        if (cpu == null)
+            cpu = bc.gameObject.AddComponent<TacticalComputerPlayer>();
+
+        var prevActor = bc.turn.actor;
+        var rogueAlliance = rogue.GetComponent<Alliance>();
+        var haniaStats = hania.GetComponent<Stats>();
+        var alaoisStats = alaois.GetComponent<Stats>();
+        var rogueStats = rogue.GetComponent<Stats>();
+        var savedHaniaHp = haniaStats[StatTypes.HP];
+        var savedAlaoisHp = alaoisStats[StatTypes.HP];
+        var savedRogueHp = rogueStats[StatTypes.HP];
+        var savedRogueMp = rogueStats[StatTypes.MP];
+
+        // Stage proximity: from its home corner the rogue may reach nobody,
+        // which would make every scenario vacuous — stand it near the heroes
+        // for the focus/retreat checks and put it home afterwards
+        var rogueHome = rogue.tile;
+        var rogueHomeDir = rogue.dir;
+        Tile nearHania = null;
+        var stageOffsets = new[]
+        {
+            new Point(0, 2), new Point(2, 0), new Point(0, -2), new Point(-2, 0),
+            new Point(1, 1), new Point(1, -1), new Point(-1, 1), new Point(-1, -1)
+        };
+        foreach (var offset in stageOffsets)
+        {
+            var t = bc.board.GetTile(hania.tile.pos + offset);
+            if (t != null && t.content == null && Mathf.Abs(t.height - hania.tile.height) <= 2)
+            {
+                nearHania = t;
+                break;
+            }
+        }
+
+        Check("ai scenarios found a staging tile", nearHania != null);
+        if (nearHania == null)
+            return;
+
+        rogue.Place(nearHania);
+        rogue.Match();
+
+        // Focus: a badly wounded hero is nominated and hittable candidates
+        // that damage them exist
+        haniaStats.SetValue(StatTypes.HP, Mathf.Max(1, haniaStats[StatTypes.MHP] / 10), false);
+        bc.turn.actor = rogue;
+        var focusCtx = AiTurnContext.Build(bc, rogue);
+        Check("focus nominates the wounded hero", focusCtx.FocusTarget == hania,
+            focusCtx.FocusTarget != null ? focusCtx.FocusTarget.name : "null");
+        var focusCands = AiCandidateGenerator.Generate(focusCtx);
+        Check("candidates converge on the focus target",
+            focusCands.Exists(c => c.HitsFocus), focusCands.Count + " candidates");
+        haniaStats.SetValue(StatTypes.HP, savedHaniaHp, false);
+
+        // Retreat: a critical unit's committed stand tile never raises its
+        // exposure over standing still
+        rogueStats.SetValue(StatTypes.HP, Mathf.Max(1, rogueStats[StatTypes.MHP] / 10), false);
+        var retreatCtx = AiTurnContext.Build(bc, rogue);
+        var retreatPlan = cpu.Evaluate();
+        var startThreat = retreatCtx.GetThreat(rogue.tile);
+        var standPos = retreatPlan.actFirst ? retreatPlan.postActMoveLocation : retreatPlan.moveLocation;
+        var standTile = bc.board.GetTile(standPos);
+        Check("a critical unit never increases exposure",
+            standTile != null && retreatCtx.GetThreat(standTile) <= startThreat,
+            $"threat {startThreat} -> {(standTile != null ? retreatCtx.GetThreat(standTile) : -1f)}");
+        rogueStats.SetValue(StatTypes.HP, savedRogueHp, false);
+
+        // Put the rogue home before the support scenario — a foe parked
+        // beside the heroes floods the healing ground with threat, and the
+        // healer (correctly) refuses to heal from deadly tiles
+        rogue.Place(rogueHome);
+        rogue.dir = rogueHomeDir;
+        rogue.Match();
+
+        // Support: a healer next to a wounded ally spends the turn healing
+        // them. The spawned healer is deliberately not registered in
+        // bc.units — planning reads the roster for foes/allies, the actor
+        // itself only needs a tile. Every living enemy is parked in the far
+        // corner for the duration so the healing ground is genuinely safe.
+        alaoisStats.SetValue(StatTypes.HP, Mathf.Max(1, alaoisStats[StatTypes.MHP] * 3 / 10), false);
+        var parkedFoes = new List<Unit>();
+        var parkedHomes = new List<Tile>();
+        var farTiles = new List<Tile>(bc.board.tiles.Values);
+        farTiles.Sort((x, y) =>
+            (Mathf.Abs(y.pos.x - alaois.tile.pos.x) + Mathf.Abs(y.pos.y - alaois.tile.pos.y))
+            .CompareTo(Mathf.Abs(x.pos.x - alaois.tile.pos.x) + Mathf.Abs(x.pos.y - alaois.tile.pos.y)));
+        var farIndex = 0;
+        var heroAlliance = alaois.GetComponent<Alliance>();
+        foreach (var u in bc.units)
+        {
+            if (u == null || u.tile == null)
+                continue;
+            var ua = u.GetComponent<Alliance>();
+            var us = u.GetComponent<Stats>();
+            if (ua == null || us == null || us[StatTypes.HP] <= 0 || !heroAlliance.IsMatch(ua, Targets.Foe))
+                continue;
+            while (farIndex < farTiles.Count && farTiles[farIndex].content != null)
+                farIndex++;
+            if (farIndex >= farTiles.Count)
+                break;
+            parkedFoes.Add(u);
+            parkedHomes.Add(u.tile);
+            u.Place(farTiles[farIndex]);
+        }
+        var healerGo = UnitFactory.Create("Hania", 10);
+        var healer = healerGo.GetComponent<Unit>();
+        Tile healerTile = null;
+        var spawnOffsets = new[]
+        {
+            new Point(0, 1), new Point(0, -1), new Point(1, 0), new Point(-1, 0),
+            new Point(0, 2), new Point(2, 0), new Point(0, -2), new Point(-2, 0)
+        };
+        foreach (var offset in spawnOffsets)
+        {
+            var t = bc.board.GetTile(alaois.tile.pos + offset);
+            if (t != null && t.content == null && Mathf.Abs(t.height - alaois.tile.height) <= 2)
+            {
+                healerTile = t;
+                break;
+            }
+        }
+
+        Check("support scenario found a stand tile", healerTile != null);
+        if (healerTile != null)
+        {
+            healer.Place(healerTile);
+            healer.dir = Directions.North;
+            healer.Match();
+            bc.turn.actor = healer;
+            var supCtx = AiTurnContext.Build(bc, healer);
+            var supCands = AiCandidateGenerator.Generate(supCtx);
+            var supBest = 0f;
+            foreach (var c in supCands)
+                supBest = Mathf.Max(supBest, c.Score);
+            var supportPlan = cpu.Evaluate();
+            var healEffect = supportPlan != null && supportPlan.ability != null
+                ? supportPlan.ability.GetComponentInChildren<HealAbilityEffect>()
+                : null;
+            Check("healer plans a heal on the wounded ally",
+                supportPlan != null && healEffect != null && supportPlan.fireLocation == alaois.tile.pos,
+                (supportPlan != null && supportPlan.ability != null
+                    ? supportPlan.ability.name + " @ " + supportPlan.fireLocation
+                    : "no ability")
+                + $" | cands={supCands.Count} best={supBest}");
+            healerTile.content = null;
+        }
+
+        Destroy(healerGo);
+        for (var i = 0; i < parkedFoes.Count; i++)
+            parkedFoes[i].Place(parkedHomes[i]);
+        alaoisStats.SetValue(StatTypes.HP, savedAlaoisHp, false);
+
+        // No living target: planning degrades to a plan with nothing to fire
+        // instead of throwing (MoveTowardOpponent stays put with no foe)
+        bc.turn.actor = rogue;
+        var downed = new List<Stats>();
+        var downedHp = new List<int>();
+        foreach (var u in bc.units)
+        {
+            if (u == null)
+                continue;
+            var ua = u.GetComponent<Alliance>();
+            var us = u.GetComponent<Stats>();
+            if (ua != null && us != null && us[StatTypes.HP] > 0 && rogueAlliance.IsMatch(ua, Targets.Foe))
+            {
+                downed.Add(us);
+                downedHp.Add(us[StatTypes.HP]);
+                us.SetValue(StatTypes.HP, 0, false);
+            }
+        }
+
+        PlanOfAttack noTargetPlan = null;
+        var noTargetThrew = false;
+        try
+        {
+            noTargetPlan = cpu.Evaluate();
+        }
+        catch
+        {
+            noTargetThrew = true;
+        }
+
+        Check("no living target degrades safely",
+            !noTargetThrew && noTargetPlan != null && noTargetPlan.ability == null,
+            noTargetThrew ? "threw" : (noTargetPlan == null ? "null plan" : "ability " + (noTargetPlan.ability != null ? noTargetPlan.ability.name : "none") + " @ " + noTargetPlan.moveLocation));
+        for (var i = 0; i < downed.Count; i++)
+            downed[i].SetValue(StatTypes.HP, downedHp[i], false);
+
+        // Stand-tile regression: an infinite-range (non-position-oriented)
+        // ability's candidates commit to the safest tile AND carry the score
+        // computed from that exact placement
+        rogueStats.SetValue(StatTypes.MP, 999, false);
+        var infinitePrefab = Resources.Load<GameObject>("Abilities/Wakener/Furnace");
+        Check("infinite-range regression prefab present", infinitePrefab != null,
+            "run Tactics RPG → Generate Content → Abilities");
+        if (infinitePrefab != null)
+        {
+            var infinite = Instantiate(infinitePrefab);
+            infinite.name = "Furnace";
+            infinite.transform.SetParent(rogue.transform);
+            var regCtx = AiTurnContext.Build(bc, rogue);
+            var safe = regCtx.SafestMoveTile();
+            var regCands = AiCandidateGenerator.Generate(regCtx)
+                .FindAll(c => c.Ability != null && c.Ability.name == "Furnace");
+            Check("infinite-range candidates commit to the safest tile",
+                regCands.Count > 0 && regCands.TrueForAll(c => c.MoveTile == safe),
+                regCands.Count + " candidates");
+            if (regCands.Count > 0)
+            {
+                var sample = regCands[0];
+                AiPlanCandidate expected;
+                using (var reScope = new AiPlacementScope(rogue))
+                {
+                    reScope.MoveTo(safe);
+                    expected = new AiPlanScorer(regCtx).Score(sample.Ability,
+                        sample.Ability.GetComponent<AbilityArea>(), safe, sample.FireTile, regCtx.StartDir);
+                }
+
+                Check("infinite-range score matches placed-at-committed-tile scoring",
+                    expected != null && Mathf.Approximately(sample.Score, expected.Score),
+                    expected == null ? "no rescore" : $"{sample.Score} vs {expected.Score}");
+            }
+
+            Destroy(infinite);
+        }
+
+        rogueStats.SetValue(StatTypes.MP, savedRogueMp, false);
+        rogue.Place(rogueHome);
+        rogue.dir = rogueHomeDir;
+        rogue.Match();
+        bc.turn.actor = prevActor;
     }
 
     // ---- 1.8: clock + reinforcements (mutates state — runs last) -----------

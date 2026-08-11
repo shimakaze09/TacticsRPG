@@ -34,12 +34,18 @@ public static class AiCandidateGenerator
 
                 if (!range.positionOriented)
                 {
-                    // Infinite-style ranges: fire options don't depend on where
-                    // we stand, so score them once from the safest stand tile.
-                    var fireTiles = range.GetTilesInRange(context.Bc.board);
+                    // Infinite-style ranges: fire options don't depend on
+                    // where we stand, but the scorer's live-placement
+                    // precondition still does — hit rates and predictions
+                    // read the caster's actual tile/facing, so stand on the
+                    // committed tile before scoring (PR #95 review)
                     var safeTile = context.SafestMoveTile();
+                    scope.MoveTo(safeTile);
+                    var fireTiles = range.GetTilesInRange(context.Bc.board);
                     foreach (var fireTile in fireTiles)
                         Collect(candidates, scorer.Score(ability, area, safeTile, fireTile, context.StartDir));
+
+                    scope.Restore();
                 }
                 else if (range.directionOriented)
                 {
