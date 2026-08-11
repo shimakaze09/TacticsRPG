@@ -275,6 +275,12 @@ public class GameFlowController : StateMachine
             // Any in-flight scene load now belongs to a dead generation
             SceneGeneration++;
 
+            // The transition boundary owns the loading UI: reclaim it here so
+            // a superseded load's screen can never outlive its generation —
+            // a scene-loading successor re-shows it from its own Enter, and a
+            // scene-less successor correctly starts with it hidden (PR #94)
+            ShowLoadingScreen(false);
+
             var from = CurrentFlowState;
             NotifyStateChanging(from, targetState);
 

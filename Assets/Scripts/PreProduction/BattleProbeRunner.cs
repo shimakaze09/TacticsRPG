@@ -609,6 +609,17 @@ public class BattleProbeRunner : MonoBehaviour
             flow.SceneGeneration > generation,
             $"{generation} -> {flow.SceneGeneration}");
 
+        // A loading screen left showing by a superseded load must be
+        // reclaimed by the next transition even when the successor is
+        // scene-less and would never touch it itself (PR #94 review)
+        var overlay = new GameObject("Probe Loading Screen");
+        flow.loadingScreen = overlay;
+        flow.ShowLoadingScreen(true);
+        flow.TransitionToState(GameFlowState.Shop);
+        Check("transition reclaims a stuck loading screen", !overlay.activeSelf,
+            overlay.activeSelf ? "still showing" : "hidden");
+        DestroyImmediate(overlay);
+
         flow.UnregisterListener(listener);
         DestroyImmediate(go);
         Check("transient flow controller cleaned up", GameFlowController.Instance == null);
