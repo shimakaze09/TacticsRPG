@@ -78,6 +78,9 @@ def main() -> int:
         seen_ability_jobs.add(job.lower())
 
         ids, names = set(), set()
+        # Ability names become '{name}.prefab' asset paths — duplicate
+        # detection is case-insensitive; catalog membership keeps exact names
+        names_ci: set[str] = set()
         ability_ids_by_job[job] = ids
         ability_names_by_job[job] = names
         for ability in data.get("abilities") or []:
@@ -91,9 +94,10 @@ def main() -> int:
                 ids.add(aid)
             if not name:
                 errors.append(f"{job}: ability '{aid}' has no display name")
-            elif name in names:
-                errors.append(f"{job}: duplicate ability name '{name}'")
+            elif name.lower() in names_ci:
+                errors.append(f"{job}: duplicate ability name '{name}' (asset paths are case-insensitive)")
             else:
+                names_ci.add(name.lower())
                 names.add(name)
 
     # Catalogs: unique names; every entry must be an ability name of its job
@@ -118,18 +122,23 @@ def main() -> int:
                 if entry not in job_names:
                     errors.append(f"catalog '{catalog}': entry '{entry}' is not an ability of that job")
 
-    # Jobs, first pass: collect resolved ids for prerequisite validation
+    # Jobs, first pass: collect resolved ids for prerequisite validation.
+    # Ids become 'Jobs/{id}.asset' paths — duplicate detection is
+    # case-insensitive, while prerequisite matching stays exact
     job_files = []
     job_ids: set[str] = set()
+    job_ids_ci: set[str] = set()
     for file in json_files(JOB_DIR):
         data = load(file)
         if data is None:
             continue
         label = data.get("jobName") or file.name
         jid = data.get("id") or slug(data.get("jobName") or "")
-        if jid in job_ids:
-            errors.append(f"{label}: duplicate job id '{jid}'")
-        job_ids.add(jid)
+        if jid.lower() in job_ids_ci:
+            errors.append(f"{label}: duplicate job id '{jid}' (asset paths are case-insensitive)")
+        else:
+            job_ids_ci.add(jid.lower())
+            job_ids.add(jid)
         job_files.append((label, data))
 
     # Jobs, second pass: catalog references, unlocks, curves, prerequisites

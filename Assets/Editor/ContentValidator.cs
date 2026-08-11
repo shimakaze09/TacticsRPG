@@ -53,6 +53,11 @@ public static class ContentValidator
 
             var ids = new HashSet<string>();
             var names = new HashSet<string>();
+            // Ability names become '{name}.prefab' asset paths, so duplicate
+            // detection must be case-insensitive ('Fire' vs 'fire' collide on
+            // a case-insensitive filesystem); catalog membership below keeps
+            // the exact set, since catalogs are generated from these names
+            var namesCI = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
             abilityIdsByJob[data.job] = ids;
             abilityNamesByJob[data.job] = names;
 
@@ -67,8 +72,10 @@ public static class ContentValidator
 
                 if (string.IsNullOrEmpty(ability.name))
                     errors.Add($"{data.job}: ability '{ability.id}' has no display name");
-                else if (!names.Add(ability.name))
-                    errors.Add($"{data.job}: duplicate ability name '{ability.name}'");
+                else if (!namesCI.Add(ability.name))
+                    errors.Add($"{data.job}: duplicate ability name '{ability.name}' (asset paths are case-insensitive)");
+                else
+                    names.Add(ability.name);
             }
         }
 
@@ -108,6 +115,10 @@ public static class ContentValidator
         // pass, after the whole job tree has been written
         var jobFiles = new List<(string label, JobDataFile data)>();
         var jobIds = new HashSet<string>();
+        // Job ids become 'Jobs/{id}.asset' paths: duplicate detection must be
+        // case-insensitive ('burner' vs 'Burner' collide on disk), while
+        // prerequisite matching below stays exact against declared ids
+        var jobIdsCI = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
         foreach (var file in JsonFiles(JobDataPath, errors))
         {
             var data = Load<JobDataFile>(file, errors);
@@ -116,8 +127,10 @@ public static class ContentValidator
 
             var jobLabel = string.IsNullOrEmpty(data.jobName) ? Path.GetFileName(file) : data.jobName;
             var id = string.IsNullOrEmpty(data.id) ? Slug(data.jobName) : data.id;
-            if (!jobIds.Add(id))
-                errors.Add($"{jobLabel}: duplicate job id '{id}'");
+            if (!jobIdsCI.Add(id))
+                errors.Add($"{jobLabel}: duplicate job id '{id}' (asset paths are case-insensitive)");
+            else
+                jobIds.Add(id);
             jobFiles.Add((jobLabel, data));
         }
 
