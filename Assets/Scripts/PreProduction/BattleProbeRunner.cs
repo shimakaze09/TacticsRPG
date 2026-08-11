@@ -548,17 +548,38 @@ public class BattleProbeRunner : MonoBehaviour
                 easy.jpGained == hard.jpGained);
 
             // Pre-payload contracts (all-zero rewards) pay like writs, not
-            // zero (PR #99 review) — both enemies are down at this point
+            // zero, capped to the AUTHORED starting roster — both authored
+            // enemies are down at this point (PR #99 review)
             var legacy = ScriptableObject.CreateInstance<BattleDefinition>();
+            legacy.enemies.Add(new SpawnEntry());
+            legacy.enemies.Add(new SpawnEntry());
             var legacySettle = RewardPolicy.Settle(bc, legacy, true);
             Check("legacy contract falls back to writ pay",
                 legacySettle.goldGained == 700 && legacySettle.expGained == 200 && legacySettle.jpGained == 100,
                 $"gold {legacySettle.goldGained}, exp {legacySettle.expGained}");
-            legacy.enemies.Add(new SpawnEntry());
-            legacy.enemies.Add(new SpawnEntry());
+
+            // A dead reinforcement must not inflate legacy pay past the
+            // authored roster (and thus past the forecast)
+            var legacyWave = UnitFactory.Create("Enemy Rogue", 1);
+            bc.units.Add(legacyWave.GetComponent<Unit>());
+            Kill(legacyWave);
+            var legacyFarmed = RewardPolicy.Settle(bc, legacy, true);
+            Check("legacy pay capped at the authored roster",
+                legacyFarmed.goldGained == 700 && legacyFarmed.expGained == 200,
+                $"gold {legacyFarmed.goldGained}");
+            bc.units.RemoveAt(bc.units.Count - 1);
+            Destroy(legacyWave);
+
             var legacyForecast = RewardPolicy.Forecast(legacy);
             Check("legacy forecast quotes the same writ pay",
                 legacyForecast.goldGained == 700 && legacyForecast.expGained == 200);
+
+            // The explicit flag makes a deliberately zero-pay contract stick
+            legacy.rewards.authored = true;
+            var intentionalZero = RewardPolicy.Settle(bc, legacy, true);
+            Check("intentionally zero-pay contract pays zero",
+                intentionalZero.goldGained == 0 && intentionalZero.expGained == 0 && intentionalZero.jpGained == 0,
+                $"gold {intentionalZero.goldGained}");
             Destroy(legacy);
 
             // Commit: exactly once, KO'd participants keep the half share.

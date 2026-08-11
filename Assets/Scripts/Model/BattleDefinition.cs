@@ -73,13 +73,18 @@ public class ContractRewards
     [Range(0, 100)]
     public int defeatPayPercent;
 
+    [Tooltip("Tick when these rewards are deliberately authored — permits an intentionally zero-pay contract. Pre-payload definitions leave this false and fall back to bounded writ pay.")]
+    public bool authored;
+
     /// <summary>
-    /// True once any pay, award, or salvage has been authored. Definitions
-    /// created before this payload existed deserialize to all zeros — those
-    /// contracts fall back to writ-style pay instead of paying nothing.
+    /// True when this payload is intentional: the explicit flag, or any
+    /// nonzero value (an author who filled amounts but forgot the flag).
+    /// Definitions created before this payload existed deserialize to all
+    /// zeros with the flag off — those fall back to bounded writ-style pay
+    /// instead of paying nothing.
     /// </summary>
     public bool IsAuthored =>
-        basePay != 0 || bonusPay != 0 || expAward != 0 || certAward != 0 ||
+        authored || basePay != 0 || bonusPay != 0 || expAward != 0 || certAward != 0 ||
         defeatPayPercent != 0 || (salvage != null && salvage.Count > 0);
 }
 

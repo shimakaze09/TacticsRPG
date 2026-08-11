@@ -111,10 +111,23 @@ public static class RewardPolicy
             playerUnits = GetPlayerUnits(battle)
         };
 
-        // A definition authored before the rewards payload existed carries
-        // all zeros — pay it like a writ rather than paying nothing
         if (definition != null && (definition.rewards == null || !definition.rewards.IsAuthored))
-            definition = null;
+        {
+            // A definition authored before the rewards payload existed
+            // carries all zeros — pay it like a writ, but capped to the
+            // AUTHORED starting roster so reinforcement waves can never
+            // inflate the pay past what Forecast quoted for it
+            if (victory)
+            {
+                int cap = definition.enemies != null ? definition.enemies.Count : 0;
+                int defeated = Mathf.Min(CountDefeatedEnemies(battle), cap);
+                results.goldGained = WritBasePay + defeated * WritPayPerEnemy;
+                results.expGained = defeated * WritExpPerEnemy;
+                results.jpGained = defeated * WritCertPerEnemy;
+            }
+
+            return results;
+        }
 
         if (definition != null)
         {
