@@ -21,14 +21,49 @@ public static class DifficultySettings
 {
     private const string PrefsKey = "TacticsRPG.Difficulty";
 
+    // While a battle is being resolved, Current answers with this snapshot so
+    // mid-battle preference changes cannot swing HP multipliers or AI choice
+    private static Difficulty? battleLock;
+
+    /// <summary>
+    /// The difficulty every combat system reads. While a battle is locked
+    /// (issue #62), this is the value snapshotted at battle start — changing
+    /// the stored preference mid-battle only affects the NEXT battle.
+    /// </summary>
     public static Difficulty Current
     {
-        get => (Difficulty)PlayerPrefs.GetInt(PrefsKey, (int)Difficulty.Easy);
+        get => battleLock ?? (Difficulty)PlayerPrefs.GetInt(PrefsKey, (int)Difficulty.Easy);
         set
         {
             PlayerPrefs.SetInt(PrefsKey, (int)value);
             PlayerPrefs.Save();
         }
+    }
+
+    /// <summary>True while a battle holds the difficulty snapshot.</summary>
+    public static bool IsLockedForBattle => battleLock.HasValue;
+
+    /// <summary>
+    /// The saved preference regardless of any battle lock — what settings
+    /// UIs display and edit, since Current answers with the snapshot while
+    /// a battle runs.
+    /// </summary>
+    public static Difficulty StoredPreference =>
+        (Difficulty)PlayerPrefs.GetInt(PrefsKey, (int)Difficulty.Easy);
+
+    /// <summary>
+    /// Snapshots the current difficulty for the duration of a battle —
+    /// called by battle init before any difficulty-dependent stat or AI work.
+    /// </summary>
+    public static void LockForBattle()
+    {
+        battleLock = Current;
+    }
+
+    /// <summary>Releases the battle snapshot; the stored preference rules again.</summary>
+    public static void ReleaseBattleLock()
+    {
+        battleLock = null;
     }
 
     /// <summary>Applied to enemy MHP during stat recalculation.</summary>

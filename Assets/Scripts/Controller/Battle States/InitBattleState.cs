@@ -49,6 +49,11 @@ public class InitBattleState : BattleState
     // Builds the battle in dependency order, then hands off to the cutscene
     private IEnumerator Init()
     {
+        // Snapshot difficulty before any stat/AI work and apply the paced
+        // battle speed; the guard's OnDestroy releases both on ANY battle
+        // exit, normal or abnormal (issue #62)
+        owner.gameObject.AddComponent<BattleSessionGuard>().Arm();
+
         var definition = Definition;
         var level = Level;
 

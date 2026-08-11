@@ -96,6 +96,7 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeGrowthGoldenBuilds();
             ProbeJobThresholds();
             ProbeSerializableDictionary();
+            ProbeSettingsAndDifficultyLock();
             ProbeControlBudget(bc);
             // Status removals destroy deferred, so this block yields frames
             yield return StartCoroutine(ProbeControlContract(bc));
@@ -446,6 +447,30 @@ public class BattleProbeRunner : MonoBehaviour
         Destroy(unit);
     }
 
+    // Spawns a Hero-recipe unit that can never touch the player's save:
+    // renamed off the roster keys, unregistered from persistence, and reset
+    // to a factory-fresh state — registration already applied the real save
+    // (keyed by recipe name) before the probe could intervene, and a probe
+    // unit alive at any save point must never write real roster keys.
+    private static GameObject CreateProbeHero(string recipe, int level, string probeName)
+    {
+        var go = UnitFactory.Create(recipe, level);
+        go.name = probeName;
+        var jm = go.GetComponent<JobManager>();
+        DataPersistenceManager.Unregister(jm);
+
+        var freshProgress = new JobProgressData();
+        freshProgress.InitializeWithBasicJobs(jm.CurrentJob);
+        var freshData = new GameData();
+        freshData.jobProgressData.Add(probeName, freshProgress);
+        freshData.abilityMemoryData.Add(probeName, new AbilityMemory());
+        jm.LoadData(freshData);
+        jm.AbilityMemory.SyncLearnedAbilities(jm.ProgressData, jm.allJobs);
+        jm.GrantStarterKit();
+        jm.InvalidateLoadout();
+        return go;
+    }
+
     // ---- issue #59: contract rewards ----------------------------------------
 
     // The reward-policy contract: forecast and settle share one shape and one
@@ -484,8 +509,8 @@ public class BattleProbeRunner : MonoBehaviour
             writForecast.goldGained == 800 && writForecast.expGained == 300 && writForecast.jpGained == 150,
             $"gold {writForecast.goldGained}");
 
-        var heroA = UnitFactory.Create("Alaois", 1);
-        var heroB = UnitFactory.Create("Hania", 1);
+        var heroA = CreateProbeHero("Alaois", 1, "Probe Reward Hero A");
+        var heroB = CreateProbeHero("Hania", 1, "Probe Reward Hero B");
         var enemyA = UnitFactory.Create("Enemy Rogue", 1);
         var enemyB = UnitFactory.Create("Enemy Warrior", 1);
         var neutral = UnitFactory.Create("Enemy Wizard", 1);
@@ -758,7 +783,7 @@ public class BattleProbeRunner : MonoBehaviour
 
         // Purchase makes an ability usable; the projection rebuilds purely
         // from persisted progress and memory
-        var buyerGo = UnitFactory.Create("Hania", 10);
+        var buyerGo = CreateProbeHero("Hania", 10, "Probe Buyer");
         var buyerJm = buyerGo.GetComponent<JobManager>();
         var buyerJob = buyerJm.CurrentJob;
         JobAbilityUnlock target = null;
@@ -828,7 +853,7 @@ public class BattleProbeRunner : MonoBehaviour
         // Reload: a save carrying a different certification than the
         // spawn-time default must swap the runtime catalog in the same
         // frame (PR #98 review)
-        var reloadGo = UnitFactory.Create("Alaois", 1);
+        var reloadGo = CreateProbeHero("Alaois", 1, "Probe Reload Hero");
         var reloadJm = reloadGo.GetComponent<JobManager>();
         var reloadDefault = reloadJm.CurrentJob;
         JobDefinition savedJob = null;
@@ -2175,7 +2200,7 @@ public class BattleProbeRunner : MonoBehaviour
         Check("toll road validation found tiles", heroTile != null && foeTile != null);
         if (heroTile != null && foeTile != null)
         {
-            var strikerGo = UnitFactory.Create("Alaois", 10);
+            var strikerGo = CreateProbeHero("Alaois", 10, "Probe Striker");
             var skirmisherGo = UnitFactory.Create("Enemy Rogue", 9);
             var striker = strikerGo.GetComponent<Unit>();
             var skirmisher = skirmisherGo.GetComponent<Unit>();
@@ -2195,7 +2220,7 @@ public class BattleProbeRunner : MonoBehaviour
             Destroy(strikerGo);
             Destroy(skirmisherGo);
 
-            var squishyGo = UnitFactory.Create("Hania", 10);
+            var squishyGo = CreateProbeHero("Hania", 10, "Probe Skirmish Target");
             var damageGo = UnitFactory.Create("Enemy Warrior", 9);
             var squishy = squishyGo.GetComponent<Unit>();
             var damageDealer = damageGo.GetComponent<Unit>();
@@ -2766,6 +2791,194 @@ public class BattleProbeRunner : MonoBehaviour
             Check("legacy level has a usable empty skin map",
                 legacy.tileSkins != null && !legacy.tileSkins.TryGetValue(Vector3.zero, out _),
                 legacy.tileSkins == null ? "null map" : "count " + legacy.tileSkins.Count);
+    }
+
+    // ---- issue #62: device settings + difficulty lock -----------------------
+
+    // The settings contract: defaults on first run, clamped writes, invalid
+    // stored values recover on read, persistence is write-through, an
+    // unsupported saved resolution falls back to the current screen
+    // (device switch), the revert countdown expires exactly once confirmed
+    // or not, mid-battle difficulty edits do not leak into Current, and the
+    // panel opens/closes without scene wiring. All prefs are restored.
+    private void ProbeSettingsAndDifficultyLock()
+    {
+        string[] keys =
+        {
+            "TacticsRPG.Settings.Version", "TacticsRPG.Settings.MasterVolume",
+            "TacticsRPG.Settings.MusicVolume",
+            "TacticsRPG.Settings.SfxVolume", "TacticsRPG.Settings.TextScale",
+            "TacticsRPG.Settings.BattleSpeed", "TacticsRPG.Settings.WindowMode",
+            "TacticsRPG.Settings.ResolutionWidth", "TacticsRPG.Settings.ResolutionHeight"
+        };
+        var saved = new Dictionary<string, int>();
+        foreach (var key in keys)
+            if (PlayerPrefs.HasKey(key))
+                saved[key] = PlayerPrefs.GetInt(key);
+
+        // The probe battle locked difficulty at init; release to reach the
+        // stored preference, and restore the equivalent lock afterwards
+        bool wasLocked = DifficultySettings.IsLockedForBattle;
+        if (wasLocked)
+            DifficultySettings.ReleaseBattleLock();
+        var storedDifficulty = DifficultySettings.Current;
+
+        try
+        {
+            // Version mismatch resets to defaults
+            PlayerPrefs.DeleteKey("TacticsRPG.Settings.Version");
+            PlayerPrefs.SetInt("TacticsRPG.Settings.MusicVolume", 7);
+            GameSettings.MigrateIfNeeded();
+            Check("settings migration restores defaults",
+                GameSettings.MasterVolume == GameSettings.DefaultMasterVolume &&
+                GameSettings.MusicVolume == GameSettings.DefaultMusicVolume &&
+                GameSettings.SfxVolume == GameSettings.DefaultSfxVolume &&
+                GameSettings.TextScalePercent == GameSettings.DefaultTextScale &&
+                GameSettings.BattleSpeedPercent == GameSettings.BattleSpeedSteps[0]);
+
+            // Writes clamp
+            GameSettings.MusicVolume = 250;
+            Check("volume clamps high", GameSettings.MusicVolume == 100);
+            GameSettings.MusicVolume = -5;
+            Check("volume clamps low", GameSettings.MusicVolume == 0);
+
+            // Corrupted stored values recover on read
+            PlayerPrefs.SetInt("TacticsRPG.Settings.TextScale", 999);
+            Check("invalid text scale recovers", GameSettings.TextScalePercent == GameSettings.MaxTextScale);
+            PlayerPrefs.SetInt("TacticsRPG.Settings.BattleSpeed", 130);
+            Check("battle speed snaps to a legal step", GameSettings.BattleSpeedPercent == 150);
+
+            // Persistence is write-through
+            GameSettings.SfxVolume = 30;
+            Check("settings persist to prefs",
+                PlayerPrefs.GetInt("TacticsRPG.Settings.SfxVolume", -1) == 30);
+
+            // Device switch: an unsupported saved resolution falls back
+            PlayerPrefs.SetInt("TacticsRPG.Settings.ResolutionWidth", 12345);
+            PlayerPrefs.SetInt("TacticsRPG.Settings.ResolutionHeight", 777);
+            var fallback = GameSettings.PreferredResolution;
+            Check("unsupported resolution falls back to current",
+                fallback.width == Screen.currentResolution.width &&
+                fallback.height == Screen.currentResolution.height,
+                $"{fallback.width}x{fallback.height}");
+
+            // Revert countdown: confirm-or-revert with a hard deadline
+            var countdown = new RevertCountdown();
+            countdown.Arm(100f);
+            Check("countdown arms with full window",
+                countdown.Armed && countdown.RemainingSeconds(100f) == 10);
+            Check("countdown holds before the deadline", !countdown.HasExpired(109.9f));
+            Check("countdown expires at the deadline", countdown.HasExpired(110f));
+            countdown.Confirm();
+            Check("confirm defuses the revert", !countdown.Armed && !countdown.HasExpired(120f));
+            countdown.Arm(200f, 5f);
+            Check("re-arm restarts the window", countdown.RemainingSeconds(202f) == 3);
+
+            // Difficulty edits during a battle do not reach Current
+            DifficultySettings.Current = Difficulty.Easy;
+            DifficultySettings.LockForBattle();
+            DifficultySettings.Current = Difficulty.Hard;
+            Check("difficulty locked during battle",
+                DifficultySettings.Current == Difficulty.Easy && DifficultySettings.IsLockedForBattle);
+            DifficultySettings.ReleaseBattleLock();
+            Check("preference applies after the battle", DifficultySettings.Current == Difficulty.Hard);
+
+            // The settings UI reads and edits the stored preference — under
+            // the lock, Current keeps answering with the snapshot
+            DifficultySettings.Current = Difficulty.Easy;
+            DifficultySettings.LockForBattle();
+            DifficultySettings.Current = Difficulty.Hard;
+            Check("stored preference visible under the lock",
+                DifficultySettings.StoredPreference == Difficulty.Hard &&
+                DifficultySettings.Current == Difficulty.Easy);
+            DifficultySettings.ReleaseBattleLock();
+
+            // The session guard releases lock and pacing on ANY battle exit,
+            // and pause-resume restores the armed snapshot, not a preference
+            // changed mid-battle (PR #100 review)
+            float scaleBefore = Time.timeScale;
+            GameSettings.BattleSpeedPercent = 150;
+            var guardGo = new GameObject("Probe Session Guard");
+            guardGo.AddComponent<BattleSessionGuard>().Arm();
+            GameSettings.BattleSpeedPercent = 200;
+            Check("guard arms lock, pacing, and the resume snapshot",
+                DifficultySettings.IsLockedForBattle &&
+                Mathf.Approximately(Time.timeScale, 1.5f) &&
+                BattleSessionGuard.ActiveBattleSpeedPercent == 150,
+                $"scale {Time.timeScale}, snapshot {BattleSessionGuard.ActiveBattleSpeedPercent}");
+            DestroyImmediate(guardGo);
+            Check("abnormal battle exit releases lock and pacing",
+                !DifficultySettings.IsLockedForBattle &&
+                Mathf.Approximately(Time.timeScale, 1f) &&
+                BattleSessionGuard.ActiveBattleSpeedPercent == null);
+
+            // Forfeit path: leaving the Battle flow state must release the
+            // session even when the successor is scene-less and the battle
+            // scene (and the guard's OnDestroy) stays alive (PR #100 review)
+            if (GameFlowController.Instance == null)
+            {
+                var forfeitFlowGo = new GameObject("Probe Forfeit Flow");
+                var forfeitFlow = forfeitFlowGo.AddComponent<GameFlowController>();
+                var battleFlowState = forfeitFlow.GetState<BattleFlowState>();
+                battleFlowState.Initialize(forfeitFlow);
+                var forfeitGuard = new GameObject("Probe Forfeit Guard").AddComponent<BattleSessionGuard>();
+                forfeitGuard.Arm();
+                battleFlowState.Exit();
+                Check("battle flow exit releases the session without scene unload",
+                    !DifficultySettings.IsLockedForBattle &&
+                    Mathf.Approximately(Time.timeScale, 1f) &&
+                    BattleSessionGuard.ActiveBattleSpeedPercent == null);
+                DestroyImmediate(forfeitGuard.gameObject);
+                DestroyImmediate(forfeitFlowGo);
+            }
+            else
+            {
+                Check("battle flow exit probe skipped (live controller present)", true);
+            }
+
+            Time.timeScale = scaleBefore;
+
+            // Immediate settings genuinely apply: audio to the listener,
+            // text scale through a CanvasScaler when one is present
+            float volumeBefore = AudioListener.volume;
+            GameSettings.MasterVolume = 60;
+            GameSettings.ApplyImmediate();
+            Check("master volume drives the listener", Mathf.Approximately(AudioListener.volume, 0.6f),
+                AudioListener.volume.ToString());
+            AudioListener.volume = volumeBefore;
+
+            var canvasGo = new GameObject("Probe Scaled Canvas", typeof(Canvas), typeof(UnityEngine.UI.CanvasScaler));
+            var probeScaler = canvasGo.GetComponent<UnityEngine.UI.CanvasScaler>();
+            probeScaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ConstantPixelSize;
+            GameSettings.TextScalePercent = 120;
+            GameSettings.ApplyTextScale(canvasGo.GetComponent<Canvas>());
+            Check("text scale routes through the canvas scaler",
+                Mathf.Approximately(probeScaler.scaleFactor, 1.2f), probeScaler.scaleFactor.ToString());
+            DestroyImmediate(canvasGo);
+
+            // The panel builds itself without scene wiring
+            var panel = SettingsPanelController.Open();
+            Check("settings panel opens", SettingsPanelController.IsOpen);
+            panel.Close();
+            Check("settings panel closes", !SettingsPanelController.IsOpen);
+            Destroy(panel.gameObject);
+        }
+        finally
+        {
+            foreach (var key in keys)
+            {
+                if (saved.TryGetValue(key, out int value))
+                    PlayerPrefs.SetInt(key, value);
+                else
+                    PlayerPrefs.DeleteKey(key);
+            }
+
+            PlayerPrefs.Save();
+            DifficultySettings.ReleaseBattleLock();
+            DifficultySettings.Current = storedDifficulty;
+            if (wasLocked)
+                DifficultySettings.LockForBattle();
+        }
     }
 
     // ---- issue #57: RES growth + control budget -----------------------------
@@ -3501,7 +3714,7 @@ public class BattleProbeRunner : MonoBehaviour
             parkedHomes.Add(u.tile);
             u.Place(farTiles[farIndex]);
         }
-        var healerGo = UnitFactory.Create("Hania", 10);
+        var healerGo = CreateProbeHero("Hania", 10, "Probe Healer");
         var healer = healerGo.GetComponent<Unit>();
         Tile healerTile = null;
         var spawnOffsets = new[]
