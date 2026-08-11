@@ -77,6 +77,7 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeGearAndStats(bc);
             ProbeAbilityMemory(bc);
             ProbeCertPurchases(bc);
+            ProbeStateMachineAtomicity();
             ProbeWeaponBehavior(bc);
             ProbeTraits(bc);
             ProbeElementsAndCrits(bc);
@@ -424,6 +425,117 @@ public class BattleProbeRunner : MonoBehaviour
             $"bank {progressCopy.GetAvailableJP(current)} vs {progress.GetAvailableJP(current)}");
 
         Destroy(unit);
+    }
+
+    // ---- issue #18: state machine atomicity ---------------------------------
+
+    // Minimal probe states exercising the transition contract on a scratch
+    // machine — never on the live battle or game-flow controllers
+    private class ProbeStateA : State
+    {
+        public int enters;
+        public int exits;
+
+        public override void Enter()
+        {
+            base.Enter();
+            enters++;
+        }
+
+        public override void Exit()
+        {
+            exits++;
+            base.Exit();
+        }
+    }
+
+    private class ProbeStateB : ProbeStateA
+    {
+    }
+
+    // Enter always throws — the machine must survive it
+    private class ProbeThrowingState : State
+    {
+        public override void Enter()
+        {
+            base.Enter();
+            throw new System.InvalidOperationException("probe: Enter failed");
+        }
+    }
+
+    // Attempts a re-entrant transition from inside Enter — must be rejected
+    private class ProbeReentrantState : State
+    {
+        public StateMachine machine;
+        public State target;
+        public bool attempted;
+
+        public override void Enter()
+        {
+            base.Enter();
+            attempted = true;
+            machine.CurrentState = target;
+        }
+    }
+
+    // The issue #18 contract at the machine level: exits precede enters,
+    // same-state requests are no-ops, an exception inside Enter can never
+    // strand the machine mid-transition, and re-entrant requests are
+    // rejected rather than silently corrupting the swap. (Full
+    // Title→World→Battle scene cycling becomes drivable when those scenes
+    // exist — the flow-level generation token guards the loads until then.)
+    private void ProbeStateMachineAtomicity()
+    {
+        var go = new GameObject("Probe State Machine");
+        var machine = go.AddComponent<StateMachine>();
+        var a = go.AddComponent<ProbeStateA>();
+        var b = go.AddComponent<ProbeStateB>();
+
+        machine.CurrentState = a;
+        Check("transition enters the new state", machine.CurrentState == a && a.enters == 1,
+            $"enters {a.enters}");
+        machine.CurrentState = b;
+        Check("transition exits old then enters new",
+            a.exits == 1 && b.enters == 1 && machine.CurrentState == b,
+            $"a.exits {a.exits}, b.enters {b.enters}");
+        machine.CurrentState = b;
+        Check("same-state transition is a no-op", b.enters == 1 && b.exits == 0,
+            $"enters {b.enters}, exits {b.exits}");
+
+        // An exception inside Enter must not strand _inTransition
+        var thrower = go.AddComponent<ProbeThrowingState>();
+        var threw = false;
+        try
+        {
+            machine.CurrentState = thrower;
+        }
+        catch (System.InvalidOperationException)
+        {
+            threw = true;
+        }
+
+        Check("throwing Enter propagates but swaps the state",
+            threw && machine.CurrentState == thrower);
+        machine.CurrentState = a;
+        Check("machine stays usable after a throwing transition",
+            machine.CurrentState == a && a.enters == 2, $"enters {a.enters}");
+
+        // A re-entrant request from inside Enter is rejected, not applied
+        var reentrant = go.AddComponent<ProbeReentrantState>();
+        reentrant.machine = machine;
+        reentrant.target = b;
+        machine.CurrentState = reentrant;
+        Check("re-entrant transition rejected",
+            reentrant.attempted && machine.CurrentState == reentrant,
+            machine.CurrentState != null ? machine.CurrentState.GetType().Name : "null");
+
+        // Rapid back-to-back transitions stay consistent
+        for (var i = 0; i < 20; i++)
+            machine.CurrentState = i % 2 == 0 ? a : (State)b;
+        Check("rapid transitions stay consistent", machine.CurrentState == b,
+            machine.CurrentState != null ? machine.CurrentState.GetType().Name : "null");
+
+        Destroy(go);
     }
 
     // ---- 1.9b/1.9c: weapon behavior --------------------------------------
