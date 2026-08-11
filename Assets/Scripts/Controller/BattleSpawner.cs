@@ -76,6 +76,10 @@ public static class BattleSpawner
             {
                 jm.ProgressData.UnlockJob(job);
                 jm.ProgressData.SwitchJob(job);
+
+                // The recipe already built the original job's runtime
+                // catalog — swap it or the boss fights with the old kit
+                UnitFactory.RebuildAbilityCatalog(instance, job.abilityCatalogName);
             }
         }
 

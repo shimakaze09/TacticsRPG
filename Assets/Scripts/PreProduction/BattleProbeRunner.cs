@@ -253,9 +253,18 @@ public class BattleProbeRunner : MonoBehaviour
                     justified.Add(name);
             }
 
+            // Mirror RepairLearnedAbilities' policy: only entries the old
+            // locked-job leak can explain are violations — save-loaded
+            // grandfathered purchases/grants are kept by design (issue #51)
+            var leakable = new HashSet<string>();
+            foreach (var job in jm.allJobs)
+                if (job != null && !progress.IsJobUnlocked(job))
+                    foreach (var name in job.GetUnlockedAbilities(1))
+                        leakable.Add(name);
             foreach (var learned in memory.learnedAbilities)
-                Check("learned ability justified " + u.name, justified.Contains(learned),
-                    learned + " has no backing job progress");
+                Check("learned ability not leak-attributable " + u.name,
+                    justified.Contains(learned) || !leakable.Contains(learned),
+                    learned + " is a locked job's grade-1 ability with no backing progress");
 
             // Re-sync must not add anything new for unchanged progress
             var before = memory.GetLearnedAbilityCount();
@@ -1654,6 +1663,31 @@ public class BattleProbeRunner : MonoBehaviour
                 Check("boss override replaces the gear",
                     boss.GetComponent<Equipment>().items.Count == 1,
                     boss.GetComponent<Equipment>().items.Count + " items");
+
+                // The runtime kit must follow the override job — the recipe
+                // built the rogue catalog before the switch (PR #96 review)
+                var bossCatalog = boss.GetComponentInChildren<AbilityCatalog>();
+                var catalogJobs = new HashSet<string>();
+                if (bossCatalog != null)
+                {
+                    foreach (var a in bossCatalog.GetComponentsInChildren<Ability>(true))
+                        catalogJobs.Add(a.name);
+                }
+
+                string wardenAbility = null;
+                foreach (var unlock in jm.CurrentJob.abilityUnlocks)
+                {
+                    if (unlock.unlockAtJobLevel <= 1)
+                    {
+                        wardenAbility = unlock.abilityName;
+                        break;
+                    }
+                }
+
+                Check("boss override rebuilds the ability catalog",
+                    bossCatalog != null && bossCatalog.gameObject.activeSelf &&
+                    wardenAbility != null && catalogJobs.Contains(wardenAbility),
+                    wardenAbility == null ? "no warden unlock" : string.Join(",", catalogJobs));
                 var order = JobManager.statOrder;
                 var bossMatch = true;
                 var got = "";
