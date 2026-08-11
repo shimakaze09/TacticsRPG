@@ -33,6 +33,11 @@ public class InitBattleState : BattleState
     // Builds the battle in dependency order, then hands off to the cutscene
     private IEnumerator Init()
     {
+        // Snapshot difficulty before any stat/AI work and apply the paced
+        // battle speed — both release in EndBattleState (issue #62)
+        DifficultySettings.LockForBattle();
+        Time.timeScale = GameSettings.BattleSpeedPercent / 100f;
+
         var definition = Definition;
         var level = definition != null && definition.level != null ? definition.level : levelData;
 

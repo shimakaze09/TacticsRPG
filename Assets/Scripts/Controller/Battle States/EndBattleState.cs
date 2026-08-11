@@ -11,6 +11,11 @@ public class EndBattleState : BattleState
     {
         base.Enter();
 
+        // The battle's difficulty snapshot and pacing end with the battle
+        // (issue #62)
+        DifficultySettings.ReleaseBattleLock();
+        Time.timeScale = 1f;
+
         bool victory = CheckVictoryCondition();
 
         if (GameFlowController.Instance != null)
