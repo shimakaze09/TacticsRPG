@@ -77,6 +77,7 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeGearAndStats(bc);
             ProbeAbilityMemory(bc);
             ProbeCertPurchases(bc);
+            ProbeBattleLoadout(bc);
             ProbeEventBusLifecycle();
             ProbeWeaponBehavior(bc);
             ProbeTraits(bc);
@@ -250,9 +251,18 @@ public class BattleProbeRunner : MonoBehaviour
                     justified.Add(name);
             }
 
+            // Mirror RepairLearnedAbilities' policy: only entries the old
+            // locked-job leak can explain are violations — save-loaded
+            // grandfathered purchases/grants are kept by design (issue #51)
+            var leakable = new HashSet<string>();
+            foreach (var job in jm.allJobs)
+                if (job != null && !progress.IsJobUnlocked(job))
+                    foreach (var name in job.GetUnlockedAbilities(1))
+                        leakable.Add(name);
             foreach (var learned in memory.learnedAbilities)
-                Check("learned ability justified " + u.name, justified.Contains(learned),
-                    learned + " has no backing job progress");
+                Check("learned ability not leak-attributable " + u.name,
+                    justified.Contains(learned) || !leakable.Contains(learned),
+                    learned + " is a locked job's grade-1 ability with no backing progress");
 
             // Re-sync must not add anything new for unchanged progress
             var before = memory.GetLearnedAbilityCount();
@@ -428,6 +438,160 @@ public class BattleProbeRunner : MonoBehaviour
             $"bank {progressCopy.GetAvailableJP(current)} vs {progress.GetAvailableJP(current)}");
 
         Destroy(unit);
+    }
+
+    // ---- issue #17: battle loadout projection -------------------------------
+
+    // The battle kit is a projection: player-owned units use grade gates AND
+    // purchases (Grade-1 arrives free with the certification), generated
+    // enemies project from the grade their level implies, the gate blocks
+    // players and AI through the one CanPerform seam, job switches rebuild
+    // the catalog in the same frame, and the projection rebuilds purely from
+    // persisted state.
+    private void ProbeBattleLoadout(BattleController bc)
+    {
+        var alaois = Find(bc, "Alaois");
+        if (alaois == null)
+        {
+            Check("loadout cast present", false);
+            return;
+        }
+
+        // Scene hero: Grade-1 starter kit usable, higher unlocks locked
+        var heroJm = alaois.GetComponent<JobManager>();
+        var heroJob = heroJm.CurrentJob;
+        string starterName = null, lockedName = null;
+        foreach (var unlock in heroJob.abilityUnlocks)
+        {
+            if (unlock.unlockAtJobLevel <= 1 && starterName == null)
+                starterName = unlock.abilityName;
+            if (unlock.unlockAtJobLevel > 1 && lockedName == null)
+                lockedName = unlock.abilityName;
+        }
+
+        Check("hero starter ability usable", starterName != null && heroJm.IsAbilityUsable(starterName),
+            starterName ?? "none");
+        Check("hero locked ability not usable", lockedName != null && !heroJm.IsAbilityUsable(lockedName),
+            lockedName ?? "none");
+        Check("attack always usable", heroJm.IsAbilityUsable("Attack"));
+
+        // The gate enforces it end to end: the locked ability's runtime
+        // instance fails CanPerform, and the AI generates no candidates for it
+        Ability lockedAbility = null;
+        foreach (var a in alaois.GetComponentsInChildren<Ability>())
+        {
+            if (a.name == lockedName)
+            {
+                lockedAbility = a;
+                break;
+            }
+        }
+
+        Check("locked ability exists in the catalog", lockedAbility != null);
+        if (lockedAbility != null)
+            Check("gate vetoes locked ability CanPerform", !lockedAbility.CanPerform());
+
+        var prevActor = bc.turn.actor;
+        bc.turn.actor = alaois;
+        var heroCtx = AiTurnContext.Build(bc, alaois);
+        var heroCands = AiCandidateGenerator.Generate(heroCtx);
+        Check("AI never plans a locked ability",
+            !heroCands.Exists(c => c.Ability != null && c.Ability.name == lockedName));
+        bc.turn.actor = prevActor;
+
+        // Enemy projection follows spawn level through the JP curve: a L1
+        // spawn holds only Grade-1 abilities, a L30 spawn the whole kit
+        var lowGo = UnitFactory.Create("Enemy Rogue", 1);
+        var highGo = UnitFactory.Create("Enemy Rogue", 30);
+        var lowJm = lowGo.GetComponent<JobManager>();
+        var highJm = highGo.GetComponent<JobManager>();
+        var enemyJob = lowJm.CurrentJob;
+        string enemyTop = null;
+        var enemyTopLevel = 0;
+        foreach (var unlock in enemyJob.abilityUnlocks)
+        {
+            if (unlock.unlockAtJobLevel > enemyTopLevel)
+            {
+                enemyTopLevel = unlock.unlockAtJobLevel;
+                enemyTop = unlock.abilityName;
+            }
+        }
+
+        Check("low-level enemy lacks its capstone",
+            enemyTopLevel > 1 && !lowJm.IsAbilityUsable(enemyTop), enemyTop ?? "none");
+        Check("high-level enemy holds its full kit", highJm.IsAbilityUsable(enemyTop),
+            enemyTop ?? "none");
+        Destroy(lowGo);
+        Destroy(highGo);
+
+        // Purchase makes an ability usable; the projection rebuilds purely
+        // from persisted progress and memory
+        var buyerGo = UnitFactory.Create("Hania", 10);
+        var buyerJm = buyerGo.GetComponent<JobManager>();
+        var buyerJob = buyerJm.CurrentJob;
+        JobAbilityUnlock target = null;
+        foreach (var unlock in buyerJob.abilityUnlocks)
+        {
+            var candidateId = string.IsNullOrEmpty(unlock.abilityId) ? unlock.abilityName : unlock.abilityId;
+            if (unlock.unlockAtJobLevel >= 2 && !buyerJm.AbilityMemory.HasLearnedAbility(candidateId))
+            {
+                target = unlock;
+                break;
+            }
+        }
+
+        Check("purchase target exists", target != null);
+        if (target != null)
+        {
+            var targetId = string.IsNullOrEmpty(target.abilityId) ? target.abilityName : target.abilityId;
+            Check("unpurchased ability not usable", !buyerJm.IsAbilityUsable(target.abilityName));
+            buyerJm.ProgressData.SetJobJP(buyerJob, 2000);
+            var bought = buyerJm.PurchaseAbility(buyerJob, targetId);
+            Check("purchase succeeds", bought == AbilityMemory.PurchaseResult.Success, bought.ToString());
+            Check("purchased ability becomes usable", buyerJm.IsAbilityUsable(target.abilityName));
+            buyerJm.InvalidateLoadout();
+            Check("projection rebuilds from persisted state alone",
+                buyerJm.IsAbilityUsable(target.abilityName));
+        }
+
+        // Job switch rebuilds the catalog and projection in the same frame,
+        // granting the new certification's starter kit
+        JobDefinition secondJob = null;
+        foreach (var j in buyerJm.allJobs)
+        {
+            if (j != null && j != buyerJob && !j.isUnique)
+            {
+                secondJob = j;
+                break;
+            }
+        }
+
+        Check("switch target job exists", secondJob != null);
+        if (secondJob != null)
+        {
+            buyerJm.ProgressData.UnlockJob(secondJob);
+            var switched = buyerJm.SwitchJob(secondJob);
+            var catalog = buyerGo.GetComponentInChildren<AbilityCatalog>();
+            string newStarter = null;
+            foreach (var unlock in secondJob.abilityUnlocks)
+            {
+                if (unlock.unlockAtJobLevel <= 1)
+                {
+                    newStarter = unlock.abilityName;
+                    break;
+                }
+            }
+
+            Check("job switch rebuilds catalog same frame",
+                switched && catalog != null && catalog.gameObject.activeSelf,
+                catalog == null ? "no catalog" : "ok");
+            Check("switched-in certification grants its starter",
+                newStarter != null && buyerJm.IsAbilityUsable(newStarter), newStarter ?? "none");
+            Check("old job's kit is no longer usable",
+                target != null && !buyerJm.IsAbilityUsable(target.abilityName));
+        }
+
+        Destroy(buyerGo);
     }
 
     // ---- issue #24: event-bus lifecycle -------------------------------------
@@ -2521,6 +2685,12 @@ public class BattleProbeRunner : MonoBehaviour
             var infinite = Instantiate(infinitePrefab);
             infinite.name = "Furnace";
             infinite.transform.SetParent(rogue.transform);
+
+            // The planted ability is cross-kit by design — suspend the
+            // loadout gate (issue #17) so the stand-tile regression can run
+            var gate = rogue.GetComponent<AbilityLoadoutGate>();
+            if (gate != null)
+                gate.enabled = false;
             var regCtx = AiTurnContext.Build(bc, rogue);
             var safe = regCtx.SafestMoveTile();
             var regCands = AiCandidateGenerator.Generate(regCtx)
@@ -2545,6 +2715,8 @@ public class BattleProbeRunner : MonoBehaviour
             }
 
             Destroy(infinite);
+            if (gate != null)
+                gate.enabled = true;
         }
 
         rogueStats.SetValue(StatTypes.MP, savedRogueMp, false);
