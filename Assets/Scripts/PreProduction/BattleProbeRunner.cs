@@ -77,6 +77,8 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeGearAndStats(bc);
             ProbeAbilityMemory(bc);
             ProbeCertPurchases(bc);
+            ProbeStateMachineAtomicity();
+            ProbeGameFlowAtomicity();
             ProbeEventBusLifecycle();
             ProbeWeaponBehavior(bc);
             ProbeTraits(bc);
@@ -438,6 +440,199 @@ public class BattleProbeRunner : MonoBehaviour
             $"bank {progressCopy.GetAvailableJP(current)} vs {progress.GetAvailableJP(current)}");
 
         Destroy(unit);
+    }
+
+    // ---- issue #18: state machine atomicity ---------------------------------
+
+    // Minimal probe states exercising the transition contract on a scratch
+    // machine — never on the live battle or game-flow controllers
+    private class ProbeStateA : State
+    {
+        public int enters;
+        public int exits;
+
+        public override void Enter()
+        {
+            base.Enter();
+            enters++;
+        }
+
+        public override void Exit()
+        {
+            exits++;
+            base.Exit();
+        }
+    }
+
+    private class ProbeStateB : ProbeStateA
+    {
+    }
+
+    // Enter always throws — the machine must survive it
+    private class ProbeThrowingState : State
+    {
+        public override void Enter()
+        {
+            base.Enter();
+            throw new System.InvalidOperationException("probe: Enter failed");
+        }
+    }
+
+    // Attempts a re-entrant transition from inside Enter — must be rejected
+    private class ProbeReentrantState : State
+    {
+        public StateMachine machine;
+        public State target;
+        public bool attempted;
+
+        public override void Enter()
+        {
+            base.Enter();
+            attempted = true;
+            machine.CurrentState = target;
+        }
+    }
+
+    // The issue #18 contract at the machine level: exits precede enters,
+    // same-state requests are no-ops, an exception inside Enter can never
+    // strand the machine mid-transition, and re-entrant requests are
+    // rejected rather than silently corrupting the swap. (Full
+    // Title→World→Battle scene cycling becomes drivable when those scenes
+    // exist — the flow-level generation token guards the loads until then.)
+    private void ProbeStateMachineAtomicity()
+    {
+        var go = new GameObject("Probe State Machine");
+        var machine = go.AddComponent<StateMachine>();
+        var a = go.AddComponent<ProbeStateA>();
+        var b = go.AddComponent<ProbeStateB>();
+
+        machine.CurrentState = a;
+        Check("transition enters the new state", machine.CurrentState == a && a.enters == 1,
+            $"enters {a.enters}");
+        machine.CurrentState = b;
+        Check("transition exits old then enters new",
+            a.exits == 1 && b.enters == 1 && machine.CurrentState == b,
+            $"a.exits {a.exits}, b.enters {b.enters}");
+        machine.CurrentState = b;
+        Check("same-state transition is a no-op", b.enters == 1 && b.exits == 0,
+            $"enters {b.enters}, exits {b.exits}");
+
+        // An exception inside Enter is contained (logged, never propagated):
+        // the machine still lands on the requested state, so no caller can
+        // observe a half-transition (PR #94 review)
+        var thrower = go.AddComponent<ProbeThrowingState>();
+        machine.CurrentState = thrower;
+        Check("throwing Enter is contained and the swap completes",
+            machine.CurrentState == thrower);
+        machine.CurrentState = a;
+        Check("machine stays usable after a faulted transition",
+            machine.CurrentState == a && a.enters == 2, $"enters {a.enters}");
+
+        // A re-entrant request from inside Enter is rejected, not applied
+        var reentrant = go.AddComponent<ProbeReentrantState>();
+        reentrant.machine = machine;
+        reentrant.target = b;
+        machine.CurrentState = reentrant;
+        Check("re-entrant transition rejected",
+            reentrant.attempted && machine.CurrentState == reentrant,
+            machine.CurrentState != null ? machine.CurrentState.GetType().Name : "null");
+
+        // Rapid back-to-back transitions stay consistent
+        for (var i = 0; i < 20; i++)
+            machine.CurrentState = i % 2 == 0 ? a : (State)b;
+        Check("rapid transitions stay consistent", machine.CurrentState == b,
+            machine.CurrentState != null ? machine.CurrentState.GetType().Name : "null");
+
+        Destroy(go);
+    }
+
+    // Captures flow notification order and can request a transition from
+    // inside a notification — which must queue, never interleave
+    private class ProbeFlowListener : IGameFlowEventListener
+    {
+        public GameFlowController flow;
+        public GameFlowState? requestDuringChanging;
+        public readonly List<string> log = new List<string>();
+
+        public void OnFlowStateChanging(GameFlowState fromState, GameFlowState toState)
+        {
+            log.Add($"changing:{fromState}->{toState}");
+            if (requestDuringChanging != null)
+            {
+                var request = requestDuringChanging.Value;
+                requestDuringChanging = null;
+                flow.TransitionToState(request);
+            }
+        }
+
+        public void OnFlowStateChanged(GameFlowState newState)
+        {
+            log.Add("changed:" + newState);
+        }
+    }
+
+    // The flow layer's own issue #18 contract, on a transient controller
+    // destroyed before its Start can auto-transition: bookkeeping follows the
+    // swap, a same-state request is a pure no-op (no generation bump, no
+    // notifications), and a listener requesting a transition mid-notification
+    // is queued and executed afterward with events in order (PR #94 review)
+    private void ProbeGameFlowAtomicity()
+    {
+        if (GameFlowController.Instance != null)
+        {
+            Check("flow atomicity probe skipped (live controller present)", true);
+            return;
+        }
+
+        var go = new GameObject("Probe Game Flow");
+        var flow = go.AddComponent<GameFlowController>();
+        flow.GetState<TitleState>().Initialize(flow);
+        flow.GetState<ShopState>().Initialize(flow);
+
+        flow.TransitionToState(GameFlowState.Title);
+        Check("flow bookkeeping follows the swap",
+            flow.CurrentFlowState == GameFlowState.Title, flow.CurrentFlowState.ToString());
+
+        // Same-state request: nothing changes, and crucially the state's own
+        // in-flight scene load generation stays valid
+        var generation = flow.SceneGeneration;
+        var listener = new ProbeFlowListener { flow = flow };
+        flow.RegisterListener(listener);
+        flow.TransitionToState(GameFlowState.Title);
+        Check("same-state request is a pure no-op",
+            flow.CurrentFlowState == GameFlowState.Title &&
+            flow.SceneGeneration == generation &&
+            listener.log.Count == 0,
+            $"gen {generation}->{flow.SceneGeneration}, events [{string.Join("|", listener.log)}]");
+
+        // Listener re-entry: a request made during the pre-notification must
+        // queue and run after the current transition, events strictly ordered
+        listener.requestDuringChanging = GameFlowState.Title;
+        flow.TransitionToState(GameFlowState.Shop);
+        var expected = "changing:Title->Shop|changed:Shop|changing:Shop->Title|changed:Title";
+        Check("listener re-entry queues with ordered events",
+            flow.CurrentFlowState == GameFlowState.Title &&
+            string.Join("|", listener.log) == expected,
+            string.Join("|", listener.log));
+
+        Check("executed transitions bump the generation",
+            flow.SceneGeneration > generation,
+            $"{generation} -> {flow.SceneGeneration}");
+
+        // A loading screen left showing by a superseded load must be
+        // reclaimed by the next transition even when the successor is
+        // scene-less and would never touch it itself (PR #94 review)
+        var overlay = new GameObject("Probe Loading Screen");
+        flow.loadingScreen = overlay;
+        flow.ShowLoadingScreen(true);
+        flow.TransitionToState(GameFlowState.Shop);
+        Check("transition reclaims a stuck loading screen", !overlay.activeSelf,
+            overlay.activeSelf ? "still showing" : "hidden");
+        DestroyImmediate(overlay);
+
+        flow.UnregisterListener(listener);
+        DestroyImmediate(go);
+        Check("transient flow controller cleaned up", GameFlowController.Instance == null);
     }
 
     // ---- issue #24: event-bus lifecycle -------------------------------------

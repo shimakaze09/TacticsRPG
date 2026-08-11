@@ -52,16 +52,9 @@ public class BattleFlowState : BaseGameFlowState
             return;
         }
 
-        // Apply the pending level data to the battle controller
-        if (Controller.PendingBattleLevel != null)
-        {
-            battleController.levelData = Controller.PendingBattleLevel;
-            Debug.Log($"[BattleFlowState] Applied level data: {Controller.PendingBattleLevel.name}");
-        }
-        else
-        {
-            Debug.LogWarning("[BattleFlowState] No pending battle level data!");
-        }
+        // Pending battle payloads (PendingBattle / PendingBattleLevel) are
+        // PULLED by InitBattleState before it builds anything — pushing them
+        // here raced BattleController.Start's own init (issue #18)
 
         // Subscribe to battle end events
         SubscribeToBattleEvents();
@@ -87,8 +80,10 @@ public class BattleFlowState : BaseGameFlowState
         // Clear the battle controller reference
         battleController = null;
 
-        // Clear the pending battle data
+        // Both pending payloads are one-battle data: consumed by this
+        // battle's init, cleared here so a later battle can never replay them
         Controller.PendingBattleLevel = null;
+        Controller.PendingBattle = null;
     }
 
     #endregion

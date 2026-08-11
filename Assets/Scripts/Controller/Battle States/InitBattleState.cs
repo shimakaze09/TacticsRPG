@@ -30,6 +30,22 @@ public class InitBattleState : BattleState
         }
     }
 
+    // The level to load: authored definition first, then the game flow's
+    // pending level, then the scene's own. Pulled here — before anything is
+    // built — so the payload can never race scene activation (issue #18)
+    private LevelData Level
+    {
+        get
+        {
+            var definition = Definition;
+            if (definition != null && definition.level != null)
+                return definition.level;
+            if (GameFlowController.Instance != null && GameFlowController.Instance.PendingBattleLevel != null)
+                return GameFlowController.Instance.PendingBattleLevel;
+            return levelData;
+        }
+    }
+
     // Builds the battle in dependency order, then hands off to the cutscene
     private IEnumerator Init()
     {
@@ -39,7 +55,7 @@ public class InitBattleState : BattleState
         Time.timeScale = GameSettings.BattleSpeedPercent / 100f;
 
         var definition = Definition;
-        var level = definition != null && definition.level != null ? definition.level : levelData;
+        var level = Level;
 
         board.Load(level);
         var p = new Point((int)level.tiles[0].x, (int)level.tiles[0].z);
