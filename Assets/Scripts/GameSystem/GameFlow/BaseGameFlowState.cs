@@ -3,9 +3,16 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Base class for all game flow states.
-/// Provides common functionality for scene loading, async operations, and GameFlowController access.
-/// Inherits from State to integrate with the existing state machine pattern.
+/// Base class for all game flow states: scene loading, async operations, and
+/// GameFlowController access, integrated with the State machine pattern.
+/// Scene ownership policy (issue #18): flow scenes load in **single mode
+/// only** — a state with a SceneName owns the active scene outright and
+/// replaces whatever was loaded; additive loading is not part of the flow
+/// contract. States without a SceneName deliberately inherit the scene left
+/// by the previous owner (their dedicated scenes do not exist yet). Async
+/// loads capture the controller's SceneGeneration; a load that finishes
+/// after a newer transition still activates (Unity cannot abandon an async
+/// load) but its OnSceneReady and side effects are suppressed.
 /// </summary>
 public abstract class BaseGameFlowState : State
 {
@@ -31,6 +38,10 @@ public abstract class BaseGameFlowState : State
     /// </summary>
     protected virtual bool RequiresSceneLoad => !string.IsNullOrEmpty(SceneName);
 
+    // In-flight scene load, stopped on Exit so a dead state never runs
+    // completion code
+    private Coroutine _loadRoutine;
+
     #endregion
 
     #region Initialization
@@ -54,7 +65,7 @@ public abstract class BaseGameFlowState : State
 
         if (RequiresSceneLoad)
         {
-            Controller.StartCoroutine(LoadSceneAsync());
+            _loadRoutine = Controller.StartCoroutine(LoadSceneAsync());
         }
         else
         {
@@ -65,6 +76,14 @@ public abstract class BaseGameFlowState : State
     public override void Exit()
     {
         Debug.Log($"[GameFlow] Exiting {StateType} state");
+
+        if (_loadRoutine != null)
+        {
+            Controller.StopCoroutine(_loadRoutine);
+            _loadRoutine = null;
+            Controller.ShowLoadingScreen(false);
+        }
+
         OnStateExit();
         base.Exit();
     }
@@ -74,11 +93,16 @@ public abstract class BaseGameFlowState : State
     #region Scene Loading
 
     /// <summary>
-    /// Asynchronously loads the scene for this state
+    /// Asynchronously loads the state's scene in single mode. Captures the
+    /// flow generation up front: when a newer transition supersedes this
+    /// load, the scene still activates (an async load cannot be abandoned
+    /// without wedging Unity's load queue) but OnSceneReady is skipped —
+    /// the new owner's transition decides what happens next.
     /// </summary>
     protected virtual IEnumerator LoadSceneAsync()
     {
-        Debug.Log($"[GameFlow] Loading scene: {SceneName}");
+        var myGeneration = Controller.SceneGeneration;
+        Debug.Log($"[GameFlow] Loading scene: {SceneName} (generation {myGeneration})");
 
         // Show loading UI if available
         Controller.ShowLoadingScreen(true);
@@ -94,7 +118,7 @@ public abstract class BaseGameFlowState : State
             yield return null;
         }
 
-        // Activate the scene
+        // Activate the scene — even when stale, or the load queue wedges
         asyncLoad.allowSceneActivation = true;
 
         // Wait for scene to fully load
@@ -102,6 +126,13 @@ public abstract class BaseGameFlowState : State
 
         // Hide loading UI
         Controller.ShowLoadingScreen(false);
+        _loadRoutine = null;
+
+        if (Controller.SceneGeneration != myGeneration)
+        {
+            Debug.LogWarning($"[GameFlow] Stale scene load of '{SceneName}' (generation {myGeneration} vs {Controller.SceneGeneration}) — OnSceneReady suppressed.");
+            yield break;
+        }
 
         // Scene is ready
         OnSceneReady();
@@ -150,15 +181,9 @@ public abstract class BaseGameFlowState : State
     #region Helper Methods
 
     /// <summary>
-    /// Transition to another game flow state
-    /// </summary>
-    protected void TransitionToState<T>() where T : BaseGameFlowState
-    {
-        Controller.ChangeState<T>();
-    }
-
-    /// <summary>
-    /// Transition to a specific state type
+    /// Transition to a specific state type. Always routes through the
+    /// controller so flow bookkeeping stays atomic — never swap the
+    /// underlying machine state directly (issue #18).
     /// </summary>
     protected void TransitionToState(GameFlowState targetState)
     {

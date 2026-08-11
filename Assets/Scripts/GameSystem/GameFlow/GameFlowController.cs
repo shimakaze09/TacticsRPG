@@ -88,6 +88,17 @@ public class GameFlowController : StateMachine
     /// </summary>
     public bool IsTransitioning => _inTransition;
 
+    /// <summary>
+    /// Monotonic transition counter (issue #18): bumped at the start of every
+    /// executed flow transition. Async scene loads capture it and treat a
+    /// mismatch as "stale" — a newer transition owns the scenes now.
+    /// </summary>
+    public int SceneGeneration { get; private set; }
+
+    // A transition requested while one is running; latest request wins and
+    // executes after the current transition completes
+    private GameFlowState? _queuedFlowState;
+
     #endregion
 
     #region Manager References
@@ -192,9 +203,36 @@ public class GameFlowController : StateMachine
     #region State Transitions
 
     /// <summary>
-    /// Transition to a specific game flow state
+    /// Transition to a specific game flow state. Atomic (issue #18): flow
+    /// fields, notifications, and scene ownership change only when the
+    /// underlying transition actually applies. A request made while a
+    /// transition is running is queued — latest wins — and executes after
+    /// the current one completes.
     /// </summary>
     public void TransitionToState(GameFlowState targetState)
+    {
+        if (_inTransition)
+        {
+            if (_queuedFlowState != null && _queuedFlowState != targetState)
+                Debug.LogWarning($"[GameFlow] Replacing queued transition {_queuedFlowState} with {targetState}.");
+            _queuedFlowState = targetState;
+            return;
+        }
+
+        ExecuteTransition(targetState);
+
+        // Drain requests queued by Exit/Enter/notification code, latest wins
+        while (_queuedFlowState != null)
+        {
+            var next = _queuedFlowState.Value;
+            _queuedFlowState = null;
+            ExecuteTransition(next);
+        }
+    }
+
+    // One atomic flow transition: generation bump → pre-notify → state swap
+    // → bookkeeping and post-notify only when the swap applied
+    private void ExecuteTransition(GameFlowState targetState)
     {
         BaseGameFlowState newState = targetState switch
         {
@@ -206,25 +244,28 @@ public class GameFlowController : StateMachine
             _ => null
         };
 
-        if (newState != null)
-        {
-            PreviousFlowState = CurrentFlowState;
-            CurrentFlowState = targetState;
-
-            // Notify listeners BEFORE transition
-            NotifyStateChanging(PreviousFlowState, CurrentFlowState);
-
-            // Change the state
-            CurrentState = newState;
-
-            // Notify listeners AFTER transition
-            OnFlowStateChanged?.Invoke(PreviousFlowState, CurrentFlowState);
-            NotifyStateChanged(CurrentFlowState);
-        }
-        else
+        if (newState == null)
         {
             Debug.LogError($"[GameFlow] Cannot transition to state: {targetState}");
+            return;
         }
+
+        // Any in-flight scene load now belongs to a dead generation
+        SceneGeneration++;
+
+        var from = CurrentFlowState;
+        NotifyStateChanging(from, targetState);
+
+        if (!TryTransition(newState))
+        {
+            Debug.LogWarning($"[GameFlow] Transition to {targetState} did not apply; flow state stays {from}.");
+            return;
+        }
+
+        PreviousFlowState = from;
+        CurrentFlowState = targetState;
+        OnFlowStateChanged?.Invoke(PreviousFlowState, CurrentFlowState);
+        NotifyStateChanged(CurrentFlowState);
     }
 
     #endregion
