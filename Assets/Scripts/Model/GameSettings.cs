@@ -135,6 +135,15 @@ public static class GameSettings
         AudioListener.volume = SfxVolume / 100f;
     }
 
+    // Stored preferences take effect from boot, not from the first time the
+    // settings panel happens to open
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    private static void ApplyOnBoot()
+    {
+        MigrateIfNeeded();
+        ApplyImmediate();
+    }
+
     /// <summary>Applies the stored window mode + resolution to the display.</summary>
     public static void ApplyResolution()
     {
@@ -142,11 +151,28 @@ public static class GameSettings
         Screen.SetResolution(target.width, target.height, WindowMode);
     }
 
-    /// <summary>Scales a canvas for the text-scale accessibility option.</summary>
+    /// <summary>
+    /// Scales a canvas for the text-scale accessibility option. A
+    /// CanvasScaler rewrites Canvas.scaleFactor every frame, so when one is
+    /// present the scale must route through the scaler (constant-pixel-size
+    /// mode) or the setting silently loses; scale-with-screen-size canvases
+    /// adopt the option when the shared UI root migrates (#36).
+    /// </summary>
     public static void ApplyTextScale(Canvas canvas)
     {
-        if (canvas != null)
+        if (canvas == null)
+            return;
+
+        var scaler = canvas.GetComponent<UnityEngine.UI.CanvasScaler>();
+        if (scaler != null)
+        {
+            if (scaler.uiScaleMode == UnityEngine.UI.CanvasScaler.ScaleMode.ConstantPixelSize)
+                scaler.scaleFactor = TextScalePercent / 100f;
+        }
+        else
+        {
             canvas.scaleFactor = TextScalePercent / 100f;
+        }
     }
 
     // Snaps an arbitrary stored value to the nearest legal battle-speed step.

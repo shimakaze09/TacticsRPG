@@ -1987,6 +1987,54 @@ public class BattleProbeRunner : MonoBehaviour
             DifficultySettings.ReleaseBattleLock();
             Check("preference applies after the battle", DifficultySettings.Current == Difficulty.Hard);
 
+            // The settings UI reads and edits the stored preference — under
+            // the lock, Current keeps answering with the snapshot
+            DifficultySettings.Current = Difficulty.Easy;
+            DifficultySettings.LockForBattle();
+            DifficultySettings.Current = Difficulty.Hard;
+            Check("stored preference visible under the lock",
+                DifficultySettings.StoredPreference == Difficulty.Hard &&
+                DifficultySettings.Current == Difficulty.Easy);
+            DifficultySettings.ReleaseBattleLock();
+
+            // The session guard releases lock and pacing on ANY battle exit,
+            // and pause-resume restores the armed snapshot, not a preference
+            // changed mid-battle (PR #100 review)
+            float scaleBefore = Time.timeScale;
+            GameSettings.BattleSpeedPercent = 150;
+            var guardGo = new GameObject("Probe Session Guard");
+            guardGo.AddComponent<BattleSessionGuard>().Arm();
+            GameSettings.BattleSpeedPercent = 200;
+            Check("guard arms lock, pacing, and the resume snapshot",
+                DifficultySettings.IsLockedForBattle &&
+                Mathf.Approximately(Time.timeScale, 1.5f) &&
+                BattleSessionGuard.ActiveBattleSpeedPercent == 150,
+                $"scale {Time.timeScale}, snapshot {BattleSessionGuard.ActiveBattleSpeedPercent}");
+            DestroyImmediate(guardGo);
+            Check("abnormal battle exit releases lock and pacing",
+                !DifficultySettings.IsLockedForBattle &&
+                Mathf.Approximately(Time.timeScale, 1f) &&
+                BattleSessionGuard.ActiveBattleSpeedPercent == null);
+            Time.timeScale = scaleBefore;
+
+            // Immediate settings genuinely apply: audio to the listener,
+            // text scale through a CanvasScaler when one is present
+            float volumeBefore = AudioListener.volume;
+            GameSettings.SfxVolume = 60;
+            GameSettings.ApplyImmediate();
+            Check("sfx volume drives the listener", Mathf.Approximately(AudioListener.volume, 0.6f),
+                AudioListener.volume.ToString());
+            AudioListener.volume = volumeBefore;
+
+            var canvasGo = new GameObject("Probe Scaled Canvas", typeof(Canvas), typeof(UnityEngine.UI.CanvasScaler));
+            var probeScaler = canvasGo.GetComponent<UnityEngine.UI.CanvasScaler>();
+            probeScaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ConstantPixelSize;
+            GameSettings.TextScalePercent = 120;
+            GameSettings.ApplyTextScale(canvasGo.GetComponent<Canvas>());
+            Check("text scale routes through the canvas scaler",
+                Mathf.Approximately(probeScaler.scaleFactor, 1.2f), probeScaler.scaleFactor.ToString());
+            DestroyImmediate(canvasGo);
+
             // The panel builds itself without scene wiring
             var panel = SettingsPanelController.Open();
             Check("settings panel opens", SettingsPanelController.IsOpen);

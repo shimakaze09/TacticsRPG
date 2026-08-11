@@ -50,9 +50,9 @@ public class InitBattleState : BattleState
     private IEnumerator Init()
     {
         // Snapshot difficulty before any stat/AI work and apply the paced
-        // battle speed — both release in EndBattleState (issue #62)
-        DifficultySettings.LockForBattle();
-        Time.timeScale = GameSettings.BattleSpeedPercent / 100f;
+        // battle speed; the guard's OnDestroy releases both on ANY battle
+        // exit, normal or abnormal (issue #62)
+        owner.gameObject.AddComponent<BattleSessionGuard>().Arm();
 
         var definition = Definition;
         var level = Level;

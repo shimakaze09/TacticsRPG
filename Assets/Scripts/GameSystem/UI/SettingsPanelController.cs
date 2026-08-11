@@ -91,10 +91,11 @@ public class SettingsPanelController : MonoBehaviour
 
     #region Row actions
 
-    // Difficulty flips between the two modes; combat reads it next battle
+    // Difficulty flips the STORED preference — during a battle, Current
+    // answers with the locked snapshot, so the preference is the edit target
     private void StepDifficulty(int direction)
     {
-        DifficultySettings.Current = DifficultySettings.Current == Difficulty.Easy ? Difficulty.Hard : Difficulty.Easy;
+        DifficultySettings.Current = DifficultySettings.StoredPreference == Difficulty.Easy ? Difficulty.Hard : Difficulty.Easy;
         RefreshAll();
     }
 
@@ -197,12 +198,15 @@ public class SettingsPanelController : MonoBehaviour
         if (difficultyValue == null)
             return;
 
-        difficultyValue.text = DifficultySettings.Current.ToString();
-        difficultyDescription.text = DifficultySettings.Current == Difficulty.Hard
+        // Display the stored preference, not the battle-locked snapshot —
+        // otherwise a mid-battle change looks like it did nothing
+        Difficulty preference = DifficultySettings.StoredPreference;
+        difficultyValue.text = preference.ToString();
+        difficultyDescription.text = preference == Difficulty.Hard
             ? "Tactical AI; enemies gain +30% HP and +20% damage. Rewards are identical."
             : "Classic patterned AI; enemies fight at their listed stats.";
-        if (DifficultySettings.IsLockedForBattle)
-            difficultyDescription.text += " Takes effect next battle.";
+        if (DifficultySettings.IsLockedForBattle && preference != DifficultySettings.Current)
+            difficultyDescription.text += " Change takes effect next battle.";
 
         musicValue.text = GameSettings.MusicVolume + "%";
         sfxValue.text = GameSettings.SfxVolume + "%";

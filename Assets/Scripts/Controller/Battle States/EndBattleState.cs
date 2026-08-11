@@ -11,10 +11,9 @@ public class EndBattleState : BattleState
     {
         base.Enter();
 
-        // The battle's difficulty snapshot and pacing end with the battle
-        // (issue #62)
-        DifficultySettings.ReleaseBattleLock();
-        Time.timeScale = 1f;
+        // The battle's difficulty snapshot and pacing end with the battle;
+        // the guard also releases on destroy for abnormal exits (issue #62)
+        BattleSessionGuard.Release();
 
         bool victory = CheckVictoryCondition();
 

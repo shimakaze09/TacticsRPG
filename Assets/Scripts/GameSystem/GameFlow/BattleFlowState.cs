@@ -176,8 +176,9 @@ public class BattleFlowState : BaseGameFlowState
     public void ResumeBattle()
     {
         Debug.Log("[BattleFlowState] Resuming battle");
-        // Resume to the configured battle pacing, not hard 1× (issue #62)
-        Time.timeScale = GameSettings.BattleSpeedPercent / 100f;
+        // Resume to the pacing THIS battle started with — a preference
+        // changed mid-battle waits for the next one (issue #62)
+        Time.timeScale = (BattleSessionGuard.ActiveBattleSpeedPercent ?? GameSettings.BattleSpeedPercent) / 100f;
 
         // TODO: Hide pause menu
         // Controller.UIManager.HidePanel<PauseMenuPanel>();

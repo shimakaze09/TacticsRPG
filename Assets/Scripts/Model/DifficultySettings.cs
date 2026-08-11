@@ -44,6 +44,14 @@ public static class DifficultySettings
     public static bool IsLockedForBattle => battleLock.HasValue;
 
     /// <summary>
+    /// The saved preference regardless of any battle lock — what settings
+    /// UIs display and edit, since Current answers with the snapshot while
+    /// a battle runs.
+    /// </summary>
+    public static Difficulty StoredPreference =>
+        (Difficulty)PlayerPrefs.GetInt(PrefsKey, (int)Difficulty.Easy);
+
+    /// <summary>
     /// Snapshots the current difficulty for the duration of a battle —
     /// called by battle init before any difficulty-dependent stat or AI work.
     /// </summary>
