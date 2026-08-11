@@ -169,8 +169,9 @@ public class JobManager : MonoBehaviour, IDataPersistence
             progressData.UnlockJob(sawbones);
         }
 
-        // Sync abilities
+        // Sync abilities and grant the certification's free starter kit
         abilityMemory.SyncLearnedAbilities(progressData, allJobs);
+        GrantStarterKit();
 
         // Calculate initial stats and fill HP/MP for the fresh unit
         RecalculateStats(true);
@@ -240,6 +241,16 @@ public class JobManager : MonoBehaviour, IDataPersistence
         // Recalculate stats based on new job
         RecalculateStats();
 
+        // The battle kit follows the certification: rebuild the ability
+        // catalog and the usable-ability projection in the same frame
+        // (issue #17)
+        UnitFactory.RebuildAbilityCatalog(gameObject, newJob.abilityCatalogName);
+
+        // Every certification includes its basics: entering a job grants its
+        // Grade-1 abilities to player-owned units (idempotent)
+        GrantStarterKit();
+        InvalidateLoadout();
+
         // Publish job switched event
         this.Publish(new JobSwitchedEvent(this, oldJob, newJob));
 
@@ -247,6 +258,95 @@ public class JobManager : MonoBehaviour, IDataPersistence
 
         return true;
     }
+
+    #region Battle Loadout (issue #17)
+
+    // Display names of abilities this unit may currently use in battle;
+    // null means the projection needs a rebuild
+    private HashSet<string> usableAbilityNames;
+
+    /// <summary>
+    /// Whether the named ability (display name, as runtime ability objects
+    /// are named) is part of this unit's battle loadout: the projection of
+    /// current job, grade gates, and — for player-owned units — purchased
+    /// abilities. The basic Attack is always usable.
+    /// </summary>
+    public bool IsAbilityUsable(string abilityName)
+    {
+        if (string.IsNullOrEmpty(abilityName) || abilityName == "Attack")
+            return true;
+
+        if (usableAbilityNames == null)
+            RebuildLoadout();
+
+        return usableAbilityNames.Contains(abilityName);
+    }
+
+    /// <summary>
+    /// Marks the projection stale; the next usability query rebuilds it —
+    /// job switches, purchases, level-ups, and loads all invalidate.
+    /// </summary>
+    public void InvalidateLoadout()
+    {
+        usableAbilityNames = null;
+    }
+
+    // Builds the usable set. Player-owned (Hero) units use grade gates AND
+    // purchases (Cert buys abilities, issue #51); generated enemies have no
+    // purchase economy, so their kit projects from the grade a player of
+    // their character level would plausibly hold (level × jpPerLevel run
+    // through the job's own JP curve) — capstones no longer appear on
+    // low-level spawns.
+    private void RebuildLoadout()
+    {
+        usableAbilityNames = new HashSet<string>();
+        var job = CurrentJob;
+        if (job == null)
+            return;
+
+        var persistent = IsPersistentUnit();
+        var grade = persistent
+            ? CurrentJobLevel
+            : job.GetJobLevelForJP((rank != null ? rank.LVL : 1) * jpPerLevel);
+
+        foreach (var unlock in job.abilityUnlocks)
+        {
+            if (unlock == null || unlock.unlockAtJobLevel > grade)
+                continue;
+
+            var id = string.IsNullOrEmpty(unlock.abilityId) ? unlock.abilityName : unlock.abilityId;
+            if (persistent && !abilityMemory.HasLearnedAbility(id))
+                continue;
+
+            usableAbilityNames.Add(unlock.abilityName);
+        }
+    }
+
+    /// <summary>
+    /// Grants the current job's Grade-1 abilities to a player-owned unit as
+    /// its free starter kit — the certification includes the basics; every
+    /// higher unlock is purchased with Cert (issues #17/#51). No-op for
+    /// generated enemies, whose kits project from grade instead.
+    /// </summary>
+    public void GrantStarterKit()
+    {
+        var job = CurrentJob;
+        if (job == null || !IsPersistentUnit())
+            return;
+
+        foreach (var unlock in job.abilityUnlocks)
+        {
+            if (unlock == null || unlock.unlockAtJobLevel > 1)
+                continue;
+
+            var id = string.IsNullOrEmpty(unlock.abilityId) ? unlock.abilityName : unlock.abilityId;
+            abilityMemory.LearnAbility(id);
+        }
+
+        InvalidateLoadout();
+    }
+
+    #endregion
 
     /// <summary>
     /// Attempts to unlock a job if prerequisites are met
@@ -390,6 +490,7 @@ public class JobManager : MonoBehaviour, IDataPersistence
 
         // Grades make abilities purchasable, never learned: Cert buys
         // abilities (GDD design call, issue #51) via PurchaseAbility
+        InvalidateLoadout();
 
         // Recalculate stats (job level affects stats)
         RecalculateStats();
@@ -411,6 +512,7 @@ public class JobManager : MonoBehaviour, IDataPersistence
         var result = abilityMemory.PurchaseAbility(progressData, job, abilityId);
         if (result == AbilityMemory.PurchaseResult.Success)
         {
+            InvalidateLoadout();
             this.Publish(new AbilityLearnedEvent(this, abilityId, job));
             Debug.Log($"{gameObject.name} purchased ability: {abilityId}");
         }
@@ -723,8 +825,9 @@ public class JobManager : MonoBehaviour, IDataPersistence
                 Debug.LogWarning($"Repaired ability memory for {unitName}: removed {repaired} leaked abilities");
         }
 
-        // Recalculate stats after loading
+        // Recalculate stats and re-project the battle loadout after loading
         RecalculateStats();
+        InvalidateLoadout();
 
         Debug.Log($"Loaded job data for {unitName}: {progressData}");
     }
