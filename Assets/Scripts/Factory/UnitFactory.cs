@@ -161,6 +161,24 @@ public static class UnitFactory
         Debug.Log($"Added JobManager to {obj.name} with job: {jobDefinition.jobName}");
     }
 
+    /// <summary>
+    /// Replaces the unit's runtime ability catalog with another job's — the
+    /// outgoing catalog is deactivated before its deferred destroy so
+    /// same-frame queries only ever see the replacement. Used when a spawn
+    /// override switches the job after the recipe built the original kit.
+    /// </summary>
+    public static void RebuildAbilityCatalog(GameObject obj, string catalogName)
+    {
+        var existing = obj.GetComponentInChildren<AbilityCatalog>();
+        if (existing != null)
+        {
+            existing.gameObject.SetActive(false);
+            Object.Destroy(existing.gameObject);
+        }
+
+        CreateJobAbilityCatalog(obj, catalogName);
+    }
+
     private static void CreateJobAbilityCatalog(GameObject obj, string catalogName)
     {
         if (string.IsNullOrEmpty(catalogName))

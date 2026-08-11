@@ -88,6 +88,7 @@ public class BattleProbeRunner : MonoBehaviour
             yield return StartCoroutine(ProbeControlStatuses(bc));
             ProbeTerrain(bc);
             ProbeLevelScaling();
+            ProbeSpawnOverridesAndGoldens(bc);
             ProbeGrowthModel();
             ProbeGrowthBands();
             ProbeGrowthGoldenBuilds();
@@ -252,9 +253,18 @@ public class BattleProbeRunner : MonoBehaviour
                     justified.Add(name);
             }
 
+            // Mirror RepairLearnedAbilities' policy: only entries the old
+            // locked-job leak can explain are violations — save-loaded
+            // grandfathered purchases/grants are kept by design (issue #51)
+            var leakable = new HashSet<string>();
+            foreach (var job in jm.allJobs)
+                if (job != null && !progress.IsJobUnlocked(job))
+                    foreach (var name in job.GetUnlockedAbilities(1))
+                        leakable.Add(name);
             foreach (var learned in memory.learnedAbilities)
-                Check("learned ability justified " + u.name, justified.Contains(learned),
-                    learned + " has no backing job progress");
+                Check("learned ability not leak-attributable " + u.name,
+                    justified.Contains(learned) || !leakable.Contains(learned),
+                    learned + " is a locked job's grade-1 ability with no backing progress");
 
             // Re-sync must not add anything new for unchanged progress
             var before = memory.GetLearnedAbilityCount();
@@ -1562,6 +1572,206 @@ public class BattleProbeRunner : MonoBehaviour
         }
 
         Destroy(unit);
+        DifficultySettings.Current = savedDifficulty;
+    }
+
+    // ---- issue #52: authored overrides + archetype goldens ------------------
+
+    // Reviewed golden rows (MHP, ATK, MAT) for the three generated-enemy
+    // archetypes at levels 1/10/30/99 — striker (Enemy Warrior, marksman
+    // kit), skirmisher (Enemy Rogue, scav kit), caster (Enemy Wizard,
+    // ghostspeaker kit) — plus the full statOrder row for the boss archetype
+    // built from SpawnEntry overrides (warden job, grade 8, twohead_blade)
+    // at level 30. Hard constants on the Easy fixture with recipe gear:
+    // formula or data drift fails loudly; retune only with a conscious,
+    // reviewed balance change.
+    private static readonly int[,] GoldenStrikerRows = { { 51, 17, 2 }, { 165, 40, 7 }, { 418, 92, 17 }, { 1291, 272, 53 } };
+    private static readonly int[,] GoldenSkirmisherRows = { { 51, 12, 3 }, { 165, 27, 10 }, { 418, 60, 26 }, { 1291, 174, 81 } };
+    private static readonly int[,] GoldenCasterRows = { { 38, 2, 16 }, { 123, 6, 36 }, { 312, 15, 82 }, { 964, 46, 239 } };
+    private static readonly int[] GoldenBossRow = { 1311, 84, 117, 151, 21, 58, 37 };
+
+    // The remaining issue #52 contract: SpawnEntry overrides build the boss
+    // archetype (job/grade/gear replaced, stats recalculated), archetype
+    // stats land exactly on the reviewed rows at 1/10/30/99, and Toll Road's
+    // authored levels (heroes 10, enemies 9) produce basic-attack
+    // hits-to-KO inside the WORLD §4b 2-6 band under the locked formula.
+    private void ProbeSpawnOverridesAndGoldens(BattleController bc)
+    {
+        var savedDifficulty = DifficultySettings.Current;
+        DifficultySettings.Current = Difficulty.Easy;
+
+        // Archetype goldens against the hard rows
+        var recipes = new[] { "Enemy Warrior", "Enemy Rogue", "Enemy Wizard" };
+        var rows = new[] { GoldenStrikerRows, GoldenSkirmisherRows, GoldenCasterRows };
+        int[] levels = { 1, 10, 30, 99 };
+        for (var r = 0; r < recipes.Length; r++)
+        {
+            for (var l = 0; l < levels.Length; l++)
+            {
+                var spawned = UnitFactory.Create(recipes[r], levels[l]);
+                if (spawned == null)
+                {
+                    Check("golden archetype spawns " + recipes[r], false);
+                    continue;
+                }
+
+                var stats = spawned.GetComponent<Stats>();
+                Check($"{recipes[r]} L{levels[l]} golden row",
+                    stats[StatTypes.MHP] == rows[r][l, 0] &&
+                    stats[StatTypes.ATK] == rows[r][l, 1] &&
+                    stats[StatTypes.MAT] == rows[r][l, 2],
+                    $"got {stats[StatTypes.MHP]}/{stats[StatTypes.ATK]}/{stats[StatTypes.MAT]}, expected {rows[r][l, 0]}/{rows[r][l, 1]}/{rows[r][l, 2]}");
+                Destroy(spawned);
+            }
+        }
+
+        // Boss archetype via SpawnEntry overrides, end to end through the
+        // real spawner: job, grade, and gear all replaced, then recalculated
+        Tile bossTile = null;
+        foreach (var t in bc.board.tiles.Values)
+        {
+            if (t.content == null && t.CanStop(TileTraversalFlags.Ground))
+            {
+                bossTile = t;
+                break;
+            }
+        }
+
+        Check("boss override found a tile", bossTile != null);
+        if (bossTile != null)
+        {
+            var entry = new SpawnEntry
+            {
+                recipe = "Enemy Rogue",
+                level = 30,
+                position = bossTile.pos,
+                jobOverride = "warden",
+                gradeOverride = 8,
+                gearOverride = new List<string> { "twohead_blade" }
+            };
+            var boss = BattleSpawner.Spawn(bc, entry, null);
+            Check("boss override spawns", boss != null);
+            if (boss != null)
+            {
+                var jm = boss.GetComponent<JobManager>();
+                var stats = boss.GetComponent<Stats>();
+                Check("boss override switches the job",
+                    jm.CurrentJob != null && jm.CurrentJob.id == "warden",
+                    jm.CurrentJob != null ? jm.CurrentJob.id : "null");
+                Check("boss override applies the grade", jm.CurrentJobLevel == 8,
+                    "grade " + jm.CurrentJobLevel);
+                Check("boss override replaces the gear",
+                    boss.GetComponent<Equipment>().items.Count == 1,
+                    boss.GetComponent<Equipment>().items.Count + " items");
+
+                // The runtime kit must follow the override job — the recipe
+                // built the rogue catalog before the switch (PR #96 review)
+                var bossCatalog = boss.GetComponentInChildren<AbilityCatalog>();
+                var catalogJobs = new HashSet<string>();
+                if (bossCatalog != null)
+                {
+                    foreach (var a in bossCatalog.GetComponentsInChildren<Ability>(true))
+                        catalogJobs.Add(a.name);
+                }
+
+                string wardenAbility = null;
+                foreach (var unlock in jm.CurrentJob.abilityUnlocks)
+                {
+                    if (unlock.unlockAtJobLevel <= 1)
+                    {
+                        wardenAbility = unlock.abilityName;
+                        break;
+                    }
+                }
+
+                Check("boss override rebuilds the ability catalog",
+                    bossCatalog != null && bossCatalog.gameObject.activeSelf &&
+                    wardenAbility != null && catalogJobs.Contains(wardenAbility),
+                    wardenAbility == null ? "no warden unlock" : string.Join(",", catalogJobs));
+                var order = JobManager.statOrder;
+                var bossMatch = true;
+                var got = "";
+                for (var i = 0; i < order.Length; i++)
+                {
+                    bossMatch &= stats[order[i]] == GoldenBossRow[i];
+                    got += (i > 0 ? "/" : "") + stats[order[i]];
+                }
+
+                Check("boss archetype golden row", bossMatch, "got " + got);
+
+                bc.units.Remove(boss);
+                bossTile.content = null;
+                Destroy(boss.gameObject);
+            }
+        }
+
+        // Toll Road validation under the locked formula: its authored levels
+        // (heroes 10, enemies 9) must put basic-attack hits-to-KO in the
+        // WORLD §4b 2-6 band for the matchups the design tunes — the hero
+        // striker killing a skirmisher, and the enemy damage-dealer
+        // (Enemy Warrior's marksman kit) threatening the squishiest hero
+        // (Hania, sawbones). The party tank soaking many light hits is the
+        // warden archetype working, not a band violation.
+        Tile heroTile = null, foeTile = null;
+        foreach (var t in bc.board.tiles.Values)
+        {
+            if (t.content != null || !t.CanStop(TileTraversalFlags.Ground))
+                continue;
+            if (heroTile == null)
+            {
+                heroTile = t;
+            }
+            else if (foeTile == null && (Mathf.Abs(t.pos.x - heroTile.pos.x) + Mathf.Abs(t.pos.y - heroTile.pos.y)) == 1)
+            {
+                foeTile = t;
+                break;
+            }
+        }
+
+        Check("toll road validation found tiles", heroTile != null && foeTile != null);
+        if (heroTile != null && foeTile != null)
+        {
+            var strikerGo = UnitFactory.Create("Alaois", 10);
+            var skirmisherGo = UnitFactory.Create("Enemy Rogue", 9);
+            var striker = strikerGo.GetComponent<Unit>();
+            var skirmisher = skirmisherGo.GetComponent<Unit>();
+            striker.Place(heroTile);
+            striker.Match();
+            skirmisher.Place(foeTile);
+            skirmisher.Match();
+
+            var heroHit = -AttackOf(striker).GetComponentInChildren<DamageAbilityEffect>().Predict(skirmisher.tile);
+            var skirmisherHp = skirmisherGo.GetComponent<Stats>()[StatTypes.MHP];
+            var heroTtk = heroHit > 0 ? Mathf.CeilToInt(skirmisherHp / (float)heroHit) : 99;
+            Check("toll road hero-vs-enemy TTK in the 2-6 band",
+                heroTtk >= 2 && heroTtk <= 6, $"dmg {heroHit} vs {skirmisherHp} HP = {heroTtk} hits");
+
+            heroTile.content = null;
+            foeTile.content = null;
+            Destroy(strikerGo);
+            Destroy(skirmisherGo);
+
+            var squishyGo = UnitFactory.Create("Hania", 10);
+            var damageGo = UnitFactory.Create("Enemy Warrior", 9);
+            var squishy = squishyGo.GetComponent<Unit>();
+            var damageDealer = damageGo.GetComponent<Unit>();
+            squishy.Place(heroTile);
+            squishy.Match();
+            damageDealer.Place(foeTile);
+            damageDealer.Match();
+
+            var foeHit = -AttackOf(damageDealer).GetComponentInChildren<DamageAbilityEffect>().Predict(squishy.tile);
+            var squishyHp = squishyGo.GetComponent<Stats>()[StatTypes.MHP];
+            var foeTtk = foeHit > 0 ? Mathf.CeilToInt(squishyHp / (float)foeHit) : 99;
+            Check("toll road enemy-vs-squishy TTK in the 2-6 band",
+                foeTtk >= 2 && foeTtk <= 6, $"dmg {foeHit} vs {squishyHp} HP = {foeTtk} hits");
+
+            heroTile.content = null;
+            foeTile.content = null;
+            Destroy(squishyGo);
+            Destroy(damageGo);
+        }
+
         DifficultySettings.Current = savedDifficulty;
     }
 
