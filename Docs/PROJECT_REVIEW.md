@@ -76,8 +76,8 @@ this snapshot.
 
 - Almost all runtime types live in the global namespace.
 - There are no assembly-definition boundaries for runtime, editor, and tests.
-- Duplicate infrastructure remains, including two `SerializableDictionary`
-  implementations.
+- Pockets of duplicate infrastructure remain (the two `SerializableDictionary`
+  implementations have since been consolidated into one — issue #22).
 - Several coordinators combine orchestration, state, query logic, and policy;
   `JobManager`, `UIManager`, `GameFlowController`, `PostBattleController`, and
   `TacticalComputerPlayer` are extraction-sensitive as they evolve. Classified

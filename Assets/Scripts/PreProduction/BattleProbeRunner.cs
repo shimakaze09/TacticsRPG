@@ -79,6 +79,7 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeCertPurchases(bc);
             ProbeStateMachineAtomicity();
             ProbeGameFlowAtomicity();
+            ProbeEventBusLifecycle();
             ProbeWeaponBehavior(bc);
             ProbeTraits(bc);
             ProbeElementsAndCrits(bc);
@@ -91,11 +92,14 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeGrowthBands();
             ProbeGrowthGoldenBuilds();
             ProbeJobThresholds();
+            ProbeSerializableDictionary();
             ProbeControlBudget(bc);
             // Tempo statuses add/remove effects, which destroy deferred
             yield return StartCoroutine(ProbeTempoStatuses(bc));
             // Drives real tween ticks and pool teardown across frames
             yield return StartCoroutine(ProbePoolAndTweenLifecycles(bc));
+            ProbeAiPlanningExtraction(bc);
+            ProbeAiScenarios(bc);
             ProbeClockAndWaves(bc); // mutates turn count
             // Publishes whole rounds of turn events — keep dead last
             yield return StartCoroutine(ProbeControlExpiry(bc));
@@ -608,6 +612,141 @@ public class BattleProbeRunner : MonoBehaviour
         flow.UnregisterListener(listener);
         DestroyImmediate(go);
         Check("transient flow controller cleaned up", GameFlowController.Instance == null);
+    }
+
+    // ---- issue #24: event-bus lifecycle -------------------------------------
+
+    // Probe-local event type; real game events live in EventArgs/
+    private class ProbeBusEvent
+    {
+    }
+
+    // Subscriber component whose destruction must silence and prune its
+    // global subscription
+    private class ProbeBusListener : MonoBehaviour
+    {
+        public int received;
+
+        // Global handler with this component as the delegate target
+        public void Handle(ProbeBusEvent e)
+        {
+            received++;
+        }
+    }
+
+    // The issue #24 contract: sender-scoped delivery precedes global,
+    // duplicates are rejected, mutation during publish has defined
+    // semantics (adds wait for the next publish, removals still receive the
+    // in-flight event), and destroyed delegate targets are never invoked
+    // and get pruned — by publish, by the sweep, and counted by diagnostics.
+    private void ProbeEventBusLifecycle()
+    {
+        var bus = GameEventBus.Instance;
+        var busEventType = typeof(ProbeBusEvent);
+
+        // Ordering: sender-scoped handlers run before global ones
+        var orderLog = new List<string>();
+        System.Action<ProbeBusEvent> senderHandler = _ => orderLog.Add("sender");
+        System.Action<ProbeBusEvent> globalHandler = _ => orderLog.Add("global");
+        var senderObj = new object();
+        bus.Subscribe(globalHandler);
+        bus.Subscribe(senderHandler, senderObj);
+        bus.Publish(new ProbeBusEvent(), senderObj);
+        Check("sender-scoped delivery precedes global",
+            orderLog.Count == 2 && orderLog[0] == "sender" && orderLog[1] == "global",
+            string.Join(",", orderLog));
+
+        // Duplicate subscription (same handler + sender) is rejected
+        bus.Subscribe(globalHandler);
+        orderLog.Clear();
+        bus.Publish(new ProbeBusEvent(), senderObj);
+        Check("duplicate subscription rejected", orderLog.Count == 2,
+            orderLog.Count + " deliveries");
+        bus.Unsubscribe(senderHandler, senderObj);
+        bus.Unsubscribe(globalHandler);
+
+        // A handler subscribed during a publish waits for the next publish
+        var lateCalls = 0;
+        System.Action<ProbeBusEvent> late = _ => lateCalls++;
+        System.Action<ProbeBusEvent> adder = _ => bus.Subscribe(late);
+        bus.Subscribe(adder);
+        bus.Publish(new ProbeBusEvent());
+        Check("handler added during publish waits", lateCalls == 0, lateCalls + " calls");
+        bus.Publish(new ProbeBusEvent());
+        Check("handler added during publish gets the next", lateCalls == 1, lateCalls + " calls");
+        bus.Unsubscribe(adder);
+        bus.Unsubscribe(late);
+
+        // A handler unsubscribed during a publish still receives the
+        // in-flight event (delivery list is copy-on-write)
+        var removedCalls = 0;
+        System.Action<ProbeBusEvent> removed = _ => removedCalls++;
+        System.Action<ProbeBusEvent> remover = _ => bus.Unsubscribe(removed);
+        bus.Subscribe(remover);
+        bus.Subscribe(removed);
+        bus.Publish(new ProbeBusEvent());
+        Check("handler removed during publish gets the in-flight event",
+            removedCalls == 1, removedCalls + " calls");
+        bus.Publish(new ProbeBusEvent());
+        Check("handler removed during publish is gone afterwards",
+            removedCalls == 1, removedCalls + " calls");
+        bus.Unsubscribe(remover);
+
+        // Nested publish of the same event type: the copy-on-write marker
+        // must survive until the OUTERMOST publish returns — a handler that
+        // subscribes after a nested publish completed must still wait for
+        // the next outer publish (PR #92 review regression)
+        var h3Calls = 0;
+        System.Action<ProbeBusEvent> h3 = _ => h3Calls++;
+        var h1Calls = 0;
+        System.Action<ProbeBusEvent> h1 = _ =>
+        {
+            h1Calls++;
+            if (h1Calls == 1)
+                bus.Publish(new ProbeBusEvent());
+        };
+        var h2Calls = 0;
+        System.Action<ProbeBusEvent> h2 = _ =>
+        {
+            h2Calls++;
+            if (h2Calls == 2)
+                bus.Subscribe(h3);
+        };
+        bus.Subscribe(h1);
+        bus.Subscribe(h2);
+        bus.Publish(new ProbeBusEvent());
+        Check("subscribe after nested publish still waits", h3Calls == 0,
+            $"h3 {h3Calls}, h1 {h1Calls}, h2 {h2Calls}");
+        bus.Publish(new ProbeBusEvent());
+        Check("subscribe after nested publish gets the next outer publish", h3Calls == 1,
+            h3Calls + " calls");
+        bus.Unsubscribe(h1);
+        bus.Unsubscribe(h2);
+        bus.Unsubscribe(h3);
+
+        // A destroyed component's global subscription (null sender, dead
+        // delegate target) is never invoked and publish prunes it
+        var go = new GameObject("Probe Bus Listener");
+        var listener = go.AddComponent<ProbeBusListener>();
+        bus.Subscribe<ProbeBusEvent>(listener.Handle);
+        bus.Publish(new ProbeBusEvent());
+        Check("live component handler invoked", listener.received == 1,
+            listener.received + " calls");
+        DestroyImmediate(go);
+        Check("destroyed target counted by diagnostics", bus.CountDeadSubscriptions() >= 1,
+            bus.CountDeadSubscriptions() + " dead");
+        bus.Publish(new ProbeBusEvent());
+        Check("publish skips and prunes destroyed targets",
+            bus.CountDeadSubscriptions() == 0 && bus.CountSubscriptions(busEventType) == 0,
+            $"dead {bus.CountDeadSubscriptions()}, live {bus.CountSubscriptions(busEventType)}");
+
+        // The sweep the scene-unload hook calls prunes without a publish
+        var go2 = new GameObject("Probe Bus Listener 2");
+        var listener2 = go2.AddComponent<ProbeBusListener>();
+        bus.Subscribe<ProbeBusEvent>(listener2.Handle);
+        DestroyImmediate(go2);
+        Check("cleanup sweep prunes dead subscriptions",
+            bus.CleanupDestroyedObjects() >= 1 && bus.CountDeadSubscriptions() == 0);
     }
 
     // ---- 1.9b/1.9c: weapon behavior --------------------------------------
@@ -1679,6 +1818,66 @@ public class BattleProbeRunner : MonoBehaviour
         }
     }
 
+    // ---- issue #22: serializable dictionary ----
+
+    // JsonUtility wrapper mirroring how GameData embeds its dictionaries as
+    // serialized fields (JsonUtility is exercised the way real saves use it)
+    [System.Serializable]
+    private class DictProbeWrapper
+    {
+        public SerializableDictionary<string, int> ints = new SerializableDictionary<string, int>();
+        public SerializableDictionary<string, string> strings = new SerializableDictionary<string, string>();
+    }
+
+    // The save-dictionary contract: JsonUtility round-trips preserve content,
+    // the shipped "keys"/"values" field names stay stable so old saves load,
+    // duplicate serialized keys resolve last-wins instead of throwing
+    // mid-load, null values keep their key, and reserialization is stable
+    private void ProbeSerializableDictionary()
+    {
+        var empty = JsonUtility.FromJson<DictProbeWrapper>(JsonUtility.ToJson(new DictProbeWrapper()));
+        Check("dict empty round-trip", empty.ints.Count == 0 && empty.strings.Count == 0);
+
+        var w = new DictProbeWrapper();
+        w.ints["ash"] = 1;
+        w.ints["briar"] = 2;
+        w.ints["fen"] = -3;
+        var json = JsonUtility.ToJson(w);
+        Check("dict json keeps shipped field names",
+            json.Contains("\"keys\"") && json.Contains("\"values\""));
+
+        var back = JsonUtility.FromJson<DictProbeWrapper>(json);
+        Check("dict populated round-trip",
+            back.ints.Count == 3 && back.ints["ash"] == 1 && back.ints["briar"] == 2 && back.ints["fen"] == -3);
+        Check("dict reserialize stable", JsonUtility.ToJson(back) == json);
+
+        // Hand-built corrupt payload: the same key twice must not abort the
+        // load — the later pair wins
+        var dup = JsonUtility.FromJson<DictProbeWrapper>(
+            "{\"ints\":{\"keys\":[\"ash\",\"ash\"],\"values\":[1,2]},\"strings\":{\"keys\":[],\"values\":[]}}");
+        Check("dict duplicate key last-wins",
+            dup.ints.Count == 1 && dup.ints["ash"] == 2,
+            "count " + dup.ints.Count + (dup.ints.ContainsKey("ash") ? ", value " + dup.ints["ash"] : ""));
+
+        // JsonUtility writes null strings as empty, so the key must survive
+        // with a null-or-empty value
+        var nulls = new DictProbeWrapper();
+        nulls.strings["hollow"] = null;
+        var nullsBack = JsonUtility.FromJson<DictProbeWrapper>(JsonUtility.ToJson(nulls));
+        Check("dict null value keeps its key",
+            nullsBack.strings.Count == 1 && string.IsNullOrEmpty(nullsBack.strings["hollow"]));
+
+        // Legacy shipped asset: Level_2 predates tileSkins and carries no
+        // serialized block — it must deserialize to a usable empty map, not
+        // null, because the board loaders index it unguarded (PR #93 review)
+        var legacy = Resources.Load<LevelData>("Levels/Level_2");
+        Check("legacy level asset loads", legacy != null);
+        if (legacy != null)
+            Check("legacy level has a usable empty skin map",
+                legacy.tileSkins != null && !legacy.tileSkins.TryGetValue(Vector3.zero, out _),
+                legacy.tileSkins == null ? "null map" : "count " + legacy.tileSkins.Count);
+    }
+
     // ---- issue #57: RES growth + control budget -----------------------------
 
     // The control contract: RES grows with level and job profile per
@@ -2117,6 +2316,426 @@ public class BattleProbeRunner : MonoBehaviour
         Check("unfrozen bystander never fallback-ticks", bystander != null && bystander.duration == 2,
             bystander != null ? "duration " + bystander.duration : "condition gone");
         bystander.Remove();
+    }
+
+    // ---- issue #25: AI planning extraction ----
+
+    // The tactical AI's planning must be a pure read of the battle:
+    // hypothetical placement may never leak into real occupancy, identical
+    // inputs must choose identical plans, a surrounded melee unit must still
+    // find candidates, and the Easy AI's fallbacks must resolve the real
+    // basic attack and survive malformed patterns without throwing.
+    private void ProbeAiPlanningExtraction(BattleController bc)
+    {
+        var rogue = Find(bc, "Enemy Rogue");
+        if (rogue == null || rogue.tile == null)
+        {
+            Check("ai planning cast present", false);
+            return;
+        }
+
+        var cpu = bc.GetComponent<TacticalComputerPlayer>();
+        if (cpu == null)
+            cpu = bc.gameObject.AddComponent<TacticalComputerPlayer>();
+
+        // Surround the rogue with living foes on its walkable neighbors so
+        // melee candidates must exist even with movement fully blocked
+        var rogueAlliance = rogue.GetComponent<Alliance>();
+        var foes = new List<Unit>();
+        foreach (var u in bc.units)
+        {
+            if (u == null || u == rogue || u.tile == null)
+                continue;
+            var ua = u.GetComponent<Alliance>();
+            var us = u.GetComponent<Stats>();
+            if (ua != null && us != null && us[StatTypes.HP] > 0 && rogueAlliance.IsMatch(ua, Targets.Foe))
+                foes.Add(u);
+        }
+
+        var offsets = new[] { new Point(0, 1), new Point(0, -1), new Point(1, 0), new Point(-1, 0) };
+        var movedFoes = new List<Unit>();
+        var homeTiles = new List<Tile>();
+        var adjacentFoes = 0;
+        var next = 0;
+        foreach (var offset in offsets)
+        {
+            var tile = bc.board.GetTile(rogue.tile.pos + offset);
+            if (tile == null || Mathf.Abs(tile.height - rogue.tile.height) > 1)
+                continue;
+
+            if (tile.content == null && next < foes.Count)
+            {
+                var foe = foes[next++];
+                movedFoes.Add(foe);
+                homeTiles.Add(foe.tile);
+                foe.Place(tile);
+            }
+
+            if (tile.content != null)
+            {
+                var occupant = tile.content.GetComponentInChildren<Unit>();
+                var oa = occupant != null ? occupant.GetComponent<Alliance>() : null;
+                if (oa != null && rogueAlliance.IsMatch(oa, Targets.Foe))
+                    adjacentFoes++;
+            }
+        }
+
+        Check("surround setup has an adjacent foe", adjacentFoes > 0);
+
+        // Candidate generation: a surrounded melee unit still finds options
+        var context = AiTurnContext.Build(bc, rogue);
+        var candidates = AiCandidateGenerator.Generate(context);
+        Check("surrounded melee unit yields candidates", candidates.Count > 0);
+
+        // Full Hard-AI evaluation is a pure read: every tile's occupancy and
+        // every unit's tile/facing must come back exactly as they were
+        var prevActor = bc.turn.actor;
+        bc.turn.actor = rogue;
+        var tiles = new List<Tile>(bc.board.tiles.Values);
+        var contentBefore = new List<GameObject>(tiles.Count);
+        foreach (var tile in tiles)
+            contentBefore.Add(tile.content);
+        var tileBefore = new Dictionary<Unit, Tile>();
+        var dirBefore = new Dictionary<Unit, Directions>();
+        foreach (var u in bc.units)
+        {
+            if (u == null)
+                continue;
+            tileBefore[u] = u.tile;
+            dirBefore[u] = u.dir;
+        }
+
+        var planA = cpu.Evaluate();
+
+        var occupancyIntact = true;
+        for (var i = 0; i < tiles.Count; i++)
+        {
+            if (tiles[i].content != contentBefore[i])
+            {
+                occupancyIntact = false;
+                break;
+            }
+        }
+
+        var unitsIntact = true;
+        foreach (var u in bc.units)
+        {
+            if (u == null)
+                continue;
+            if (tileBefore[u] != u.tile || dirBefore[u] != u.dir)
+            {
+                unitsIntact = false;
+                break;
+            }
+        }
+
+        Check("planning leaves tile occupancy untouched", occupancyIntact);
+        Check("planning leaves every unit in place", unitsIntact);
+
+        // Determinism: identical inputs choose the identical plan
+        var planB = cpu.Evaluate();
+        Check("planning is deterministic",
+            planA.ability == planB.ability &&
+            planA.moveLocation == planB.moveLocation &&
+            planA.fireLocation == planB.fireLocation &&
+            planA.attackDirection == planB.attackDirection &&
+            planA.actFirst == planB.actFirst &&
+            planA.postActMoveLocation == planB.postActMoveLocation);
+
+        bc.turn.actor = prevActor;
+        for (var i = 0; i < movedFoes.Count; i++)
+            movedFoes[i].Place(homeTiles[i]);
+
+        // The default plan resolves the real basic attack, not whichever
+        // ability descendant happens to be found first
+        var go = UnitFactory.Create("Enemy Warrior", 1);
+        var probeUnit = go.GetComponent<Unit>();
+        var basic = BasicAttackResolver.Resolve(probeUnit);
+        Check("default pattern resolves the Attack ability", basic != null && basic.name == "Attack",
+            basic == null ? "null" : basic.name);
+
+        // Malformed patterns degrade to safe fallbacks instead of throwing
+        var plan = new PlanOfAttack();
+        var pattern = go.AddComponent<AttackPattern>();
+        pattern.pickers = new List<BaseAbilityPicker>();
+        var threw = false;
+        try
+        {
+            pattern.Pick(plan);
+        }
+        catch
+        {
+            threw = true;
+        }
+
+        Check("empty attack pattern degrades without throwing", !threw && plan.ability == null);
+
+        var picker = go.AddComponent<RandomAbilityPicker>();
+        picker.pickers = new List<BaseAbilityPicker>();
+        threw = false;
+        try
+        {
+            picker.Pick(plan);
+        }
+        catch
+        {
+            threw = true;
+        }
+
+        Check("empty picker list degrades to the basic attack", !threw && plan.ability == basic,
+            plan.ability == null ? "null" : plan.ability.name);
+
+        Destroy(go);
+    }
+
+    // The four issue #25 decision scenarios, staged deterministically on the
+    // live board — focus fire on the nominated wounded target, no increased
+    // exposure for a critical unit, a healer spending its turn on the
+    // wounded ally, and safe degradation with no living foes — plus the
+    // PR #95 regression: a non-position-oriented candidate is scored from
+    // the exact tile it commits to.
+    private void ProbeAiScenarios(BattleController bc)
+    {
+        var rogue = Find(bc, "Enemy Rogue");
+        var hania = Find(bc, "Hania");
+        var alaois = Find(bc, "Alaois");
+        if (rogue == null || hania == null || alaois == null || rogue.tile == null)
+        {
+            Check("ai scenario cast present", false);
+            return;
+        }
+
+        var cpu = bc.GetComponent<TacticalComputerPlayer>();
+        if (cpu == null)
+            cpu = bc.gameObject.AddComponent<TacticalComputerPlayer>();
+
+        var prevActor = bc.turn.actor;
+        var rogueAlliance = rogue.GetComponent<Alliance>();
+        var haniaStats = hania.GetComponent<Stats>();
+        var alaoisStats = alaois.GetComponent<Stats>();
+        var rogueStats = rogue.GetComponent<Stats>();
+        var savedHaniaHp = haniaStats[StatTypes.HP];
+        var savedAlaoisHp = alaoisStats[StatTypes.HP];
+        var savedRogueHp = rogueStats[StatTypes.HP];
+        var savedRogueMp = rogueStats[StatTypes.MP];
+
+        // Stage proximity: from its home corner the rogue may reach nobody,
+        // which would make every scenario vacuous — stand it near the heroes
+        // for the focus/retreat checks and put it home afterwards
+        var rogueHome = rogue.tile;
+        var rogueHomeDir = rogue.dir;
+        Tile nearHania = null;
+        var stageOffsets = new[]
+        {
+            new Point(0, 2), new Point(2, 0), new Point(0, -2), new Point(-2, 0),
+            new Point(1, 1), new Point(1, -1), new Point(-1, 1), new Point(-1, -1)
+        };
+        foreach (var offset in stageOffsets)
+        {
+            var t = bc.board.GetTile(hania.tile.pos + offset);
+            if (t != null && t.content == null && Mathf.Abs(t.height - hania.tile.height) <= 2)
+            {
+                nearHania = t;
+                break;
+            }
+        }
+
+        Check("ai scenarios found a staging tile", nearHania != null);
+        if (nearHania == null)
+            return;
+
+        rogue.Place(nearHania);
+        rogue.Match();
+
+        // Focus: a badly wounded hero is nominated and hittable candidates
+        // that damage them exist
+        haniaStats.SetValue(StatTypes.HP, Mathf.Max(1, haniaStats[StatTypes.MHP] / 10), false);
+        bc.turn.actor = rogue;
+        var focusCtx = AiTurnContext.Build(bc, rogue);
+        Check("focus nominates the wounded hero", focusCtx.FocusTarget == hania,
+            focusCtx.FocusTarget != null ? focusCtx.FocusTarget.name : "null");
+        var focusCands = AiCandidateGenerator.Generate(focusCtx);
+        Check("candidates converge on the focus target",
+            focusCands.Exists(c => c.HitsFocus), focusCands.Count + " candidates");
+        haniaStats.SetValue(StatTypes.HP, savedHaniaHp, false);
+
+        // Retreat: a critical unit's committed stand tile never raises its
+        // exposure over standing still
+        rogueStats.SetValue(StatTypes.HP, Mathf.Max(1, rogueStats[StatTypes.MHP] / 10), false);
+        var retreatCtx = AiTurnContext.Build(bc, rogue);
+        var retreatPlan = cpu.Evaluate();
+        var startThreat = retreatCtx.GetThreat(rogue.tile);
+        var standPos = retreatPlan.actFirst ? retreatPlan.postActMoveLocation : retreatPlan.moveLocation;
+        var standTile = bc.board.GetTile(standPos);
+        Check("a critical unit never increases exposure",
+            standTile != null && retreatCtx.GetThreat(standTile) <= startThreat,
+            $"threat {startThreat} -> {(standTile != null ? retreatCtx.GetThreat(standTile) : -1f)}");
+        rogueStats.SetValue(StatTypes.HP, savedRogueHp, false);
+
+        // Put the rogue home before the support scenario — a foe parked
+        // beside the heroes floods the healing ground with threat, and the
+        // healer (correctly) refuses to heal from deadly tiles
+        rogue.Place(rogueHome);
+        rogue.dir = rogueHomeDir;
+        rogue.Match();
+
+        // Support: a healer next to a wounded ally spends the turn healing
+        // them. The spawned healer is deliberately not registered in
+        // bc.units — planning reads the roster for foes/allies, the actor
+        // itself only needs a tile. Every living enemy is parked in the far
+        // corner for the duration so the healing ground is genuinely safe.
+        alaoisStats.SetValue(StatTypes.HP, Mathf.Max(1, alaoisStats[StatTypes.MHP] * 3 / 10), false);
+        var parkedFoes = new List<Unit>();
+        var parkedHomes = new List<Tile>();
+        var farTiles = new List<Tile>(bc.board.tiles.Values);
+        farTiles.Sort((x, y) =>
+            (Mathf.Abs(y.pos.x - alaois.tile.pos.x) + Mathf.Abs(y.pos.y - alaois.tile.pos.y))
+            .CompareTo(Mathf.Abs(x.pos.x - alaois.tile.pos.x) + Mathf.Abs(x.pos.y - alaois.tile.pos.y)));
+        var farIndex = 0;
+        var heroAlliance = alaois.GetComponent<Alliance>();
+        foreach (var u in bc.units)
+        {
+            if (u == null || u.tile == null)
+                continue;
+            var ua = u.GetComponent<Alliance>();
+            var us = u.GetComponent<Stats>();
+            if (ua == null || us == null || us[StatTypes.HP] <= 0 || !heroAlliance.IsMatch(ua, Targets.Foe))
+                continue;
+            while (farIndex < farTiles.Count && farTiles[farIndex].content != null)
+                farIndex++;
+            if (farIndex >= farTiles.Count)
+                break;
+            parkedFoes.Add(u);
+            parkedHomes.Add(u.tile);
+            u.Place(farTiles[farIndex]);
+        }
+        var healerGo = UnitFactory.Create("Hania", 10);
+        var healer = healerGo.GetComponent<Unit>();
+        Tile healerTile = null;
+        var spawnOffsets = new[]
+        {
+            new Point(0, 1), new Point(0, -1), new Point(1, 0), new Point(-1, 0),
+            new Point(0, 2), new Point(2, 0), new Point(0, -2), new Point(-2, 0)
+        };
+        foreach (var offset in spawnOffsets)
+        {
+            var t = bc.board.GetTile(alaois.tile.pos + offset);
+            if (t != null && t.content == null && Mathf.Abs(t.height - alaois.tile.height) <= 2)
+            {
+                healerTile = t;
+                break;
+            }
+        }
+
+        Check("support scenario found a stand tile", healerTile != null);
+        if (healerTile != null)
+        {
+            healer.Place(healerTile);
+            healer.dir = Directions.North;
+            healer.Match();
+            bc.turn.actor = healer;
+            var supCtx = AiTurnContext.Build(bc, healer);
+            var supCands = AiCandidateGenerator.Generate(supCtx);
+            var supBest = 0f;
+            foreach (var c in supCands)
+                supBest = Mathf.Max(supBest, c.Score);
+            var supportPlan = cpu.Evaluate();
+            var healEffect = supportPlan != null && supportPlan.ability != null
+                ? supportPlan.ability.GetComponentInChildren<HealAbilityEffect>()
+                : null;
+            Check("healer plans a heal on the wounded ally",
+                supportPlan != null && healEffect != null && supportPlan.fireLocation == alaois.tile.pos,
+                (supportPlan != null && supportPlan.ability != null
+                    ? supportPlan.ability.name + " @ " + supportPlan.fireLocation
+                    : "no ability")
+                + $" | cands={supCands.Count} best={supBest}");
+            healerTile.content = null;
+        }
+
+        Destroy(healerGo);
+        for (var i = 0; i < parkedFoes.Count; i++)
+            parkedFoes[i].Place(parkedHomes[i]);
+        alaoisStats.SetValue(StatTypes.HP, savedAlaoisHp, false);
+
+        // No living target: planning degrades to a plan with nothing to fire
+        // instead of throwing (MoveTowardOpponent stays put with no foe)
+        bc.turn.actor = rogue;
+        var downed = new List<Stats>();
+        var downedHp = new List<int>();
+        foreach (var u in bc.units)
+        {
+            if (u == null)
+                continue;
+            var ua = u.GetComponent<Alliance>();
+            var us = u.GetComponent<Stats>();
+            if (ua != null && us != null && us[StatTypes.HP] > 0 && rogueAlliance.IsMatch(ua, Targets.Foe))
+            {
+                downed.Add(us);
+                downedHp.Add(us[StatTypes.HP]);
+                us.SetValue(StatTypes.HP, 0, false);
+            }
+        }
+
+        PlanOfAttack noTargetPlan = null;
+        var noTargetThrew = false;
+        try
+        {
+            noTargetPlan = cpu.Evaluate();
+        }
+        catch
+        {
+            noTargetThrew = true;
+        }
+
+        Check("no living target degrades safely",
+            !noTargetThrew && noTargetPlan != null && noTargetPlan.ability == null,
+            noTargetThrew ? "threw" : (noTargetPlan == null ? "null plan" : "ability " + (noTargetPlan.ability != null ? noTargetPlan.ability.name : "none") + " @ " + noTargetPlan.moveLocation));
+        for (var i = 0; i < downed.Count; i++)
+            downed[i].SetValue(StatTypes.HP, downedHp[i], false);
+
+        // Stand-tile regression: an infinite-range (non-position-oriented)
+        // ability's candidates commit to the safest tile AND carry the score
+        // computed from that exact placement
+        rogueStats.SetValue(StatTypes.MP, 999, false);
+        var infinitePrefab = Resources.Load<GameObject>("Abilities/Wakener/Furnace");
+        Check("infinite-range regression prefab present", infinitePrefab != null,
+            "run Tactics RPG → Generate Content → Abilities");
+        if (infinitePrefab != null)
+        {
+            var infinite = Instantiate(infinitePrefab);
+            infinite.name = "Furnace";
+            infinite.transform.SetParent(rogue.transform);
+            var regCtx = AiTurnContext.Build(bc, rogue);
+            var safe = regCtx.SafestMoveTile();
+            var regCands = AiCandidateGenerator.Generate(regCtx)
+                .FindAll(c => c.Ability != null && c.Ability.name == "Furnace");
+            Check("infinite-range candidates commit to the safest tile",
+                regCands.Count > 0 && regCands.TrueForAll(c => c.MoveTile == safe),
+                regCands.Count + " candidates");
+            if (regCands.Count > 0)
+            {
+                var sample = regCands[0];
+                AiPlanCandidate expected;
+                using (var reScope = new AiPlacementScope(rogue))
+                {
+                    reScope.MoveTo(safe);
+                    expected = new AiPlanScorer(regCtx).Score(sample.Ability,
+                        sample.Ability.GetComponent<AbilityArea>(), safe, sample.FireTile, regCtx.StartDir);
+                }
+
+                Check("infinite-range score matches placed-at-committed-tile scoring",
+                    expected != null && Mathf.Approximately(sample.Score, expected.Score),
+                    expected == null ? "no rescore" : $"{sample.Score} vs {expected.Score}");
+            }
+
+            Destroy(infinite);
+        }
+
+        rogueStats.SetValue(StatTypes.MP, savedRogueMp, false);
+        rogue.Place(rogueHome);
+        rogue.dir = rogueHomeDir;
+        rogue.Match();
+        bc.turn.actor = prevActor;
     }
 
     // ---- 1.8: clock + reinforcements (mutates state — runs last) -----------
