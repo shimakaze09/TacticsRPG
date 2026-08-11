@@ -594,6 +594,66 @@ public class BattleProbeRunner : MonoBehaviour
         }
 
         Destroy(buyerGo);
+
+        // Reload: a save carrying a different certification than the
+        // spawn-time default must swap the runtime catalog in the same
+        // frame (PR #98 review)
+        var reloadGo = UnitFactory.Create("Alaois", 1);
+        var reloadJm = reloadGo.GetComponent<JobManager>();
+        var reloadDefault = reloadJm.CurrentJob;
+        JobDefinition savedJob = null;
+        foreach (var j in reloadJm.allJobs)
+        {
+            if (j != null && j != reloadDefault && !j.isUnique)
+            {
+                savedJob = j;
+                break;
+            }
+        }
+
+        Check("reload cast present", savedJob != null);
+        if (savedJob != null)
+        {
+            var savedProgress = JsonUtility.FromJson<JobProgressData>(JsonUtility.ToJson(reloadJm.ProgressData));
+            savedProgress.UnlockJob(savedJob);
+            savedProgress.SwitchJob(savedJob);
+            var gameData = new GameData();
+            gameData.jobProgressData.Add(reloadGo.name, savedProgress);
+            reloadJm.LoadData(gameData);
+
+            string savedStarter = null;
+            foreach (var unlock in savedJob.abilityUnlocks)
+            {
+                if (unlock.unlockAtJobLevel <= 1)
+                {
+                    savedStarter = unlock.abilityName;
+                    break;
+                }
+            }
+
+            var reloadCatalog = reloadGo.GetComponentInChildren<AbilityCatalog>();
+            bool starterInCatalog = false;
+            if (reloadCatalog != null && savedStarter != null)
+            {
+                foreach (var a in reloadCatalog.GetComponentsInChildren<Ability>(true))
+                {
+                    if (a.name == savedStarter)
+                    {
+                        starterInCatalog = true;
+                        break;
+                    }
+                }
+            }
+
+            Check("reload with saved job swaps catalog same frame",
+                reloadJm.CurrentJob == savedJob && reloadCatalog != null &&
+                reloadCatalog.gameObject.activeSelf && starterInCatalog,
+                reloadJm.CurrentJob != savedJob ? "job not applied" : "catalog stale");
+            Check("saved job's starter usable after reload",
+                savedStarter != null && reloadJm.IsAbilityUsable(savedStarter), savedStarter ?? "none");
+        }
+
+        Destroy(reloadGo);
     }
 
     // ---- issue #18: state machine atomicity ---------------------------------

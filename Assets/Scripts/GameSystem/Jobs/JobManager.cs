@@ -803,6 +803,7 @@ public class JobManager : MonoBehaviour, IDataPersistence
             return;
 
         string unitName = gameObject.name;
+        JobDefinition spawnJob = CurrentJob;
 
         if (data.jobProgressData.TryGetValue(unitName, out JobProgressData loadedProgress))
         {
@@ -823,6 +824,15 @@ public class JobManager : MonoBehaviour, IDataPersistence
             int repaired = abilityMemory.RepairLearnedAbilities(progressData, allJobs);
             if (repaired > 0)
                 Debug.LogWarning($"Repaired ability memory for {unitName}: removed {repaired} leaked abilities");
+        }
+
+        // A save can carry a different certification than the spawn-time
+        // default the factory built the runtime catalog for — swap the
+        // catalog now (same-frame) or the unit fights with the wrong kit
+        if (CurrentJob != null && CurrentJob != spawnJob)
+        {
+            UnitFactory.RebuildAbilityCatalog(gameObject, CurrentJob.abilityCatalogName);
+            GrantStarterKit();
         }
 
         // Recalculate stats and re-project the battle loadout after loading
