@@ -39,7 +39,15 @@ and label contract.
    rule applies exactly once per calculation.
 5. **Subscription lifetime:** hold one `EventSubscriptions` bag, subscribe
    through it in `OnEnable`, call `Clear()` in `OnDisable`. No
-   hand-maintained mirror lists. Required for all new code.
+   hand-maintained mirror lists. Required for all new code and for any
+   component a change touches.
+6. **Bus contract (issue #24):** the bus is **main-thread only** — enforced,
+   off-thread calls are rejected with an error. Subscriptions whose sender
+   or handler target is a destroyed Unity object are never invoked; publish
+   prunes them lazily and every scene unload sweeps them with a leak
+   warning (a survivor past unload means a missed `Clear()`). During a
+   publish, a newly added handler waits for the next publish; a removed
+   handler still receives the in-flight event.
 
 ## 3. Lifecycle rules (spawn-frame safety)
 

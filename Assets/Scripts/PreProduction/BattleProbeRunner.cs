@@ -77,6 +77,7 @@ public class BattleProbeRunner : MonoBehaviour
             ProbeGearAndStats(bc);
             ProbeAbilityMemory(bc);
             ProbeCertPurchases(bc);
+            ProbeEventBusLifecycle();
             ProbeWeaponBehavior(bc);
             ProbeTraits(bc);
             ProbeElementsAndCrits(bc);
@@ -424,6 +425,141 @@ public class BattleProbeRunner : MonoBehaviour
             $"bank {progressCopy.GetAvailableJP(current)} vs {progress.GetAvailableJP(current)}");
 
         Destroy(unit);
+    }
+
+    // ---- issue #24: event-bus lifecycle -------------------------------------
+
+    // Probe-local event type; real game events live in EventArgs/
+    private class ProbeBusEvent
+    {
+    }
+
+    // Subscriber component whose destruction must silence and prune its
+    // global subscription
+    private class ProbeBusListener : MonoBehaviour
+    {
+        public int received;
+
+        // Global handler with this component as the delegate target
+        public void Handle(ProbeBusEvent e)
+        {
+            received++;
+        }
+    }
+
+    // The issue #24 contract: sender-scoped delivery precedes global,
+    // duplicates are rejected, mutation during publish has defined
+    // semantics (adds wait for the next publish, removals still receive the
+    // in-flight event), and destroyed delegate targets are never invoked
+    // and get pruned — by publish, by the sweep, and counted by diagnostics.
+    private void ProbeEventBusLifecycle()
+    {
+        var bus = GameEventBus.Instance;
+        var busEventType = typeof(ProbeBusEvent);
+
+        // Ordering: sender-scoped handlers run before global ones
+        var orderLog = new List<string>();
+        System.Action<ProbeBusEvent> senderHandler = _ => orderLog.Add("sender");
+        System.Action<ProbeBusEvent> globalHandler = _ => orderLog.Add("global");
+        var senderObj = new object();
+        bus.Subscribe(globalHandler);
+        bus.Subscribe(senderHandler, senderObj);
+        bus.Publish(new ProbeBusEvent(), senderObj);
+        Check("sender-scoped delivery precedes global",
+            orderLog.Count == 2 && orderLog[0] == "sender" && orderLog[1] == "global",
+            string.Join(",", orderLog));
+
+        // Duplicate subscription (same handler + sender) is rejected
+        bus.Subscribe(globalHandler);
+        orderLog.Clear();
+        bus.Publish(new ProbeBusEvent(), senderObj);
+        Check("duplicate subscription rejected", orderLog.Count == 2,
+            orderLog.Count + " deliveries");
+        bus.Unsubscribe(senderHandler, senderObj);
+        bus.Unsubscribe(globalHandler);
+
+        // A handler subscribed during a publish waits for the next publish
+        var lateCalls = 0;
+        System.Action<ProbeBusEvent> late = _ => lateCalls++;
+        System.Action<ProbeBusEvent> adder = _ => bus.Subscribe(late);
+        bus.Subscribe(adder);
+        bus.Publish(new ProbeBusEvent());
+        Check("handler added during publish waits", lateCalls == 0, lateCalls + " calls");
+        bus.Publish(new ProbeBusEvent());
+        Check("handler added during publish gets the next", lateCalls == 1, lateCalls + " calls");
+        bus.Unsubscribe(adder);
+        bus.Unsubscribe(late);
+
+        // A handler unsubscribed during a publish still receives the
+        // in-flight event (delivery list is copy-on-write)
+        var removedCalls = 0;
+        System.Action<ProbeBusEvent> removed = _ => removedCalls++;
+        System.Action<ProbeBusEvent> remover = _ => bus.Unsubscribe(removed);
+        bus.Subscribe(remover);
+        bus.Subscribe(removed);
+        bus.Publish(new ProbeBusEvent());
+        Check("handler removed during publish gets the in-flight event",
+            removedCalls == 1, removedCalls + " calls");
+        bus.Publish(new ProbeBusEvent());
+        Check("handler removed during publish is gone afterwards",
+            removedCalls == 1, removedCalls + " calls");
+        bus.Unsubscribe(remover);
+
+        // Nested publish of the same event type: the copy-on-write marker
+        // must survive until the OUTERMOST publish returns — a handler that
+        // subscribes after a nested publish completed must still wait for
+        // the next outer publish (PR #92 review regression)
+        var h3Calls = 0;
+        System.Action<ProbeBusEvent> h3 = _ => h3Calls++;
+        var h1Calls = 0;
+        System.Action<ProbeBusEvent> h1 = _ =>
+        {
+            h1Calls++;
+            if (h1Calls == 1)
+                bus.Publish(new ProbeBusEvent());
+        };
+        var h2Calls = 0;
+        System.Action<ProbeBusEvent> h2 = _ =>
+        {
+            h2Calls++;
+            if (h2Calls == 2)
+                bus.Subscribe(h3);
+        };
+        bus.Subscribe(h1);
+        bus.Subscribe(h2);
+        bus.Publish(new ProbeBusEvent());
+        Check("subscribe after nested publish still waits", h3Calls == 0,
+            $"h3 {h3Calls}, h1 {h1Calls}, h2 {h2Calls}");
+        bus.Publish(new ProbeBusEvent());
+        Check("subscribe after nested publish gets the next outer publish", h3Calls == 1,
+            h3Calls + " calls");
+        bus.Unsubscribe(h1);
+        bus.Unsubscribe(h2);
+        bus.Unsubscribe(h3);
+
+        // A destroyed component's global subscription (null sender, dead
+        // delegate target) is never invoked and publish prunes it
+        var go = new GameObject("Probe Bus Listener");
+        var listener = go.AddComponent<ProbeBusListener>();
+        bus.Subscribe<ProbeBusEvent>(listener.Handle);
+        bus.Publish(new ProbeBusEvent());
+        Check("live component handler invoked", listener.received == 1,
+            listener.received + " calls");
+        DestroyImmediate(go);
+        Check("destroyed target counted by diagnostics", bus.CountDeadSubscriptions() >= 1,
+            bus.CountDeadSubscriptions() + " dead");
+        bus.Publish(new ProbeBusEvent());
+        Check("publish skips and prunes destroyed targets",
+            bus.CountDeadSubscriptions() == 0 && bus.CountSubscriptions(busEventType) == 0,
+            $"dead {bus.CountDeadSubscriptions()}, live {bus.CountSubscriptions(busEventType)}");
+
+        // The sweep the scene-unload hook calls prunes without a publish
+        var go2 = new GameObject("Probe Bus Listener 2");
+        var listener2 = go2.AddComponent<ProbeBusListener>();
+        bus.Subscribe<ProbeBusEvent>(listener2.Handle);
+        DestroyImmediate(go2);
+        Check("cleanup sweep prunes dead subscriptions",
+            bus.CleanupDestroyedObjects() >= 1 && bus.CountDeadSubscriptions() == 0);
     }
 
     // ---- 1.9b/1.9c: weapon behavior --------------------------------------
