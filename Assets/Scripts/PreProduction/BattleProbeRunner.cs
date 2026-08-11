@@ -447,6 +447,30 @@ public class BattleProbeRunner : MonoBehaviour
         Destroy(unit);
     }
 
+    // Spawns a Hero-recipe unit that can never touch the player's save:
+    // renamed off the roster keys, unregistered from persistence, and reset
+    // to a factory-fresh state — registration already applied the real save
+    // (keyed by recipe name) before the probe could intervene, and a probe
+    // unit alive at any save point must never write real roster keys.
+    private static GameObject CreateProbeHero(string recipe, int level, string probeName)
+    {
+        var go = UnitFactory.Create(recipe, level);
+        go.name = probeName;
+        var jm = go.GetComponent<JobManager>();
+        DataPersistenceManager.Unregister(jm);
+
+        var freshProgress = new JobProgressData();
+        freshProgress.InitializeWithBasicJobs(jm.CurrentJob);
+        var freshData = new GameData();
+        freshData.jobProgressData.Add(probeName, freshProgress);
+        freshData.abilityMemoryData.Add(probeName, new AbilityMemory());
+        jm.LoadData(freshData);
+        jm.AbilityMemory.SyncLearnedAbilities(jm.ProgressData, jm.allJobs);
+        jm.GrantStarterKit();
+        jm.InvalidateLoadout();
+        return go;
+    }
+
     // ---- issue #59: contract rewards ----------------------------------------
 
     // The reward-policy contract: forecast and settle share one shape and one
@@ -485,8 +509,8 @@ public class BattleProbeRunner : MonoBehaviour
             writForecast.goldGained == 800 && writForecast.expGained == 300 && writForecast.jpGained == 150,
             $"gold {writForecast.goldGained}");
 
-        var heroA = UnitFactory.Create("Alaois", 1);
-        var heroB = UnitFactory.Create("Hania", 1);
+        var heroA = CreateProbeHero("Alaois", 1, "Probe Reward Hero A");
+        var heroB = CreateProbeHero("Hania", 1, "Probe Reward Hero B");
         var enemyA = UnitFactory.Create("Enemy Rogue", 1);
         var enemyB = UnitFactory.Create("Enemy Warrior", 1);
         var neutral = UnitFactory.Create("Enemy Wizard", 1);
@@ -759,7 +783,7 @@ public class BattleProbeRunner : MonoBehaviour
 
         // Purchase makes an ability usable; the projection rebuilds purely
         // from persisted progress and memory
-        var buyerGo = UnitFactory.Create("Hania", 10);
+        var buyerGo = CreateProbeHero("Hania", 10, "Probe Buyer");
         var buyerJm = buyerGo.GetComponent<JobManager>();
         var buyerJob = buyerJm.CurrentJob;
         JobAbilityUnlock target = null;
@@ -829,7 +853,7 @@ public class BattleProbeRunner : MonoBehaviour
         // Reload: a save carrying a different certification than the
         // spawn-time default must swap the runtime catalog in the same
         // frame (PR #98 review)
-        var reloadGo = UnitFactory.Create("Alaois", 1);
+        var reloadGo = CreateProbeHero("Alaois", 1, "Probe Reload Hero");
         var reloadJm = reloadGo.GetComponent<JobManager>();
         var reloadDefault = reloadJm.CurrentJob;
         JobDefinition savedJob = null;
@@ -2176,7 +2200,7 @@ public class BattleProbeRunner : MonoBehaviour
         Check("toll road validation found tiles", heroTile != null && foeTile != null);
         if (heroTile != null && foeTile != null)
         {
-            var strikerGo = UnitFactory.Create("Alaois", 10);
+            var strikerGo = CreateProbeHero("Alaois", 10, "Probe Striker");
             var skirmisherGo = UnitFactory.Create("Enemy Rogue", 9);
             var striker = strikerGo.GetComponent<Unit>();
             var skirmisher = skirmisherGo.GetComponent<Unit>();
@@ -2196,7 +2220,7 @@ public class BattleProbeRunner : MonoBehaviour
             Destroy(strikerGo);
             Destroy(skirmisherGo);
 
-            var squishyGo = UnitFactory.Create("Hania", 10);
+            var squishyGo = CreateProbeHero("Hania", 10, "Probe Skirmish Target");
             var damageGo = UnitFactory.Create("Enemy Warrior", 9);
             var squishy = squishyGo.GetComponent<Unit>();
             var damageDealer = damageGo.GetComponent<Unit>();
@@ -3690,7 +3714,7 @@ public class BattleProbeRunner : MonoBehaviour
             parkedHomes.Add(u.tile);
             u.Place(farTiles[farIndex]);
         }
-        var healerGo = UnitFactory.Create("Hania", 10);
+        var healerGo = CreateProbeHero("Hania", 10, "Probe Healer");
         var healer = healerGo.GetComponent<Unit>();
         Tile healerTile = null;
         var spawnOffsets = new[]
