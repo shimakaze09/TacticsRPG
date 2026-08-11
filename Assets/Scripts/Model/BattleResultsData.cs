@@ -20,4 +20,12 @@ public class BattleResultsData
     /// <summary>Set by RewardPolicy.Commit; guards double payment.</summary>
     [NonSerialized]
     public bool committed;
+
+    /// <summary>
+    /// EXP each participant actually received (KO share applied), parallel
+    /// to playerUnits — level-up detection must use this, not expGained.
+    /// Filled by RewardPolicy.Commit.
+    /// </summary>
+    [NonSerialized]
+    public int[] grantedExp;
 }

@@ -529,6 +529,12 @@ public class GameFlowController : StateMachine
 
         if (results != null && !results.victory)
         {
+            // Defeat never reaches the post-battle flow, so the authored
+            // consolation pay must be committed here or it is silently lost
+            // (issue #59); Commit is exactly-once, so a future game-over
+            // screen can safely run the same payload again
+            RewardPolicy.Commit(results);
+
             // Defeat: back to title (game-over screen when one exists)
             ReturnToTitle();
             return;

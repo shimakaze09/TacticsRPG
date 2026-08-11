@@ -72,6 +72,15 @@ public class ContractRewards
     [Tooltip("Percent of basePay still paid on defeat (0 = nothing)")]
     [Range(0, 100)]
     public int defeatPayPercent;
+
+    /// <summary>
+    /// True once any pay, award, or salvage has been authored. Definitions
+    /// created before this payload existed deserialize to all zeros — those
+    /// contracts fall back to writ-style pay instead of paying nothing.
+    /// </summary>
+    public bool IsAuthored =>
+        basePay != 0 || bonusPay != 0 || expAward != 0 || certAward != 0 ||
+        defeatPayPercent != 0 || (salvage != null && salvage.Count > 0);
 }
 
 /// <summary>One unit to spawn: recipe name, level, board position, facing.</summary>

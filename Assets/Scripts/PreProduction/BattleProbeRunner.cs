@@ -547,7 +547,27 @@ public class BattleProbeRunner : MonoBehaviour
                 easy.goldGained == hard.goldGained && easy.expGained == hard.expGained &&
                 easy.jpGained == hard.jpGained);
 
-            // Commit: exactly once, KO'd participants keep the half share
+            // Pre-payload contracts (all-zero rewards) pay like writs, not
+            // zero (PR #99 review) — both enemies are down at this point
+            var legacy = ScriptableObject.CreateInstance<BattleDefinition>();
+            var legacySettle = RewardPolicy.Settle(bc, legacy, true);
+            Check("legacy contract falls back to writ pay",
+                legacySettle.goldGained == 700 && legacySettle.expGained == 200 && legacySettle.jpGained == 100,
+                $"gold {legacySettle.goldGained}, exp {legacySettle.expGained}");
+            legacy.enemies.Add(new SpawnEntry());
+            legacy.enemies.Add(new SpawnEntry());
+            var legacyForecast = RewardPolicy.Forecast(legacy);
+            Check("legacy forecast quotes the same writ pay",
+                legacyForecast.goldGained == 700 && legacyForecast.expGained == 200);
+            Destroy(legacy);
+
+            // Commit: exactly once, KO'd participants keep the half share.
+            // heroB starts just past the level-2 threshold: after the half
+            // share it has NOT leveled this battle, but detection using the
+            // headline award would claim it had (the PR #99 review bug)
+            // EXP first (its level-up recalc refills HP), then the KO
+            int levelTwoExp = Rank.ExperienceForLevel(2);
+            heroB.GetComponent<Stats>().SetValue(StatTypes.EXP, levelTwoExp + 6, false);
             Kill(heroB);
             var payload = RewardPolicy.Settle(bc, definition, true);
             var rankA = heroA.GetComponent<Rank>();
@@ -557,6 +577,13 @@ public class BattleProbeRunner : MonoBehaviour
             int salvageBefore = CountOf(salvageId);
 
             RewardPolicy.Commit(payload);
+            Check("commit records the real per-unit shares",
+                payload.grantedExp != null && payload.grantedExp.Length == 2 &&
+                payload.grantedExp[0] == 80 && payload.grantedExp[1] == 40,
+                payload.grantedExp == null ? "null" : string.Join(",", payload.grantedExp));
+            Check("KO level-up detection uses the granted share",
+                rankB.LVL == 2 && !rankB.DidLevelUp(payload.grantedExp[1]) && rankB.DidLevelUp(payload.expGained),
+                $"LVL {rankB.LVL}, exp {rankB.EXP}/{levelTwoExp}");
             Check("commit pays surviving participant in full", rankA.EXP == expABefore + 80,
                 $"{expABefore} -> {rankA.EXP}");
             Check("commit pays KO'd participant the half share", rankB.EXP == expBBefore + 40,
@@ -568,6 +595,26 @@ public class BattleProbeRunner : MonoBehaviour
             RewardPolicy.Commit(payload);
             Check("recommit is a no-op", rankA.EXP == expABefore + 80 && Bank.Instance.gold == originalGold + 420 &&
                 (salvageId == null || CountOf(salvageId) == salvageBefore + 1));
+
+            // Defeat routes to Title, never the post-battle flow — the flow
+            // boundary itself must commit the consolation (PR #99 review)
+            if (GameFlowController.Instance == null)
+            {
+                var flowGo = new GameObject("Probe Reward Flow");
+                var flow = flowGo.AddComponent<GameFlowController>();
+                flow.GetState<TitleState>().Initialize(flow);
+                int bankBeforeDefeat = Bank.Instance.gold;
+                var defeatPayload = RewardPolicy.Settle(bc, definition, false);
+                flow.NotifyBattleEnded(defeatPayload);
+                Check("defeat consolation committed at the flow boundary",
+                    defeatPayload.committed && Bank.Instance.gold == bankBeforeDefeat + 75,
+                    $"{bankBeforeDefeat} -> {Bank.Instance.gold}");
+                DestroyImmediate(flowGo);
+            }
+            else
+            {
+                Check("defeat commit probe skipped (live controller present)", true);
+            }
         }
         finally
         {

@@ -44,6 +44,12 @@ public static class RewardPolicy
             return null;
 
         ContractRewards rewards = definition.rewards ?? new ContractRewards();
+
+        // Pre-payload definitions (all zeros) quote writ-style pay, matching
+        // what Settle will actually pay for them
+        if (!rewards.IsAuthored)
+            return ForecastWrit(definition.enemies != null ? definition.enemies.Count : 0);
+
         return new BattleResultsData
         {
             victory = true,
@@ -105,9 +111,14 @@ public static class RewardPolicy
             playerUnits = GetPlayerUnits(battle)
         };
 
+        // A definition authored before the rewards payload existed carries
+        // all zeros — pay it like a writ rather than paying nothing
+        if (definition != null && (definition.rewards == null || !definition.rewards.IsAuthored))
+            definition = null;
+
         if (definition != null)
         {
-            ContractRewards rewards = definition.rewards ?? new ContractRewards();
+            ContractRewards rewards = definition.rewards;
             if (victory)
             {
                 results.goldGained = rewards.basePay + (AllEnemiesDown(battle) ? rewards.bonusPay : 0);
@@ -153,16 +164,19 @@ public static class RewardPolicy
 
         if (results.playerUnits != null)
         {
-            foreach (Unit unit in results.playerUnits)
+            results.grantedExp = new int[results.playerUnits.Length];
+            for (int i = 0; i < results.playerUnits.Length; i++)
             {
+                Unit unit = results.playerUnits[i];
                 if (unit == null)
                     continue;
 
                 int share = IsKnockedOut(unit) ? KoSharePercent : 100;
+                results.grantedExp[i] = results.expGained * share / 100;
 
                 var rank = unit.GetComponent<Rank>();
                 if (rank != null)
-                    rank.EXP += results.expGained * share / 100;
+                    rank.EXP += results.grantedExp[i];
 
                 var jobManager = unit.GetComponent<JobManager>();
                 if (jobManager != null)
