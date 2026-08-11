@@ -143,7 +143,10 @@ cut as an NPC: Coldwater's information broker.
   (tank/striker/caster/support) stay distinct all campaign, multiclassing
   broadens a build without saturating the 999 caps, and the 3,000–5,000 HP boss
   band comes from authored boss levels/gear rather than stacked job history.
-  Party units and generated enemies share the model.
+  Party units and generated enemies share the model. Authored spawns may carry
+  per-entry **boss-tuning overrides** (job / grade / gear — `SpawnEntry`,
+  issue #52); generated writ battles draw levels from the documented
+  **chapter-1 writ band 8–12** (`ProgressionModel.WritLevelMin/Max`).
 - **Control budget** (`ControlBudget.cs` + `ProgressionModel.ResistanceFor`,
   2026-08-10, issue #57): RES is derived, never authored — **15 base + 0.5 per
   level above 1 + 0.5 per point of the current job's MDF kit**, capped at **75**
